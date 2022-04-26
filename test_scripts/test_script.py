@@ -1,4 +1,5 @@
 import itertools
+import plot_data
 from itertools import chain, combinations
 from os import system
 
@@ -45,6 +46,14 @@ def generate_all_interleaved_orders():
     
     return all_orders
 
+# reverses an order string. E.g
+# ixpec:rtyum -> cepxi:muytr
+# This is necessary because the --revers_order flag reverses the whole vector of clauses.
+# it allows us to conjoin clauses with higher timesteps first
+def revers_order(order_string):
+    s1, s2 = order_string.split(":")[0], order_string.split(":")[1]
+    return s1[::-1] + ":" + s2[::-1]
+
 # Adds the conjoin orders and corresonding filename to the defualt_argument map
 def generate_argmument_maps_for_conjoin_orders(default_arguments, conjoin_orders):
     all_maps = []
@@ -86,13 +95,32 @@ standart_argument_map = {
     "$timeout" : "80s",
     "$sas_file" : "output.sas",
     "$timesteps" : "11",
-    "$output_folder" : "../test_script/interleaved_bdd"
+    "$output_folder" : "../test_script/interleaved_bdd",
+    "$addition_flags" : "",
 }
-standart_commandline_string = "timeout $timeout " + planning_to_dd_path + " --sas_file $sas_file --$mode --timesteps $timesteps --build_order $build_order > $output_folder/$output_file"
+standart_commandline_string = "timeout $timeout " + planning_to_dd_path + " --sas_file $sas_file --$mode --timesteps $timesteps --build_order $build_order $addition_flags > $output_folder/$output_file"
 
 
-all_argument_maps = generate_argmument_maps_for_conjoin_orders(standart_argument_map, generate_all_interleaved_orders())
-all_commands = generate_all_commandline_strings(standart_commandline_string, all_argument_maps)
+#all_argument_maps = generate_argmument_maps_for_conjoin_orders(standart_argument_map, generate_all_interleaved_orders())
+#all_commands = generate_all_commandline_strings(standart_commandline_string, all_argument_maps)
+
+# Test Run for including mutex constraints
+best_orders = [plot_data.unsimplify_order_string(x) for x in plot_data.find_all_finished_orders("../test_output/interleaved_bdd")]
+mutex_standart_map = standart_argument_map.copy()
+mutex_standart_map["$addition_flags"] = "--include_mutex"
+mutex_standart_map["$output_folder"] = "../test_script/include_mutex"
+mutex_arguments_maps = generate_argmument_maps_for_conjoin_orders(mutex_standart_map, best_orders)
+all_commands = generate_all_commandline_strings(standart_commandline_string, mutex_arguments_maps)
+
+"""
+# Test Run for trying to reverse the best orders
+best_orders = [plot_data.unsimplify_order_string(x) for x in plot_data.find_all_finished_orders("../test_output/interleaved_bdd")]
+reverse_standart_map = standart_argument_map.copy()
+reverse_standart_map["$addition_flags"] = "--revers_order"
+reverse_standart_map["$output_folder"] = "../test_script/reverse_order"
+reverse_argument_maps = generate_argmument_maps_for_conjoin_orders(reverse_standart_map, best_orders)
+all_commands = generate_all_commandline_strings(standart_commandline_string, reverse_argument_maps)
+"""
 
 print(all_commands)
-execute_all_commands(all_commands)
+#execute_all_commands(all_commands)

@@ -145,7 +145,6 @@ def print_all_orders_sorted(folder_path):
 
 def find_all_finished_orders(folder_path):
     order_dict = get_information_about_order_performance(folder_path)
-
     finished = [order for order in order_dict if order_dict[order][0] != TIMEOUT]
     return finished
 
@@ -153,10 +152,12 @@ def find_all_finished_orders(folder_path):
 
 #plot_conjoin_times("../test_output/simple_orders_bdd")
 #plot_conjoin_times("../test_output/simple_orders_sdd")
+#plot_conjoin_times("../test_output/interleaved_bdd")
 
-print_all_orders_sorted("../test_output/simple_orders_bdd")
+#print_all_orders_sorted("../test_output/simple_orders_bdd")
 #print_all_orders_sorted("../test_output/simple_orders_sdd")
-print(find_all_finished_orders("../test_output/simple_orders_bdd"))
+#print_all_orders_sorted("../test_output/interleaved_bdd")
+#print(find_all_finished_orders("../test_output/interleaved_bdd"))
 
 #print(get_information_about_order_performance("../test_output/simple_orders_sdd"))
 
