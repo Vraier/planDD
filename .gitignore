@@ -15,6 +15,9 @@
 *.sas
 *.ass
 
+# ignore all_files in test_output
+./test_output/*
+
 
 # Visual Code Stuff
 .vscode/*
