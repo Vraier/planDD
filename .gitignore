@@ -7,6 +7,9 @@
 # Unignore all dirs
 !*/
 
+# Unignore Makefile
+!Makefile
+
 # Ignore input/output files
 *.cnf
 *.sas
