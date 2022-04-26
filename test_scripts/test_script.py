@@ -2,9 +2,7 @@ import itertools
 from itertools import chain, combinations
 from os import system
 
-planning_to_dd_path = "../planning_to_DD/main"
-
-commandline_string = "timeout $timeout " + planning_to_dd_path + " --sas_file $sas_file --$mode --timesteps $timesteps --build_order $build_order > $output_folder/$output_file"
+planning_to_dd_path = "../planDD/main"
 
 def generate_all_disjoint_clause_orders():
     clause_groups = [
@@ -47,26 +45,17 @@ def generate_all_interleaved_orders():
     
     return all_orders
 
-
-def generate_all_interleaved_argument_maps():
+# Adds the conjoin orders and corresonding filename to the defualt_argument map
+def generate_argmument_maps_for_conjoin_orders(default_arguments, conjoin_orders):
     all_maps = []
-    standart_argument_map = {
-        "$mode" : "build_bdd",
-        "$timeout" : "80s",
-        "$sas_file" : "output.sas",
-        "$timesteps" : "11",
-        "$output_folder" : "interleaved_bdd"
-    }
-    all_interleaved_orders = generate_all_interleaved_orders()
 
-    for i in range(len(all_interleaved_orders)):
-        new_map = dict(standart_argument_map)
-        new_map["$build_order"] = all_interleaved_orders[i]
+    for i in range(len(conjoin_orders)):
+        new_map = dict(default_arguments)
+        new_map["$build_order"] = conjoin_orders[i]
         new_map["$output_file"] = "test_run" + str(i) + ".txt"
         all_maps.append(new_map)
 
-    return all_maps
-    
+    return all_maps   
 
 
 
@@ -76,27 +65,9 @@ def apply_argument_map_to_commandline_string(commandline_string, argument_map):
         new_string = new_string.replace(key, argument_map[key], 1)
     return new_string
 
-def generate_all_argument_maps():
-    all_maps = []
-    standart_argument_map = {
-        "$mode" : "build_sdd",
-        "$timeout" : "180s",
-        "$sas_file" : "output.sas",
-        "$timesteps" : "11",
-        "$output_folder" : "sdd_try"
-    }
-    all_new_orders = generate_all_disjoint_clause_orders()
-
-    for i in range(len(all_new_orders)):
-        new_map = dict(standart_argument_map)
-        new_map["$build_order"] = all_new_orders[i]
-        new_map["$output_file"] = "test_run" + str(i) + ".txt"
-        all_maps.append(new_map)
-
-    return all_maps
-
-def generate_all_commandline_strings(agument_maps):
-    return [apply_argument_map_to_commandline_string(commandline_string, m) for m in agument_maps]
+# converts the argument_map to a commandline string
+def generate_all_commandline_strings(commandlien, agument_maps):
+    return [apply_argument_map_to_commandline_string(commandlien, m) for m in agument_maps]
 
 
 def execute_all_commands(command_list):
@@ -111,20 +82,20 @@ def execute_all_commands(command_list):
     
 
 
+standart_argument_map = {
+    "$mode" : "build_bdd",
+    "$timeout" : "80s",
+    "$sas_file" : "output.sas",
+    "$timesteps" : "11",
+    "$output_folder" : "../test_script/interleaved_bdd"
+}
+
+standart_commandline_string = "timeout $timeout " + planning_to_dd_path + " --sas_file $sas_file --$mode --timesteps $timesteps --build_order $build_order > $output_folder/$output_file"
 
 
+all_argument_maps = generate_argmument_maps_for_conjoin_orders(standart_argument_map, generate_all_interleaved_orders())
+all_commands = generate_all_commandline_strings(standart_commandline_string, all_argument_maps)
 
-#print(all_orders)
-
-#print(apply_argument_map_to_commandline_string(command_line_string, argument_map))
-
-#all_commands = generate_all_commandline_strings(generate_all_argument_maps())[93:]
-all_commands = generate_all_commandline_strings(generate_all_interleaved_argument_maps())
 print(all_commands)
 
 execute_all_commands(all_commands)
-
-#o = generate_all_interleaved_orders()
-#print(o)
-
-#print(len(o))
