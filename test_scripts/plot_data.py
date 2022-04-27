@@ -123,6 +123,8 @@ def print_comparison_of_two_order_runs(folder1, folder2):
     info1 = get_information_about_order_performance(folder1)
     info2 = get_information_about_order_performance(folder2)
 
+    # print(info2)
+
     joind_info = {order : info1[order] + info2[order] for order in info1 if order in info2}
     list_info = [(order, joind_info[order][0], joind_info[order][1], joind_info[order][2], joind_info[order][3]) for order in joind_info]
 
@@ -153,13 +155,16 @@ def find_all_finished_orders(folder_path):
 #plot_conjoin_times("../test_output/simple_orders_bdd")
 #plot_conjoin_times("../test_output/simple_orders_sdd")
 #plot_conjoin_times("../test_output/interleaved_bdd")
+#plot_conjoin_times("../test_output/include_mutex")
+##plot_conjoin_times("../test_output/reverse_order")
 
 #print_all_orders_sorted("../test_output/simple_orders_bdd")
 #print_all_orders_sorted("../test_output/simple_orders_sdd")
-#print_all_orders_sorted("../test_output/interleaved_bdd")
+print_all_orders_sorted("../test_output/interleaved_bdd")
 #print(find_all_finished_orders("../test_output/interleaved_bdd"))
 
 #print(get_information_about_order_performance("../test_output/simple_orders_sdd"))
 
 #print_comparison_of_two_order_runs("../test_output/simple_orders_bdd", "../test_output/simple_orders_sdd")
-
+#print_comparison_of_two_order_runs("../test_output/interleaved_bdd", "../test_output/include_mutex")
+##print_comparison_of_two_order_runs("../test_output/interleaved_bdd", "../test_output/reverse_order")

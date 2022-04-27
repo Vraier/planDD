@@ -10,14 +10,14 @@ namespace planning_cnf {
 typedef std::vector<int> clause;
 
 enum tag {
-    initial_state,
-    goal,
-    at_least_var,
-    at_most_var,
-    at_least_op,
-    at_most_op,
-    mutex,
-    precondition,
+    initial_state,  // revelvant for timestep 0
+    goal,           // only for tiemestep n
+    at_least_var,   // for timestep 0..n
+    at_most_var,    // 0..n
+    at_least_op,    // 0..n-1
+    at_most_op,     // ipex:mc
+    mutex,          // igxpc:m -> i0gn m0m1m2..mn p0..pn c0..cn
+    precondition,   // igmx:cp -> i0gn m0m1..mn c0p0 c1p1..cnpn
     effect,
     changing_atoms,
     none,
