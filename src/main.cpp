@@ -18,7 +18,7 @@ int main(int argc, char *argv[]) {
     option_parser options;
     options.parse_command_line(argc, argv);
 
-    options.print_config();
+    options.print_variable_map();
 
     if (!options.check_validity()) {
         options.print_help();

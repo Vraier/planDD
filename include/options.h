@@ -33,7 +33,7 @@ class option_parser {
     void parse_command_line(int argc, char *argv[]);
     bool check_validity();
     void print_help();
-    void print_config();
+    void print_variable_map();
 };
 
 #endif

@@ -57,22 +57,61 @@ void option_parser::print_help() {
     std::cout << m_option_desc << std::endl;
 }
 
-void option_parser::print_config() {
+// code from (little bit modified): https://gist.github.com/gesquive/8673796
+void option_parser::print_variable_map() {
     std::cout << "Using the following config: " << std::endl;
 
-    std::cout << "sas_file: " << m_values.sas_file << std::endl;
-    std::cout << "ass_file: " << m_values.ass_file << std::endl;
-    std::cout << "cnf_file: " << m_values.cnf_file << std::endl;
+    for (po::variables_map::const_iterator it = m_argument_map.begin(); it != m_argument_map.end(); it++) {
+        std::cout << "> " << it->first;
+        if (((boost::any)it->second.value()).empty()) {
+            std::cout << "(empty)";
+        }
+        if (m_argument_map[it->first].defaulted() || it->second.defaulted()) {
+            std::cout << "(default)";
+        }
+        std::cout << "=";
 
-    std::cout << "encode_cnf: " << (m_values.encode_cnf ? "true" : "false") << std::endl;
-    std::cout << "build_bdd: " << (m_values.build_bdd ? "true" : "false") << std::endl;
-    std::cout << "build_sdd: " << (m_values.build_sdd ? "true" : "false") << std::endl;
-    std::cout << "single_minisat: " << (m_values.single_minisat ? "true" : "false") << std::endl;
-    std::cout << "count_minisat: " << (m_values.count_minisat ? "true" : "false") << std::endl;
+        bool is_char;
+        try {
+            boost::any_cast<const char *>(it->second.value());
+            is_char = true;
+        } catch (const boost::bad_any_cast &) {
+            is_char = false;
+        }
+        bool is_str;
+        try {
+            boost::any_cast<std::string>(it->second.value());
+            is_str = true;
+        } catch (const boost::bad_any_cast &) {
+            is_str = false;
+        }
 
-    std::cout << "build_order: " << m_values.build_order << std::endl;
-    std::cout << "reverse_order: " << (m_values.reverse_order ? "true" : "false") << std::endl;
-    std::cout << "include_mutex: " << (m_values.include_mutex ? "true" : "false") << std::endl;
-    std::cout << "use_ladder_encoding: " << (m_values.use_ladder_encoding ? "true" : "false") << std::endl;
-    std::cout << "timesteps: " << m_values.timesteps << std::endl;
+        if (((boost::any)it->second.value()).type() == typeid(int)) {
+            std::cout << m_argument_map[it->first].as<int>() << std::endl;
+        } else if (((boost::any)it->second.value()).type() == typeid(bool)) {
+            std::cout << (m_argument_map[it->first].as<bool>() ? "true" : "false") << std::endl;
+        } else if (((boost::any)it->second.value()).type() == typeid(double)) {
+            std::cout << m_argument_map[it->first].as<double>() << std::endl;
+        } else if (is_char) {
+            std::cout << m_argument_map[it->first].as<const char * >() << std::endl;
+        } else if (is_str) {
+            std::string temp = m_argument_map[it->first].as<std::string>();
+            if (temp.size()) {
+                std::cout << temp << std::endl;
+            } else {
+                std::cout << "true" << std::endl;
+            }
+        } else { // Assumes that the only remainder is vector<string>
+            try {
+                std::vector<std::string> vect = m_argument_map[it->first].as<std::vector<std::string> >();
+                uint i = 0;
+                for (std::vector<std::string>::iterator oit=vect.begin();
+                     oit != vect.end(); oit++, ++i) {
+                    std::cout << "\r> " << it->first << "[" << i << "]=" << (*oit) << std::endl;
+                }
+            } catch (const boost::bad_any_cast &) {
+                std::cout << "UnknownType(" << ((boost::any)it->second.value()).type().name() << ")" << std::endl;
+            }
+        }
+    }
 }
