@@ -38,6 +38,7 @@ class cnf {
 
    public:
     cnf(int num_variables, int num_timestpes);
+    cnf(int num_timesteps);
     ~cnf();
 
     // adds a clause to the cnf. the tag indicates which type of clause this is
@@ -52,6 +53,8 @@ class cnf {
     int get_num_variables();
     int get_num_clauses();
     int get_num_timesteps();
+
+    void set_num_variables(int num_variables);
 };
 
 }  // namespace planning_cnf

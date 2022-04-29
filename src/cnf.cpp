@@ -7,6 +7,11 @@ cnf::cnf(int num_variables, int num_timestpes){
     m_num_timesteps = num_timestpes;
 }
 
+cnf::cnf(int num_timestpes){
+    m_num_variables = -1;
+    m_num_timesteps = num_timestpes;
+}
+
 cnf::~cnf(){}
 
 void cnf::add_clause(std::vector<int> clause, tag tag, int timestep) {
@@ -24,3 +29,5 @@ int cnf::get_timestep(int i) { return m_timesteps[i]; }
 int cnf::get_num_variables() { return m_num_variables; }
 int cnf::get_num_clauses() { return m_clauses.size(); }
 int cnf::get_num_timesteps() { return m_num_timesteps; }
+
+void cnf::set_num_variables(int num_variables) {m_num_variables = num_variables;}

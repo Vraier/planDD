@@ -7,12 +7,16 @@
 
 using namespace planning_cnf;
 
+std::vector<std::vector<int>> at_most_one_encoding(){
+
+}
+
 cnf cnf_encoder::encode_cnf(int timesteps) {
     LOG_MESSAGE(log_level::info) << "Start encoding SAS problem into CNF problem";
 
     generate_index_mapping(timesteps);
 
-    m_cnf = cnf(m_symbol_map.size(), timesteps);
+    m_cnf = cnf(timesteps);
 
     LOG_MESSAGE(log_level::info) << "Starting to generate all clauses for the CNF problem";
 
@@ -38,7 +42,10 @@ cnf cnf_encoder::encode_cnf(int timesteps) {
 
     construct_changing_atom_implies_action_clauses(timesteps);
 
+    m_cnf.set_num_variables(m_symbol_map.size());
+
     LOG_MESSAGE(log_level::info) << "Constructed a total of " << m_cnf.get_num_clauses() << " clauses";
+    LOG_MESSAGE(log_level::info) << "Constructed a total of " << m_cnf.get_num_variables() << " variables (with helper)";
 
     return m_cnf;
 }
@@ -79,6 +86,61 @@ void cnf_encoder::generate_index_mapping(int timesteps) {
     LOG_MESSAGE(log_level::info) << "Constructed a total of " << m_symbol_map.size() << " CNF variables";
 }
 
+// TODO check if 6 is correct megic number
+std::vector<std::vector<int>> cnf_encoder::generate_at_most_one_constraint(std::vector<int> &variables, int constraint_type, int timestep){
+
+    if(!m_options.use_ladder_encoding) {
+        return generate_at_most_one_constraint_pairwise(variables);
+    }
+    else if(m_options.use_ladder_encoding && variables.size() <=6 ) {
+        return generate_at_most_one_constraint_pairwise(variables);
+    }
+    else {
+        return generate_at_most_one_constraint_ladder(variables, constraint_type, timestep);
+    }
+}
+
+std::vector<std::vector<int>> cnf_encoder::generate_at_most_one_constraint_ladder(std::vector<int> &variables, int constraint_type, int timestep){
+    std::vector<std::vector<int>> all_new_clauses;
+
+    int num_helper_variables = variables.size() - 1;
+    for(int i = 0; i < variables.size(); i++){
+        if(i != 0 || i == variables.size()-1) { // first and last helper variable dont need this clause
+            std::vector<int> new_clause;
+            new_clause.push_back( get_index(std::make_tuple(i-1, constraint_type, timestep))); // !si-1
+            new_clause.push_back(-get_index(std::make_tuple(i,   constraint_type, timestep))); //si
+            all_new_clauses.push_back(new_clause);
+        }
+        if (i != variables.size()-1) { // last variable does not need this implication
+            std::vector<int> new_clause;
+            new_clause.push_back(-variables[i]); // !Xi
+            new_clause.push_back( get_index(std::make_tuple(i, constraint_type, timestep))); // si
+            all_new_clauses.push_back(new_clause);
+        }
+        if( i != 0) { // first vaiable does not need this implication
+            std::vector<int> new_clause;
+            new_clause.push_back(-variables[i]); // !Xi
+            new_clause.push_back(-get_index(std::make_tuple(i-1, constraint_type, timestep))); // !si-1
+            all_new_clauses.push_back(new_clause);
+        }
+    }
+
+    return all_new_clauses;
+}
+
+std::vector<std::vector<int>> cnf_encoder::generate_at_most_one_constraint_pairwise(std::vector<int> &variables){
+    std::vector<std::vector<int>> all_new_clauses;
+    for(int i = 0; i < variables.size(); i++){
+        for(int j = i+1; j < variables.size(); j++) {
+            std::vector<int> new_clause;
+            new_clause.push_back(-variables[i]); // !Xi
+            new_clause.push_back(-variables[j]); // !Xj
+            all_new_clauses.push_back(new_clause);
+        }
+    }
+    return all_new_clauses;
+}
+
 // The initial state must hold at t = 0.
 void cnf_encoder::construct_initial_state_clauses() {
     for (int var = 0; var < m_sas_problem.m_variabels.size(); var++) {
@@ -114,18 +176,16 @@ void cnf_encoder::construct_at_least_on_value_clause(int timesteps) {
 void cnf_encoder::construct_at_most_on_value_clause(int timesteps) {
     for (int t = 0; t <= timesteps; t++) {
         for (int v = 0; v < m_sas_problem.m_variabels.size(); v++) {
-            for (int val1 = 0; val1 < m_sas_problem.m_variabels[v].m_range; val1++) {
-                for (int val2 = val1 + 1; val2 < m_sas_problem.m_variabels[v].m_range; val2++) {
-                    int index1, index2;
-                    index1 = get_index(std::make_tuple(v, val1, t));
-                    index2 = get_index(std::make_tuple(v, val2, t));
 
-                    std::vector<int> new_clause;
-                    new_clause.push_back(-index1);
-                    new_clause.push_back(-index2);
+            std::vector<int> at_most_one_should_be_true;
+            for(int val = 0; val < m_sas_problem.m_variabels[v].m_range; val++){
+                int index = get_index(std::make_tuple(v, val, t));
+                at_most_one_should_be_true.append(index);
+            }
 
-                    m_cnf.add_clause(new_clause, at_most_var, t);
-                }
+            std::vector<std::vector<int>> constrain_clauses = generate_at_most_one_constraint(at_most_one_should_be_true, -2, t);
+            for(std::vector<int> constraint: constrain_clauses) {
+                m_cnf.add_clause(constraint, at_most_var, t);
             }
         }
     }
@@ -147,18 +207,16 @@ void cnf_encoder::construct_at_least_one_action_clauses(int timesteps) {
 // At every step, at most one action is applied
 void cnf_encoder::construct_at_most_one_action_clauses(int timesteps) {
     for (int t = 0; t < timesteps; t++) {
-        for (int op1 = 0; op1 < m_sas_problem.m_operators.size(); op1++) {
-            for (int op2 = op1 + 1; op2 < m_sas_problem.m_operators.size(); op2++) {
-                int index1, index2;
-                index1 = get_index(std::make_tuple(op1, -1, t));
-                index2 = get_index(std::make_tuple(op2, -1, t));
 
-                std::vector<int> new_clause;
-                new_clause.push_back(-index1);
-                new_clause.push_back(-index2);
+        std::vector<int> at_most_one_should_be_true;
+        for (int op = 0; v < m_sas_problem.m_operators.size(); op++) {
+            int index = get_index(std::make_tuple(op, -1, t));
+            at_most_one_should_be_true.append(index);
+        }
 
-                m_cnf.add_clause(new_clause, at_most_op, t);
-            }
+        std::vector<std::vector<int>> constrain_clauses = generate_at_most_one_constraint(at_most_one_should_be_true, -3, t);
+        for(std::vector<int> constraint: constrain_clauses) {
+            m_cnf.add_clause(constraint, at_most_op, t);
         }
     }
 }
@@ -282,22 +340,18 @@ void cnf_encoder::construct_changing_atom_implies_action_clauses(int timesteps) 
 void cnf_encoder::construct_mutex_clauses(int timesteps){
     for (int t = 0; t <= timesteps; t++) {
         for (int m = 0; m < m_sas_problem.m_mutex_groups.size(); m++) {
+
+
+            std::vector<int> at_most_one_should_be_true;
             for (int i = 0; i < m_sas_problem.m_mutex_groups[m].size(); i++) {
-                for (int j = i + 1; j < m_sas_problem.m_mutex_groups[m].size(); j++) {
-                    std::pair<int, int> pair1, pair2;
-                    pair1 = m_sas_problem.m_mutex_groups[m][i];
-                    pair2 = m_sas_problem.m_mutex_groups[m][j];
+                std::pair<int, int> var_val_pair = m_sas_problem.m_mutex_groups[m][i];
+                int index = get_index(std::make_tuple(m_sas_problem.first, m_sas_problem.second, t));
+                at_most_one_should_be_true.append(index);
+            }
 
-                    int index1, index2;
-                    index1 = get_index(std::make_tuple(pair1.first, pair1.second, t));
-                    index2 = get_index(std::make_tuple(pair2.first, pair2.second, t));
-
-                    std::vector<int> new_clause;
-                    new_clause.push_back(-index1);
-                    new_clause.push_back(-index2);
-
-                    m_cnf.add_clause(new_clause, mutex, t);
-                }
+            std::vector<std::vector<int>> constrain_clauses = generate_at_most_one_constraint(at_most_one_should_be_true, -4, t);
+            for(std::vector<int> constraint: constrain_clauses) {
+                m_cnf.add_clause(constraint, mutex, t);
             }
         }
     }

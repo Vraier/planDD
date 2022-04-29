@@ -27,6 +27,8 @@ void option_parser::parse_command_line(int argc, char *argv[]) {
          "The amount of timsteps represented by the cnf formula")  //
         ("include_mutex", po::bool_switch(&m_values.include_mutex)->default_value(false),
          "If this flag is set, the cnf encoder will include the mutexes from the sas problem in its formula")  //
+        ("use_ladder_encoding", po::bool_switch(&m_values.use_ladder_encoding)->default_value(false),
+         "Uses the ladder encoding for at most one constraints") //
         ("build_order", po::value<std::string>(&m_values.build_order)->default_value("irtyumpegc"),
          "Determins the order of conjoins when building a dd linearily and not interleaved. Must be a permutation of "
          "the string impgc; i: initial_state, rtyum: mutex, pe: precondition/effect, g: goal, c: changing atoms "
@@ -71,5 +73,6 @@ void option_parser::print_config() {
     std::cout << "build_order: " << m_values.build_order << std::endl;
     std::cout << "reverse_order: " << (m_values.reverse_order ? "true" : "false") << std::endl;
     std::cout << "include_mutex: " << (m_values.include_mutex ? "true" : "false") << std::endl;
+    std::cout << "use_ladder_encoding: " << (m_values.use_ladder_encoding ? "true" : "false") << std::endl;
     std::cout << "timesteps: " << m_values.timesteps << std::endl;
 }
