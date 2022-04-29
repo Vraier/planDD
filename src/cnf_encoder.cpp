@@ -7,9 +7,6 @@
 
 using namespace planning_cnf;
 
-std::vector<std::vector<int>> at_most_one_encoding(){
-
-}
 
 cnf cnf_encoder::encode_cnf(int timesteps) {
     LOG_MESSAGE(log_level::info) << "Start encoding SAS problem into CNF problem";
@@ -103,7 +100,6 @@ std::vector<std::vector<int>> cnf_encoder::generate_at_most_one_constraint(std::
 std::vector<std::vector<int>> cnf_encoder::generate_at_most_one_constraint_ladder(std::vector<int> &variables, int constraint_type, int timestep){
     std::vector<std::vector<int>> all_new_clauses;
 
-    int num_helper_variables = variables.size() - 1;
     for(int i = 0; i < variables.size(); i++){
         if(i != 0 || i == variables.size()-1) { // first and last helper variable dont need this clause
             std::vector<int> new_clause;
@@ -180,7 +176,7 @@ void cnf_encoder::construct_at_most_on_value_clause(int timesteps) {
             std::vector<int> at_most_one_should_be_true;
             for(int val = 0; val < m_sas_problem.m_variabels[v].m_range; val++){
                 int index = get_index(std::make_tuple(v, val, t));
-                at_most_one_should_be_true.append(index);
+                at_most_one_should_be_true.push_back(index);
             }
 
             std::vector<std::vector<int>> constrain_clauses = generate_at_most_one_constraint(at_most_one_should_be_true, -2, t);
@@ -209,9 +205,9 @@ void cnf_encoder::construct_at_most_one_action_clauses(int timesteps) {
     for (int t = 0; t < timesteps; t++) {
 
         std::vector<int> at_most_one_should_be_true;
-        for (int op = 0; v < m_sas_problem.m_operators.size(); op++) {
+        for (int op = 0; op < m_sas_problem.m_operators.size(); op++) {
             int index = get_index(std::make_tuple(op, -1, t));
-            at_most_one_should_be_true.append(index);
+            at_most_one_should_be_true.push_back(index);
         }
 
         std::vector<std::vector<int>> constrain_clauses = generate_at_most_one_constraint(at_most_one_should_be_true, -3, t);
@@ -345,8 +341,8 @@ void cnf_encoder::construct_mutex_clauses(int timesteps){
             std::vector<int> at_most_one_should_be_true;
             for (int i = 0; i < m_sas_problem.m_mutex_groups[m].size(); i++) {
                 std::pair<int, int> var_val_pair = m_sas_problem.m_mutex_groups[m][i];
-                int index = get_index(std::make_tuple(m_sas_problem.first, m_sas_problem.second, t));
-                at_most_one_should_be_true.append(index);
+                int index = get_index(std::make_tuple(var_val_pair.first, var_val_pair.second, t));
+                at_most_one_should_be_true.push_back(index);
             }
 
             std::vector<std::vector<int>> constrain_clauses = generate_at_most_one_constraint(at_most_one_should_be_true, -4, t);
