@@ -17,9 +17,7 @@ bdd_manager::~bdd_manager() {
 
 // Print a bdd summary
 void bdd_manager::print_bdd(int num_variables) {
-    // TODO: i have to find the values that interes me and that i want to output here. for example: time spent
-    // reordering, time spend, conjoining....
-
+    LOG_MESSAGE(log_level::info) << "Printing CUDD statistics...";
     // printf("Ddm_bdd_manager nodes: %ld | ",
     //        Cudd_ReadNodeCount(m_bdd_manager)); /*Reports the number of live nodes in BDDs and ADDs*/
     // printf("Ddm_bdd_manager vars: %d | ",
@@ -31,7 +29,6 @@ void bdd_manager::print_bdd(int num_variables) {
     // printf("Ddm_bdd_manager paths: %f \n", Cudd_CountPathsToNonZero(m_root_node));
     LOG_MESSAGE(log_level::info) << "Number of nodes: " << Cudd_DagSize(m_root_node) << ", Number of solutions: "
                                  << Cudd_CountMinterm(m_bdd_manager, m_root_node, num_variables);
-    LOG_MESSAGE(log_level::info) << "Printing CUDD statistics...";
     FILE** fout = &stdout;
     Cudd_PrintInfo(m_bdd_manager, *fout);
     // Cudd_PrintSummary(m_bdd_manager, m_root_node, num_variables, 2);

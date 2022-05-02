@@ -71,6 +71,9 @@ void sdd_manager::conjoin_clause(std::vector<int> &clause) {
 }
 
 void sdd_manager::print_sdd(){
+    LOG_MESSAGE(log_level::info) << "Printing LibSDD statistics...";
     SddModelCount count = sdd_model_count(m_root_node, m_sdd_manager);
     LOG_MESSAGE(log_level::info) << "Counted a total of " << count << " models";
+
+    sdd_manager_print(m_sdd_manager);
 }
