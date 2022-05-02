@@ -5,6 +5,7 @@
 bdd_manager::bdd_manager() {
     m_bdd_manager = Cudd_Init(0, 0, CUDD_UNIQUE_SLOTS, CUDD_CACHE_SLOTS, 0);
     Cudd_AutodynEnable(m_bdd_manager, CUDD_REORDER_SIFT);
+    //Cudd_SetMaxCacheHard(m_bdd_manager, 62500000);
 
     m_root_node = Cudd_ReadOne(m_bdd_manager);
     Cudd_Ref(m_root_node);
@@ -30,6 +31,9 @@ void bdd_manager::print_bdd(int num_variables) {
     // printf("Ddm_bdd_manager paths: %f \n", Cudd_CountPathsToNonZero(m_root_node));
     LOG_MESSAGE(log_level::info) << "Number of nodes: " << Cudd_DagSize(m_root_node) << ", Number of solutions: "
                                  << Cudd_CountMinterm(m_bdd_manager, m_root_node, num_variables);
+    LOG_MESSAGE(log_level::info) << "Printing CUDD statistics...";
+    FILE** fout = &stdout;
+    Cudd_PrintInfo(m_bdd_manager, *fout);
     // Cudd_PrintSummary(m_bdd_manager, m_root_node, num_variables, 2);
 }
 

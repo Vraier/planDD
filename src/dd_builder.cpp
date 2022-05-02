@@ -75,7 +75,7 @@ std::map<tag, std::vector<std::vector<clause>>> categorize_clauses(cnf &cnf) {
 
         // we only need one timestep
         if (t == initial_state || t == goal || t == none) {
-            LOG_MESSAGE(log_level::error) << "Categorized " << tagged_clauses[t][0].size() << " clauses of tag " << t;
+            LOG_MESSAGE(log_level::info) << "Categorized " << tagged_clauses[t][0].size() << " clauses of tag " << t;
         }
         // we need one bucket for each timestep
         else {
@@ -83,7 +83,7 @@ std::map<tag, std::vector<std::vector<clause>>> categorize_clauses(cnf &cnf) {
             for (int k = 0; k <= cnf.get_num_timesteps(); k++) {
                 total_clauses += tagged_clauses[t][k].size();
             }
-            LOG_MESSAGE(log_level::error) << "Categorized " << total_clauses << " clauses of tag " << t;
+            LOG_MESSAGE(log_level::info) << "Categorized " << total_clauses << " clauses of tag " << t;
         }
     }
 

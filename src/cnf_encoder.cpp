@@ -11,6 +11,8 @@ using namespace planning_cnf;
 cnf cnf_encoder::encode_cnf(int timesteps) {
     LOG_MESSAGE(log_level::info) << "Start encoding SAS problem into CNF problem";
 
+    // TODO: i really have to think about this, should i really generate the whole mapping here?
+    // it will probably become irrelevant as soon as i introduce propper variable ordering
     generate_index_mapping(timesteps);
 
     m_cnf = cnf(timesteps);
