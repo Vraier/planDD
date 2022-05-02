@@ -101,10 +101,10 @@ std::vector<std::vector<int>> cnf_encoder::generate_at_most_one_constraint_ladde
     std::vector<std::vector<int>> all_new_clauses;
 
     for(int i = 0; i < variables.size(); i++){
-        if(i != 0 || i == variables.size()-1) { // first and last helper variable dont need this clause
+        if(i != 0 && i != variables.size()-1) { // first and last helper variable dont need this clause
             std::vector<int> new_clause;
-            new_clause.push_back( get_index(std::make_tuple(i-1, constraint_type, timestep))); // !si-1
-            new_clause.push_back(-get_index(std::make_tuple(i,   constraint_type, timestep))); //si
+            new_clause.push_back(-get_index(std::make_tuple(i-1, constraint_type, timestep))); // !si-1
+            new_clause.push_back( get_index(std::make_tuple(i,   constraint_type, timestep))); //si
             all_new_clauses.push_back(new_clause);
         }
         if (i != variables.size()-1) { // last variable does not need this implication

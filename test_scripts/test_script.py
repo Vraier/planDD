@@ -66,7 +66,6 @@ def generate_argmument_maps_for_conjoin_orders(default_arguments, conjoin_orders
 
     return all_maps   
 
-
 # inserts the arguments in the map into the default string
 def apply_argument_map_to_commandline_string(commandline_string, argument_map):
     new_string = commandline_string
