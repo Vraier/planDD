@@ -51,7 +51,7 @@ def construct_DD_call(output_folder, problem_path, plan_length):
     mkdir_command = "mkdir -p " + output_folder
     chdir_command = "cd " + output_folder
     downward_translate_command = os.path.join("../../", PATH_TO_DOWNWARD) + " --sas-file output.sas --translate-time-limit 180 --translate " + os.path.join("../../", problem_path) + " > fd_output.txt"
-    planDD_command = os.path.join("../../", PATH_TO_PLANDD) + " --build_bdd --sas_file output.sas --timesteps " + str(plan_length) + " > planDD_output.txt"
+    planDD_command = "timeout 180s " + os.path.join("../../", PATH_TO_PLANDD) + " --build_bdd --sas_file output.sas --timesteps " + str(plan_length) + " > planDD_output.txt"
     whole_command = mkdir_command + " && " + chdir_command + " && " + downward_translate_command + " && " + planDD_command
     return whole_command
 
