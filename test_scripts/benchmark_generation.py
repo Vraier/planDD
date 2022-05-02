@@ -27,7 +27,6 @@ def check_if_folder_contains_domain(folder_path):
 # input format: (doman, problem, problem_path)
 # return output_path
 def generate_output_directory_name(problem):
-    
     (d, p, _) = problem
     
     unsanitized_name = d + p
@@ -37,11 +36,11 @@ def generate_output_directory_name(problem):
     return test_instance_path
 
 # problem_file is relative to test_scripts directory
-# overall timelimit of 2min
+# overall timelimit of 3min
 def construct_downward_call(output_folder, problem_path):
     mkdir_command = "mkdir -p " + output_folder
     chdir_command = "cd " + output_folder
-    downward_command =  os.path.join("../../", path_to_downward) + " --overall-time-limit 120 " + os.path.join("../../", problem_path) + " --search \"astar(lmcut())\" > fd_output.txt"
+    downward_command =  os.path.join("../../", path_to_downward) + " --overall-time-limit 180 " + os.path.join("../../", problem_path) + " --search \"astar(lmcut())\" > fd_output.txt"
     
     whole_command = mkdir_command + " && " + chdir_command + " && " + downward_command
     return whole_command
@@ -134,3 +133,6 @@ def extract_plan_length(file_path):
                 path_length = int(p.search(line).group(0))
                 return path_length
     return -1
+
+
+generate_parallel_file_from_calls(generate_downward_calls())
