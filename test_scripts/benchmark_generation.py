@@ -132,7 +132,7 @@ def extract_finish_time(file_path):
         for line in f:
             p = re.compile("\[t=(.*)s,.*\] Solution found!")
             if p.match(line):
-                path_length = int(p.search(line).group(1))
+                path_length = float(p.search(line).group(1))
                 return path_length
     return -1
     
@@ -150,7 +150,18 @@ def extract_plan_length(file_path):
 #generate_parallel_file_from_calls(generate_downward_calls())
 
 # Check how succesfull downward run was
-#downward_search_infos = extract_information_from_all_problems()
+# downward_search_infos = extract_information_from_all_problems()
+
+"""
+unsuccesfull = [x for x in downward_search_infos if not x["has_finished"]]
+succesfull = [x for x in downward_search_infos if x["has_finished"]]
+
+print(len(unsuccesfull))
+print(len(succesfull))
+
+for x in succesfull:
+    print(x)
+"""
 
 # Prepares the planDD run
-#generate_parallel_file_from_calls(generate_DD_calls())
+generate_parallel_file_from_calls(generate_DD_calls())
