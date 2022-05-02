@@ -2,15 +2,19 @@ import suites
 import os
 import re
 
-path_to_benchmarks = "../../downward-benchmarks/"
-path_to_downward = "../../downward/fast-downward.py"
+PATH_TO_BENCHMARKS = "../../downward-benchmarks/"
+PATH_TO_DOWNWARD = "../../downward/fast-downward.py"
+PATH_TO_PLANDD = "../main"
+
+DOWNWARD_RUN = "easy_optimal_downward_test"
+PLANDD_RUN = "easy_optimal_planDD_test"
 
 # lists the path to all domains and problems that conatin optimal strips problems
 # format: (domain, problem, full_path)
 def list_all_problems():
     all_problems = []
     for domain in suites.suite_optimal_strips():
-        domain_path = os.path.join(path_to_benchmarks, domain)
+        domain_path = os.path.join(PATH_TO_BENCHMARKS, domain)
         for f in os.listdir(domain_path):
             file_path = os.path.join(domain_path, f)
             if os.path.isfile(file_path) and not "domain" in f and ".pddl" in f:
@@ -19,7 +23,7 @@ def list_all_problems():
 
 # returns a samitized name for an output directory, given a problem
 # suite folder = easy_optimal_downward_test/, 
-# input format: (doman, problem, problem_path)
+# input format: (domain, problem, problem_path)
 # return output_path
 def generate_output_directory_name(suite_folder, problem):
     (d, p, _) = problem
@@ -35,25 +39,32 @@ def generate_output_directory_name(suite_folder, problem):
 def construct_downward_call(output_folder, problem_path):
     mkdir_command = "mkdir -p " + output_folder
     chdir_command = "cd " + output_folder
-    downward_command =  os.path.join("../../", path_to_downward) + " --overall-time-limit 180 " + os.path.join("../../", problem_path) + " --search \"astar(lmcut())\" > fd_output.txt"
+    downward_command =  os.path.join("../../", PATH_TO_DOWNWARD) + " --overall-time-limit 180 " + os.path.join("../../", problem_path) + " --search \"astar(lmcut())\" > fd_output.txt"
     
     whole_command = mkdir_command + " && " + chdir_command + " && " + downward_command
     return whole_command
 
-# TODO: implement
+# constructs the call for the planDD program. Will also call the downward translator
+# needs the legth of an optimal plan for the problem
+# problem path is relative from location of test_script folder
 def construct_DD_call(output_folder, problem_path, plan_length):
-    pass
+    mkdir_command = "mkdir -p " + output_folder
+    chdir_command = "cd " + output_folder
+    downward_translate_command = os.path.join("../../", PATH_TO_DOWNWARD) + " --sas-file output.sas --translate-time-limit 180 --translate " + os.path.join("../../", problem_path) + " > fd_output.txt"
+    planDD_command = os.path.join("../../", PATH_TO_PLANDD) + " --build_bdd --sas_file output.sas --timesteps " + str(plan_length) + " > planDD_output.txt"
+    whole_command = mkdir_command + " && " + chdir_command + " && " + downward_translate_command + " && " + planDD_command
+    return whole_command
 
 
 # constructs all the calls tha run dast downward on the opt strips benchmarks
-def generate_downward_calls(suite_folder="easy_optimal_downward_test"):
+def generate_downward_calls():
     all_problems = list_all_problems()
     all_commandline_calls = []    
     
     for i in range(len(all_problems)):
         _, _, problem_path = all_problems[i]
         #print(problem_path)
-        output_folder = generate_output_directory_name(suite_folder, all_problems[i])
+        output_folder = generate_output_directory_name(DOWNWARD_RUN, all_problems[i])
         downward_call = construct_downward_call(output_folder, problem_path)
         all_commandline_calls.append(downward_call)
         
@@ -66,7 +77,9 @@ def generate_DD_calls():
     all_commandline_calls = []
     for info in downward_problem_information:
         if info["has_finished"]:
-            DD_call = construct_DD_call()
+            problem = (info["domain"], info["problem"], info["problem_path"])
+            output_folder = generate_output_directory_name(PLANDD_RUN, problem)
+            DD_call = construct_DD_call(output_folder, info["problem_path"], info["path_length"])
             all_commandline_calls.append(DD_call)
             
     return all_commandline_calls
@@ -99,7 +112,7 @@ def extract_information_from_all_problems(suite_folder="easy_optimal_downward_te
 
         info["has_finished"] = extract_has_finished(output_path)
         info["finish_time"] = extract_finish_time(output_path)
-        info["path_legth"] = extract_plan_length(output_path)
+        info["path_length"] = extract_plan_length(output_path)
         
         problem_information.append(info)
         
@@ -109,7 +122,7 @@ def extract_information_from_all_problems(suite_folder="easy_optimal_downward_te
 def extract_has_finished(file_path):
     with open(file_path, "r") as f:
         for line in f:
-            p = re.compile("\[.*\] Solution found!")
+            p = re.compile("\[t=.*s,.*\] Solution found!")
             if p.match(line):
                 return True
     return False
@@ -133,5 +146,11 @@ def extract_plan_length(file_path):
     return -1
 
 
+# Prepares the downward run
 #generate_parallel_file_from_calls(generate_downward_calls())
-downward_search_infos = extract_information_from_all_problems()
+
+# Check how succesfull downward run was
+#downward_search_infos = extract_information_from_all_problems()
+
+# Prepares the planDD run
+#generate_parallel_file_from_calls(generate_DD_calls())
