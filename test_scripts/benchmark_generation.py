@@ -164,4 +164,4 @@ for x in succesfull:
 """
 
 # Prepares the planDD run
-generate_parallel_file_from_calls(generate_DD_calls())
+# generate_parallel_file_from_calls(generate_DD_calls())
