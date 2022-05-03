@@ -27,7 +27,10 @@ int main(int argc, char *argv[]) {
 
     if (options.m_values.encode_cnf) {
         sas_parser parser(options.m_values.sas_file);
-        parser.start_parsing();
+        if(parser.start_parsing() == -1){
+            LOG_MESSAGE(log_level::error) << "Error while parsing sas_file";
+            return 0;
+        }
 
         cnf_encoder encoder(options.m_values, parser.m_sas_problem);
         planning_cnf::cnf clauses = encoder.encode_cnf(options.m_values.timesteps);
@@ -38,7 +41,10 @@ int main(int argc, char *argv[]) {
 
     if (options.m_values.build_bdd) {
         sas_parser parser(options.m_values.sas_file);
-        parser.start_parsing();
+        if(parser.start_parsing() == -1){
+            LOG_MESSAGE(log_level::error) << "Error while parsing sas_file";
+            return 0;
+        }
 
         cnf_encoder encoder(options.m_values, parser.m_sas_problem);
         planning_cnf::cnf clauses = encoder.encode_cnf(options.m_values.timesteps);
@@ -53,7 +59,10 @@ int main(int argc, char *argv[]) {
     
     if (options.m_values.build_sdd) {
         sas_parser parser(options.m_values.sas_file);
-        parser.start_parsing();
+        if(parser.start_parsing() == -1){
+            LOG_MESSAGE(log_level::error) << "Error while parsing sas_file";
+            return 0;
+        }
 
         cnf_encoder encoder(options.m_values, parser.m_sas_problem);
         planning_cnf::cnf clauses = encoder.encode_cnf(options.m_values.timesteps);
@@ -70,7 +79,10 @@ int main(int argc, char *argv[]) {
 
     if (options.m_values.single_minisat) {
         sas_parser parser(options.m_values.sas_file);
-        parser.start_parsing();
+        if(parser.start_parsing() == -1){
+            LOG_MESSAGE(log_level::error) << "Error while parsing sas_file";
+            return 0;
+        }
 
         cnf_encoder encoder(options.m_values, parser.m_sas_problem);
         planning_cnf::cnf clauses = encoder.encode_cnf(options.m_values.timesteps);
@@ -89,7 +101,10 @@ int main(int argc, char *argv[]) {
     if (options.m_values.count_minisat) {
         // parse sas file
         sas_parser parser(options.m_values.sas_file);
-        parser.start_parsing();
+        if(parser.start_parsing() == -1){
+            LOG_MESSAGE(log_level::error) << "Error while parsing sas_file";
+            return 0;
+        }
 
         // encode it into cnf file
         cnf_encoder encoder(options.m_values, parser.m_sas_problem);

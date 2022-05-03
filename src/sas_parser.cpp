@@ -94,6 +94,7 @@ int sas_parser::parse_sas_metric(std::ifstream &infile) {
         return -1;
     }
     std::getline(infile, line);
+    // 1 indicates that action costs are used
     if (line != "0") {
         LOG_MESSAGE(log_level::error) << "Not a unit cost problem" << std::endl;
         return -1;
