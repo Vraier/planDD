@@ -9,7 +9,12 @@ namespace planning_cnf {
 
 typedef std::vector<int> clause;
 
-enum tag {
+// definition of clause, tag, timestep
+typedef std::tuple<clause, clause_tag, int> tagged_clause;
+// index of the variable into planning problem, timestep, value (in case of planning variable)
+typedef std::tuple<int, variable_tag, int, int> tagged_variable;
+
+enum clause_tag {
     initial_state,  // revelvant for timestep 0
     goal,           // only for tiemestep n
     at_least_var,   // for timestep 0..n
@@ -23,38 +28,61 @@ enum tag {
     none,
 };
 
+enum variable_tag {
+    plan_variable,
+    plan_action,
+    h_amost_variable,
+    h_amost_operator,
+    h_amost_mutex
+};
+
 class cnf {
    private:
     /* data */
-    int m_num_variables, m_num_timesteps;
+    int m_num_timesteps;
 
-    // sort the clauses by order of creation
+    // sorted clauses by order of creation
+    std::vector<tagged_clause> clauses;
+
     std::vector<clause> m_clauses;
-    std::vector<tag> m_tags;
+    std::vector<clause_tag> m_tags;
     std::vector<int> m_timesteps;
 
-    // sortes the clauses by tag and then by timesteps
-    std::map<tag, std::vector<std::vector<clause>>> m_sorted_clauses;
+    // maps information about planning variable to variable index of cnf formula
+    std::map<tagged_variable, int> m_variable_map;
+    std::map<int, tagged_variable> m_inverse_variable_map;
 
    public:
-    cnf(int num_variables, int num_timestpes);
     cnf(int num_timesteps);
     ~cnf();
 
     // adds a clause to the cnf. the tag indicates which type of clause this is
     // if the type is initial_state, the timestep will alway be zero, for the goal it will always be n
-    void add_clause(clause clause, tag tag, int timestep);
+    void add_clause(clause clause, clause_tag tag, int timestep);
+
+    // These methos get the information about a variable/action from a planning problem and return 
+    // the variable index into the cnf formula
+    // They also add is to the pool of variables
+    // This method is used for planning variables: var_index, tag, timestep, value
+    int get_variable_index(int var_index, variable_tag tag, int timestep, int value);
+    // This method is used for planning operators and helper variables: var_index, tag, timestep
+    int get_variable_index(int var_index, variable_tag tag, int timestep);
+
+    // smae as above but does not add if variable does not exists. Returns -1 in this case
+    int get_variable_index_without_adding(int var_index, variable_tag tag, int timestep, int value);
+    int get_variable_index_without_adding(int var_index, variable_tag tag, int timestep);
 
     // returns the ith clause, tar, timestep in the order they were added
     clause get_clause(int i);
-    tag get_tag(int i);
+    clause_tag get_tag(int i);
     int get_timestep(int i);
 
     int get_num_variables();
     int get_num_clauses();
     int get_num_timesteps();
 
-    void set_num_variables(int num_variables);
+    // writes the cnf to file in standart format
+    void write_to_file(std::string filepath);
 };
 
 }  // namespace planning_cnf
