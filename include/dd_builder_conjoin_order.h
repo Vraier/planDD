@@ -7,20 +7,20 @@
 
 #include "cnf.h"
 
-using namespace planning_cnf;
-
 namespace conjoin_order {
 
-// used to interpret the order of clauses from the command line options
-std::map<char, clause_tag> char_tag_map = {
-    {'i', initial_state}, {'g', goal},  {'r', at_least_var}, {'t', at_most_var}, {'y', at_least_op},
-    {'u', at_most_op},    {'m', mutex}, {'p', precondition}, {'e', effect},      {'c', changing_atoms},
-};
+// each tag represents a buckets, each tag buckets is divided into subbuckets for each timesetep
+// the subbuckets have an arbitrary order and contain the actual cnf clauses
+typedef std::map<planning_cnf::clause_tag, std::vector<std::vector<planning_cnf::clause>>> categorized_clauses;
 
-bool is_valid_build_order_string(std::string build_order);
-std::map<clause_tag, std::vector<std::vector<clause>>> categorize_clauses(cnf &cnf);
-std::vector<clause> sort_clauses(cnf &cnf, std::string build_order,
-                                 std::map<clause_tag, std::vector<std::vector<clause>>> &tagged_clauses);
+// checks if the string can be used as a build order
+bool is_valid_conjoin_order_string(std::string build_order);
+
+// catgeorizes the clauses of a planning cnf into buckets.
+// each tag gets a bucket. Each buckets is hase one subbucket for each timestep
+categorized_clauses categorize_clauses(planning_cnf::cnf &cnf);
+// uses the categoriyed clauses to order them in one single vector according to a build order
+std::vector<planning_cnf::clause> sort_clauses(planning_cnf::cnf &cnf, std::string build_order, categorized_clauses &tagged_clauses);
 };
 
 #endif

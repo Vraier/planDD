@@ -7,13 +7,6 @@
 
 namespace planning_cnf {
 
-typedef std::vector<int> clause;
-
-// definition of clause, tag, timestep
-typedef std::tuple<clause, clause_tag, int> tagged_clause;
-// index of the variable into planning problem, timestep, value (in case of planning variable)
-typedef std::tuple<int, variable_tag, int, int> tagged_variable;
-
 enum clause_tag {
     initial_state,  // revelvant for timestep 0
     goal,           // only for tiemestep n
@@ -35,6 +28,13 @@ enum variable_tag {
     h_amost_operator,
     h_amost_mutex
 };
+
+typedef std::vector<int> clause;
+
+// definition of clause, tag, timestep
+typedef std::tuple<clause, clause_tag, int> tagged_clause;
+// index of the variable into planning problem, timestep, value (in case of planning variable)
+typedef std::tuple<int, variable_tag, int, int> tagged_variable;
 
 class cnf {
    private:

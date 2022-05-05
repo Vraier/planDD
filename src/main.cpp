@@ -25,6 +25,25 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
+    if (options.m_values.hack_debug){
+        LOG_MESSAGE(log_level::info) << "You unlocked full control. Good luck modifying the source code";
+
+        sas_parser parser(options.m_values.sas_file);
+        if(parser.start_parsing() == -1){
+            LOG_MESSAGE(log_level::error) << "Error while parsing sas_file";
+            return 0;
+        }
+
+        cnf_encoder encoder(options.m_values, parser.m_sas_problem);
+        planning_cnf::cnf clauses = encoder.encode_cnf(options.m_values.timesteps);
+
+        bdd_manager builder;
+        dd_builder::construct_dd_linear_disjoint(builder, clauses, options.m_values.build_order, options.m_values.reverse_order);
+
+        // TODO print variable order here
+        
+    }
+
     if (options.m_values.encode_cnf) {
         sas_parser parser(options.m_values.sas_file);
         if(parser.start_parsing() == -1){
@@ -34,7 +53,7 @@ int main(int argc, char *argv[]) {
 
         cnf_encoder encoder(options.m_values, parser.m_sas_problem);
         planning_cnf::cnf clauses = encoder.encode_cnf(options.m_values.timesteps);
-        encoder.write_cnf_to_file(options.m_values.cnf_file, clauses);
+        clauses.write_to_file(options.m_values.cnf_file);
 
         return 0;
     }
@@ -86,7 +105,7 @@ int main(int argc, char *argv[]) {
 
         cnf_encoder encoder(options.m_values, parser.m_sas_problem);
         planning_cnf::cnf clauses = encoder.encode_cnf(options.m_values.timesteps);
-        encoder.write_cnf_to_file(options.m_values.cnf_file, clauses);
+        clauses.write_to_file(options.m_values.cnf_file);
 
         LOG_MESSAGE(log_level::info) << "Envoking minisat";
         std::string minisat_call =
@@ -94,7 +113,7 @@ int main(int argc, char *argv[]) {
         std::system(minisat_call.c_str());
 
         std::vector<bool> assignment = encoder.parse_cnf_solution(options.m_values.ass_file);
-        encoder.decode_cnf_solution(assignment, options.m_values.timesteps);
+        encoder.decode_cnf_solution(assignment);
         return 0;
     }
 
@@ -109,7 +128,7 @@ int main(int argc, char *argv[]) {
         // encode it into cnf file
         cnf_encoder encoder(options.m_values, parser.m_sas_problem);
         planning_cnf::cnf clauses = encoder.encode_cnf(options.m_values.timesteps);
-        encoder.write_cnf_to_file(options.m_values.cnf_file, clauses);
+        clauses.write_to_file(options.m_values.cnf_file);
 
         std::vector<bool> current_assignment;
         std::vector<bool> old_assignment;
@@ -142,7 +161,7 @@ int main(int argc, char *argv[]) {
                 new_blocking_clause.push_back(current_assignment[i] ? -i : i);
             }
             clauses.add_clause(new_blocking_clause, planning_cnf::none, -1);
-            encoder.write_cnf_to_file(options.m_values.cnf_file, clauses);
+            clauses.write_to_file(options.m_values.cnf_file);
             num_solutions++;
         }
 

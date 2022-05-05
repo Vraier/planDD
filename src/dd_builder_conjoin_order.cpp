@@ -2,9 +2,17 @@
 
 #include "logging.h"
 
-using namespace conjoin_order;
+using namespace planning_cnf;
 
-bool is_valid_build_order_string(std::string build_order) {
+namespace conjoin_order{
+
+// used to interpret the order of clauses from the command line options
+std::map<char, clause_tag> char_tag_map = {
+    {'i', initial_state}, {'g', goal},  {'r', at_least_var}, {'t', at_most_var}, {'y', at_least_op},
+    {'u', at_most_op},    {'m', mutex}, {'p', precondition}, {'e', effect},      {'c', changing_atoms},
+};
+
+bool is_valid_conjoin_order_string(std::string build_order) {
     // check if string is permutation
     std::string standart_permutation = "ixg:rtyumpec";
     if (!std::is_permutation(build_order.begin(), build_order.end(), standart_permutation.begin(),
@@ -133,3 +141,5 @@ std::vector<clause> sort_clauses(cnf &cnf, std::string build_order,
     LOG_MESSAGE(log_level::info) << "Sorted a total of " << total_clauses.size() << " clauses";
     return total_clauses;
 }
+
+};
