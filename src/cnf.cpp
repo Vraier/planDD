@@ -45,6 +45,10 @@ int cnf::get_variable_index_without_adding(int var_index, variable_tag tag, int 
     return get_variable_index_without_adding(var_index, tag, timestep, 0);
 }
 
+tagged_variable get_planning_info_for_variable(int index){
+    return m_inverse_variable_map[index];
+}
+
 std::vector<int> cnf::get_clause(int i) { return m_clauses[i]; }
 clause_tag cnf::get_tag(int i) { return m_tags[i]; }
 int cnf::get_timestep(int i) { return m_timesteps[i]; }

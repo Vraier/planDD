@@ -166,3 +166,17 @@ void bdd_manager::conjoin_clause(std::vector<int> &clause) {
     Cudd_RecursiveDeref(m_bdd_manager, disjunction);
     m_root_node = tmp;
 }
+
+
+// TDODO: find out what swapvars, bddpermute does
+// also find out what index 0 is
+// also test around with permpos
+// when do i reach index out of range?
+// what is a variable map?
+std::vector<int> bdd_manager::get_variable_order(int num_variables){
+    std::vector<int> permutation(num_variable+1);
+    for(int i = 1; i <= num_variables; i++){
+        int perm_pos = Cudd_ReadPerm(m_bdd_manager, i);
+        permutation[i] = perm_pos;
+    }
+}

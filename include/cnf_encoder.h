@@ -22,6 +22,8 @@ class cnf_encoder {
     void decode_cnf_solution(std::vector<bool> &assignment);
     // compares two asssignments for a cnf formula and prints the difference in human readable form (for debugging)
     void compare_assignments(std::vector<bool> &assignment1, std::vector<bool> &assignment2);
+    // translate the ith cnf variable into the planning context and returns a string description
+    std::string get_description_of_ith_variable(int index);
 
    private:
     // holds options for the whole programm. Some are important for the cnf_encoder

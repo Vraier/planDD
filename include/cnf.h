@@ -67,6 +67,8 @@ class cnf {
     int get_variable_index(int var_index, variable_tag tag, int timestep, int value);
     // This method is used for planning operators and helper variables: var_index, tag, timestep
     int get_variable_index(int var_index, variable_tag tag, int timestep);
+    // invers of the methos above
+    tagged_variable get_planning_info_for_variable(int index);
 
     // smae as above but does not add if variable does not exists. Returns -1 in this case
     int get_variable_index_without_adding(int var_index, variable_tag tag, int timestep, int value);

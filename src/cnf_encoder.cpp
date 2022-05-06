@@ -427,3 +427,9 @@ void cnf_encoder::compare_assignments(std::vector<bool> &assignment1, std::vecto
         }
     }*/
 }
+
+// TODO finish this
+std::string get_description_of_ith_variable(int index){
+
+    tagged_variable info = cnf.get_planning_info_for_variable(index);
+}

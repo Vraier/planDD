@@ -24,6 +24,11 @@ class bdd_manager : public virtual dd_buildable {
     bdd_manager();
     virtual ~bdd_manager();
 
+    // returns the permutation of the variable order
+    // the i-th entry contains the the level in the BDD in which the variable resides in
+    std::vector<int> get_variable_order(int num_variables);
+
+
     void print_bdd(int num_variables);
     void write_bdd_to_dot_file(DdNode *bdd, std::string filename);
     //DdNode *construct_bdd_from_cnf(std::vector<std::vector<int>> &cnf);

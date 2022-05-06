@@ -28,20 +28,32 @@ int main(int argc, char *argv[]) {
     if (options.m_values.hack_debug){
         LOG_MESSAGE(log_level::info) << "You unlocked full control. Good luck modifying the source code";
 
-        sas_parser parser(options.m_values.sas_file);
-        if(parser.start_parsing() == -1){
-            LOG_MESSAGE(log_level::error) << "Error while parsing sas_file";
-            return 0;
-        }
+        //sas_parser parser(options.m_values.sas_file);
+        //if(parser.start_parsing() == -1){
+        //    LOG_MESSAGE(log_level::error) << "Error while parsing sas_file";
+        //    return 0;
+        //}
 
-        cnf_encoder encoder(options.m_values, parser.m_sas_problem);
-        planning_cnf::cnf clauses = encoder.encode_cnf(options.m_values.timesteps);
+        //cnf_encoder encoder(options.m_values, parser.m_sas_problem);
+        //planning_cnf::cnf clauses = encoder.encode_cnf(options.m_values.timesteps);
 
         bdd_manager builder;
-        dd_builder::construct_dd_linear_disjoint(builder, clauses, options.m_values.build_order, options.m_values.reverse_order);
+        //dd_builder::construct_dd_linear_disjoint(builder, clauses, options.m_values.build_order, options.m_values.reverse_order);
 
         // TODO print variable order here
+        std::vector<int> a,b,c,d,e;
+        a.push_back(1);
+        b.push_back(2);
+        c.push_back(4);
+        d.push_back(5);
+        e.push_back(6);
+        builder.conjoin_clause(a);
+        builder.conjoin_clause(b);
+        builder.conjoin_clause(c);
+        builder.conjoin_clause(d);
+        builder.conjoin_clause(e);
         
+        builder.print_variable_order(6);
     }
 
     if (options.m_values.encode_cnf) {
