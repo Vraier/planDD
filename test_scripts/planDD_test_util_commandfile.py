@@ -39,9 +39,8 @@ def generate_command_calls(list_of_problems, list_of_arguments):
     for argument in list_of_arguments:
         for prob in list_of_problems:
             (suite_name, planDD_map, downward_map) = argument
-            (_, _, prob_path) = prob
             output_folder = generate_output_directory_name(suite_name, prob)
-            commandline_call = construct_complete_call(output_folder, prob_path, planDD_map, downward_map)
+            commandline_call = construct_complete_call(output_folder, prob, planDD_map, downward_map)
             all_commandline_calls.append(commandline_call)
     return all_commandline_calls
 
@@ -52,9 +51,7 @@ def generate_command_calls(list_of_problems, list_of_arguments):
 # input format: (domain, problem, problem_path)
 # return output_path
 def generate_output_directory_name(suite_name, problem):
-    (d, p, _) = problem
-    
-    unsanitized_name = d + p
+    unsanitized_name = problem["d_name"] + problem["p_name"]
     sanitized_name = "".join(x for x in unsanitized_name if x.isalnum())
     test_instance_path = os.path.join("../test_output/", suite_name, sanitized_name)
         
@@ -68,18 +65,21 @@ def apply_argument_map_to_commandline_string(commandline_string, argument_map):
     for key in argument_map:
         if not key in new_string:
             print("Warning, cant replace key:", key, " in", new_string)
-        new_string = new_string.replace(key, argument_map[key], 1)
+        new_string = new_string.replace(key, str(argument_map[key]), 1)
     return new_string
 
 # constructs the call for the planDD program. Will also call the downward translator
-# needs the length of an optimal plan for the problem
-# problem path is relative from location of test_script folder
-def construct_complete_call(output_folder, problem_path, planDD_argument_map, downward_argument_map):
+# inserts the last bit of information into the argument maps (e.g. num timesteps)
+def construct_complete_call(output_folder, problem, planDD_argument_map, downward_argument_map):
     mkdir_command = "mkdir -p " + output_folder
     chdir_command = "cd " + output_folder
+    
+    # insert new information into dictionaries
     new_downward_dic = dict(downward_argument_map)
-    new_downward_dic["$problem_path"] = problem_path
+    new_downward_dic["$problem_path"] = problem["path"]
+    new_planDD_dic = dict(planDD_argument_map)
+    new_planDD_dic["$timesteps"] = problem["plan_length"]
     downward_translate_command = apply_argument_map_to_commandline_string(STANDART_DOWNWARD_COMMANDLINE_STRING, new_downward_dic)
-    planDD_command = apply_argument_map_to_commandline_string(STANDART_PLANDD_COMMANDLINE_STRING, planDD_argument_map)
+    planDD_command = apply_argument_map_to_commandline_string(STANDART_PLANDD_COMMANDLINE_STRING, new_planDD_dic)
     whole_command = mkdir_command + " && " + chdir_command + " && " + downward_translate_command + " && " + planDD_command
     return whole_command

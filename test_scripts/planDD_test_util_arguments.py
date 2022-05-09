@@ -20,7 +20,8 @@ def generate_all_interleaved_argument_maps():
     all_interleaved_orders = generate_all_interleaved_clause_orders()
     for order in all_interleaved_orders:
         new_p_dic = dict(standart_planDD_argument_map)
-        new_p_dic["$build_order"] = order        
+        new_p_dic["$build_order"] = order    
+        all_dics.append(new_p_dic)    
     return all_dics
     
 
