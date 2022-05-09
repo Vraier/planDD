@@ -66,17 +66,6 @@ def generate_argmument_maps_for_conjoin_orders(default_arguments, conjoin_orders
 
     return all_maps   
 
-# inserts the arguments in the map into the default string
-def apply_argument_map_to_commandline_string(commandline_string, argument_map):
-    new_string = commandline_string
-    for key in argument_map:
-        new_string = new_string.replace(key, argument_map[key], 1)
-    return new_string
-
-# converts each argument map into a commandline string
-def generate_all_commandline_strings(commandline_string, agument_maps):
-    return [apply_argument_map_to_commandline_string(commandline_string, m) for m in agument_maps]
-
 
 # executes a list of commands. The commands get written into a all_commands.sh file
 def execute_all_commands(command_list):
@@ -87,17 +76,6 @@ def execute_all_commands(command_list):
 
     system("chmod +x all_commands.sh")
     system("./all_commands.sh")
-
-    
-standart_argument_map = {
-    "$mode" : "build_bdd",
-    "$timeout" : "80s",
-    "$sas_file" : "output.sas",
-    "$timesteps" : "11",
-    "$output_folder" : "../test_output/interleaved_bdd",
-    "$addition_flags" : "",
-}
-standart_commandline_string = "timeout $timeout " + planning_to_dd_path + " --sas_file $sas_file --$mode --timesteps $timesteps --build_order $build_order $addition_flags > $output_folder/$output_file"
 
 
 #all_argument_maps = generate_argmument_maps_for_conjoin_orders(standart_argument_map, generate_all_interleaved_orders())
