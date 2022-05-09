@@ -1,9 +1,6 @@
 import os
-import suites
-import extract_planDD_information
 
 PATH_TO_PLANDD = "../main"
-PATH_TO_BENCHMARKS = "../../downward-benchmarks/"
 PATH_TO_DOWNWARD = "../../downward/fast-downward.py"
 
 # template for the command lins string. Vars with $ get substituted
@@ -23,21 +20,6 @@ STANDART_DOWNWARD_COMMANDLINE_STRING += " --sas-file output.sas "
 STANDART_DOWNWARD_COMMANDLINE_STRING += " --translate-time-limit $downward_timeout "
 STANDART_DOWNWARD_COMMANDLINE_STRING += " --translate $problem_path "
 STANDART_DOWNWARD_COMMANDLINE_STRING += " > fd_output.txt"
-
-# example structure for an argument map
-standart_planDD_argument_map = {
-    "$timeout" : "80s",
-    "$mode" : "build_bdd",
-    "$timesteps" : "13",
-    "$build_order" : "igrtyumpecx:",
-    "$addition_flags" : "",
-}
-
-standart_downward_argument_map = {
-    "$downward_timeout" : "80s",
-    "$problem_path" : "prob.pddl"
-}
-
 
 # Takes a list of commandline calls and generates a file for the parallel tool
 # example to call the all_commands file with parallel
@@ -62,36 +44,6 @@ def generate_command_calls(list_of_problems, list_of_arguments):
             commandline_call = construct_complete_call(output_folder, prob_path, planDD_map, downward_map)
             all_commandline_calls.append(commandline_call)
     return all_commandline_calls
-
-
-
-# lists the path to all domains and problems that conatin optimal strips problems
-# format: (domain, problem, full_path)
-def list_all_opt_strips_problems():
-    all_problems = []
-    for domain in suites.suite_optimal_strips():
-        domain_path = os.path.join(PATH_TO_BENCHMARKS, domain)
-        for f in os.listdir(domain_path):
-            file_path = os.path.join(domain_path, f)
-            if os.path.isfile(file_path) and not "domain" in f and ".pddl" in f:
-                all_problems.append((domain, f, file_path))
-    return all_problems
-
-# returns only the problems that were solved during the benchmark generation run
-def list_all_easy_opt_strips_problems():
-    def get_domain_desc_from_prob(problem):
-        (d, p, _) = problem
-        "".join(x for x in d+p if x.isalnum())
-        
-    all_dics = extract_planDD_information.read_all_information_from_file("../test_output/easy_optimal_downward_test.pkl")
-    all_problems = list_all_opt_strips_problems()
-    
-    valid_domain_desc = set()
-    for d in all_dics:
-        if d["has_finished"]:
-            valid_domain_desc.add(d["domain_desc"])
-            
-    return [p for p in all_problems if get_domain_desc_from_prob(p) in valid_domain_desc]
 
 
 

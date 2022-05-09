@@ -1,6 +1,8 @@
 import re
 import os
 import pickle
+import planDD_test_util_problems
+import planDD_test_util_commandfile
 
 # extracts all the possible information from an output file into a dict
 # domain_desc: describes which domain and tescase is used (name of the folder used to hold the testcase)
@@ -171,3 +173,64 @@ def get_percentage_of_conjoined_clauses_from_info(info):
     constructed_clauses = info["constructed_clauses"]
     conjoined_clauses = info["conjoined_clauses"]
     return 100 * conjoined_clauses/constructed_clauses
+
+# TODO: fix the filenames
+# extracts information from the output of a fast_downward run on all benchmarks         
+def downward_write_all_information_to_file(output_file="../test_output/easy_optimal_downward_test.pkl", suite_folder="easy_optimal_downward_test"):
+    problem_information = []
+    for problem in planDD_test_util_problems.list_all_opt_strips_problems():
+        output_folder = planDD_test_util_commandfile.generate_output_directory_name(suite_folder, problem)
+        output_path = os.path.join(output_folder, "fd_output.txt")
+
+        if not os.path.isfile(output_path):
+            print("Warning", output_path, "does not exist")
+            continue
+        
+        info = {}
+        info["domain"] = problem["d_name"]
+        info["problem"] = problem["p_name"]
+        info["problem_path"] = problem["path"]
+        info["output_path"] = output_path
+
+        info["has_finished"] = downward_extract_has_finished(output_path)
+        info["finish_time"] = downward_extract_finish_time(output_path)
+        info["path_length"] = downward_extract_plan_length(output_path)
+        
+        problem_information.append(info)
+    
+    with open(output_file, "wb") as f:
+        pickle.dump(problem_information, f) 
+        
+# Reads in the dicitonaries that were written to file eralier
+def downward_read_all_information_from_file(pickle_file="../test_output/easy_optimal_downward_test.pkl"):
+    all_dics = []
+    with open(pickle_file, 'rb') as f:
+        all_dics = pickle.load(f)
+    return all_dics
+         
+# Helper methods to extract information from the downward output     
+def downward_extract_has_finished(file_path):
+    with open(file_path, "r") as f:
+        for line in f:
+            p = re.compile("\[t=.*s,.*\] Solution found!")
+            if p.match(line):
+                return True
+    return False
+
+def downward_extract_finish_time(file_path):
+    with open(file_path, "r") as f:
+        for line in f:
+            p = re.compile("\[t=(.*)s,.*\] Solution found!")
+            if p.match(line):
+                path_length = float(p.search(line).group(1))
+                return path_length
+    return -1
+    
+def downward_extract_plan_length(file_path):
+    with open(file_path, "r") as f:
+        for line in f:
+            p = re.compile("\[t=.*s,.*\] Plan length: (.*) step\(s\).")
+            if p.match(line):
+                path_length = int(p.search(line).group(1))
+                return path_length
+    return -1

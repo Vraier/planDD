@@ -104,7 +104,7 @@ def extract_information_from_all_problems(suite_folder="easy_optimal_downward_te
             print("Warning", output_path, "does not exist")
             continue
         
-        info = dict()
+        info = {}
         info["domain"] = d
         info["problem"] = p
         info["problem_path"] = problem_path
