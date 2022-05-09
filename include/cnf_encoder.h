@@ -1,16 +1,15 @@
 #include <map>
 #include <sstream>
 #include <string>
-#include <vector>
 #include <unordered_map>
+#include <vector>
 
+#include "cnf.h"
 #include "options.h"
 #include "sas_parser.h"
-#include "cnf.h"
 
 class cnf_encoder {
    public:
-
     cnf_encoder(option_values &options, sas_problem &problem) : m_options(options), m_sas_problem(problem), m_cnf(0) {}
     planning_cnf::cnf encode_cnf(int timesteps);
 
@@ -18,17 +17,21 @@ class cnf_encoder {
     // assignemnt gives the truth value for the ith variable (index 0 of assignment has no meaningful value)
     // returns an empty vector if the file contains no solution
     std::vector<bool> parse_cnf_solution(std::string filepath);
+
+    // translate the ith cnf variable into the planning context and returns a string description
+    // the variable should be greater than 0 and smaller or eaqual to
+    // num_variables
+    std::string decode_cnf_variable(int cnf_index);
     // interprets the bool vector as a plan for a planning problem
     void decode_cnf_solution(std::vector<bool> &assignment);
     // compares two asssignments for a cnf formula and prints the difference in human readable form (for debugging)
     void compare_assignments(std::vector<bool> &assignment1, std::vector<bool> &assignment2);
-    // translate the ith cnf variable into the planning context and returns a string description
-    std::string get_description_of_ith_variable(int index);
+
 
    private:
     // holds options for the whole programm. Some are important for the cnf_encoder
     option_values m_options;
-    
+
     // represents the planning problem
     sas_problem m_sas_problem;
 
@@ -42,13 +45,16 @@ class cnf_encoder {
 
     // generates a set of clauses that gurarantee that at most on of the variables is true
     // can insert helper variables in the symbol map, depending wich at most one type is chosen
-    std::vector<std::vector<int>> generate_at_most_one_constraint(std::vector<int> &variables, planning_cnf::variable_tag constraint_type, int timestep);
+    std::vector<std::vector<int>> generate_at_most_one_constraint(std::vector<int> &variables,
+                                                                  planning_cnf::variable_tag constraint_type,
+                                                                  int timestep);
     // Should only be called once per timestep and constraint_type
     // otherwise the helper variables will get reused
-    std::vector<std::vector<int>> generate_at_most_one_constraint_ladder(std::vector<int> &variables, planning_cnf::variable_tag constraint_type, int timestep);
+    std::vector<std::vector<int>> generate_at_most_one_constraint_ladder(std::vector<int> &variables,
+                                                                         planning_cnf::variable_tag constraint_type,
+                                                                         int timestep);
     // pairwise generates no additional helper variables
     std::vector<std::vector<int>> generate_at_most_one_constraint_pairwise(std::vector<int> &variables);
-
 
     // These methos generate all the clauses that represent the planning problem
     void construct_initial_state_clauses();

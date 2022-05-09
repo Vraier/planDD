@@ -7,7 +7,6 @@
 
 using namespace planning_cnf;
 
-
 cnf cnf_encoder::encode_cnf(int timesteps) {
     LOG_MESSAGE(log_level::info) << "Start encoding SAS problem into CNF problem";
     LOG_MESSAGE(log_level::info) << "Starting to generate all clauses for the CNF problem";
@@ -26,7 +25,7 @@ cnf cnf_encoder::encode_cnf(int timesteps) {
 
     construct_at_most_one_action_clauses(timesteps);
 
-    if(m_options.include_mutex){
+    if (m_options.include_mutex) {
         construct_mutex_clauses(timesteps);
     }
 
@@ -37,45 +36,46 @@ cnf cnf_encoder::encode_cnf(int timesteps) {
     construct_changing_atom_implies_action_clauses(timesteps);
 
     LOG_MESSAGE(log_level::info) << "Constructed a total of " << m_cnf.get_num_clauses() << " clauses";
-    LOG_MESSAGE(log_level::info) << "Constructed a total of " << m_cnf.get_num_variables() << " variables (with helper)";
+    LOG_MESSAGE(log_level::info) << "Constructed a total of " << m_cnf.get_num_variables()
+                                 << " variables (with helper)";
 
     return m_cnf;
 }
 
 // TODO check if 6 is correct magic number
-std::vector<std::vector<int>> cnf_encoder::generate_at_most_one_constraint(std::vector<int> &variables, variable_tag constraint_type, int timestep){
-
-    if(!m_options.use_ladder_encoding) {
+std::vector<std::vector<int>> cnf_encoder::generate_at_most_one_constraint(std::vector<int> &variables,
+                                                                           variable_tag constraint_type, int timestep) {
+    if (!m_options.use_ladder_encoding) {
         return generate_at_most_one_constraint_pairwise(variables);
-    }
-    else if(m_options.use_ladder_encoding && variables.size() <=6 ) {
+    } else if (m_options.use_ladder_encoding && variables.size() <= 6) {
         return generate_at_most_one_constraint_pairwise(variables);
-    }
-    else {
+    } else {
         return generate_at_most_one_constraint_ladder(variables, constraint_type, timestep);
     }
 }
 
-std::vector<std::vector<int>> cnf_encoder::generate_at_most_one_constraint_ladder(std::vector<int> &variables, variable_tag constraint_type, int timestep){
+std::vector<std::vector<int>> cnf_encoder::generate_at_most_one_constraint_ladder(std::vector<int> &variables,
+                                                                                  variable_tag constraint_type,
+                                                                                  int timestep) {
     std::vector<std::vector<int>> all_new_clauses;
 
-    for(int i = 0; i < variables.size(); i++){
-        if(i != 0 && i != variables.size()-1) { // first and last helper variable dont need this clause
+    for (int i = 0; i < variables.size(); i++) {
+        if (i != 0 && i != variables.size() - 1) {  // first and last helper variable dont need this clause
             std::vector<int> new_clause;
-            new_clause.push_back(-m_cnf.get_variable_index(i-1, constraint_type, timestep)); // !si-1
-            new_clause.push_back( m_cnf.get_variable_index(i,   constraint_type, timestep)); //si
+            new_clause.push_back(-m_cnf.get_variable_index(i - 1, constraint_type, timestep));  // !si-1
+            new_clause.push_back(m_cnf.get_variable_index(i, constraint_type, timestep));       // si
             all_new_clauses.push_back(new_clause);
         }
-        if (i != variables.size()-1) { // last variable does not need this implication
+        if (i != variables.size() - 1) {  // last variable does not need this implication
             std::vector<int> new_clause;
-            new_clause.push_back(-variables[i]); // !Xi
-            new_clause.push_back( m_cnf.get_variable_index(i, constraint_type, timestep)); // si
+            new_clause.push_back(-variables[i]);                                           // !Xi
+            new_clause.push_back(m_cnf.get_variable_index(i, constraint_type, timestep));  // si
             all_new_clauses.push_back(new_clause);
         }
-        if( i != 0) { // first vaiable does not need this implication
+        if (i != 0) {  // first vaiable does not need this implication
             std::vector<int> new_clause;
-            new_clause.push_back(-variables[i]); // !Xi
-            new_clause.push_back(-m_cnf.get_variable_index(i-1, constraint_type, timestep)); // !si-1
+            new_clause.push_back(-variables[i]);                                                // !Xi
+            new_clause.push_back(-m_cnf.get_variable_index(i - 1, constraint_type, timestep));  // !si-1
             all_new_clauses.push_back(new_clause);
         }
     }
@@ -83,13 +83,13 @@ std::vector<std::vector<int>> cnf_encoder::generate_at_most_one_constraint_ladde
     return all_new_clauses;
 }
 
-std::vector<std::vector<int>> cnf_encoder::generate_at_most_one_constraint_pairwise(std::vector<int> &variables){
+std::vector<std::vector<int>> cnf_encoder::generate_at_most_one_constraint_pairwise(std::vector<int> &variables) {
     std::vector<std::vector<int>> all_new_clauses;
-    for(int i = 0; i < variables.size(); i++){
-        for(int j = i+1; j < variables.size(); j++) {
+    for (int i = 0; i < variables.size(); i++) {
+        for (int j = i + 1; j < variables.size(); j++) {
             std::vector<int> new_clause;
-            new_clause.push_back(-variables[i]); // !Xi
-            new_clause.push_back(-variables[j]); // !Xj
+            new_clause.push_back(-variables[i]);  // !Xi
+            new_clause.push_back(-variables[j]);  // !Xj
             all_new_clauses.push_back(new_clause);
         }
     }
@@ -131,15 +131,15 @@ void cnf_encoder::construct_at_least_on_value_clause(int timesteps) {
 void cnf_encoder::construct_at_most_on_value_clause(int timesteps) {
     for (int t = 0; t <= timesteps; t++) {
         for (int v = 0; v < m_sas_problem.m_variabels.size(); v++) {
-
             std::vector<int> at_most_one_should_be_true;
-            for(int val = 0; val < m_sas_problem.m_variabels[v].m_range; val++){
+            for (int val = 0; val < m_sas_problem.m_variabels[v].m_range; val++) {
                 int index = m_cnf.get_variable_index(v, plan_variable, t, val);
                 at_most_one_should_be_true.push_back(index);
             }
 
-            std::vector<std::vector<int>> constrain_clauses = generate_at_most_one_constraint(at_most_one_should_be_true, h_amost_variable, t);
-            for(std::vector<int> constraint: constrain_clauses) {
+            std::vector<std::vector<int>> constrain_clauses =
+                generate_at_most_one_constraint(at_most_one_should_be_true, h_amost_variable, t);
+            for (std::vector<int> constraint : constrain_clauses) {
                 m_cnf.add_clause(constraint, at_most_var, t);
             }
         }
@@ -162,15 +162,15 @@ void cnf_encoder::construct_at_least_one_action_clauses(int timesteps) {
 // At every step, at most one action is applied
 void cnf_encoder::construct_at_most_one_action_clauses(int timesteps) {
     for (int t = 0; t < timesteps; t++) {
-
         std::vector<int> at_most_one_should_be_true;
         for (int op = 0; op < m_sas_problem.m_operators.size(); op++) {
             int index = m_cnf.get_variable_index(op, plan_action, t);
             at_most_one_should_be_true.push_back(index);
         }
 
-        std::vector<std::vector<int>> constrain_clauses = generate_at_most_one_constraint(at_most_one_should_be_true, h_amost_operator, t);
-        for(std::vector<int> constraint: constrain_clauses) {
+        std::vector<std::vector<int>> constrain_clauses =
+            generate_at_most_one_constraint(at_most_one_should_be_true, h_amost_operator, t);
+        for (std::vector<int> constraint : constrain_clauses) {
             m_cnf.add_clause(constraint, at_most_op, t);
         }
     }
@@ -217,7 +217,7 @@ void cnf_encoder::construct_effect_clauses(int timesteps) {
 
                 int index_op, index_effect;
                 index_op = m_cnf.get_variable_index(op, plan_action, t);
-                index_effect = m_cnf.get_variable_index(effected_var, plan_variable,  t + 1, effected_new_val);
+                index_effect = m_cnf.get_variable_index(effected_var, plan_variable, t + 1, effected_new_val);
 
                 std::vector<int> new_clause;
                 new_clause.push_back(-index_op);
@@ -292,11 +292,9 @@ void cnf_encoder::construct_changing_atom_implies_action_clauses(int timesteps) 
 }
 
 // at every timestep it is not allowed for two values in a mutex to be true at the same time
-void cnf_encoder::construct_mutex_clauses(int timesteps){
+void cnf_encoder::construct_mutex_clauses(int timesteps) {
     for (int t = 0; t <= timesteps; t++) {
         for (int m = 0; m < m_sas_problem.m_mutex_groups.size(); m++) {
-
-
             std::vector<int> at_most_one_should_be_true;
             for (int i = 0; i < m_sas_problem.m_mutex_groups[m].size(); i++) {
                 std::pair<int, int> var_val_pair = m_sas_problem.m_mutex_groups[m][i];
@@ -304,8 +302,9 @@ void cnf_encoder::construct_mutex_clauses(int timesteps){
                 at_most_one_should_be_true.push_back(index);
             }
 
-            std::vector<std::vector<int>> constrain_clauses = generate_at_most_one_constraint(at_most_one_should_be_true, h_amost_mutex, t);
-            for(std::vector<int> constraint: constrain_clauses) {
+            std::vector<std::vector<int>> constrain_clauses =
+                generate_at_most_one_constraint(at_most_one_should_be_true, h_amost_mutex, t);
+            for (std::vector<int> constraint : constrain_clauses) {
                 m_cnf.add_clause(constraint, mutex, t);
             }
         }
@@ -348,6 +347,41 @@ std::vector<bool> cnf_encoder::parse_cnf_solution(std::string filepath) {
     return assignment;
 }
 
+std::string cnf_encoder::decode_cnf_variable(int index) {
+    tagged_variable info = m_cnf.get_planning_info_for_variable(index);
+    int v_index = std::get<0>(info);
+    variable_tag tag = std::get<1>(info);
+    int v_timestep = std::get<2>(info);
+    int v_value = std::get<3>(info);
+
+    // determin type of 
+    std::string type;
+    std::string name;
+    switch (tag) {
+        case plan_variable:
+            type = "plan_variable";
+            name =  m_sas_problem.m_variabels[v_index].m_name + ": " + m_sas_problem.m_variabels[v_index].m_symbolic_names[v_value];
+            break;
+        case plan_action:
+            type = "plan_action";
+            name = m_sas_problem.m_operators[v_index].m_name;
+            break;
+        case h_amost_variable:
+            type = "h_amost_variable";
+            break;
+        case h_amost_operator:
+            type = "h_amost_operator";
+            break;
+        case h_amost_mutex:
+            type = "h_amost_mutex";
+            break;
+        default:
+            type = "unknown";
+    }
+
+    return type + " t=" + std::to_string(v_timestep) + " " + name;
+}
+
 // interprets a solution from minisat. It translates the sat solution to a
 // planning problem solution (with some addional debugg information)
 // This call depends on the correct symbol map.
@@ -385,7 +419,8 @@ void cnf_encoder::decode_cnf_solution(std::vector<bool> &assignment) {
         int goal_var, goal_val, goal_idx;
         goal_var = m_sas_problem.m_goal[g].first;
         goal_val = m_sas_problem.m_goal[g].second;
-        goal_idx = m_cnf.get_variable_index_without_adding(goal_var, plan_variable, m_cnf.get_num_timesteps(), goal_val);
+        goal_idx =
+            m_cnf.get_variable_index_without_adding(goal_var, plan_variable, m_cnf.get_num_timesteps(), goal_val);
         std::cout << "Variable " << m_sas_problem.m_variabels[goal_var].m_name << " has value "
                   << m_sas_problem.m_variabels[goal_var].m_symbolic_names[goal_val];
         if (assignment[goal_idx]) {
@@ -401,7 +436,7 @@ void cnf_encoder::compare_assignments(std::vector<bool> &assignment1, std::vecto
                                  << m_cnf.get_num_variables() << " " << assignment1.size() << " " << assignment2.size();
 
     // TODO this will be fixed when i am finished with variable tagging.
-    // At this point i hopelfully have a way to output variables uniformly 
+    // At this point i hopelfully have a way to output variables uniformly
     /*
     for (int i = 0; i < m_cnf.get_num_variables(); i++) {
         // search for cnf values that changes between the assignments
@@ -426,10 +461,4 @@ void cnf_encoder::compare_assignments(std::vector<bool> &assignment1, std::vecto
             }
         }
     }*/
-}
-
-// TODO finish this
-std::string get_description_of_ith_variable(int index){
-
-    tagged_variable info = cnf.get_planning_info_for_variable(index);
 }

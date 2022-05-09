@@ -45,7 +45,8 @@ int cnf::get_variable_index_without_adding(int var_index, variable_tag tag, int 
     return get_variable_index_without_adding(var_index, tag, timestep, 0);
 }
 
-tagged_variable get_planning_info_for_variable(int index){
+// TODO implement
+tagged_variable cnf::get_planning_info_for_variable(int index){
     return m_inverse_variable_map[index];
 }
 

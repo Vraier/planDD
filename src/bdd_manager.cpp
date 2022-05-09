@@ -15,6 +15,12 @@ bdd_manager::~bdd_manager() {
     Cudd_Quit(m_bdd_manager); 
 }
 
+void bdd_manager::reduce_heap(){
+    LOG_MESSAGE(log_level::info) << "Start reducing heap";
+    Cudd_ReduceHeap(m_bdd_manager, CUDD_REORDER_SIFT_CONVERGE, 1);
+    LOG_MESSAGE(log_level::info) << "Finished reducing heap";
+}
+
 // Print a bdd summary
 void bdd_manager::print_bdd(int num_variables) {
     LOG_MESSAGE(log_level::info) << "Printing CUDD statistics...";
@@ -35,14 +41,16 @@ void bdd_manager::print_bdd(int num_variables) {
 }
 
 // Writes a dot file representing the argument DDs
-void bdd_manager::write_bdd_to_dot_file(DdNode *bdd, std::string filename) {
-    DdNode *add = Cudd_BddToAdd(m_bdd_manager, bdd);
+void bdd_manager::write_bdd_to_dot_file(std::string filename) {
+    DdNode *add = Cudd_BddToAdd(m_bdd_manager, m_root_node);
+    Cudd_Ref(add);
     FILE *outfile;  // output file pointer for .dot file
     outfile = fopen(filename.c_str(), "w");
     DdNode **ddnodearray = (DdNode **)malloc(sizeof(DdNode *));  // initialize the function array
     ddnodearray[0] = add;
     Cudd_DumpDot(m_bdd_manager, 1, ddnodearray, NULL, NULL, outfile);  // dump the function to .dot file
     free(ddnodearray);
+    Cudd_RecursiveDeref(m_bdd_manager, add);
     fclose(outfile);
 }
 
@@ -167,16 +175,20 @@ void bdd_manager::conjoin_clause(std::vector<int> &clause) {
     m_root_node = tmp;
 }
 
-
-// TDODO: find out what swapvars, bddpermute does
-// also find out what index 0 is
-// also test around with permpos
-// when do i reach index out of range?
-// what is a variable map?
+// This method returns the variable permutation
+// the ith entry of the return verctor dictates what variable(index) resides in the ith layer of the bdd
 std::vector<int> bdd_manager::get_variable_order(int num_variables){
-    std::vector<int> permutation(num_variable+1);
-    for(int i = 1; i <= num_variables; i++){
+    std::vector<int> permutation(num_variables+1, -1);
+    for(int i = 0; i <= num_variables; i++){
         int perm_pos = Cudd_ReadPerm(m_bdd_manager, i);
-        permutation[i] = perm_pos;
+        if (perm_pos == -1) { // variable does not exist
+            continue;
+        }
+        permutation[perm_pos] = i;
     }
+
+    return permutation;
 }
+
+// TODO: find out what swapvars, bddpermute does
+// what is a variable map?

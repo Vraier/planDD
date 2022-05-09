@@ -33,7 +33,7 @@ typedef std::vector<int> clause;
 
 // definition of clause, tag, timestep
 typedef std::tuple<clause, clause_tag, int> tagged_clause;
-// index of the variable into planning problem, timestep, value (in case of planning variable)
+// index of the variable into planning problem, tag, timestep, value (in case of planning variable)
 typedef std::tuple<int, variable_tag, int, int> tagged_variable;
 
 class cnf {
@@ -52,7 +52,7 @@ class cnf {
     std::map<tagged_variable, int> m_variable_map;
     std::map<int, tagged_variable> m_inverse_variable_map;
 
-   public:
+   public:    
     cnf(int num_timesteps);
     ~cnf();
 
