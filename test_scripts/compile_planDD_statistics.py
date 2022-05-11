@@ -37,6 +37,9 @@ def print_information_from_dicts(all_dics):
 
 
 
-#write_all_information_to_file("../test_output/easy_optimal_downward_test", "../test_output/easy_optimal_downward_test.pkl")
-all_dics = read_all_information_from_file("../test_output/easy_optimal_downward_test.pkl")
-print_information_from_dicts(all_dics)
+#write_all_information_to_file("../test_output/easy_optimal_planDD_test", "../test_output/easy_optimal_planDD_test.pkl")
+#downward_write_all_information_to_file("easy_optimal_downward_test", "../test_output/easy_optimal_downward_test.pkl")
+planDD_dics = read_all_information_from_file("../test_output/easy_optimal_planDD_test.pkl")
+print_information_from_dicts(planDD_dics)
+downward_dics = read_all_information_from_file("../test_output/easy_optimal_downward_test.pkl")
+print(downward_dics)

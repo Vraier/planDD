@@ -176,7 +176,7 @@ def get_percentage_of_conjoined_clauses_from_info(info):
 
 # TODO: fix the filenames
 # extracts information from the output of a fast_downward run on all benchmarks         
-def downward_write_all_information_to_file(output_file="../test_output/easy_optimal_downward_test.pkl", suite_folder="easy_optimal_downward_test"):
+def downward_write_all_information_to_file(suite_folder="easy_optimal_downward_test", output_file="../test_output/easy_optimal_downward_test.pkl"):
     problem_information = []
     for problem in planDD_test_util_problems.list_all_opt_strips_problems():
         output_folder = planDD_test_util_commandfile.generate_output_directory_name(suite_folder, problem)
