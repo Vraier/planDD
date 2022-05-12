@@ -18,7 +18,7 @@ enum clause_tag {
     precondition,   // igmx:cp -> i0gn m0m1..mn c0p0 c1p1..cnpn
     effect,
     changing_atoms,
-    none,
+    none_clause,
 };
 
 enum variable_tag {
@@ -26,7 +26,8 @@ enum variable_tag {
     plan_action,
     h_amost_variable,
     h_amost_operator,
-    h_amost_mutex
+    h_amost_mutex,
+    none_variable,
 };
 
 typedef std::vector<int> clause;
@@ -48,11 +49,12 @@ class cnf {
     std::vector<clause_tag> m_tags;
     std::vector<int> m_timesteps;
 
+   public:   
     // maps information about planning variable to variable index of cnf formula
+    // are used by the variable ordering algorithm
     std::map<tagged_variable, int> m_variable_map;
     std::map<int, tagged_variable> m_inverse_variable_map;
 
-   public:    
     cnf(int num_timesteps);
     ~cnf();
 
@@ -67,12 +69,13 @@ class cnf {
     int get_variable_index(int var_index, variable_tag tag, int timestep, int value);
     // This method is used for planning operators and helper variables: var_index, tag, timestep
     int get_variable_index(int var_index, variable_tag tag, int timestep);
-    // invers of the methos above
-    tagged_variable get_planning_info_for_variable(int index);
 
-    // smae as above but does not add if variable does not exists. Returns -1 in this case
+    // same as above but does not add if variable does not exists. Returns -1 in this case
     int get_variable_index_without_adding(int var_index, variable_tag tag, int timestep, int value);
     int get_variable_index_without_adding(int var_index, variable_tag tag, int timestep);
+
+    // inverse of the methods above
+    tagged_variable get_planning_info_for_variable(int index);
 
     // returns the ith clause, tar, timestep in the order they were added
     clause get_clause(int i);

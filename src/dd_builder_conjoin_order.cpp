@@ -17,7 +17,7 @@ bool is_valid_conjoin_order_string(std::string build_order) {
     std::string standart_permutation = "ixg:rtyumpec";
     if (!std::is_permutation(build_order.begin(), build_order.end(), standart_permutation.begin(),
                              standart_permutation.end())) {
-        LOG_MESSAGE(log_level::warning) << "Build order has to be a permutation of 'ixg:rtyumpec' but is "
+        LOG_MESSAGE(log_level::error) << "Build order has to be a permutation of " + standart_permutation + " but is "
                                         << build_order;
         return false;
     }
@@ -31,23 +31,23 @@ bool is_valid_conjoin_order_string(std::string build_order) {
     // check if first part contains x, i and g
     if (disjoin_order.find("x") == std::string::npos || disjoin_order.find("i") == std::string::npos ||
         disjoin_order.find("g") == std::string::npos) {
-        LOG_MESSAGE(log_level::warning) << "First part of order has to contain i, g and x but is " << disjoin_order;
+        LOG_MESSAGE(log_level::error) << "First part of order has to contain i, g and x but is " << disjoin_order;
         return false;
     }
 
     return true;
 }
 
-std::map<clause_tag, std::vector<std::vector<clause>>> categorize_clauses(cnf &cnf) {
+categorized_clauses categorize_clauses(cnf &cnf) {
     LOG_MESSAGE(log_level::info) << "Starting to categorize clauses";
 
     // initilize the timestep buckets for the map
-    std::map<clause_tag, std::vector<std::vector<clause>>> tagged_clauses;
-    for (int tag_int = initial_state; tag_int <= none; tag_int++) {
+    categorized_clauses tagged_clauses;
+    for (int tag_int = initial_state; tag_int <= none_clause; tag_int++) {
         clause_tag t = static_cast<clause_tag>(tag_int);
 
         // we only need one timestep
-        if (t == initial_state || t == goal || t == none) {
+        if (t == initial_state || t == goal || t == none_clause) {
             tagged_clauses[t] = std::vector<std::vector<clause>>(1);
         }
         // we need one bucket for each timestep
@@ -61,7 +61,7 @@ std::map<clause_tag, std::vector<std::vector<clause>>> categorize_clauses(cnf &c
         clause_tag t = cnf.get_tag(i);
         if (t == initial_state || t == goal) {
             tagged_clauses[t][0].push_back(cnf.get_clause(i));
-        } else if (t == none) {
+        } else if (t == none_clause) {
             LOG_MESSAGE(log_level::error) << "Unknown tag during dd building: " << t;
             return std::map<clause_tag, std::vector<std::vector<clause>>>();
         } else {
@@ -70,11 +70,11 @@ std::map<clause_tag, std::vector<std::vector<clause>>> categorize_clauses(cnf &c
     }
 
     // print info about how many clauses each tag has
-    for (int tag_int = initial_state; tag_int <= none; tag_int++) {
+    for (int tag_int = initial_state; tag_int <= none_clause; tag_int++) {
         clause_tag t = static_cast<clause_tag>(tag_int);
 
         // we only need one timestep
-        if (t == initial_state || t == goal || t == none) {
+        if (t == initial_state || t == goal || t == none_clause) {
             LOG_MESSAGE(log_level::info) << "Categorized " << tagged_clauses[t][0].size() << " clauses of tag " << t;
         }
         // we need one bucket for each timestep
@@ -90,8 +90,10 @@ std::map<clause_tag, std::vector<std::vector<clause>>> categorize_clauses(cnf &c
     return tagged_clauses;
 }
 
-std::vector<clause> sort_clauses(cnf &cnf, std::string build_order,
-                                 std::map<clause_tag, std::vector<std::vector<clause>>> &tagged_clauses) {
+std::vector<clause> order_clauses(cnf &cnf, std::string build_order) {
+    // categorize the clauses
+    categorized_clauses tagged_clauses = categorize_clauses(cnf);
+
     // contains the result at the end
     std::vector<clause> interleved_clauses;
     std::vector<clause> total_clauses;
