@@ -33,9 +33,8 @@ class bdd_manager : public virtual dd_buildable {
 
 
     void print_bdd(int num_variables);
+    virtual std::string get_short_statistics();
     void write_bdd_to_dot_file(std::string filename);
-    //DdNode *construct_bdd_from_cnf(std::vector<std::vector<int>> &cnf);
-    //DdNode *construct_bdd_from_cnf_binary(std::vector<std::vector<int>> &cnf);
 
     virtual void conjoin_clause(std::vector<int> &clause);
 };

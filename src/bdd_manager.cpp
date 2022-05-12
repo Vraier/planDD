@@ -40,6 +40,19 @@ void bdd_manager::print_bdd(int num_variables) {
     // Cudd_PrintSummary(m_bdd_manager, m_root_node, num_variables, 2);
 }
 
+std::string bdd_manager::get_short_statistics(){
+    long num_nodes = Cudd_ReadNodeCount(m_bdd_manager);
+    long num_peak_nodes = Cudd_ReadPeakNodeCount(m_bdd_manager);
+    long num_reorderings = Cudd_ReadReorderings(m_bdd_manager);
+    long num_mem_bytes = Cudd_ReadMemoryInUse(m_bdd_manager);
+    std::string result = "CUDD stats: #nodes: " + std::to_string(num_nodes)
+                                    + " #peak nodes: " + std::to_string(num_peak_nodes)
+                                    + " #reorderings: " + std::to_string(num_reorderings)
+                                    + " #memory bytes: " + std::to_string(num_mem_bytes);
+
+    return result;
+}
+
 // Writes a dot file representing the argument DDs
 void bdd_manager::write_bdd_to_dot_file(std::string filename) {
     DdNode *add = Cudd_BddToAdd(m_bdd_manager, m_root_node);

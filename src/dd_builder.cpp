@@ -15,11 +15,8 @@ void construct_dd_linear_disjoint(dd_buildable &dd, cnf &cnf, std::string build_
         return;
     }
 
-    // categorize clauses
-    std::map<clause_tag, std::vector<std::vector<clause>>> tagged_clauses = conjoin_order::categorize_clauses(cnf);
-
     // sort the clauses (disjoint and interleaved)
-    std::vector<clause> sorted_clauses = conjoin_order::sort_clauses(cnf, build_order, tagged_clauses);
+    std::vector<clause> sorted_clauses = conjoin_order::order_clauses(cnf, build_order);
 
     // this reverses the order of the clauses. It allows the variables with the highes timesteps to be conjoined first
     if (reversed) {
@@ -36,7 +33,7 @@ void construct_dd_linear_disjoint(dd_buildable &dd, cnf &cnf, std::string build_
         int new_percent = (100*(i+1))/sorted_clauses.size();
         if (new_percent > percent) {
             percent = new_percent;
-            LOG_MESSAGE(log_level::info) << "Conjoined " << percent << "% of all clauses";
+            LOG_MESSAGE(log_level::info) << "Conjoined " << percent << "% of all clauses. " + dd.get_short_statistics();
         }
     }
 

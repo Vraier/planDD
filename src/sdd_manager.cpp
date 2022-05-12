@@ -77,3 +77,7 @@ void sdd_manager::print_sdd(){
 
     sdd_manager_print(m_sdd_manager);
 }
+
+std::string sdd_manager::get_short_statistics(){
+    return "";
+}

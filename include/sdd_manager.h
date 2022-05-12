@@ -23,6 +23,7 @@ class sdd_manager : public virtual dd_buildable  {
     ~sdd_manager();
 
     void print_sdd();
+    virtual std::string get_short_statistics();
     // void write_bdd_to_dot_file(DdNode *bdd, std::string filename);
     SddNode *construct_bdd_from_cnf(std::vector<std::vector<int>> &cnf);
     SddNode *construct_bdd_from_cnf_binary(std::vector<std::vector<int>> &cnf);
