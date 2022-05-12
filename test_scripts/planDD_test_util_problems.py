@@ -1,6 +1,7 @@
 import os
 import suites
 import extract_planDD_information
+import planDD_test_util_general as util
 
 PATH_TO_BENCHMARKS = "../../downward-benchmarks/"
 
@@ -21,13 +22,11 @@ def list_all_opt_strips_problems():
                 })
     return all_problems
 
-# TODO: extend it to also include problems with low number of vars/clauses
+# TODO: Find a good number
+# TODO: check if it works with the non unit cost porblems (not more than 120 problems)
 # returns only the problems that were solved during the benchmark generation run
-def list_all_easy_opt_strips_problems():
-    def get_domain_desc_from_prob(problem):
-        "".join(x for x in problem["d_name"]+problem["p_name"] if x.isalnum())
-        
-    planDD_dics = extract_planDD_information.read_all_information_from_file("../test_output/easy_optimal_downward_test.pkl")
+def list_all_easy_opt_strips_problems():  
+    planDD_dics = extract_planDD_information.read_all_information_from_file("../test_output/easy_optimal_planDD_test.pkl")
     downward_dics = extract_planDD_information.downward_read_all_information_from_file()
     all_problems = list_all_opt_strips_problems()
     
@@ -35,20 +34,33 @@ def list_all_easy_opt_strips_problems():
     planDD_domain_to_dic = {}
     downward_domain_to_dic = {}
     for d in planDD_dics:
-        if d["has_finished"]:
-            planDD_domain_to_dic[d["domain_desc"]] = d
+        planDD_domain_to_dic[d["domain_desc"]] = d
     for d in downward_dics:
-        if d["has_finished"]:
-            downward_domain_to_dic[d["domain_desc"]] = d
+        downward_domain_to_dic[d["domain_desc"]] = d
+
+    # planDD solved it or it has only few clauses (20000) or few (1000) variables
+    def is_easy_problem(domain_desc):
+        if not domain_desc in planDD_domain_to_dic: # this is the case if the problem was not finished by downward
+            return False
+        if planDD_domain_to_dic[domain_desc]["error_while_encoding"]:
+            return False
+        if planDD_domain_to_dic[domain_desc]["has_finished"]:
+            return True
+        if planDD_domain_to_dic[domain_desc]["has_finished_cnf"] and planDD_domain_to_dic[domain_desc]["constructed_clauses"] < 20000:
+            return True
+        if planDD_domain_to_dic[domain_desc]["has_finished_cnf"] and planDD_domain_to_dic[domain_desc]["constructed_variables"] < 1000:
+            return True
+        return False
 
     # only select problems that were solved by planDD
     # also append the length of an optimal plan
     filtered_problems = []
     for p in all_problems:
         # check if the planDD approach solved it before
-        if get_domain_desc_from_prob(p) in planDD_domain_to_dic:
+        problem_domain_desc = util.get_sanitized_domain_description(p["d_name"], p["p_name"])
+        if is_easy_problem(problem_domain_desc):
             prob_with_opt_length = dict(p)
-            prob_with_opt_length["plan_length"] = downward_domain_to_dic[get_domain_desc_from_prob(p)]["path_length"]
+            prob_with_opt_length["plan_length"] = downward_domain_to_dic[problem_domain_desc]["path_length"]
             filtered_problems.append(prob_with_opt_length)
             
     return filtered_problems

@@ -1,68 +1,12 @@
 from matplotlib import pyplot as plt
-from os.path import isfile, join
 from functools import cmp_to_key
+import extract_planDD_information as data
 
 import os
 import re
 
 TIMEOUT = 600
 NUM_CLAUSES = 9396 
-
-
-# time string is in format hh:mm:ss,sssss
-def convert_time_string_to_float(time_string):
-    return sum([a*b for a,b in zip([3600, 60, 1], map(float, time_string.split(":")))])
-
-# returns a list of times. At each timepoint a ne conjon operation was finished
-def extract_conjoin_progress(file_path):
-    conjoin_times = []
-    with open(file_path, "r") as f:
-        lines = f.readlines()
-        for l in lines:
-            p = re.compile("\[(.*)\]\[info\].* Conjoined (.*) clauses")
-            if p.match(l):
-                time_string = p.search(l).group(1)
-                time = convert_time_string_to_float(time_string)
-                conjoin_times.append(time)
-    return conjoin_times
-
-# returns wether the test_run finished building the DD
-def extract_has_finished(file_path):
-    with open(file_path, "r") as f:
-        lines = f.readlines()
-        for l in lines:
-            p = re.compile("\[.*\]\[info\].* Finished constructing DD.*")
-            if p.match(l):
-                return True
-    return False
-
-# returns the time at which the DD was build
-def extract_finish_time(file_path):
-    with open(file_path, "r") as f:
-        lines = f.readlines()
-        for l in lines:
-            p = re.compile("\[(.*)\]\[info\].* Finished constructing DD.*")
-            if p.match(l):
-                time_string = p.search(l).group(1)
-                return convert_time_string_to_float(time_string)
-    return TIMEOUT
-
-# returns the conjoin order that was used during construction
-def extract_order(file_path):
-    with open(file_path, "r") as f:
-        lines = f.readlines()
-        for l in lines:
-            p = re.compile("\[.*\]\[info\].* Construction DD with the following .*order: (.*)")
-            if p.match(l):
-                order_string = p.search(l).group(1)
-                return order_string
-    print("[Warning] Found no order")
-    return ""
-
-# lists all "test_run" files in a folder
-def get_all_test_files(folder_path):
-    return [join(folder_path, f) for f in os.listdir(folder_path) if isfile(join(folder_path, f)) and "test_run" in f]
-
 
 def plot_conjoin_times(folder_path):
     all_files = sorted(get_all_test_files(folder_path))
@@ -77,6 +21,20 @@ def plot_conjoin_times(folder_path):
         plt.plot(times, y_axis)
     
     plt.show()
+
+def plot_num_clauses(dics):
+    x_axis = []
+    y_axis = []
+    for d in dics:
+        x_axis.append(d["constructed_clauses"])
+    x_axis = sorted(x_axis)
+    y_axis = list(range(len(x_axis)))
+
+    print(len(x_axis))
+    print(x_axis)
+    plt.plot(x_axis)
+    plt.show()
+
 
 
 def custom_triple_sort(a, b):
@@ -160,7 +118,7 @@ def find_all_finished_orders(folder_path):
 
 #print_all_orders_sorted("../test_output/simple_orders_bdd")
 #print_all_orders_sorted("../test_output/simple_orders_sdd")
-print_all_orders_sorted("../test_output/interleaved_bdd")
+#print_all_orders_sorted("../test_output/interleaved_bdd")
 #print(find_all_finished_orders("../test_output/interleaved_bdd"))
 
 #print(get_information_about_order_performance("../test_output/simple_orders_sdd"))
@@ -168,3 +126,7 @@ print_all_orders_sorted("../test_output/interleaved_bdd")
 #print_comparison_of_two_order_runs("../test_output/simple_orders_bdd", "../test_output/simple_orders_sdd")
 #print_comparison_of_two_order_runs("../test_output/interleaved_bdd", "../test_output/include_mutex")
 ##print_comparison_of_two_order_runs("../test_output/interleaved_bdd", "../test_output/reverse_order")
+
+
+planDD_dics = data.read_all_information_from_file("../test_output/easy_optimal_planDD_test.pkl")
+plot_num_clauses(planDD_dics)

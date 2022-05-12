@@ -1,4 +1,5 @@
 import os
+import planDD_test_util_general as util
 
 PATH_TO_PLANDD = "../main"
 PATH_TO_DOWNWARD = "../../downward/fast-downward.py"
@@ -51,8 +52,7 @@ def generate_command_calls(list_of_problems, list_of_arguments):
 # input format: (domain, problem, problem_path)
 # return output_path
 def generate_output_directory_name(suite_name, problem):
-    unsanitized_name = problem["d_name"] + problem["p_name"]
-    sanitized_name = "".join(x for x in unsanitized_name if x.isalnum())
+    sanitized_name = util.get_sanitized_domain_description(problem["d_name"], problem["p_name"])
     test_instance_path = os.path.join("../test_output/", suite_name, sanitized_name)
         
     return test_instance_path
@@ -76,7 +76,7 @@ def construct_complete_call(output_folder, problem, planDD_argument_map, downwar
     
     # insert new information into dictionaries
     new_downward_dic = dict(downward_argument_map)
-    new_downward_dic["$problem_path"] = problem["path"]
+    new_downward_dic["$problem_path"] = os.path.join("../../", problem["path"])
     new_planDD_dic = dict(planDD_argument_map)
     new_planDD_dic["$timesteps"] = problem["plan_length"]
     downward_translate_command = apply_argument_map_to_commandline_string(STANDART_DOWNWARD_COMMANDLINE_STRING, new_downward_dic)

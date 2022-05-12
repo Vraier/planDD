@@ -3,9 +3,10 @@ import os
 import pickle
 import planDD_test_util_problems
 import planDD_test_util_commandfile
+import planDD_test_util_general as util
+
 
 # extracts all the possible information from an output file into a dict
-# domain_desc: describes which domain and tescase is used (name of the folder used to hold the testcase)
 def compile_information_about_planDD_into_dic(domain_desc, file_path):
     info = {}
     info["domain_desc"] = domain_desc
@@ -16,7 +17,8 @@ def compile_information_about_planDD_into_dic(domain_desc, file_path):
     info["config"] = extract_config(file_path)
     info["cudd_config"] = extract_CUDD_config(file_path)
     info["constructed_clauses"] = extract_total_constructed_clauses(file_path)
-    info["conjoined_clauses"] = extract_conjoined_clauses(file_path)
+    info["constructed_variables"] = extract_constructed_variables(file_path)
+    info["percent_conjoined_clauses"] = extract_percent_of_conjoined_clauses(file_path)
 
     return info
 
@@ -104,10 +106,18 @@ def extract_total_constructed_clauses(file_path):
                 return int(p.search(line).group(1))
     return -1
 
-def extract_conjoined_clauses(file_path):
+def extract_constructed_variables(file_path):
+    with open(file_path, "r") as f:
+        for line in f:
+            p = re.compile("\[.*\]\[info\] Constructed a total of (.*) variables \(with helper\).*")
+            if p.match(line):
+                return int(p.search(line).group(1))
+    return -1
+
+def extract_percent_of_conjoined_clauses(file_path):
     with open(file_path, "r") as f:
         content = str(f.read())
-        lst = re.findall(r"\[.*\]\[info\] Conjoined (.*) clauses.*", content)
+        lst = re.findall(r"\[.*\]\[info\] Conjoined (.*)% of all clauses.*", content)
         if(len(lst) != 0):
             return int(lst[-1])
     return -1
@@ -169,13 +179,8 @@ def get_number_of_nodes_from_bdd_from_info(info):
             return int(p.search(line).group(1))
     return -1
 
-def get_percentage_of_conjoined_clauses_from_info(info):
-    constructed_clauses = info["constructed_clauses"]
-    conjoined_clauses = info["conjoined_clauses"]
-    return 100 * conjoined_clauses/constructed_clauses
-
-# TODO: fix the filenames
-# extracts information from the output of a fast_downward run on all benchmarks         
+# extracts information from the output of a fast_downward run on all benchmarks   
+# domain_desc: describes which domain and testcase is used (name of the folder used to hold the testcase)      
 def downward_write_all_information_to_file(suite_folder="easy_optimal_downward_test", output_file="../test_output/easy_optimal_downward_test.pkl"):
     problem_information = []
     for problem in planDD_test_util_problems.list_all_opt_strips_problems():
@@ -187,8 +192,7 @@ def downward_write_all_information_to_file(suite_folder="easy_optimal_downward_t
             continue
         
         info = {}
-        info["domain"] = problem["d_name"]
-        info["problem"] = problem["p_name"]
+        info["domain_desc"] = util.get_sanitized_domain_description(problem["d_name"], problem["p_name"])
         info["problem_path"] = problem["path"]
         info["output_path"] = output_path
 

@@ -11,7 +11,7 @@ standart_planDD_argument_map = {
 }
 
 standart_downward_argument_map = {
-    "$downward_timeout" : "80s",
+    "$downward_timeout" : "60s",
     "$problem_path" : "prob.pddl"
 }
 
