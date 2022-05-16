@@ -25,7 +25,7 @@ void option_parser::parse_command_line(int argc, char *argv[]) {
         ("hack_debug", po::bool_switch(&m_values.hack_debug)->default_value(false),
          "Sandbox hack mode for developing purposes")  //
         // DD building parameters
-        ("timesteps", po::value<int>(&m_values.timesteps)->default_value(11),
+        ("timesteps", po::value<int>(&m_values.timesteps),
          "The amount of timsteps represented by the cnf formula")  //
         ("include_mutex", po::bool_switch(&m_values.include_mutex)->default_value(false),
          "If this flag is set, the cnf encoder will include the mutexes from the sas problem in its formula")  //
