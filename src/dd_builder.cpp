@@ -8,7 +8,7 @@ using namespace planning_cnf;
 namespace dd_builder {
 
 void construct_dd_linear_disjoint(dd_buildable &dd, cnf &cnf, std::string build_order, bool reversed) {
-    LOG_MESSAGE(log_level::info) << "Construction DD with the following disjoint_order: " << build_order;
+    LOG_MESSAGE(log_level::info) << "Constructing DD with the following disjoint_order: " << build_order;
 
     if (!conjoin_order::is_valid_conjoin_order_string(build_order)) {
         LOG_MESSAGE(log_level::error) << "Can't build the following order " << build_order;

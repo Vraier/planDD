@@ -10,7 +10,7 @@
 namespace variable_order {
 
 // each tag represents a bucket, each tag bucket is divided into subbuckets for each timesetep
-// the subbuckets are sorted by the indize of the variable in the planning context (nad then value)
+// the subbuckets are sorted by the indize of the variable in the planning context (and then value)
 typedef std::map<planning_cnf::variable_tag, std::vector<std::vector<int>>> categorized_variables;
 
 

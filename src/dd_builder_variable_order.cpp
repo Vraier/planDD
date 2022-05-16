@@ -69,6 +69,7 @@ std::vector<int> order_variables(planning_cnf::cnf &cnf, std::string build_order
     // contains the result at the end
     std::vector<int> interleved_variables;
     std::vector<int> total_variables;
+    total_variables.push_back(0); // the 0th variable does not exist
 
     // split the order into first and second part (in a really complicated manner)
     std::stringstream ss(build_order);
@@ -111,7 +112,7 @@ std::vector<int> order_variables(planning_cnf::cnf &cnf, std::string build_order
         inverted_vector[total_variables[i]] = i;
     }
     
-    LOG_MESSAGE(log_level::info) << "Sorted a total of " << inverted_vector.size() << " clauses";
+    LOG_MESSAGE(log_level::info) << "Sorted a total of " << inverted_vector.size()-1 << " variables";
     return inverted_vector;
 }
 

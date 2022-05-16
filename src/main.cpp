@@ -6,6 +6,7 @@
 
 #include "cnf_encoder.h"
 #include "dd_builder.h"
+#include "dd_builder_variable_order.h"
 #include "logging.h"
 #include "options.h"
 #include "sas_parser.h"
@@ -27,8 +28,6 @@ int main(int argc, char *argv[]) {
 
     if (options.m_values.hack_debug){
         LOG_MESSAGE(log_level::info) << "You unlocked full control. Good luck modifying the source code";
-
-        bdd_manager builder;
 
         /*
         sas_parser parser(options.m_values.sas_file);
@@ -61,8 +60,9 @@ int main(int argc, char *argv[]) {
 
         std::tuple<int, int, std::vector<planning_cnf::clause>> cnf_data = planning_cnf::cnf::parse_cnf_file_to_clauses(options.m_values.cnf_file);
         int num_variables = std::get<0>(cnf_data);
-        int num_clauses = std::get<1>(cnf_data);
+        //int num_clauses = std::get<1>(cnf_data);
         std::vector<planning_cnf::clause> clauses = std::get<2>(cnf_data);
+        bdd_manager builder(num_variables);
 
         for(planning_cnf::clause c: clauses){
             builder.conjoin_clause(c);
@@ -111,7 +111,9 @@ int main(int argc, char *argv[]) {
         cnf_encoder encoder(options.m_values, parser.m_sas_problem);
         planning_cnf::cnf clauses = encoder.encode_cnf(options.m_values.timesteps);
 
-        bdd_manager builder;
+        std::vector<int> var_order = variable_order::order_variables(clauses, options.m_values.variable_order);
+
+        bdd_manager builder(clauses.get_num_variables(), var_order);
         dd_builder::construct_dd_linear_disjoint(builder, clauses, options.m_values.build_order, options.m_values.reverse_order);
         builder.print_bdd(clauses.get_num_variables());
 

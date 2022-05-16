@@ -2,13 +2,32 @@
 
 #include "bdd_manager.h"
 
-bdd_manager::bdd_manager() {
+bdd_manager::bdd_manager(int num_variables) {
     m_bdd_manager = Cudd_Init(0, 0, CUDD_UNIQUE_SLOTS, CUDD_CACHE_SLOTS, 0);
     Cudd_AutodynEnable(m_bdd_manager, CUDD_REORDER_SIFT);
     //Cudd_SetMaxCacheHard(m_bdd_manager, 62500000);
 
     m_root_node = Cudd_ReadOne(m_bdd_manager);
     Cudd_Ref(m_root_node);
+
+    // build identity for inital variable order
+    m_num_variables = num_variables;
+    m_initial_variable_order = std::vector<int>(num_variables+1);
+    for(int i = 0; i <= m_num_variables; i++){
+        m_initial_variable_order[i] = i;
+    }
+}
+
+bdd_manager::bdd_manager(int num_variables, std::vector<int> &initial_variable_order) {
+    m_bdd_manager = Cudd_Init(0, 0, CUDD_UNIQUE_SLOTS, CUDD_CACHE_SLOTS, 0);
+    Cudd_AutodynEnable(m_bdd_manager, CUDD_REORDER_SIFT);
+    //Cudd_SetMaxCacheHard(m_bdd_manager, 62500000);
+
+    m_root_node = Cudd_ReadOne(m_bdd_manager);
+    Cudd_Ref(m_root_node);
+
+    m_num_variables = num_variables;
+    m_initial_variable_order = initial_variable_order;
 }
 
 bdd_manager::~bdd_manager() { 
@@ -16,7 +35,7 @@ bdd_manager::~bdd_manager() {
 }
 
 void bdd_manager::reduce_heap(){
-    LOG_MESSAGE(log_level::info) << "Start reducing heap";
+    LOG_MESSAGE(log_level::info) << "Start reducing heap manually";
     Cudd_ReduceHeap(m_bdd_manager, CUDD_REORDER_SIFT_CONVERGE, 1);
     LOG_MESSAGE(log_level::info) << "Finished reducing heap";
 }
@@ -167,10 +186,10 @@ void bdd_manager::conjoin_clause(std::vector<int> &clause) {
     Cudd_Ref(disjunction);
 
     for (int j = 0; j < clause.size(); j++) {
-        int literal = clause[j];
-        var = Cudd_bddIthVar(m_bdd_manager, std::abs(literal));
+        int unpermuted_literal = clause[j];
+        var = Cudd_bddIthVar(m_bdd_manager, m_initial_variable_order[std::abs(unpermuted_literal)]);
 
-        if (literal > 0) {
+        if (unpermuted_literal > 0) {
             tmp = Cudd_bddOr(m_bdd_manager, var, disjunction);
         } else {
             tmp = Cudd_bddOr(m_bdd_manager, Cudd_Not(var), disjunction);

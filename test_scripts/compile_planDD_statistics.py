@@ -10,7 +10,7 @@ def print_big_information_from_dicts(all_dics):
     solved_dics = [d for d in all_dics if not d["error_while_encoding"] and d["has_finished_cnf"] and d["has_finished"]]
 
     print("Compiling Information: ########################################################")
-    #print(sorted([i["domain_desc"] for i in solved_dics]))
+    print("Conjoin Order", get_conjoin_order_from_info(all_dics[0]))
 
     print("#Total", len(all_dics))
     print("#Non unit cost", len(non_unit_length_dics))
@@ -78,3 +78,6 @@ for s in suites:
 
 for (num_solved, info_text) in sorted(compiled_infos):
     print(info_text)
+
+planDD_dics = read_all_information_from_file("../test_output/easy_optimal_planDD_test.pkl")
+print_big_information_from_dicts(planDD_dics)

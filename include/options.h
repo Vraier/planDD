@@ -10,7 +10,7 @@ struct option_values {
     // Program modes
     bool encode_cnf, build_bdd, build_sdd, single_minisat, count_minisat, hack_debug;
     // DD building parameters
-    std::string build_order;
+    std::string build_order, variable_order;
     bool reverse_order;
     bool include_mutex, use_ladder_encoding;
     int timesteps;
