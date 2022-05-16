@@ -33,6 +33,11 @@ all:
 build: $(CPP_FILES)
 	$(CC) $(CFLAGS) $(INCLUDE_ALL) $(CPP_FILES) $(LIB_CUDD) $(LIB_SDD) $(LIB_COMMON) -o $(TARGET)
 
+variable_order:
+	./$(TARGET) --cnf_file problem.cnf --hack_debug
+	dot -Tpng befor_reorder.dot -o befor_reorder.png
+	dot -Tpng after_reorder.dot -o after_reorder.png
+
 easygripper:
 	../downward/fast-downward.py --sas-file easygripper.sas --translate ../downward-benchmarks/gripper-easy/prob01.pddl
 	./$(TARGET) --sas_file easygripper.sas --build_bdd --timesteps 5
