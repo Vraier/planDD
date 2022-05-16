@@ -12,7 +12,7 @@ struct option_values {
     // DD building parameters
     std::string build_order, variable_order;
     bool reverse_order;
-    bool include_mutex, use_ladder_encoding;
+    bool include_mutex, use_ladder_encoding, goal_variables_first, initial_state_variables_first;
     int timesteps;
 };
 

@@ -27,10 +27,11 @@ void option_parser::parse_command_line(int argc, char *argv[]) {
         // DD building parameters
         ("timesteps", po::value<int>(&m_values.timesteps),
          "The amount of timsteps represented by the cnf formula")  //
+        // what and how to conjoin clauses?
         ("include_mutex", po::bool_switch(&m_values.include_mutex)->default_value(false),
          "If this flag is set, the cnf encoder will include the mutexes from the sas problem in its formula")  //
         ("use_ladder_encoding", po::bool_switch(&m_values.use_ladder_encoding)->default_value(false),
-         "Uses the ladder encoding for at most one constraints") //
+         "Uses the ladder encoding for at most one constraints")  //
         ("build_order", po::value<std::string>(&m_values.build_order)->default_value("grtyumix:pec"),
          "Determins the order of conjoins when building a dd linearily and not interleaved. Must be a permutation of "
          "the string impgc; i: initial_state, rtyum: mutex, pe: precondition/effect, g: goal, c: changing atoms "
@@ -38,9 +39,15 @@ void option_parser::parse_command_line(int argc, char *argv[]) {
         ("reverse_order", po::bool_switch(&m_values.reverse_order)->default_value(false),
          "Reverses the order of the conjoin operations. This has the effect that the conjoin order gets reversed but "
          "also clauses with higher timesteps get conjoined first.")  //
+        // variable ordering
         ("variable_order", po::value<std::string>(&m_values.variable_order)->default_value("vox:hjk"),
          "Determins the initial variable order for the dd building. "
-         "v: variables, o: operators, h: helper amost variable, j: helper amost operator, k: helper amost mutex"); // 
+         "v: variables, o: operators, h: helper amost variable, j: helper amost operator, k: helper amost mutex")  //
+        ("goal_variables_first", po::bool_switch(&m_values.goal_variables_first)->default_value(false),
+         "If this flag is set, variables in goal clauses will be moved to the front of the variable order")  //
+        ("initial_state_variables_first",
+         po::bool_switch(&m_values.initial_state_variables_first)->default_value(false),
+         "If this flag is set, variables in initial state clauses will be moved to the front of the variable order");  //
 
     po::store(po::parse_command_line(argc, argv, m_option_desc), m_argument_map);
     po::notify(m_argument_map);
@@ -98,7 +105,7 @@ void option_parser::print_variable_map() {
         } else if (((boost::any)it->second.value()).type() == typeid(double)) {
             std::cout << m_argument_map[it->first].as<double>() << std::endl;
         } else if (is_char) {
-            std::cout << m_argument_map[it->first].as<const char * >() << std::endl;
+            std::cout << m_argument_map[it->first].as<const char *>() << std::endl;
         } else if (is_str) {
             std::string temp = m_argument_map[it->first].as<std::string>();
             if (temp.size()) {
@@ -106,12 +113,11 @@ void option_parser::print_variable_map() {
             } else {
                 std::cout << "true" << std::endl;
             }
-        } else { // Assumes that the only remainder is vector<string>
+        } else {  // Assumes that the only remainder is vector<string>
             try {
                 std::vector<std::string> vect = m_argument_map[it->first].as<std::vector<std::string> >();
                 uint i = 0;
-                for (std::vector<std::string>::iterator oit=vect.begin();
-                     oit != vect.end(); oit++, ++i) {
+                for (std::vector<std::string>::iterator oit = vect.begin(); oit != vect.end(); oit++, ++i) {
                     std::cout << "\r> " << it->first << "[" << i << "]=" << (*oit) << std::endl;
                 }
             } catch (const boost::bad_any_cast &) {

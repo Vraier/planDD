@@ -26,7 +26,7 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
-    if (options.m_values.hack_debug){
+    if (options.m_values.hack_debug) {
         LOG_MESSAGE(log_level::info) << "You unlocked full control. Good luck modifying the source code";
 
         /*
@@ -40,7 +40,8 @@ int main(int argc, char *argv[]) {
         planning_cnf::cnf clauses = encoder.encode_cnf(options.m_values.timesteps);
 
         bdd_manager builder;
-        dd_builder::construct_dd_linear_disjoint(builder, clauses, options.m_values.build_order, options.m_values.reverse_order);
+        dd_builder::construct_dd_linear_disjoint(builder, clauses, options.m_values.build_order,
+        options.m_values.reverse_order);
 
         for(int i = 0; i < 1; i++){
             std::cout << i;
@@ -55,32 +56,33 @@ int main(int argc, char *argv[]) {
 
         builder.print_bdd(clauses.get_num_variables());
 
-        dd_builder::construct_dd_linear_disjoint(builder, clauses, options.m_values.build_order, options.m_values.reverse_order);
+        dd_builder::construct_dd_linear_disjoint(builder, clauses, options.m_values.build_order,
+        options.m_values.reverse_order);
         */
 
-        std::tuple<int, int, std::vector<planning_cnf::clause>> cnf_data = planning_cnf::cnf::parse_cnf_file_to_clauses(options.m_values.cnf_file);
+        std::tuple<int, int, std::vector<planning_cnf::clause>> cnf_data =
+            planning_cnf::cnf::parse_cnf_file_to_clauses(options.m_values.cnf_file);
         int num_variables = std::get<0>(cnf_data);
-        //int num_clauses = std::get<1>(cnf_data);
+        // int num_clauses = std::get<1>(cnf_data);
         std::vector<planning_cnf::clause> clauses = std::get<2>(cnf_data);
         bdd_manager builder(num_variables);
 
-        for(planning_cnf::clause c: clauses){
+        for (planning_cnf::clause c : clauses) {
             builder.conjoin_clause(c);
         }
-        
+
         std::vector<int> var_order = builder.get_variable_order(num_variables);
-        for (int i = 0; i < var_order.size(); i++){
+        for (int i = 0; i < var_order.size(); i++) {
             std::cout << "At index " << i << ": " << var_order[i] << std::endl;
         }
 
         builder.write_bdd_to_dot_file("befor_reorder.dot");
 
-
         std::cout << "Order after shifting" << std::endl;
 
         builder.reduce_heap();
         var_order = builder.get_variable_order(num_variables);
-        for (int i = 0; i < var_order.size(); i++){
+        for (int i = 0; i < var_order.size(); i++) {
             std::cout << "At index " << i << ": " << var_order[i] << std::endl;
         }
 
@@ -89,7 +91,7 @@ int main(int argc, char *argv[]) {
 
     if (options.m_values.encode_cnf) {
         sas_parser parser(options.m_values.sas_file);
-        if(parser.start_parsing() == -1){
+        if (parser.start_parsing() == -1) {
             LOG_MESSAGE(log_level::error) << "Error while parsing sas_file";
             return 0;
         }
@@ -103,7 +105,7 @@ int main(int argc, char *argv[]) {
 
     if (options.m_values.build_bdd) {
         sas_parser parser(options.m_values.sas_file);
-        if(parser.start_parsing() == -1){
+        if (parser.start_parsing() == -1) {
             LOG_MESSAGE(log_level::error) << "Error while parsing sas_file";
             return 0;
         }
@@ -111,25 +113,28 @@ int main(int argc, char *argv[]) {
         cnf_encoder encoder(options.m_values, parser.m_sas_problem);
         planning_cnf::cnf clauses = encoder.encode_cnf(options.m_values.timesteps);
 
-        std::vector<int> var_order = variable_order::order_variables(clauses, options.m_values.variable_order);
+        std::vector<int> var_order = variable_order::order_variables(clauses, options.m_values.variable_order,
+                                                                     options.m_values.goal_variables_first,
+                                                                     options.m_values.initial_state_variables_first);
         bdd_manager builder(clauses.get_num_variables(), var_order);
 
         /*
         std::vector<int> builder_order = builder.get_variable_order(clauses.get_num_variables());
         for(int i = 0; i < builder_order.size(); i++){
-            std::cout << "Layer " << i << ", " << builder_order[i] << ": " << encoder.decode_cnf_variable(builder_order[i]) << std::endl;
+            std::cout << "Layer " << i << ", " << builder_order[i] << ": " <<
+        encoder.decode_cnf_variable(builder_order[i]) << std::endl;
         }*/
 
-        dd_builder::construct_dd_linear_disjoint(builder, clauses, options.m_values.build_order, options.m_values.reverse_order);
+        dd_builder::construct_dd_linear_disjoint(builder, clauses, options.m_values.build_order,
+                                                 options.m_values.reverse_order);
         builder.print_bdd(clauses.get_num_variables());
 
         return 0;
     }
 
-    
     if (options.m_values.build_sdd) {
         sas_parser parser(options.m_values.sas_file);
-        if(parser.start_parsing() == -1){
+        if (parser.start_parsing() == -1) {
             LOG_MESSAGE(log_level::error) << "Error while parsing sas_file";
             return 0;
         }
@@ -137,11 +142,12 @@ int main(int argc, char *argv[]) {
         cnf_encoder encoder(options.m_values, parser.m_sas_problem);
         planning_cnf::cnf clauses = encoder.encode_cnf(options.m_values.timesteps);
 
-        //encoder.write_cnf_to_file(options.m_values.cnf_file, clauses);
+        // encoder.write_cnf_to_file(options.m_values.cnf_file, clauses);
         sdd_manager builder(clauses.get_num_variables());
         LOG_MESSAGE(log_level::info) << "Start building sdd";
 
-        dd_builder::construct_dd_linear_disjoint(builder, clauses, options.m_values.build_order, options.m_values.reverse_order);
+        dd_builder::construct_dd_linear_disjoint(builder, clauses, options.m_values.build_order,
+                                                 options.m_values.reverse_order);
         builder.print_sdd();
 
         return 0;
@@ -149,7 +155,7 @@ int main(int argc, char *argv[]) {
 
     if (options.m_values.single_minisat) {
         sas_parser parser(options.m_values.sas_file);
-        if(parser.start_parsing() == -1){
+        if (parser.start_parsing() == -1) {
             LOG_MESSAGE(log_level::error) << "Error while parsing sas_file";
             return 0;
         }
@@ -171,7 +177,7 @@ int main(int argc, char *argv[]) {
     if (options.m_values.count_minisat) {
         // parse sas file
         sas_parser parser(options.m_values.sas_file);
-        if(parser.start_parsing() == -1){
+        if (parser.start_parsing() == -1) {
             LOG_MESSAGE(log_level::error) << "Error while parsing sas_file";
             return 0;
         }

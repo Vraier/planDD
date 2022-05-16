@@ -2,6 +2,7 @@
 
 #include "logging.h"
 #include <iostream>
+#include <set>
 
 using namespace planning_cnf;
 
@@ -64,7 +65,35 @@ categorized_variables categorize_variables(planning_cnf::cnf &cnf){
     return tagged_variables;
 }
 
-std::vector<int> order_variables(planning_cnf::cnf &cnf, std::string build_order){
+// current_order[i] = what variable is at layer i?
+std::vector<int> put_variables_of_tag_first(planning_cnf::cnf &cnf, std::vector<int> &current_order, clause_tag front_tag){
+
+    // find all variables that are affected by the goal
+    std::set<int> goal_variables;
+    for(int i = 0; i < cnf.get_num_clauses(); i++){
+        if(cnf.get_tag(i) == front_tag){
+            clause goal_clause = cnf.get_clause(i);
+            for(int j = 0; j < goal_clause.size(); j++){
+                goal_variables.insert(std::abs(goal_clause[j]));
+            }
+        }
+    }
+
+    // first append all the goal variables and than the rest (the rest keeps its order)
+    std::vector<int> goal_first_variables;
+    for(int i: goal_variables){
+        goal_first_variables.push_back(i);
+    }
+    for (int i = 0; i < current_order.size(); i++){
+        if(goal_variables.find(current_order[i]) == goal_variables.end()){
+            goal_first_variables.push_back(current_order[i]);
+        }
+    }
+
+    return goal_first_variables;
+}
+
+std::vector<int> order_variables(planning_cnf::cnf &cnf, std::string build_order, bool goal_first, bool init_state_first){
     
     if (!is_valid_variable_order_string(build_order)) {
         LOG_MESSAGE(log_level::error) << "Can't build the following variable order " << build_order;
@@ -113,6 +142,14 @@ std::vector<int> order_variables(planning_cnf::cnf &cnf, std::string build_order
             total_variables.insert(total_variables.end(), tagged_variables[order_tag][t].begin(),
                                  tagged_variables[order_tag][t].end());
         }
+    }
+
+    // move goal or initial_state variable first
+    if(goal_first){
+        total_variables = put_variables_of_tag_first(cnf, total_variables, goal);
+    }
+    if(init_state_first){
+        total_variables = put_variables_of_tag_first(cnf, total_variables, initial_state);
     }
 
     // total_clauses[i]: which cnf variable is at layer i

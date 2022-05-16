@@ -20,10 +20,13 @@ bool is_valid_variable_order_string(std::string build_order);
 // catgeorizes the variables of a planning cnf into buckets.
 // each tag gets a bucket. Each buckets has one subbucket for each timestep
 categorized_variables categorize_variables(planning_cnf::cnf &cnf);
+// Moves all the variables to the front that are in a clause with the given front_tag
+// current_order[i] = what variable is at layer i?
+std::vector<int> put_variables_of_tag_first(planning_cnf::cnf &cnf, std::vector<int> &current_order, planning_cnf::clause_tag front_tag);
 // returns a vector V that represents a permutation of the variables of the cnf problem
 // the ith entry in V indicates in which layer the ith variable of the cnf should be
 // it allows to translate between cnf and bdd world cnf: i <-> bdd: V[i] 
-std::vector<int> order_variables(planning_cnf::cnf &cnf, std::string build_order);
+std::vector<int> order_variables(planning_cnf::cnf &cnf, std::string build_order, bool goal_first, bool init_state_first);
 
 };
 
