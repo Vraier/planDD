@@ -91,6 +91,12 @@ categorized_clauses categorize_clauses(cnf &cnf) {
 }
 
 std::vector<clause> order_clauses(cnf &cnf, std::string build_order) {
+
+    if (!is_valid_conjoin_order_string(build_order)) {
+        LOG_MESSAGE(log_level::error) << "Can't build the following conjoin order " << build_order;
+        return std::vector<clause>();
+    }
+
     // categorize the clauses
     categorized_clauses tagged_clauses = categorize_clauses(cnf);
 

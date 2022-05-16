@@ -16,7 +16,7 @@ bdd_manager::bdd_manager(int num_variables) {
     for(int i = 0; i <= m_num_variables; i++){
         m_initial_variable_order[i] = i;
     }
-    m_inverse_initial_varaible_order = m_initial_variable_order;
+    m_inverse_initial_variable_order = m_initial_variable_order;
 
     // TODO: does this work?
     // tell CUDD how many variables to expect
@@ -35,9 +35,9 @@ bdd_manager::bdd_manager(int num_variables, std::vector<int> &initial_variable_o
     m_initial_variable_order = initial_variable_order;
 
     // invert the inital variable order
-    m_inverse_initial_varaible_order = std::vector<int>(m_initial_variable_order.size());
+    m_inverse_initial_variable_order = std::vector<int>(m_initial_variable_order.size());
     for(int i = 0; i < m_initial_variable_order.size(); i++){
-        m_inverse_initial_varaible_order[m_initial_variable_order[i]] = i;
+        m_inverse_initial_variable_order[m_initial_variable_order[i]] = i;
     }
 
     // tell CUDD how many variables to expect
@@ -226,7 +226,7 @@ void bdd_manager::conjoin_clause(std::vector<int> &clause) {
 std::vector<int> bdd_manager::get_variable_order(int num_variables){
     std::vector<int> permutation(num_variables+1, -1);
     for(int i = 0; i <= num_variables; i++){
-        int index_in_bdd_word = m_inverse_initial_varaible_order[i];
+        int index_in_bdd_word = m_initial_variable_order[i];
         // tells us at what layer the var resides in
         int perm_pos = Cudd_ReadPerm(m_bdd_manager, index_in_bdd_word);
         if (perm_pos == -1) { // variable does not exist
@@ -234,6 +234,11 @@ std::vector<int> bdd_manager::get_variable_order(int num_variables){
         }
         permutation[perm_pos] = i;
     }   
+
+    std::cout << "i, initial_var_perm, inverse_initial_var_perm, curr_perm" << std::endl;
+    for(int i = 0; i < permutation.size(); i ++){
+        std::cout << i << " " << m_initial_variable_order[i] << " " << m_inverse_initial_variable_order[i] << " " << permutation[i] << std::endl;
+    }
 
     return permutation;
 }

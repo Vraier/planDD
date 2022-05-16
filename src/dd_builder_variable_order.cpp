@@ -1,6 +1,7 @@
 #include "dd_builder_variable_order.h"
 
 #include "logging.h"
+#include <iostream>
 
 using namespace planning_cnf;
 
@@ -45,7 +46,7 @@ categorized_variables categorize_variables(planning_cnf::cnf &cnf){
         int index = std::get<0>(tag_var);
         int timestep = std::get<2>(tag_var);
         int value = std::get<3>(tag_var);
-        LOG_MESSAGE(log_level::trace) << i++ << " " << cnf_index << " Handeling variable idx:" << index << " tag:" << tag << " t:" << timestep << " val:" << value;
+        LOG_MESSAGE(log_level::trace) << " Handeling variable idx:" << index << " tag:" << tag << " t:" << timestep << " val:" << value;
 
         tagged_variables[tag][timestep].push_back(cnf_index);
     }
@@ -60,10 +61,28 @@ categorized_variables categorize_variables(planning_cnf::cnf &cnf){
         }
         LOG_MESSAGE(log_level::info) << "Categorized " << total_variables << " variables of tag " << t;
     }
+
+    for(int i = 0; i < 2; i++){
+        for(int j = 0; j <= cnf.get_num_timesteps(); j++){
+            std::vector<int> bucket = tagged_variables[static_cast<variable_tag>(i)][j];
+            std::cout << "Bucket " << i << " " << j;
+            for(int n = 0; n < bucket.size(); n++){
+                std::cout << bucket[n] << " ";
+            }
+            std::cout << std::endl;
+        }
+    }
+
     return tagged_variables;
 }
 
 std::vector<int> order_variables(planning_cnf::cnf &cnf, std::string build_order){
+    
+    if (!is_valid_variable_order_string(build_order)) {
+        LOG_MESSAGE(log_level::error) << "Can't build the following variable order " << build_order;
+        return std::vector<int>();
+    }
+
     // categorize the variables
     categorized_variables tagged_variables = categorize_variables(cnf);
 
@@ -81,6 +100,7 @@ std::vector<int> order_variables(planning_cnf::cnf &cnf, std::string build_order
     // sort the interleaved part
     for (int t = 0; t <= cnf.get_num_timesteps(); t++) {
         for (int i = 0; i < interleaved_order.size(); i++) {
+            //LOG_MESSAGE(log_level::trace) << "Sorting variable tag " << interleaved_order[i] << " for timestep " << t;
             char current_char = interleaved_order[i];
             variable_tag order_tag = char_tag_map[current_char];
 
@@ -92,6 +112,7 @@ std::vector<int> order_variables(planning_cnf::cnf &cnf, std::string build_order
 
     for (int i = 0; i < disjoin_order.size(); i++) {
         char current_char = disjoin_order[i];
+        //LOG_MESSAGE(log_level::trace) << "Sorting variable tag " << disjoin_order[i] << " for every timestep";
 
         // add the interleved part
         if (current_char == 'x') {
