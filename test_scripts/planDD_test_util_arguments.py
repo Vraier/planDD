@@ -5,8 +5,6 @@ from itertools import chain, combinations
 standart_planDD_argument_map = {
     "$timeout" : "60s",
     "$mode" : "build_bdd",
-    "$timesteps" : "13",
-    "$build_order" : "igrtyumpecx:",
     "$addition_flags" : "",
 }
 
@@ -20,10 +18,46 @@ def generate_all_interleaved_argument_maps():
     all_interleaved_orders = generate_all_interleaved_clause_orders()
     for order in all_interleaved_orders:
         new_p_dic = dict(standart_planDD_argument_map)
-        new_p_dic["$build_order"] = order    
+        new_p_dic["$addition_flags"] += (" --build_order " + order)    
         all_dics.append(new_p_dic)    
     return all_dics
-    
+
+def generate_all_variable_order_maps():
+    all_dics = []
+    no_ladder_encoding_orders = generate_variables_orders_without_helper_variables()
+    for order in no_ladder_encoding_orders:
+        for goal_first in True,False:
+            for inital_state_frist in True,False:
+                for include_mutex in True,False:
+                    new_p_dic = dict(standart_planDD_argument_map)
+                    new_p_dic["$addition_flags"] += ("--variable_order " + order)   
+                    if(goal_first):
+                        new_p_dic["$addition_flags"] += " --goal_variables_first"
+                    if(inital_state_frist):
+                        new_p_dic["$addition_flags"] += " --initial_state_variables_first"
+                    if(include_mutex):
+                        new_p_dic["$addition_flags"] += " --include_mutex"
+                    all_dics.append(new_p_dic)    
+    return all_dics
+
+def generate_all_variable_order_maps_with_ladder_encoding():
+    all_dics = []
+    ladder_encoding_orders = generate_variable_orders_with_herlper_variables()
+    for order in ladder_encoding_orders:
+        for goal_first in True,False:
+            for inital_state_frist in True,False:
+                for include_mutex in True,False:
+                    new_p_dic = dict(standart_planDD_argument_map)
+                    new_p_dic["$addition_flags"] += ("--variable_order " + order)   
+                    new_p_dic["$addition_flags"] += " --use_ladder_encoding"  
+                    if(goal_first):
+                        new_p_dic["$addition_flags"] += " --goal_variables_first"
+                    if(inital_state_frist):
+                        new_p_dic["$addition_flags"] += " --initial_state_variables_first"
+                    if(include_mutex):
+                        new_p_dic["$addition_flags"] += " --include_mutex"
+                    all_dics.append(new_p_dic)    
+    return all_dics
 
 
 # Helper methods that generate sets of arguments
@@ -78,3 +112,32 @@ def generate_all_interleaved_clause_orders():
 def reverse_order(order_string):
     s1, s2 = order_string.split(":")[0], order_string.split(":")[1]
     return s1[::-1] + ":" + s2[::-1]
+
+
+def generate_variables_orders_without_helper_variables():
+    return ["vox:hjk", "ovx:hjk", "x:vohjk", "x:ovhjk"]
+
+# in case of using ladder encoding
+def generate_variable_orders_with_herlper_variables():
+    all_orders = []
+    tags = [
+        "v",
+        "o",
+        "hjk",
+    ]
+    powerset = list(chain.from_iterable(combinations(tags, r) for r in range(2, len(tags)+1)))
+
+    for subset in powerset:
+        local_interleaved = list(subset)
+        local_disjoint = [x for x in tags if x not in subset] + ["x"]
+
+        interleaved_permutations = list(itertools.permutations(local_interleaved))
+        disjoint_permutations = list(itertools.permutations(local_disjoint))
+
+        for s in interleaved_permutations:
+            for p in disjoint_permutations:
+                new_order = "".join(p) + ":" + "".join(s)
+                all_orders.append(new_order)
+    
+    return all_orders
+
