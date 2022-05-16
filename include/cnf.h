@@ -55,7 +55,8 @@ class cnf {
     std::map<tagged_variable, int> m_variable_map;
     std::map<int, tagged_variable> m_inverse_variable_map;
 
-    cnf(int num_timesteps);
+    cnf(int num_timesteps); 
+    cnf(std::string file_path);
     ~cnf();
 
     // adds a clause to the cnf. the tag indicates which type of clause this is
@@ -88,6 +89,9 @@ class cnf {
 
     // writes the cnf to file in standart format
     void write_to_file(std::string filepath);
+    // take a cnf file and tries to parse it into a set of clauses (kind of inverse for above)
+    // return num_variable, num_clauses, and the clauses
+    static std::tuple<int, int, std::vector<clause>> parse_cnf_file_to_clauses(std::string file_path);
 };
 
 }  // namespace planning_cnf

@@ -2,6 +2,9 @@
 
 #include <fstream>
 #include <iostream>
+#include <sstream>
+
+#include "logging.h"
 
 using namespace planning_cnf;
 
@@ -70,4 +73,38 @@ void cnf::write_to_file(std::string filepath) {
         }
         file_out << "0" << std::endl;
     }
+}
+
+std::tuple<int, int, std::vector<clause>> cnf::parse_cnf_file_to_clauses(std::string file_path){
+
+    LOG_MESSAGE(log_level::info) << "Starting to parse cnf file to clauses";
+
+    std::vector<clause> all_clauses;
+    std::ifstream infile(file_path);
+    std::string line;
+    std::istringstream iss;
+
+    // parse fist line
+    std::getline(infile, line);
+    iss = std::istringstream(line);
+    std::string s_p, s_cnf;
+    int num_variables, num_clauses;
+    iss >> s_p; iss >> s_cnf; 
+    iss >> num_variables; iss >> num_clauses;
+
+    LOG_MESSAGE(log_level::debug) << s_p << " " << s_cnf << " " << num_variables << " " << num_clauses;
+
+    while(std::getline(infile, line)){
+        iss = std::istringstream(line);
+        clause new_clause;
+        int var;
+        iss >> var;
+        while(var != 0) {
+            new_clause.push_back(var);
+            iss >> var;
+        }
+        all_clauses.push_back(new_clause);
+    }
+
+    return std::make_tuple(num_variables, num_clauses, all_clauses);
 }

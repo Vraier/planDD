@@ -189,7 +189,7 @@ void bdd_manager::conjoin_clause(std::vector<int> &clause) {
 }
 
 // This method returns the variable permutation
-// the ith entry of the return verctor dictates what variable(index) resides in the ith layer of the bdd
+// the ith entry of the return verctor dictates what variable (index) resides in the ith layer of the bdd
 std::vector<int> bdd_manager::get_variable_order(int num_variables){
     std::vector<int> permutation(num_variables+1, -1);
     for(int i = 0; i <= num_variables; i++){
@@ -198,7 +198,7 @@ std::vector<int> bdd_manager::get_variable_order(int num_variables){
             continue;
         }
         permutation[perm_pos] = i;
-    }
+    }   
 
     return permutation;
 }
