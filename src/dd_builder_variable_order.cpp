@@ -36,17 +36,16 @@ categorized_variables categorize_variables(planning_cnf::cnf &cnf){
     }
 
     // iterate over every variable of the cnf problem
-    int i = 0;
     for (std::map<tagged_variable, int>::iterator iter = cnf.m_variable_map.begin(); iter != cnf.m_variable_map.end(); iter++) {
         
         // get information about the variable
         tagged_variable tag_var = iter->first;
         int cnf_index = iter->second;
         variable_tag tag = std::get<1>(tag_var);
-        int index = std::get<0>(tag_var);
+        //int index = std::get<0>(tag_var);
         int timestep = std::get<2>(tag_var);
-        int value = std::get<3>(tag_var);
-        LOG_MESSAGE(log_level::trace) << " Handeling variable idx:" << index << " tag:" << tag << " t:" << timestep << " val:" << value;
+        //int value = std::get<3>(tag_var);
+        //LOG_MESSAGE(log_level::trace) << " Handeling variable idx:" << index << " tag:" << tag << " t:" << timestep << " val:" << value;
 
         tagged_variables[tag][timestep].push_back(cnf_index);
     }
@@ -60,17 +59,6 @@ categorized_variables categorize_variables(planning_cnf::cnf &cnf){
             total_variables += tagged_variables[t][k].size();
         }
         LOG_MESSAGE(log_level::info) << "Categorized " << total_variables << " variables of tag " << t;
-    }
-
-    for(int i = 0; i < 2; i++){
-        for(int j = 0; j <= cnf.get_num_timesteps(); j++){
-            std::vector<int> bucket = tagged_variables[static_cast<variable_tag>(i)][j];
-            std::cout << "Bucket " << i << " " << j;
-            for(int n = 0; n < bucket.size(); n++){
-                std::cout << bucket[n] << " ";
-            }
-            std::cout << std::endl;
-        }
     }
 
     return tagged_variables;
@@ -128,7 +116,7 @@ std::vector<int> order_variables(planning_cnf::cnf &cnf, std::string build_order
     }
 
     // total_clauses[i]: which cnf variable is at layer i
-    // invert the map:
+    // invert the map
     std::vector<int> inverted_vector(total_variables.size());
     for(int i = 0; i < inverted_vector.size(); i++){
         inverted_vector[total_variables[i]] = i;

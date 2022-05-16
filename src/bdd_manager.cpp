@@ -234,12 +234,6 @@ std::vector<int> bdd_manager::get_variable_order(int num_variables){
         }
         permutation[perm_pos] = i;
     }   
-
-    std::cout << "i, initial_var_perm, inverse_initial_var_perm, curr_perm" << std::endl;
-    for(int i = 0; i < permutation.size(); i ++){
-        std::cout << i << " " << m_initial_variable_order[i] << " " << m_inverse_initial_variable_order[i] << " " << permutation[i] << std::endl;
-    }
-
     return permutation;
 }
 
