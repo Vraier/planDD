@@ -22,6 +22,7 @@ class bdd_manager : public virtual dd_buildable {
     int m_num_variables;
     // a permutation that tells the bdd manager at which layer variable i should lay in.
     std::vector<int> m_initial_variable_order;
+    std::vector<int> m_inverse_initial_varaible_order;
 
    public:
     bdd_manager(int num_variables);

@@ -16,6 +16,11 @@ bdd_manager::bdd_manager(int num_variables) {
     for(int i = 0; i <= m_num_variables; i++){
         m_initial_variable_order[i] = i;
     }
+    m_inverse_initial_varaible_order = m_initial_variable_order;
+
+    // TODO: does this work?
+    // tell CUDD how many variables to expect
+    Cudd_bddIthVar(m_bdd_manager, m_num_variables);
 }
 
 bdd_manager::bdd_manager(int num_variables, std::vector<int> &initial_variable_order) {
@@ -28,6 +33,15 @@ bdd_manager::bdd_manager(int num_variables, std::vector<int> &initial_variable_o
 
     m_num_variables = num_variables;
     m_initial_variable_order = initial_variable_order;
+
+    // invert the inital variable order
+    m_inverse_initial_varaible_order = std::vector<int>(m_initial_variable_order.size());
+    for(int i = 0; i < m_initial_variable_order.size(); i++){
+        m_inverse_initial_varaible_order[m_initial_variable_order[i]] = i;
+    }
+
+    // tell CUDD how many variables to expect
+    Cudd_bddIthVar(m_bdd_manager, m_num_variables);   
 }
 
 bdd_manager::~bdd_manager() { 
@@ -208,11 +222,13 @@ void bdd_manager::conjoin_clause(std::vector<int> &clause) {
 }
 
 // This method returns the variable permutation
-// the ith entry of the return verctor dictates what variable (index) resides in the ith layer of the bdd
+// the ith entry of the return vector dictates what variable (index) resides in the ith layer of the bdd
 std::vector<int> bdd_manager::get_variable_order(int num_variables){
     std::vector<int> permutation(num_variables+1, -1);
     for(int i = 0; i <= num_variables; i++){
-        int perm_pos = Cudd_ReadPerm(m_bdd_manager, i);
+        int index_in_bdd_word = m_inverse_initial_varaible_order[i];
+        // tells us at what layer the var resides in
+        int perm_pos = Cudd_ReadPerm(m_bdd_manager, index_in_bdd_word);
         if (perm_pos == -1) { // variable does not exist
             continue;
         }

@@ -112,8 +112,13 @@ int main(int argc, char *argv[]) {
         planning_cnf::cnf clauses = encoder.encode_cnf(options.m_values.timesteps);
 
         std::vector<int> var_order = variable_order::order_variables(clauses, options.m_values.variable_order);
-
         bdd_manager builder(clauses.get_num_variables(), var_order);
+
+        std::vector<int> builder_order = builder.get_variable_order(clauses.get_num_variables());
+        for(int i = 0; i < builder_order.size(); i++){
+            std::cout << "Layer " << i << ", " << builder_order[i] << ": " << encoder.decode_cnf_variable(builder_order[i]) << std::endl;
+        }
+
         dd_builder::construct_dd_linear_disjoint(builder, clauses, options.m_values.build_order, options.m_values.reverse_order);
         builder.print_bdd(clauses.get_num_variables());
 

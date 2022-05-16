@@ -35,6 +35,7 @@ categorized_variables categorize_variables(planning_cnf::cnf &cnf){
     }
 
     // iterate over every variable of the cnf problem
+    int i = 0;
     for (std::map<tagged_variable, int>::iterator iter = cnf.m_variable_map.begin(); iter != cnf.m_variable_map.end(); iter++) {
         
         // get information about the variable
@@ -44,7 +45,7 @@ categorized_variables categorize_variables(planning_cnf::cnf &cnf){
         int index = std::get<0>(tag_var);
         int timestep = std::get<2>(tag_var);
         int value = std::get<3>(tag_var);
-        LOG_MESSAGE(log_level::trace) << "Handeling variable idx:" << index << " tag:" << tag << " t:" << timestep << " val:" << value;
+        LOG_MESSAGE(log_level::trace) << i++ << " " << cnf_index << " Handeling variable idx:" << index << " tag:" << tag << " t:" << timestep << " val:" << value;
 
         tagged_variables[tag][timestep].push_back(cnf_index);
     }
