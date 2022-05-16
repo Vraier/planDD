@@ -14,7 +14,7 @@ std::map<char, clause_tag> char_tag_map = {
 
 bool is_valid_conjoin_order_string(std::string build_order) {
     // check if string is permutation
-    std::string standart_permutation = "ixg:rtyumpec";
+    std::string standart_permutation = "grtyumix:pec";
     if (!std::is_permutation(build_order.begin(), build_order.end(), standart_permutation.begin(),
                              standart_permutation.end())) {
         LOG_MESSAGE(log_level::error) << "Build order has to be a permutation of " + standart_permutation + " but is "
