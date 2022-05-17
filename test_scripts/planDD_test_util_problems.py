@@ -22,8 +22,28 @@ def list_all_opt_strips_problems():
                 })
     return all_problems
 
-# TODO: Find a good number
-# TODO: check if it works with the non unit cost porblems (not more than 120 problems)
+def list_all_downward_solved_problems():
+    downward_dics = extract_planDD_information.downward_read_all_information_from_file()
+    all_problems = list_all_opt_strips_problems()
+
+    # Allows to quickly find the information about a testcase from an older run
+    downward_domain_to_dic = {}
+    for d in downward_dics:
+        downward_domain_to_dic[d["domain_desc"]] = d
+
+    # only select problems that were solved by downward (astar(lmcut()))
+    # also append the length of an optimal plan
+    filtered_problems = []
+    for p in all_problems:
+        problem_domain_desc = util.get_sanitized_domain_description(p["d_name"], p["p_name"])
+        if downward_domain_to_dic[problem_domain_desc]["has_finished"]:
+            prob_with_opt_length = dict(p)
+            prob_with_opt_length["plan_length"] = downward_domain_to_dic[problem_domain_desc]["path_length"]
+            filtered_problems.append(prob_with_opt_length)
+    
+    return filtered_problems
+
+
 # returns only the problems that were solved during the benchmark generation run
 def list_all_easy_opt_strips_problems():  
     planDD_dics = extract_planDD_information.read_all_information_from_file("../test_output/easy_optimal_planDD_test.pkl")

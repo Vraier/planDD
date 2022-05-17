@@ -9,16 +9,39 @@ import planDD_test_util_general as util
 # extracts all the possible information from an output file into a dict
 def compile_information_about_planDD_into_dic(domain_desc, file_path):
     info = {}
+
+    # general information
     info["domain_desc"] = domain_desc
+    info["config"] = extract_config(file_path)
+    insert_config_information_into_info_dict(info)
+    info["cudd_config"] = extract_CUDD_config(file_path)
+
+    # how far did the program progress?
     info["has_finished_cnf"] = extract_has_finished_constructing_cnf(file_path)
     info["has_finished"] = extract_has_finished(file_path)
     info["error_while_encoding"] = extract_has_error_while_encoding_to_sat(file_path)
+
+    # information with multiple datapoints
+    info["progress_timesteps"] = extract_progress_timesteps(file_path)
+    info["progress_conjoin_percent"] = extract_progress_conjoin_percent(file_path)
+    info["progress_nodes"] = extract_progress_nodes(file_path)
+    info["progress_peak_nodes"] = extract_progress_peak_nodes(file_path)
+    info["progress_reorderings"] = extract_progress_reorderings(file_path)
+    info["progress_memory"] = extract_progress_memory(file_path)
+
+    info["last_timesteps"] = -99999 if len(info["progress_timesteps"]) == 0 else info["progress_timesteps"][-1]
+    info["last_conjoin_percent"] = -99999 if len(info["progress_conjoin_percent"]) == 0 else info["progress_conjoin_percent"][-1]
+    info["last_nodes"] = -99999 if len(info["progress_nodes"]) == 0 else info["progress_nodes"][-1]
+    info["last_peak_nodes"] = -99999 if len(info["progress_peak_nodes"]) == 0 else info["progress_peak_nodes"][-1]
+    info["last_reorderings"] = -99999 if len(info["progress_reorderings"]) == 0 else info["progress_reorderings"][-1]
+    info["last_memory"] = -99999 if len(info["progress_memory"]) == 0 else info["progress_memory"][-1]
+
+    # single datapoints (may only be usefull if program finsihed)
     info["finish_time"] = extract_finish_time(file_path)
-    info["config"] = extract_config(file_path)
-    info["cudd_config"] = extract_CUDD_config(file_path)
     info["constructed_clauses"] = extract_total_constructed_clauses(file_path)
     info["constructed_variables"] = extract_constructed_variables(file_path)
-    info["percent_conjoined_clauses"] = extract_percent_of_conjoined_clauses(file_path)
+
+    # parse info again to get more polished information
 
     return info
 
@@ -61,9 +84,9 @@ def read_all_information_from_file(pickle_file):
 # uses the write_all_information_to_file function on every suite in the given folder
 def write_whole_set_of_tests_to_file(folder_path):
     for d in os.listdir(folder_path):
-        if os.path.isdir(d):
+        test_folder_path = os.path.join(folder_path, d)
+        if os.path.isdir(test_folder_path):
             pickle_name = d + ".pkl"
-            test_folder_path = os.path.join(folder_path, d)
             pickel_path = os.path.join(folder_path, pickle_name)
             write_all_information_to_file(test_folder_path, pickel_path)
 
@@ -83,6 +106,24 @@ def convert_time_string_to_float(time_string):
     return sum([a*b for a,b in zip([3600, 60, 1], map(float, time_string.split(":")))])
 
 # Methods that extract information from the file
+def extract_config(file_path):
+    with open(file_path, "r") as f:
+        content = str(f.read())
+        p = re.compile("Using the following config:([\s\S]*)\[.*\]\[info\] Start Parsing SAS Problem")
+        if p.match(content):
+            configs = p.search(content).group(1).strip().split("\n")
+            return configs
+    return []
+
+def extract_CUDD_config(file_path):
+    with open(file_path, "r") as f:
+        content = str(f.read())
+        p = re.compile(".*Printing CUDD statistics\.\.\.([\s\S]*Time for reordering:.*sec)$", flags=re.DOTALL)
+        if p.match(content):
+            configs = p.search(content).group(1).strip().split("\n")
+            return configs
+    return []
+
 def extract_has_finished_constructing_cnf(file_path):
     with open(file_path, "r") as f:
         for line in f:
@@ -108,15 +149,6 @@ def extract_finish_time(file_path):
                 return convert_time_string_to_float(time_string)
     return -1
 
-def extract_config(file_path):
-    with open(file_path, "r") as f:
-        content = str(f.read())
-        p = re.compile("Using the following config:([\s\S]*)\[.*\]\[info\] Start Parsing SAS Problem")
-        if p.match(content):
-            configs = p.search(content).group(1).strip().split("\n")
-            return configs
-    return []
-
 def extract_total_constructed_clauses(file_path):
     with open(file_path, "r") as f:
         for line in f:
@@ -133,14 +165,6 @@ def extract_constructed_variables(file_path):
                 return int(p.search(line).group(1))
     return -1
 
-def extract_percent_of_conjoined_clauses(file_path):
-    with open(file_path, "r") as f:
-        content = str(f.read())
-        lst = re.findall(r"\[.*\]\[info\] Conjoined (.*)% of all clauses.*", content)
-        if(len(lst) != 0):
-            return int(lst[-1])
-    return -1
-
 def extract_has_error_while_encoding_to_sat(file_path):
     with open(file_path, "r") as f:
         for line in f:
@@ -149,14 +173,42 @@ def extract_has_error_while_encoding_to_sat(file_path):
                 return True
     return False
 
-def extract_CUDD_config(file_path):
+# returns a list of multiple data points during the execution of the program
+def extract_progress_timesteps(file_path):
     with open(file_path, "r") as f:
         content = str(f.read())
-        p = re.compile(".*Printing CUDD statistics\.\.\.([\s\S]*Time for reordering:.*sec)$", flags=re.DOTALL)
-        if p.match(content):
-            configs = p.search(content).group(1).strip().split("\n")
-            return configs
-    return []
+        lst = re.findall(r"\[(.*)\]\[info\] Conjoined .*% of all clauses.*", content)
+    return [convert_time_string_to_float(x) for x in lst]
+
+def extract_progress_conjoin_percent(file_path):
+    with open(file_path, "r") as f:
+        content = str(f.read())
+        lst = re.findall(r"\[.*\]\[info\] Conjoined (\d*)% of all clauses. CUDD stats: #nodes: \d* #peak nodes: \d* #reorderings: \d* #memory bytes: \d*.*", content)
+    return [int(x) for x in lst]
+
+def extract_progress_nodes(file_path):
+    with open(file_path, "r") as f:
+        content = str(f.read())
+        lst = re.findall(r"\[.*\]\[info\] Conjoined \d*% of all clauses. CUDD stats: #nodes: (\d*) #peak nodes: \d* #reorderings: \d* #memory bytes: \d*.*", content)
+    return [int(x) for x in lst]
+
+def extract_progress_peak_nodes(file_path):
+    with open(file_path, "r") as f:
+        content = str(f.read())
+        lst = re.findall(r"\[.*\]\[info\] Conjoined \d*% of all clauses. CUDD stats: #nodes: \d* #peak nodes: (\d*) #reorderings: \d* #memory bytes: \d*.*", content)
+    return [int(x) for x in lst]
+
+def extract_progress_reorderings(file_path):
+    with open(file_path, "r") as f:
+        content = str(f.read())
+        lst = re.findall(r"\[.*\]\[info\] Conjoined \d*% of all clauses. CUDD stats: #nodes: \d* #peak nodes: \d* #reorderings: (\d*) #memory bytes: \d*.*", content)
+    return [int(x) for x in lst]
+
+def extract_progress_memory(file_path):
+    with open(file_path, "r") as f:
+        content = str(f.read())
+        lst = re.findall(r"\[.*\]\[info\] Conjoined \d*% of all clauses. CUDD stats: #nodes: \d* #peak nodes: \d* #reorderings: \d* #memory bytes: (\d*).*", content)
+    return [int(x) for x in lst]
 
 # Methods that take the information of a dictionary and extracts parts from it or refine the information
 def get_time_for_reordering_from_info(info):
@@ -198,12 +250,13 @@ def get_number_of_nodes_from_bdd_from_info(info):
             return int(p.search(line).group(1))
     return -1
 
-def get_conjoin_order_from_info(info):
+# insert all inforamtion in the config to the info dictionary
+def insert_config_information_into_info_dict(info):
     config = info["config"]
     for c in config:
-        if "build_order" in c:
-            return c.split("=")[1]
-    return ""
+        argument = re.compile("> ([\w|_]*)[\(default\)]*=.*").search(c).group(1) 
+        value = c.split("=")[1]
+        info["config_"+argument] = value
 
 # extracts information from the output of a fast_downward run on all benchmarks   
 # domain_desc: describes which domain and testcase is used (name of the folder used to hold the testcase)      

@@ -2,6 +2,7 @@ import planDD_test_util_problems as problems
 import planDD_test_util_arguments as arguments
 import planDD_test_util_commandfile as commandfile
 
+#ran on 136/139 (not so sure)
 # Test all clause conjoin orders on all EASY (solved by planDD or few variables) opt strips testfiles
 def interleaved_easy_test():
     probs = problems.list_all_easy_opt_strips_problems()
@@ -24,7 +25,7 @@ def interleaved_easy_test():
 
 # Test all clause conjoin orders on all opt strips testfiles, WARNING! This is very big
 def interleaved_all_test():
-    probs = problems.list_all_opt_strips_problems()
+    probs = problems.list_all_downward_solved_problems()
     interleaved_arguments = arguments.generate_all_interleaved_argument_maps()
     args = []
     for i in range(len(interleaved_arguments)):
@@ -39,6 +40,7 @@ def interleaved_all_test():
     return comms
 
 
+#ran on 134
 def variable_order_no_ladder_test():
     probs = problems.list_all_easy_opt_strips_problems()
     arg_dicts = arguments.generate_all_variable_order_maps()
@@ -57,6 +59,7 @@ def variable_order_no_ladder_test():
     print("Num commands:",len(comms))
     return comms
 
+#ran on 134
 def variable_order_with_ladder_test():
     probs = problems.list_all_easy_opt_strips_problems()
     arg_dicts = arguments.generate_all_variable_order_maps_with_ladder_encoding()
@@ -75,9 +78,26 @@ def variable_order_with_ladder_test():
     print("Num commands:",len(comms))
     return comms
 
+def best_17_5_big_test():
+    probs = problems.list_all_downward_solved_problems()
+    planDD_argument_map =  {
+        "$timeout" : "180s",
+        "$mode" : "build_bdd",
+        "$addition_flags" : " --build_order grtyumix:pec --variable_order x:vohjk --goal_variables_first --initial_state_variables_first ",
+    }
+    downward_argument_map = dict(arguments.standart_downward_argument_map)
+    arg = ("best17_5_big_test", planDD_argument_map, downward_argument_map)
+    args = [arg]
+
+    comms = commandfile.generate_command_calls(probs, args)
+    print("Num problems:",len(probs))
+    print("Num configs:",len(args))
+    print("Num commands:",len(comms))
+    return comms
+
+
 comms = []
-comms += variable_order_no_ladder_test()
-comms += variable_order_with_ladder_test()
+comms += best_17_5_big_test()
 
 commandfile.generate_parallel_file_from_calls(comms)
 

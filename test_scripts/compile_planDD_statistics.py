@@ -40,19 +40,20 @@ def print_big_information_from_dicts(all_dics):
     print("Average number of nodes for bdd on solved test cases {:0.0f}".format(average_bdd_nodes))
 
 # print information in multiple suites are of interest. 
-# Have to modify the function i a way that ist also prints the difference between the suites (e.g. variable/conjoin order)
-def get_small_information_from_dicts(all_dics):
-    conjoin_order = get_conjoin_order_from_info(all_dics[0])
+# key arguments hold the config values that differentiate between the runs
+def get_small_information_from_dicts(all_dics, key_arguments):
+    config_discription = ""
+    for a in key_arguments:
+        config_discription += a[7:] + ": " + all_dics[0][a] + " "
+
     solved_dics = [d for d in all_dics if not d["error_while_encoding"] and d["has_finished_cnf"] and d["has_finished"]]
 
     average_peak_of_nodes = statistics.mean([get_peak_number_of_nodes_from_info(i) for i in solved_dics])
-    #print("Average peak of nodes on solved test cases {:0.0f}".format(average_peak_of_nodes))
     average_peak_of_live_nodes = statistics.mean([get_peak_number_of_live_nodes_from_info(i) for i in solved_dics])
-    #print("Average peak of live nodes on solved test cases {:0.0f}".format(average_peak_of_live_nodes))
     average_bdd_nodes = statistics.mean([get_number_of_nodes_from_bdd_from_info(i) for i in solved_dics])
-    #print("Average number of nodes for bdd on solved test cases {:0.0f}".format(average_bdd_nodes))
+    average_finish_time = statistics.mean([i["finish_time"] for i in solved_dics])
 
-    info_string = "Conjoin Order: {}, #Solved: {}, Avg. peak nodes {:0.0f}, Avg. live nodes {:0.0f}, Avg. BDD size {:0.0f}".format(conjoin_order, len(solved_dics), average_peak_of_nodes, average_peak_of_live_nodes, average_bdd_nodes) 
+    info_string = "{} #Solved: {}, Avg. finish time {:0.2f}s, Avg. peak nodes {:0.0f}, Avg. live nodes {:0.0f}, Avg. BDD size {:0.0f}".format(config_discription, len(solved_dics), average_finish_time, average_peak_of_nodes, average_peak_of_live_nodes, average_bdd_nodes) 
 
     return (len(solved_dics), info_string)
 
@@ -70,14 +71,37 @@ def get_small_information_from_dicts(all_dics):
 #downward_dics = read_all_information_from_file("../test_output/easy_optimal_downward_test.pkl")
 #print(downward_dics)
 
-suites = read_whole_set_of_tests_from_file("../test_output/big_interleaved")
+# writing tests to pickle files
+#write_whole_set_of_tests_to_file("../test_output/big_interleaved")
+#write_whole_set_of_tests_to_file("../test_output/variable_order_no_ladder")
+#write_whole_set_of_tests_to_file("../test_output/variable_order_with_ladder")
+
+
+#suites = read_whole_set_of_tests_from_file("../test_output/big_interleaved")
+suites = read_whole_set_of_tests_from_file("../test_output/variable_order_no_ladder")
+#suites = read_whole_set_of_tests_from_file("../test_output/variable_order_with_ladder")
+
 compiled_infos = []
+config_differences = [
+        #"config_build_order", 
+        "config_variable_order", 
+        "config_include_mutex",
+        "config_goal_variables_first", 
+        "config_initial_state_variables_first", 
+        #"config_use_ladder_encoding"
+    ]
 
 for s in suites:
-    compiled_infos.append(get_small_information_from_dicts(s))
+    compiled_infos.append(get_small_information_from_dicts(s, config_differences))
 
 for (num_solved, info_text) in sorted(compiled_infos):
     print(info_text)
+    pass
 
-planDD_dics = read_all_information_from_file("../test_output/easy_optimal_planDD_test.pkl")
-print_big_information_from_dicts(planDD_dics)
+# print information about old (best) planDD approach
+#planDD_dics = read_all_information_from_file("../test_output/easy_optimal_planDD_test.pkl")
+#print_big_information_from_dicts(planDD_dics)
+
+
+#i = compile_information_about_planDD_into_dic("blabla", "../test_output/variable_order_no_ladder/variable_order_no_ladder_0/miconics24pddl/planDD_output.txt")
+#print(i)
