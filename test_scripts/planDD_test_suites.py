@@ -78,6 +78,7 @@ def variable_order_with_ladder_test():
     print("Num commands:",len(comms))
     return comms
 
+# ran on the 139 (the 256 core machine)
 def best_17_5_big_test():
     probs = problems.list_all_downward_solved_problems()
     planDD_argument_map =  {

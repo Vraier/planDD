@@ -2,11 +2,43 @@ from matplotlib import pyplot as plt
 from functools import cmp_to_key
 import extract_planDD_information as data
 
-import os
-import re
-
 TIMEOUT = 600
 NUM_CLAUSES = 9396 
+
+def plot_progress_during_execution(info_dic):
+    timesteps = info_dic["progress_timesteps"]
+    conjoin_percent = info_dic["progress_conjoin_percent"]
+    bdd_size = info_dic["progress_nodes"]
+    reorderings = info_dic["progress_reorderings"]
+    peak_nodes = info_dic["progress_peak_nodes"]
+
+    fig, ax1 = plt.subplots()
+
+    color = 'tab:red'
+    ax1.set_ylabel('%Conjoined clauses', color=color)
+    ax1.plot(timesteps, conjoin_percent, color=color, linestyle=':', marker='o')
+    ax1.tick_params(axis='y', labelcolor=color)
+
+    ax2 = ax1.twinx()
+    color = 'tab:blue'
+    ax2.set_ylabel('BDD size', color=color)
+    ax2.plot(timesteps, bdd_size, color=color, linestyle=':', marker='o')
+    ax2.tick_params(axis='y', labelcolor=color)
+
+    ax3 = ax1.twinx()
+    color = 'tab:green'
+    ax3.set_ylabel('# Reorderings', color=color)
+    ax3.plot(timesteps, reorderings, color=color, linestyle=':', marker='o')
+    ax3.tick_params(axis='y', labelcolor=color)
+
+    ax4 = ax1.twinx()
+    color = 'tab:orange'
+    ax4.set_ylabel('Peak number of nodes', color=color)
+    ax4.plot(timesteps, peak_nodes, color=color, linestyle=':', marker='o')
+    ax4.tick_params(axis='y', labelcolor=color)
+
+    fig.tight_layout()
+    plt.show()
 
 def plot_conjoin_times(folder_path):
     all_files = sorted(get_all_test_files(folder_path))
@@ -128,5 +160,5 @@ def find_all_finished_orders(folder_path):
 ##print_comparison_of_two_order_runs("../test_output/interleaved_bdd", "../test_output/reverse_order")
 
 
-planDD_dics = data.read_all_information_from_file("../test_output/easy_optimal_planDD_test.pkl")
-plot_num_clauses(planDD_dics)
+#planDD_dics = data.read_all_information_from_file("../test_output/easy_optimal_planDD_test.pkl")
+#plot_num_clauses(planDD_dics)

@@ -1,4 +1,5 @@
 from extract_planDD_information import *
+import plot_data
 
 import statistics
 
@@ -10,7 +11,7 @@ def print_big_information_from_dicts(all_dics):
     solved_dics = [d for d in all_dics if not d["error_while_encoding"] and d["has_finished_cnf"] and d["has_finished"]]
 
     print("Compiling Information: ########################################################")
-    print("Conjoin Order", get_conjoin_order_from_info(all_dics[0]))
+    print("Conjoin Order", all_dics[0]["config_build_order"])
 
     print("#Total", len(all_dics))
     print("#Non unit cost", len(non_unit_length_dics))
@@ -29,7 +30,7 @@ def print_big_information_from_dicts(all_dics):
     average_number_clauses_solved = statistics.mean([i["constructed_clauses"] for i in solved_dics])
     average_number_variables_solved = statistics.mean([i["constructed_variables"] for i in solved_dics])
     print("Average number of total clauses/variables on solved test cases {:0.0f}/{:0.0f}".format(average_number_clauses_solved, average_number_variables_solved))
-    average_percent_of_conjoined_clauses = statistics.mean([i["percent_conjoined_clauses"] for i in solved_dics+not_finished_dd_dics])
+    average_percent_of_conjoined_clauses = statistics.mean([i["last_conjoin_percent"] if i["last_conjoin_percent"] >= 0 else 0 for i in solved_dics+not_finished_dd_dics])
     print("Average % of conjoined clauses {:0.3f}".format(average_percent_of_conjoined_clauses))
 
     average_peak_of_nodes = statistics.mean([get_peak_number_of_nodes_from_info(i) for i in solved_dics])
@@ -57,32 +58,10 @@ def get_small_information_from_dicts(all_dics, key_arguments):
 
     return (len(solved_dics), info_string)
 
+def print_ifnormation_for_multiple_dicts(suites):
 
-
-
-#write_all_information_to_file("../test_output/small_easy_optimal_planDD_test", "../test_output/small_easy_optimal_planDD_test.pkl")
-#write_all_information_to_file("../test_output/easy_optimal_planDD_test", "../test_output/easy_optimal_planDD_test.pkl")
-#downward_write_all_information_to_file("easy_optimal_downward_test", "../test_output/easy_optimal_downward_test.pkl")
-
-#small_planDD_dics = read_all_information_from_file("../test_output/small_easy_optimal_planDD_test.pkl")
-#planDD_dics = read_all_information_from_file("../test_output/easy_optimal_planDD_test.pkl")
-#print_information_from_dicts(small_planDD_dics)
-#print_information_from_dicts(planDD_dics)
-#downward_dics = read_all_information_from_file("../test_output/easy_optimal_downward_test.pkl")
-#print(downward_dics)
-
-# writing tests to pickle files
-#write_whole_set_of_tests_to_file("../test_output/big_interleaved")
-#write_whole_set_of_tests_to_file("../test_output/variable_order_no_ladder")
-#write_whole_set_of_tests_to_file("../test_output/variable_order_with_ladder")
-
-
-#suites = read_whole_set_of_tests_from_file("../test_output/big_interleaved")
-suites = read_whole_set_of_tests_from_file("../test_output/variable_order_no_ladder")
-#suites = read_whole_set_of_tests_from_file("../test_output/variable_order_with_ladder")
-
-compiled_infos = []
-config_differences = [
+    compiled_infos = []
+    config_differences = [
         #"config_build_order", 
         "config_variable_order", 
         "config_include_mutex",
@@ -91,17 +70,46 @@ config_differences = [
         #"config_use_ladder_encoding"
     ]
 
-for s in suites:
-    compiled_infos.append(get_small_information_from_dicts(s, config_differences))
+    for s in suites:
+        compiled_infos.append(get_small_information_from_dicts(s, config_differences))
 
-for (num_solved, info_text) in sorted(compiled_infos):
-    print(info_text)
-    pass
+    for (num_solved, info_text) in sorted(compiled_infos):
+        print(info_text)
+        pass
+
+
+
+# only one configuration
+#write_all_information_to_file("../test_output/small_easy_optimal_planDD_test", "../test_output/small_easy_optimal_planDD_test.pkl")
+#write_all_information_to_file("../test_output/easy_optimal_planDD_test", "../test_output/easy_optimal_planDD_test.pkl")
+#downward_write_all_information_to_file("easy_optimal_downward_test", "../test_output/easy_optimal_downward_test.pkl")
+
+# writing tests to pickle files
+#write_whole_set_of_tests_to_file("../test_output/big_interleaved")
+#write_whole_set_of_tests_to_file("../test_output/variable_order_no_ladder")
+#write_whole_set_of_tests_to_file("../test_output/variable_order_with_ladder")
+
 
 # print information about old (best) planDD approach
-#planDD_dics = read_all_information_from_file("../test_output/easy_optimal_planDD_test.pkl")
-#print_big_information_from_dicts(planDD_dics)
+#write_all_information_to_file("../test_output/easy_optimal_planDD_test", "../test_output/easy_optimal_planDD_test.pkl")
+#downward_write_all_information_to_file("easy_optimal_downward_test", "../test_output/easy_optimal_downward_test.pkl")
+#downward_dics = read_all_information_from_file("../test_output/easy_optimal_downward_test.pkl")
+
+#print_big_information_from_dicts(read_all_information_from_file("../test_output/easy_optimal_planDD_test.pkl"))
 
 
-#i = compile_information_about_planDD_into_dic("blabla", "../test_output/variable_order_no_ladder/variable_order_no_ladder_0/miconics24pddl/planDD_output.txt")
-#print(i)
+# new best approach
+#write_all_information_to_file("../test_output/best17_5_big_test", "../test_output/best17_5_big_test.pkl")
+
+#print_big_information_from_dicts(read_all_information_from_file("../test_output/best17_5_big_test.pkl"))
+
+
+# results for multiple dicts
+#print_ifnormation_for_multiple_dicts(read_whole_set_of_tests_from_file("../test_output/big_interleaved"))
+#print_ifnormation_for_multiple_dicts(read_whole_set_of_tests_from_file("../test_output/variable_order_no_ladder"))
+#print_ifnormation_for_multiple_dicts(read_whole_set_of_tests_from_file("../test_output/variable_order_with_ladder"))
+
+domain_to_dic = {}
+for dic in read_all_information_from_file("../test_output/best17_5_big_test.pkl"):
+    domain_to_dic[dic["domain_desc"]] = dic
+plot_data.plot_progress_during_execution(domain_to_dic["gripperprob02pddl"])
