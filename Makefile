@@ -11,7 +11,7 @@ INCLUDE_DIR = include
 DEP_DIR = dependencies
 
 # Directories the contain .h header files
-INCLUDE_CUDD := -I$(DEP_DIR)/cudd-3.0.0 -I$(DEP_DIR)/cudd-3.0.0/util -I$(DEP_DIR)/cudd-3.0.0/cudd
+INCLUDE_CUDD := -I$(DEP_DIR)/cudd-3.0.0 -I$(DEP_DIR)/cudd-3.0.0/util -I$(DEP_DIR)/cudd-3.0.0/cudd -I$(DEP_DIR)/cudd-3.0.0/st -I$(DEP_DIR)/cudd-3.0.0/mtr -I$(DEP_DIR)/cudd-3.0.0/epd
 INCLUDE_SDD := -I$(DEP_DIR)/libsdd-2.0 -I$(DEP_DIR)/libsdd-2.0/include
 INCLUDE_ALL := -I$(INCLUDE_DIR) $(INCLUDE_CUDD) $(INCLUDE_SDD)
 
@@ -34,7 +34,7 @@ build: $(CPP_FILES)
 	$(CC) $(CFLAGS) $(INCLUDE_ALL) $(CPP_FILES) $(LIB_CUDD) $(LIB_SDD) $(LIB_COMMON) -o $(TARGET)
 
 variable_order:
-	./$(TARGET) --cnf_file problem.cnf --hack_debug
+	./$(TARGET) --cnf_file problem.cnf --cnf_to_bdd
 	dot -Tpng befor_reorder.dot -o befor_reorder.png
 	dot -Tpng after_reorder.dot -o after_reorder.png
 

@@ -40,6 +40,7 @@ bdd_manager::bdd_manager(int num_variables, std::vector<int> &initial_variable_o
         m_inverse_initial_variable_order[m_initial_variable_order[i]] = i;
     }
 
+    // TODO: does this work?
     // tell CUDD how many variables to expect
     Cudd_bddIthVar(m_bdd_manager, m_num_variables);   
 }
@@ -54,23 +55,12 @@ void bdd_manager::reduce_heap(){
     LOG_MESSAGE(log_level::info) << "Finished reducing heap";
 }
 
-// Print a bdd summary
-void bdd_manager::print_bdd(int num_variables) {
+void bdd_manager::print_bdd() {
     LOG_MESSAGE(log_level::info) << "Printing CUDD statistics...";
-    // printf("Ddm_bdd_manager nodes: %ld | ",
-    //        Cudd_ReadNodeCount(m_bdd_manager)); /*Reports the number of live nodes in BDDs and ADDs*/
-    // printf("Ddm_bdd_manager vars: %d | ",
-    //        Cudd_ReadSize(m_bdd_manager)); /*Returns the number of BDD variables in existence*/
-    // printf("Ddm_bdd_manager reorderings: %d | ",
-    //        Cudd_ReadReorderings(m_bdd_manager)); /*Returns the number of times reordering has occurred*/
-    // printf("Ddm_bdd_manager memory: %ld \n",
-    //        Cudd_ReadMemoryInUse(m_bdd_manager)); /*Returns the memory in use by the m_bdd_manager measured in bytes*/
-    // printf("Ddm_bdd_manager paths: %f \n", Cudd_CountPathsToNonZero(m_root_node));
     LOG_MESSAGE(log_level::info) << "Number of nodes: " << Cudd_DagSize(m_root_node) << ", Number of solutions: "
-                                 << Cudd_CountMinterm(m_bdd_manager, m_root_node, num_variables);
+                                 << Cudd_CountMinterm(m_bdd_manager, m_root_node, m_num_variables);
     FILE** fout = &stdout;
     Cudd_PrintInfo(m_bdd_manager, *fout);
-    // Cudd_PrintSummary(m_bdd_manager, m_root_node, num_variables, 2);
 }
 
 std::string bdd_manager::get_short_statistics(){
@@ -100,99 +90,6 @@ void bdd_manager::write_bdd_to_dot_file(std::string filename) {
     fclose(outfile);
 }
 
-/*
-// Returns a DdNode representing the cnf with a reference count of 1
-DdNode *bdd_manager::construct_bdd_from_cnf(std::vector<std::vector<int>> &cnf) {
-    for (int i = 0; i < cnf.size(); i++) {
-        if ((i + 1) % 100 == 0) {
-            LOG_MESSAGE(log_level::trace) << "Building clause " << i + 1 << " out of " << cnf.size();
-        }
-
-        std::vector<int> clause = cnf[i];
-
-        conjoin_clause(clause);
-    }
-    return m_root_node;
-}*/
-
-/*
-// Returns a DdNode representing the cnf with a reference count of 1
-DdNode *bdd_manager::construct_bdd_from_cnf_binary(std::vector<std::vector<int>> &cnf) {
-    DdNode *conjunction = Cudd_ReadOne(m_bdd_manager);
-    Cudd_Ref(conjunction);
-
-    std::vector<DdNode *> current_clauses;
-    std::vector<DdNode *> new_clauses;
-
-    LOG_MESSAGE(log_level::info) << "Constructing the bottom most layer of clauses";
-    // build the bottom most layer of clauses
-    for (int i = 0; i < cnf.size(); i++) {
-        std::vector<int> clause = cnf[i];
-
-        // build the disjunction of the literals in the clause
-        DdNode *var, *tmp;
-        DdNode *disjunction = Cudd_ReadLogicZero(m_bdd_manager);
-        Cudd_Ref(disjunction);
-
-        for (int j = 0; j < clause.size(); j++) {
-            int literal = clause[j];
-            var = Cudd_bddIthVar(m_bdd_manager, std::abs(literal));
-
-            if (literal > 0) {
-                tmp = Cudd_bddOr(m_bdd_manager, var, disjunction);
-            } else {
-                tmp = Cudd_bddOr(m_bdd_manager, Cudd_Not(var), disjunction);
-            }
-            Cudd_Ref(tmp);
-            Cudd_RecursiveDeref(m_bdd_manager, disjunction);
-            disjunction = tmp;
-        }
-
-        current_clauses.push_back(disjunction);
-    }
-
-    // the total number of clauses halfes in size for each step
-    while (current_clauses.size() > 1) {
-        LOG_MESSAGE(log_level::info) << "Currently merging " << current_clauses.size() << " clauses";
-        for (int i = 0; i < current_clauses.size() - 1; i += 2) {
-            if (current_clauses.size() < 300 && ((i % 10) == 0)) {
-                LOG_MESSAGE(log_level::info) << "Building clause " << i + 1 << " out of " << current_clauses.size();
-            }
-            // TODO: this can probably be optimizes by not constructing the logical 1. but it does not matter that much?
-            DdNode *clauses1 = current_clauses[i];
-            DdNode *clauses2 = current_clauses[i + 1];
-            DdNode *conjunction = Cudd_ReadOne(m_bdd_manager);
-            Cudd_Ref(conjunction);
-            DdNode *tmp;
-
-            // add both nodes together
-            tmp = Cudd_bddAnd(m_bdd_manager, conjunction, clauses1);
-            Cudd_Ref(tmp);
-            Cudd_RecursiveDeref(m_bdd_manager, conjunction);
-            Cudd_RecursiveDeref(m_bdd_manager, clauses1);
-            conjunction = tmp;
-
-            tmp = Cudd_bddAnd(m_bdd_manager, conjunction, clauses2);
-            Cudd_Ref(tmp);
-            Cudd_RecursiveDeref(m_bdd_manager, conjunction);
-            Cudd_RecursiveDeref(m_bdd_manager, clauses2);
-            conjunction = tmp;
-
-            new_clauses.push_back(conjunction);
-        }
-
-        if ((current_clauses.size() % 2) == 1) {
-            // if we have an odd number of clauses, we have to add the last clause
-            new_clauses.push_back(current_clauses[current_clauses.size() - 1]);
-        }
-
-        current_clauses = new_clauses;
-        new_clauses = std::vector<DdNode *>();
-    }
-
-    return current_clauses[0];
-}*/
-
 void bdd_manager::conjoin_clause(std::vector<int> &clause) {
     // build the disjunction of the literals in the clause
     DdNode *var, *tmp;
@@ -218,6 +115,52 @@ void bdd_manager::conjoin_clause(std::vector<int> &clause) {
     Cudd_Ref(tmp);
     Cudd_RecursiveDeref(m_bdd_manager, m_root_node);
     Cudd_RecursiveDeref(m_bdd_manager, disjunction);
+    m_root_node = tmp;
+}
+
+void bdd_manager::add_exactly_one_constraint(std::vector<int> &variables){
+
+    // order variables by the variable order
+    // variable in the lowes layer comes first
+    // variable in the highest layer comes last
+    std::vector<int> ordered_variables; // TODO really order them by variable order
+    for(int i = variables.size()-1; i >= 0; i--){
+        ordered_variables.push_back(variables[i]);
+    }
+
+    DdNode *false_node = Cudd_ReadLogicZero(m_bdd_manager); Cudd_Ref(false_node);
+    DdNode *exact_one_true = Cudd_ReadOne(m_bdd_manager); Cudd_Ref(exact_one_true);
+    DdNode *exact_zero_true = Cudd_ReadLogicZero(m_bdd_manager); Cudd_Ref(exact_zero_true);
+
+    // from bottom to top ignoring the topmost variable
+    for(int i = 0; i < ordered_variables.size()-1; i++){
+
+        // create nodes for new layer
+        // cuddUniqueInter searches the unique table for the given node and creates a new one if it does not exist
+        // have to be careful about the variable order when using cuddUniqueInter
+        DdNode *new_exact_one_true = cuddUniqueInter(m_bdd_manager, ordered_variables[i], false_node, exact_one_true);
+        Cudd_Ref(new_exact_one_true);
+        DdNode *new_exact_zero_true = cuddUniqueInter(m_bdd_manager, ordered_variables[i], exact_one_true, exact_zero_true);
+        Cudd_Ref(new_exact_zero_true);
+
+        // clean up old nodes
+        //Cudd_RecursiveDeref(m_bdd_manager, exact_one_true);
+        //Cudd_RecursiveDeref(m_bdd_manager, exact_zero_true);
+        exact_one_true = new_exact_one_true;
+        exact_zero_true = new_exact_zero_true;
+    }
+
+    // build the root node for the last variable
+    DdNode *constraint_root_node = cuddUniqueInter(m_bdd_manager, ordered_variables[ordered_variables.size()-1], exact_one_true, exact_zero_true);
+    Cudd_Ref(constraint_root_node);
+    //Cudd_RecursiveDeref(m_bdd_manager, exact_one_true);
+    //Cudd_RecursiveDeref(m_bdd_manager, exact_zero_true);
+
+    // conjoin the root node for the exact one constraint with the root node of the bdd
+    DdNode *tmp = Cudd_bddAnd(m_bdd_manager, m_root_node, constraint_root_node);
+    Cudd_Ref(tmp);
+    //Cudd_RecursiveDeref(m_bdd_manager, m_root_node);
+    //Cudd_RecursiveDeref(m_bdd_manager, constraint_root_node);
     m_root_node = tmp;
 }
 

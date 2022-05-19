@@ -29,36 +29,23 @@ int main(int argc, char *argv[]) {
     if (options.m_values.hack_debug) {
         LOG_MESSAGE(log_level::info) << "You unlocked full control. Good luck modifying the source code";
 
-        /*
-        sas_parser parser(options.m_values.sas_file);
-        if(parser.start_parsing() == -1){
-            LOG_MESSAGE(log_level::error) << "Error while parsing sas_file";
-            return 0;
+        int num_variables = 7;
+        std::vector<int> constraint;
+        for(int i = 1; i <= num_variables; i++){
+            constraint.push_back(i);
         }
 
-        cnf_encoder encoder(options.m_values, parser.m_sas_problem);
-        planning_cnf::cnf clauses = encoder.encode_cnf(options.m_values.timesteps);
+        bdd_manager builder(num_variables);
+        builder.add_exactly_one_constraint(constraint);
 
-        bdd_manager builder;
-        dd_builder::construct_dd_linear_disjoint(builder, clauses, options.m_values.build_order,
-        options.m_values.reverse_order);
+        LOG_MESSAGE(log_level::debug) << builder.get_short_statistics();
+        builder.print_bdd();
 
-        for(int i = 0; i < 1; i++){
-            std::cout << i;
-            builder.reduce_heap();
-        }
+        builder.write_bdd_to_dot_file("exactly_one_constraint.dot");
+    }
 
-        std::vector<int> var_order = builder.get_variable_order(clauses.get_num_variables());
 
-        for(int i = 0; i < var_order.size(); i++){
-            std::cout << "Layer " << i << ": " << encoder.decode_cnf_variable(var_order[i]) << std::endl;
-        }
-
-        builder.print_bdd(clauses.get_num_variables());
-
-        dd_builder::construct_dd_linear_disjoint(builder, clauses, options.m_values.build_order,
-        options.m_values.reverse_order);
-        */
+    if (options.m_values.cnf_to_bdd) {
 
         std::tuple<int, int, std::vector<planning_cnf::clause>> cnf_data =
             planning_cnf::cnf::parse_cnf_file_to_clauses(options.m_values.cnf_file);
@@ -78,13 +65,16 @@ int main(int argc, char *argv[]) {
 
         builder.write_bdd_to_dot_file("befor_reorder.dot");
 
-        std::cout << "Order after shifting" << std::endl;
+        std::cout << "Order after reducing heap" << std::endl;
 
         builder.reduce_heap();
         var_order = builder.get_variable_order(num_variables);
         for (int i = 0; i < var_order.size(); i++) {
             std::cout << "At index " << i << ": " << var_order[i] << std::endl;
         }
+
+        LOG_MESSAGE(log_level::debug) << builder.get_short_statistics();
+        builder.print_bdd();
 
         builder.write_bdd_to_dot_file("after_reorder.dot");
     }
@@ -127,7 +117,7 @@ int main(int argc, char *argv[]) {
 
         dd_builder::construct_dd_linear_disjoint(builder, clauses, options.m_values.build_order,
                                                  options.m_values.reverse_order);
-        builder.print_bdd(clauses.get_num_variables());
+        builder.print_bdd();
 
         return 0;
     }
@@ -226,20 +216,5 @@ int main(int argc, char *argv[]) {
 
         return 0;
     }
-
-    // interpret_sat_solution("minisat_out", 11);
-
-    /*
-    cnf = std::vector<std::vector<int>>();
-    std::vector<int> c1, c2, c3, c4;
-    c1.push_back(1); c1.push_back(2); c1.push_back(3);
-    //c2.push_back(2);
-    //c3.push_back(3);
-    c4.push_back(4); c4.push_back(5);
-    cnf.push_back(c1);
-    //cnf.push_back(c2);
-    //cnf.push_back(c3);
-    cnf.push_back(c4);
-    */
     return 0;
 }
