@@ -10,7 +10,6 @@
 extern "C" {
 #include "cudd.h"
 #include "util.h"
-#include "cuddInt.h"
 }
 
 // code wont compile if i #include <iostream> after util.h

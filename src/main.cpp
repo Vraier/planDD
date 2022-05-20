@@ -13,6 +13,7 @@
 #include "sdd_manager.h"
 #include "bdd_manager.h"  // always include this last >:(
 
+
 int main(int argc, char *argv[]) {
     initialize_logging();
 
@@ -29,16 +30,16 @@ int main(int argc, char *argv[]) {
     if (options.m_values.hack_debug) {
         LOG_MESSAGE(log_level::info) << "You unlocked full control. Good luck modifying the source code";
 
-        int num_variables = 7;
+        int num_variables = options.m_values.timesteps;
         std::vector<int> constraint;
-        for(int i = 1; i <= num_variables; i++){
+        for (int i = 1; i <= num_variables; i++) {
             constraint.push_back(i);
         }
 
-        bdd_manager builder(4);
+        bdd_manager builder(num_variables);
 
         LOG_MESSAGE(log_level::debug) << "Starting hack back rocket";
-        builder.hack_back_rocket_method();
+        builder.add_exactly_one_constraint(constraint);
         LOG_MESSAGE(log_level::debug) << "Landed Hack back rocket";
 
         LOG_MESSAGE(log_level::debug) << builder.get_short_statistics();
@@ -47,9 +48,7 @@ int main(int argc, char *argv[]) {
         builder.write_bdd_to_dot_file("exactly_one_constraint.dot");
     }
 
-
     if (options.m_values.cnf_to_bdd) {
-
         std::tuple<int, int, std::vector<planning_cnf::clause>> cnf_data =
             planning_cnf::cnf::parse_cnf_file_to_clauses(options.m_values.cnf_file);
         int num_variables = std::get<0>(cnf_data);
@@ -121,7 +120,6 @@ int main(int argc, char *argv[]) {
         dd_builder::construct_dd_linear_disjoint(builder, clauses, options.m_values.build_order,
                                                  options.m_values.reverse_order);
         builder.print_bdd();
-
         return 0;
     }
 
