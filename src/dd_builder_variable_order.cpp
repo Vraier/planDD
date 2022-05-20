@@ -151,16 +151,9 @@ std::vector<int> order_variables(planning_cnf::cnf &cnf, std::string build_order
     if(init_state_first){
         total_variables = put_variables_of_tag_first(cnf, total_variables, initial_state);
     }
-
-    // total_clauses[i]: which cnf variable is at layer i
-    // invert the map
-    std::vector<int> inverted_vector(total_variables.size());
-    for(int i = 0; i < inverted_vector.size(); i++){
-        inverted_vector[total_variables[i]] = i;
-    }
     
-    LOG_MESSAGE(log_level::info) << "Sorted a total of " << inverted_vector.size()-1 << " variables";
-    return inverted_vector;
+    LOG_MESSAGE(log_level::info) << "Sorted a total of " << total_variables.size() << " variables";
+    return total_variables;
 }
 
 };

@@ -42,7 +42,7 @@ void option_parser::parse_command_line(int argc, char *argv[]) {
          "Reverses the order of the conjoin operations. This has the effect that the conjoin order gets reversed but "
          "also clauses with higher timesteps get conjoined first.")  //
         // variable ordering
-        ("variable_order", po::value<std::string>(&m_values.variable_order)->default_value("vox:hjk"),
+        ("variable_order", po::value<std::string>(&m_values.variable_order)->default_value("x:vohjk"),
          "Determins the initial variable order for the dd building. "
          "v: variables, o: operators, h: helper amost variable, j: helper amost operator, k: helper amost mutex")  //
         ("goal_variables_first", po::bool_switch(&m_values.goal_variables_first)->default_value(false),

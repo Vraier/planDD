@@ -60,7 +60,7 @@ int main(int argc, char *argv[]) {
             builder.conjoin_clause(c);
         }
 
-        std::vector<int> var_order = builder.get_variable_order(num_variables);
+        std::vector<int> var_order = builder.get_variable_order();
         for (int i = 0; i < var_order.size(); i++) {
             std::cout << "At index " << i << ": " << var_order[i] << std::endl;
         }
@@ -70,7 +70,7 @@ int main(int argc, char *argv[]) {
         std::cout << "Order after reducing heap" << std::endl;
 
         builder.reduce_heap();
-        var_order = builder.get_variable_order(num_variables);
+        var_order = builder.get_variable_order();
         for (int i = 0; i < var_order.size(); i++) {
             std::cout << "At index " << i << ": " << var_order[i] << std::endl;
         }
@@ -108,17 +108,26 @@ int main(int argc, char *argv[]) {
         std::vector<int> var_order = variable_order::order_variables(clauses, options.m_values.variable_order,
                                                                      options.m_values.goal_variables_first,
                                                                      options.m_values.initial_state_variables_first);
-        bdd_manager builder(clauses.get_num_variables(), var_order);
+        bdd_manager builder(clauses.get_num_variables());
+        builder.set_variable_order(var_order);
 
-        /*
-        std::vector<int> builder_order = builder.get_variable_order(clauses.get_num_variables());
-        for(int i = 0; i < builder_order.size(); i++){
-            std::cout << "Layer " << i << ", " << builder_order[i] << ": " <<
-        encoder.decode_cnf_variable(builder_order[i]) << std::endl;
-        }*/
+        
+        //std::vector<int> builder_order = builder.get_variable_order();
+        //for(int i = 0; i < builder_order.size(); i++){
+        //    std::cout << "Layer " << i << ", " << builder_order[i] << ": " <<
+        //encoder.decode_cnf_variable(builder_order[i]) << std::endl;
+        //}
+        
 
         dd_builder::construct_dd_linear_disjoint(builder, clauses, options.m_values.build_order,
                                                  options.m_values.reverse_order);
+
+        //std::vector<int> builder_order = builder.get_variable_order();
+        //for(int i = 0; i < builder_order.size(); i++){
+        //    std::cout << "Layer " << i << ", " << builder_order[i] << ": " <<
+        //encoder.decode_cnf_variable(builder_order[i]) << std::endl;
+        //}
+
         builder.print_bdd();
         return 0;
     }

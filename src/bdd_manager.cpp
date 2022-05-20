@@ -1,50 +1,26 @@
-#include "bdd_manager.h"
-
 #include "logging.h"
 
+#include "bdd_manager.h"
+
 bdd_manager::bdd_manager(int num_variables) {
-    m_num_variables = num_variables;
+    // add one more variable to account for variable with index 0
+    m_num_variables = num_variables + 1;
 
     m_bdd_manager = Cudd_Init(m_num_variables, 0, CUDD_UNIQUE_SLOTS, CUDD_CACHE_SLOTS, 0);
     Cudd_AutodynEnable(m_bdd_manager, CUDD_REORDER_SIFT);
     // Cudd_SetMaxCacheHard(m_bdd_manager, 62500000);
 
-    m_root_node = Cudd_ReadOne(m_bdd_manager);
+    // force var with index 0 to be true
+    m_root_node = Cudd_bddIthVar(m_bdd_manager, 0);
     Cudd_Ref(m_root_node);
-
-    // build identity for inital variable order
-    m_initial_variable_order = std::vector<int>(num_variables + 1);
-    for (int i = 0; i <= m_num_variables; i++) {
-        m_initial_variable_order[i] = i;
-    }
-    m_inverse_initial_variable_order = m_initial_variable_order;
-}
-
-bdd_manager::bdd_manager(int num_variables, std::vector<int> &initial_variable_order) {
-    m_bdd_manager = Cudd_Init(0, 0, CUDD_UNIQUE_SLOTS, CUDD_CACHE_SLOTS, 0);
-    Cudd_AutodynEnable(m_bdd_manager, CUDD_REORDER_SIFT);
-    // Cudd_SetMaxCacheHard(m_bdd_manager, 62500000);
-
-    m_root_node = Cudd_ReadOne(m_bdd_manager);
-    Cudd_Ref(m_root_node);
-
-    m_num_variables = num_variables;
-    m_initial_variable_order = initial_variable_order;
-
-    // invert the inital variable order
-    m_inverse_initial_variable_order = std::vector<int>(m_initial_variable_order.size());
-    for (int i = 0; i < m_initial_variable_order.size(); i++) {
-        m_inverse_initial_variable_order[m_initial_variable_order[i]] = i;
-    }
 }
 
 bdd_manager::~bdd_manager() {
-
     Cudd_RecursiveDeref(m_bdd_manager, m_root_node);
     int num_zero_reference_nodes = Cudd_CheckZeroRef(m_bdd_manager);
-    if(num_zero_reference_nodes != 0){
+    if (num_zero_reference_nodes != 0) {
         LOG_MESSAGE(log_level::warning) << "#Nodes with non-zero reference count (should be 0): "
-                                 << Cudd_CheckZeroRef(m_bdd_manager);
+                                        << Cudd_CheckZeroRef(m_bdd_manager);
     }
 
     Cudd_Quit(m_bdd_manager);
@@ -97,10 +73,9 @@ void bdd_manager::conjoin_clause(std::vector<int> &clause) {
     Cudd_Ref(disjunction);
 
     for (int j = 0; j < clause.size(); j++) {
-        int unpermuted_literal = clause[j];
-        var = Cudd_bddIthVar(m_bdd_manager, m_initial_variable_order[std::abs(unpermuted_literal)]);
+        var = Cudd_bddIthVar(m_bdd_manager, std::abs(clause[j]));
 
-        if (unpermuted_literal > 0) {
+        if (clause[j] > 0) {
             tmp = Cudd_bddOr(m_bdd_manager, var, disjunction);
         } else {
             tmp = Cudd_bddOr(m_bdd_manager, Cudd_Not(var), disjunction);
@@ -189,20 +164,25 @@ void bdd_manager::hack_back_rocket_method() {
     m_root_node = temp;
 }
 
+void bdd_manager::set_variable_order(std::vector<int> &variable_order){
+    LOG_MESSAGE(log_level::info) << "Setting variable order msize: " << Cudd_ReadSize(m_bdd_manager) << " osize: " << variable_order.size();
+    int* order = &variable_order[0];
+    Cudd_ShuffleHeap(m_bdd_manager, order);
+}
+
 // This method returns the variable permutation
 // the ith entry of the return vector dictates what variable (index) resides in the ith layer of the bdd
-std::vector<int> bdd_manager::get_variable_order(int num_variables) {
-    std::vector<int> permutation(num_variables + 1, -1);
-    for (int i = 0; i <= num_variables; i++) {
-        int index_in_bdd_word = m_initial_variable_order[i];
+std::vector<int> bdd_manager::get_variable_order() {
+    std::vector<int> layer_to_variable_index(m_num_variables, -1);
+    for (int i = 0; i <= m_num_variables; i++) {
         // tells us at what layer the var resides in
-        int perm_pos = Cudd_ReadPerm(m_bdd_manager, index_in_bdd_word);
-        if (perm_pos == -1) {  // variable does not exist
+        int layer_of_variable_i = Cudd_ReadPerm(m_bdd_manager, i);
+        if (layer_of_variable_i == -1) {  // variable does not exist
             continue;
         }
-        permutation[perm_pos] = i;
+        layer_to_variable_index[layer_of_variable_i] = i;
     }
-    return permutation;
+    return layer_to_variable_index;
 }
 
 // TODO: find out what swapvars, bddpermute does

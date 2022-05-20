@@ -20,21 +20,19 @@ class bdd_manager : public virtual dd_buildable {
     DdManager *m_bdd_manager;
     DdNode *m_root_node;
     int m_num_variables;
-    // a permutation that tells the bdd manager at which layer variable i should lay in.
-    std::vector<int> m_initial_variable_order;
-    std::vector<int> m_inverse_initial_variable_order;
 
    public:
     bdd_manager(int num_variables);
-    bdd_manager(int num_variables, std::vector<int> &inital_variable_order);
     virtual ~bdd_manager();
 
     // reorders the variables
     void reduce_heap();
 
+    // The i-th entry of the permutation array contains the index of the variable that should be brought to the i-th level
+    void set_variable_order(std::vector<int> &variable_order);
     // returns the permutation of the variable order
     // the i-th entry contains the the level in the BDD in which the variable resides in
-    std::vector<int> get_variable_order(int num_variables);
+    std::vector<int> get_variable_order();
 
     // Wirtes all the information about the CUDD manager to std::out
     void print_bdd();
