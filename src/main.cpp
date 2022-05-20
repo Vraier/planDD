@@ -35,8 +35,11 @@ int main(int argc, char *argv[]) {
             constraint.push_back(i);
         }
 
-        bdd_manager builder(num_variables);
-        builder.add_exactly_one_constraint(constraint);
+        bdd_manager builder(4);
+
+        LOG_MESSAGE(log_level::debug) << "Starting hack back rocket";
+        builder.hack_back_rocket_method();
+        LOG_MESSAGE(log_level::debug) << "Landed Hack back rocket";
 
         LOG_MESSAGE(log_level::debug) << builder.get_short_statistics();
         builder.print_bdd();

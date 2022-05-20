@@ -3,7 +3,9 @@
 #include "bdd_manager.h"
 
 bdd_manager::bdd_manager(int num_variables) {
-    m_bdd_manager = Cudd_Init(0, 0, CUDD_UNIQUE_SLOTS, CUDD_CACHE_SLOTS, 0);
+    m_num_variables = num_variables;
+
+    m_bdd_manager = Cudd_Init(m_num_variables, 0, CUDD_UNIQUE_SLOTS, CUDD_CACHE_SLOTS, 0);
     Cudd_AutodynEnable(m_bdd_manager, CUDD_REORDER_SIFT);
     //Cudd_SetMaxCacheHard(m_bdd_manager, 62500000);
 
@@ -11,16 +13,11 @@ bdd_manager::bdd_manager(int num_variables) {
     Cudd_Ref(m_root_node);
 
     // build identity for inital variable order
-    m_num_variables = num_variables;
     m_initial_variable_order = std::vector<int>(num_variables+1);
     for(int i = 0; i <= m_num_variables; i++){
         m_initial_variable_order[i] = i;
     }
     m_inverse_initial_variable_order = m_initial_variable_order;
-
-    // TODO: does this work?
-    // tell CUDD how many variables to expect
-    Cudd_bddIthVar(m_bdd_manager, m_num_variables);
 }
 
 bdd_manager::bdd_manager(int num_variables, std::vector<int> &initial_variable_order) {
@@ -38,14 +35,16 @@ bdd_manager::bdd_manager(int num_variables, std::vector<int> &initial_variable_o
     m_inverse_initial_variable_order = std::vector<int>(m_initial_variable_order.size());
     for(int i = 0; i < m_initial_variable_order.size(); i++){
         m_inverse_initial_variable_order[m_initial_variable_order[i]] = i;
-    }
-
-    // TODO: does this work?
-    // tell CUDD how many variables to expect
-    Cudd_bddIthVar(m_bdd_manager, m_num_variables);   
+    } 
 }
 
 bdd_manager::~bdd_manager() { 
+
+    Cudd_PrintDebug(m_bdd_manager, m_root_node, m_num_variables, 4);
+
+    Cudd_RecursiveDeref(m_bdd_manager, m_root_node);
+    LOG_MESSAGE(log_level::info) << "#Nodes with non-zero reference count (should be 0): " << Cudd_CheckZeroRef(m_bdd_manager) << "\n\n";
+
     Cudd_Quit(m_bdd_manager); 
 }
 
@@ -144,6 +143,8 @@ void bdd_manager::add_exactly_one_constraint(std::vector<int> &variables){
         Cudd_Ref(new_exact_zero_true);
 
         // clean up old nodes
+        //cuddDeref(exact_one_true);
+        //cuddDeref(exact_zero_true);
         //Cudd_RecursiveDeref(m_bdd_manager, exact_one_true);
         //Cudd_RecursiveDeref(m_bdd_manager, exact_zero_true);
         exact_one_true = new_exact_one_true;
@@ -153,15 +154,67 @@ void bdd_manager::add_exactly_one_constraint(std::vector<int> &variables){
     // build the root node for the last variable
     DdNode *constraint_root_node = cuddUniqueInter(m_bdd_manager, ordered_variables[ordered_variables.size()-1], exact_one_true, exact_zero_true);
     Cudd_Ref(constraint_root_node);
+    //cuddDeref(exact_one_true);
+    //cuddDeref(exact_zero_true);
     //Cudd_RecursiveDeref(m_bdd_manager, exact_one_true);
     //Cudd_RecursiveDeref(m_bdd_manager, exact_zero_true);
 
     // conjoin the root node for the exact one constraint with the root node of the bdd
     DdNode *tmp = Cudd_bddAnd(m_bdd_manager, m_root_node, constraint_root_node);
     Cudd_Ref(tmp);
+    //cuddDeref(m_root_node);
+    //cuddDeref(constraint_root_node);
     //Cudd_RecursiveDeref(m_bdd_manager, m_root_node);
     //Cudd_RecursiveDeref(m_bdd_manager, constraint_root_node);
     m_root_node = tmp;
+
+    
+    LOG_MESSAGE(log_level::debug) << "Trying to print debug info";
+    Cudd_PrintDebug(m_bdd_manager, m_root_node, m_num_variables, 4);
+}
+
+void bdd_manager::hack_back_rocket_method(){
+    Cudd_PrintDebug(m_bdd_manager, m_root_node, 4, 4);
+
+    DdNode *false_node = Cudd_ReadLogicZero(m_bdd_manager); Cudd_Ref(false_node);
+    DdNode *true_node = Cudd_ReadOne(m_bdd_manager); Cudd_Ref(true_node);
+
+    Cudd_PrintDebug(m_bdd_manager, m_root_node, 4, 4);
+    if (Cudd_DebugCheck(m_bdd_manager) != 0){
+        LOG_MESSAGE(log_level::error) << "Failed Debug check before new node";
+    }
+    cuddHeapProfile(m_bdd_manager);
+
+
+    DdNode *l4 = cuddUniqueInterIVO(m_bdd_manager, 4, false_node, true_node);
+    if (l4 == NULL){
+        LOG_MESSAGE(log_level::error) << "Null value while creating node";
+        return;
+    }
+    cuddHeapProfile(m_bdd_manager);
+    if (Cudd_DebugCheck(m_bdd_manager) != 0){
+        LOG_MESSAGE(log_level::error) << "Failed Debug check before ref";
+    }
+    Cudd_Ref(l4);
+    cuddHeapProfile(m_bdd_manager);
+    if (Cudd_DebugCheck(m_bdd_manager) != 0){
+        LOG_MESSAGE(log_level::error) << "Failed Debug check after ref";
+    }
+    Cudd_PrintDebug(m_bdd_manager, l4, 4, 4);
+
+
+
+
+    DdNode *r4 = cuddUniqueInter(m_bdd_manager, 4, true_node, false_node);
+    if (l4 == NULL){
+        LOG_MESSAGE(log_level::error) << "Null value while creating node";
+        return;
+    }
+    Cudd_Ref(r4);
+    if (Cudd_DebugCheck(m_bdd_manager) != 0){
+        LOG_MESSAGE(log_level::error) << "Failed Debug check";
+    }
+    Cudd_PrintDebug(m_bdd_manager, r4, 4, 4);
 }
 
 // This method returns the variable permutation

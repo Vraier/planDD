@@ -51,6 +51,8 @@ class bdd_manager : public virtual dd_buildable {
     // conjoins the bdd with the root node
     // should contain at least one variable
     void add_exactly_one_constraint(std::vector<int> &variables);
+    // function is purely for debugging purpose. allows entry point to bdd manager
+    void hack_back_rocket_method();
 };
 
 #endif

@@ -41,33 +41,6 @@ void sdd_manager::conjoin_clause(std::vector<int> &clause) {
     sdd_deref(m_root_node, m_sdd_manager);
     sdd_deref(disjunction, m_sdd_manager);
     m_root_node = tmp;
-
-    /*
-    DdNode *var, *tmp;
-    DdNode *disjunction = Cudd_ReadLogicZero(m_bdd_manager);
-    Cudd_Ref(disjunction);
-
-    for (int j = 0; j < clause.size(); j++) {
-        int literal = clause[j];
-        var = Cudd_bddIthVar(m_bdd_manager, std::abs(literal));
-
-        if (literal > 0) {
-            tmp = Cudd_bddOr(m_bdd_manager, var, disjunction);
-        } else {
-            tmp = Cudd_bddOr(m_bdd_manager, Cudd_Not(var), disjunction);
-        }
-        Cudd_Ref(tmp);
-        Cudd_RecursiveDeref(m_bdd_manager, disjunction);
-        disjunction = tmp;
-    }
-
-    // conjoin the clause with the root node
-    tmp = Cudd_bddAnd(m_bdd_manager, m_root_node, disjunction);
-    Cudd_Ref(tmp);
-    Cudd_RecursiveDeref(m_bdd_manager, m_root_node);
-    Cudd_RecursiveDeref(m_bdd_manager, disjunction);
-    m_root_node = tmp;
-    */
 }
 
 void sdd_manager::print_sdd(){
