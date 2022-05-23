@@ -6,6 +6,7 @@
 
 #include "logging.h"
 
+// TODO rename to something like planning logic formula
 using namespace planning_cnf;
 
 cnf::cnf(int num_timestpes){
@@ -15,9 +16,11 @@ cnf::cnf(int num_timestpes){
 cnf::~cnf(){}
 
 void cnf::add_clause(std::vector<int> clause, clause_tag tag, int timestep) {
-    m_clauses.push_back(clause);
-    m_tags.push_back(tag);
-    m_timesteps.push_back(timestep);
+    m_tagged_clauses.push_back(std::make_tuple(clause, tag, timestep));
+}
+
+void cnf::add_exact_one_constraint(exactly_one_constraint constraint, constraint_tag tag, int timestep){
+    m_constraints.push_back(std::make_tuple(constraint, tag, timestep));
 }
 
 int cnf::get_variable_index(int var_index, variable_tag tag, int timestep, int value){
@@ -53,12 +56,17 @@ tagged_variable cnf::get_planning_info_for_variable(int index){
     return m_inverse_variable_map[index];
 }
 
-std::vector<int> cnf::get_clause(int i) { return m_clauses[i]; }
-clause_tag cnf::get_tag(int i) { return m_tags[i]; }
-int cnf::get_timestep(int i) { return m_timesteps[i]; }
+std::vector<int> cnf::get_clause(int i) { return std::get<0>(m_tagged_clauses[i]); }
+clause_tag cnf::get_clause_tag(int i) { return std::get<1>(m_tagged_clauses[i]); }
+int cnf::get_clause_timestep(int i) { return std::get<2>(m_tagged_clauses[i]); }
+
+std::vector<int> cnf::get_constraint(int i) { return std::get<0>(m_constraints[i]); }
+constraint_tag cnf::get_constraint_tag(int i) { return std::get<1>(m_constraints[i]); }
+int cnf::get_constraint_timestep(int i) { return std::get<2>(m_constraints[i]); }
 
 int cnf::get_num_variables() { return m_variable_map.size(); }
-int cnf::get_num_clauses() { return m_clauses.size(); }
+int cnf::get_num_clauses() { return m_tagged_clauses.size(); }
+int cnf::get_num_constraints() { return m_constraints.size(); }
 int cnf::get_num_timesteps() { return m_num_timesteps; }
 
 void cnf::write_to_file(std::string filepath) {

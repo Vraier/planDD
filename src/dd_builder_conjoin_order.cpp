@@ -58,14 +58,14 @@ categorized_clauses categorize_clauses(cnf &cnf) {
 
     // categorize clauses by tag and timestep
     for (int i = 0; i < cnf.get_num_clauses(); i++) {
-        clause_tag t = cnf.get_tag(i);
+        clause_tag t = cnf.get_clause_tag(i);
         if (t == initial_state || t == goal) {
             tagged_clauses[t][0].push_back(cnf.get_clause(i));
         } else if (t == none_clause) {
             LOG_MESSAGE(log_level::error) << "Unknown tag during dd building: " << t;
             return std::map<clause_tag, std::vector<std::vector<clause>>>();
         } else {
-            tagged_clauses[t][cnf.get_timestep(i)].push_back(cnf.get_clause(i));
+            tagged_clauses[t][cnf.get_clause_timestep(i)].push_back(cnf.get_clause(i));
         }
     }
 

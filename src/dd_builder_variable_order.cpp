@@ -71,7 +71,7 @@ std::vector<int> put_variables_of_tag_first(planning_cnf::cnf &cnf, std::vector<
     // find all variables that are affected by the goal
     std::set<int> goal_variables;
     for(int i = 0; i < cnf.get_num_clauses(); i++){
-        if(cnf.get_tag(i) == front_tag){
+        if(cnf.get_clause_tag(i) == front_tag){
             clause goal_clause = cnf.get_clause(i);
             for(int j = 0; j < goal_clause.size(); j++){
                 goal_variables.insert(std::abs(goal_clause[j]));
