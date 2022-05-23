@@ -4,24 +4,24 @@ project(planDD)
 add_library(cudd STATIC IMPORTED GLOBAL)
 
 set_property(TARGET cudd PROPERTY
-	IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/cudd-3.0.0/cudd/.libs/libcudd.a")
+	IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/contrib/cudd-3.0.0/cudd/.libs/libcudd.a")
 
 target_include_directories(cudd SYSTEM
 	INTERFACE
-		"dependencies/cudd-3.0.0/cudd"
-		"dependencies/cudd-3.0.0/util"
-		"dependencies/cudd-3.0.0")
+		"contrib/cudd-3.0.0/cudd"
+		"contrib/cudd-3.0.0/util"
+		"contrib/cudd-3.0.0")
 
 
 add_library(libsdd STATIC IMPORTED GLOBAL)
 
 set_property(TARGET libsdd PROPERTY
-	IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/libsdd-2.0/build/libsdd.a")
+	IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/contrib/libsdd-2.0/build/libsdd.a")
 
 target_include_directories(libsdd SYSTEM
 	INTERFACE
-		"dependencies/libsdd-2.0"
-		"dependencies/libsdd-2.0/include")
+		"contrib/libsdd-2.0"
+		"contrib/libsdd-2.0/include")
 
 set(BOOST_VERSION 1.71.0)
 
