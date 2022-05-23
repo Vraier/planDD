@@ -5,8 +5,9 @@
 *.png
 *.dot
 
-# Created by https://www.toptal.com/developers/gitignore/api/c,c++,cmake,python,visualstudiocode
-# Edit at https://www.toptal.com/developers/gitignore?templates=c,c++,cmake,python,visualstudiocode
+
+# Created by https://www.toptal.com/developers/gitignore/api/c,c++,cmake,python,visualstudiocode,scons
+# Edit at https://www.toptal.com/developers/gitignore?templates=c,c++,cmake,python,visualstudiocode,scons
 
 ### C ###
 # Prerequisites
@@ -259,6 +260,14 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
+### SCons ###
+# for projects that use SCons for building: http://http://www.scons.org/
+.sconsign.dblite
+
+# When configure fails, SCons outputs these
+config.log
+.sconf_temp
+
 ### VisualStudioCode ###
 .vscode/*
 !.vscode/settings.json
@@ -284,4 +293,4 @@ cython_debug/
 # Ignore code-workspaces
 *.code-workspace
 
-# End of https://www.toptal.com/developers/gitignore/api/c,c++,cmake,python,visualstudiocode
+# End of https://www.toptal.com/developers/gitignore/api/c,c++,cmake,python,visualstudiocode,scons
