@@ -42,11 +42,8 @@ class bdd_manager : public virtual dd_buildable {
     void write_bdd_to_dot_file(std::string filename);
 
     virtual void conjoin_clause(std::vector<int> &clause);
-
-    // builds a bdd that is true iff exactly one of the variables is true
-    // conjoins the bdd with the root node
-    // should contain at least one variable
-    void add_exactly_one_constraint(std::vector<int> &variables);
+    virtual void add_exactly_one_constraint(std::vector<int> &variables);
+    
     // function is purely for debugging purpose. allows entry point to bdd manager
     void hack_back_rocket_method();
 };

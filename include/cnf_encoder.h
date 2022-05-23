@@ -60,12 +60,17 @@ class cnf_encoder {
     // These methos generate all the clauses that represent the planning problem
     void construct_initial_state_clauses();
     void construct_goal_holds_clauses(int timesteps);
-    void construct_at_least_on_value_clause(int timesteps);
-    void construct_at_most_on_value_clause(int timesteps);
+    void construct_at_least_one_value_clause(int timesteps);
+    void construct_at_most_one_value_clause(int timesteps);
     void construct_at_least_one_action_clauses(int timesteps);
     void construct_at_most_one_action_clauses(int timesteps);
     void construct_mutex_clauses(int timesteps);
     void construct_precondition_clauses(int timesteps);
     void construct_effect_clauses(int timesteps);
     void construct_changing_atom_implies_action_clauses(int timesteps);
+
+    // these methos generate additional logic constructs
+    // namely the exact one variable is true constraint
+    void construct_exact_one_value_constraint(int timesteps);
+    void construct_exact_one_action_constraint(int timesteps);
 };

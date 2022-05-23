@@ -119,8 +119,7 @@ int main(int argc, char *argv[]) {
         //}
         
 
-        dd_builder::construct_dd_linear_disjoint(builder, clauses, options.m_values.build_order,
-                                                 options.m_values.reverse_order);
+        dd_builder::construct_dd_linear_disjoint(builder, clauses, options.m_values);
 
         //std::vector<int> builder_order = builder.get_variable_order();
         //for(int i = 0; i < builder_order.size(); i++){
@@ -146,8 +145,7 @@ int main(int argc, char *argv[]) {
         sdd_manager builder(clauses.get_num_variables());
         LOG_MESSAGE(log_level::info) << "Start building sdd";
 
-        dd_builder::construct_dd_linear_disjoint(builder, clauses, options.m_values.build_order,
-                                                 options.m_values.reverse_order);
+        dd_builder::construct_dd_linear_disjoint(builder, clauses, options.m_values);
         builder.print_sdd();
 
         return 0;

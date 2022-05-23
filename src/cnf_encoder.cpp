@@ -18,13 +18,21 @@ cnf cnf_encoder::encode_cnf(int timesteps) {
 
     construct_goal_holds_clauses(timesteps);
 
-    construct_at_least_on_value_clause(timesteps);
+    // either use encoding as cnf or directly into dd
+    if(!m_options.exact_one_constraint){
+        construct_at_least_one_value_clause(timesteps);
 
-    construct_at_most_on_value_clause(timesteps);
+        construct_at_most_one_value_clause(timesteps);
 
-    construct_at_least_one_action_clauses(timesteps);
+        construct_at_least_one_action_clauses(timesteps);
 
-    construct_at_most_one_action_clauses(timesteps);
+        construct_at_most_one_action_clauses(timesteps);
+    }
+    else {
+        construct_exact_one_value_constraint(timesteps);
+
+        construct_exact_one_action_constraint(timesteps);
+    }
 
     if (m_options.include_mutex) {
         construct_mutex_clauses(timesteps);
@@ -43,12 +51,11 @@ cnf cnf_encoder::encode_cnf(int timesteps) {
     return m_cnf;
 }
 
-// TODO check if 6 is correct magic number
 std::vector<std::vector<int>> cnf_encoder::generate_at_most_one_constraint(std::vector<int> &variables,
                                                                            variable_tag constraint_type, int timestep) {
     if (!m_options.use_ladder_encoding) {
         return generate_at_most_one_constraint_pairwise(variables);
-    } else if (m_options.use_ladder_encoding && variables.size() <= 6) {
+    } else if (m_options.use_ladder_encoding && variables.size() <= 5) {
         return generate_at_most_one_constraint_pairwise(variables);
     } else {
         return generate_at_most_one_constraint_ladder(variables, constraint_type, timestep);
@@ -115,7 +122,7 @@ void cnf_encoder::construct_initial_state_clauses() {
 }
 
 // At every timestep a sas variable has at least one value
-void cnf_encoder::construct_at_least_on_value_clause(int timesteps) {
+void cnf_encoder::construct_at_least_one_value_clause(int timesteps) {
     for (int t = 0; t <= timesteps; t++) {
         for (int v = 0; v < m_sas_problem.m_variabels.size(); v++) {
             std::vector<int> new_clause;
@@ -129,7 +136,7 @@ void cnf_encoder::construct_at_least_on_value_clause(int timesteps) {
 }
 
 // At every step, a sas varaibel has at most one value
-void cnf_encoder::construct_at_most_on_value_clause(int timesteps) {
+void cnf_encoder::construct_at_most_one_value_clause(int timesteps) {
     for (int t = 0; t <= timesteps; t++) {
         for (int v = 0; v < m_sas_problem.m_variabels.size(); v++) {
             std::vector<int> at_most_one_should_be_true;
@@ -176,6 +183,33 @@ void cnf_encoder::construct_at_most_one_action_clauses(int timesteps) {
         }
     }
 }
+
+void cnf_encoder::construct_exact_one_value_constraint(int timesteps){
+    for (int t = 0; t <= timesteps; t++){
+        for (int v = 0; v < m_sas_problem.m_variabels.size(); v++) {
+            std::vector<int> exact_one_should_be_true;
+            for (int val = 0; val < m_sas_problem.m_variabels[v].m_range; val++) {
+                int index = m_cnf.get_variable_index(v, plan_variable, t, val);
+                exact_one_should_be_true.push_back(index);
+            }
+
+            m_cnf.add_exact_one_constraint(exact_one_should_be_true, exact_one_var, t);
+        }
+    }
+}
+
+void cnf_encoder::construct_exact_one_action_constraint(int timesteps){
+    for (int t = 0; t < timesteps; t++) {
+        std::vector<int> exact_one_should_be_true;
+        for (int op = 0; op < m_sas_problem.m_operators.size(); op++) {
+            int index = m_cnf.get_variable_index(op, plan_action, t);
+            exact_one_should_be_true.push_back(index);
+        }
+
+        m_cnf.add_exact_one_constraint(exact_one_should_be_true, exact_one_op, t);
+    }
+}
+
 
 // If action a is applied at step t, then pre(a) holds at step t.
 // TODO: i am not sure if this is correct (i didnt use every information from

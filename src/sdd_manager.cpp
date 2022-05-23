@@ -43,6 +43,11 @@ void sdd_manager::conjoin_clause(std::vector<int> &clause) {
     m_root_node = tmp;
 }
 
+void sdd_manager::add_exactly_one_constraint(std::vector<int> &variables){
+    //TODO implement
+    return;
+}
+
 void sdd_manager::print_sdd(){
     LOG_MESSAGE(log_level::info) << "Printing LibSDD statistics...";
     SddModelCount count = sdd_model_count(m_root_node, m_sdd_manager);

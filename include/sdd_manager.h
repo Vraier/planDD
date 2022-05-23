@@ -28,6 +28,7 @@ class sdd_manager : public virtual dd_buildable  {
     SddNode *construct_bdd_from_cnf_binary(std::vector<std::vector<int>> &cnf);
 
     virtual void conjoin_clause(std::vector<int> &clause);
+    virtual void add_exactly_one_constraint(std::vector<int> &variables);
 };
 
 /*

@@ -23,6 +23,7 @@ enum clause_tag {
 enum constraint_tag {
     exact_one_var,
     exact_one_op,
+    none_constraint,
 };
 
 enum variable_tag {
@@ -34,6 +35,13 @@ enum variable_tag {
     none_variable,
 };
 
+enum logic_primitive_type{
+    logic_clause,
+    logic_exact_one,
+};
+
+// logic primitive can be a clause or an exactly one constraint
+typedef std::vector<int> logic_primitive;
 typedef std::vector<int> clause;
 typedef std::vector<int> exactly_one_constraint;
 
