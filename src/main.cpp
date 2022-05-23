@@ -28,7 +28,7 @@ int main(int argc, char *argv[]) {
     }
 
     if (options.m_values.hack_debug) {
-        LOG_MESSAGE(log_level::info) << "You unlocked full control. Good luck modifying the source code";
+        LOG_MESSAGE(log_level::info) << "You unlocked full control. good luck modifying the source code";
 
         int num_variables = options.m_values.timesteps;
         std::vector<int> constraint;
