@@ -1,5 +1,4 @@
-#ifndef H_SDD_MANAGER
-#define H_SDD_MANAGER
+#pragma once
 
 #include <iostream>
 #include <string>
@@ -53,5 +52,3 @@ LOG_MESSAGE(log_level::info) << "Finished building SDD";
 
 sdd_manager_print(m);
 */
-
-#endif

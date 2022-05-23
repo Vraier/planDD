@@ -1,5 +1,4 @@
-#ifndef H_DD_BUILDABLE
-#define H_DD_BUILDABLE
+#pragma once
 
 #include <vector>
 
@@ -11,5 +10,3 @@ public:
     virtual void conjoin_clause(std::vector<int> &clause) = 0;
     virtual std::string get_short_statistics() = 0;
 };
-
-#endif

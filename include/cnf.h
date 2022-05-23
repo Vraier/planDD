@@ -1,5 +1,4 @@
-#ifndef CNF_H
-#define CNF_H
+#pragma once
 
 #include <map>
 #include <string>
@@ -110,5 +109,3 @@ class cnf {
 };
 
 }  // namespace planning_cnf
-
-#endif

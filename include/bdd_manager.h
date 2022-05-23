@@ -1,5 +1,4 @@
-#ifndef H_BDD_MANAGER
-#define H_BDD_MANAGER
+#pragma once
 
 #include <iostream>
 #include <string>
@@ -51,5 +50,3 @@ class bdd_manager : public virtual dd_buildable {
     // function is purely for debugging purpose. allows entry point to bdd manager
     void hack_back_rocket_method();
 };
-
-#endif

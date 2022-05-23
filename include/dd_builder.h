@@ -1,5 +1,4 @@
-#ifndef H_DD_BUILDER
-#define H_DD_BUILDER
+#pragma once
 
 #include <map>
 #include <vector>
@@ -11,5 +10,3 @@ namespace dd_builder
 {    
     void construct_dd_linear_disjoint(dd_buildable &dd, planning_cnf::cnf &cnf, std::string disjoint_order, bool reversed);
 }
-
-#endif

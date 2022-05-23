@@ -1,29 +1,4 @@
-# Compiler and flags
-CC = gcc
-CFLAGS = -g # debugging information
-CFLAGS += -Wall -Wextra # more warnings
-CFLAGS += -Wno-sign-compare # ignore comparison of signed and unsigned integer warning
-CFLAGS += -DBOOST_LOG_DYN_LINK # without this the boost log library does not work
-
-# Directories that contain important stuff
-SRC_DIR = src
-INCLUDE_DIR = include
-DEP_DIR = dependencies
-
-# Directories the contain .h header files
-INCLUDE_CUDD := -I$(DEP_DIR)/cudd-3.0.0 -I$(DEP_DIR)/cudd-3.0.0/util -I$(DEP_DIR)/cudd-3.0.0/cudd -I$(DEP_DIR)/cudd-3.0.0/st -I$(DEP_DIR)/cudd-3.0.0/mtr -I$(DEP_DIR)/cudd-3.0.0/epd
-INCLUDE_SDD := -I$(DEP_DIR)/libsdd-2.0 -I$(DEP_DIR)/libsdd-2.0/include
-INCLUDE_ALL := -I$(INCLUDE_DIR) $(INCLUDE_CUDD) $(INCLUDE_SDD)
-
-# Libraries that are used
-LIB_CUDD := $(DEP_DIR)/cudd-3.0.0/cudd/.libs/libcudd.a
-LIB_SDD := $(DEP_DIR)/libsdd-2.0/build/libsdd.a
-LIB_COMMON = -lstdc++ -lm -lpthread -lboost_program_options -lboost_thread -lboost_log -lboost_log_setup
-
-# All of my own cpp files
-CPP_FILES := $(wildcard $(SRC_DIR)/*.cpp) $(wildcard $(SRC_DIR)/fnf/*.c)
-
-TARGET = main
+TARGET = build/planDD
 
 all:
 	make clean

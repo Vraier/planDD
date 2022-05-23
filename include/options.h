@@ -1,9 +1,9 @@
-#ifndef OPTIONS_H
-#define OPTIONS_H
+#pragma once
 
 #include <boost/program_options.hpp>
 #include <iostream>
 
+// TODO make _ to -
 struct option_values {
     // Files
     std::string sas_file, ass_file, cnf_file;
@@ -12,7 +12,7 @@ struct option_values {
     // DD building parameters
     std::string build_order, variable_order;
     bool reverse_order;
-    bool include_mutex, use_ladder_encoding, goal_variables_first, initial_state_variables_first;
+    bool include_mutex, use_ladder_encoding, exact_one_constraint, goal_variables_first, initial_state_variables_first;
     int timesteps;
 };
 
@@ -35,5 +35,3 @@ class option_parser {
     void print_help();
     void print_variable_map();
 };
-
-#endif

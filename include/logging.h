@@ -1,5 +1,4 @@
-#ifndef LOGGING_H
-#define LOGGING_H
+#pragma once
 
 #include <boost/log/attributes.hpp>
 #include <boost/log/core.hpp>
@@ -32,5 +31,3 @@ void initialize_logging();
 
 // Convert file path to only the filename
 std::string path_to_filename(std::string path);
-
-#endif

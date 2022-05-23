@@ -1,5 +1,4 @@
-#ifndef H_SAS_PARSER
-#define H_SAS_PARSER
+#pragma once
 
 #include <string>
 #include <vector>
@@ -71,5 +70,3 @@ private:
     int parse_sas_operator(std::ifstream& infile);
     int parse_sas_axiom(std::ifstream& infile);
 };
-
-#endif

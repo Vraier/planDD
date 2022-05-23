@@ -1,5 +1,4 @@
-#ifndef H_DD_BUILDER_VARIABLE_ORDER
-#define H_DD_BUILDER_VARIABLE_ORDER
+#pragma once
 
 #include <string>
 #include <vector>
@@ -28,5 +27,3 @@ std::vector<int> put_variables_of_tag_first(planning_cnf::cnf &cnf, std::vector<
 std::vector<int> order_variables(planning_cnf::cnf &cnf, std::string build_order, bool goal_first, bool init_state_first);
 
 };
-
-#endif

@@ -1,3 +1,5 @@
+#pragma once
+
 /****************************************************************************************
  * The Sentential Decision Diagram Package
  * sdd version 2.0, January 8, 2018
@@ -25,9 +27,7 @@
  * compiler options: populated by main.c using command-line arguments
  * default values for some of these options can be found in parameter.h
  ****************************************************************************************/
- 
-#ifndef COMPILER_H_
-#define COMPILER_H_
+
 
 typedef struct {
   //input files
@@ -92,9 +92,6 @@ SddNode* fnf_to_sdd(Fnf* fnf, SddManager* manager);
  ****************************************************************************************/
  
 void sort_litsets_by_lca(LitSet** litsets, SddSize litset_count, SddManager* manager);
-
-
-#endif // COMPILER_H_
 
 /****************************************************************************************
  * end

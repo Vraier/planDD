@@ -1,5 +1,4 @@
-#ifndef H_DD_BUILDER_CONJONIN_ORDER
-#define H_DD_BUILDER_CONJONIN_ORDER
+#pragma once
 
 #include <string>
 #include <map>
@@ -22,5 +21,3 @@ categorized_clauses categorize_clauses(planning_cnf::cnf &cnf);
 // uses the categorized clauses to order them in one single vector according to a build order
 std::vector<planning_cnf::clause> order_clauses(planning_cnf::cnf &cnf, std::string build_order);
 };
-
-#endif
