@@ -3,14 +3,12 @@ import suites
 import extract_planDD_information
 import planDD_test_util_general as util
 
-PATH_TO_BENCHMARKS = "../../downward-benchmarks/"
-
 # lists the path to all domains and problems that conatin optimal strips problems
 # format: (domain, problem, full_path)
 def list_all_opt_strips_problems():
     all_problems = []
     for domain in suites.suite_optimal_strips():
-        domain_path = os.path.join(PATH_TO_BENCHMARKS, domain)
+        domain_path = os.path.join(util.PATH_TO_BENCHMARKS, domain)
         for f in os.listdir(domain_path):
             file_path = os.path.join(domain_path, f)
             if os.path.isfile(file_path) and not "domain" in f and ".pddl" in f:

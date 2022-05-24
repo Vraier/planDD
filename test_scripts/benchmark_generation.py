@@ -2,9 +2,7 @@ import suites
 import os
 import re
 
-PATH_TO_BENCHMARKS = "../../downward-benchmarks/"
-PATH_TO_DOWNWARD = "../../downward/fast-downward.py"
-PATH_TO_PLANDD = "../main"
+import planDD_test_util_general as util
 
 DOWNWARD_RUN = "easy_optimal_downward_test"
 PLANDD_RUN = "easy_optimal_planDD_test"
@@ -14,7 +12,7 @@ PLANDD_RUN = "easy_optimal_planDD_test"
 def list_all_problems():
     all_problems = []
     for domain in suites.suite_optimal_strips():
-        domain_path = os.path.join(PATH_TO_BENCHMARKS, domain)
+        domain_path = os.path.join(util.PATH_TO_BENCHMARKS, domain)
         for f in os.listdir(domain_path):
             file_path = os.path.join(domain_path, f)
             if os.path.isfile(file_path) and not "domain" in f and ".pddl" in f:
@@ -30,7 +28,7 @@ def generate_output_directory_name(suite_folder, problem):
     
     unsanitized_name = d + p
     sanitized_name = "".join(x for x in unsanitized_name if x.isalnum())
-    test_instance_path = os.path.join("../test_output/", suite_folder, sanitized_name)
+    test_instance_path = os.path.join(util.PATH_TO_TEST_OUTPUT, suite_folder, sanitized_name)
         
     return test_instance_path
 
@@ -39,7 +37,7 @@ def generate_output_directory_name(suite_folder, problem):
 def construct_downward_call(output_folder, problem_path):
     mkdir_command = "mkdir -p " + output_folder
     chdir_command = "cd " + output_folder
-    downward_command =  os.path.join("../../", PATH_TO_DOWNWARD) + " --overall-time-limit 180 " + os.path.join("../../", problem_path) + " --search \"astar(lmcut())\" > fd_output.txt"
+    downward_command =  os.path.join("../../", util.PATH_TO_DOWNWARD) + " --overall-time-limit 180 " + os.path.join("../../", problem_path) + " --search \"astar(lmcut())\" > fd_output.txt"
     
     whole_command = mkdir_command + " && " + chdir_command + " && " + downward_command
     return whole_command
@@ -50,8 +48,8 @@ def construct_downward_call(output_folder, problem_path):
 def construct_DD_call(output_folder, problem_path, plan_length):
     mkdir_command = "mkdir -p " + output_folder
     chdir_command = "cd " + output_folder
-    downward_translate_command = os.path.join("../../", PATH_TO_DOWNWARD) + " --sas-file output.sas --translate-time-limit 180 --translate " + os.path.join("../../", problem_path) + " > fd_output.txt"
-    planDD_command = "timeout 180s " + os.path.join("../../", PATH_TO_PLANDD) + " --build_bdd --sas_file output.sas --timesteps " + str(plan_length) + " > planDD_output.txt"
+    downward_translate_command = os.path.join("../../", util.PATH_TO_DOWNWARD) + " --sas-file output.sas --translate-time-limit 180 --translate " + os.path.join("../../", problem_path) + " > fd_output.txt"
+    planDD_command = "timeout 180s " + os.path.join("../../", util.PATH_TO_PLANDD) + " --build_bdd --sas_file output.sas --timesteps " + str(plan_length) + " > planDD_output.txt"
     whole_command = mkdir_command + " && " + chdir_command + " && " + downward_translate_command + " && " + planDD_command
     return whole_command
 
