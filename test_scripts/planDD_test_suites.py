@@ -96,9 +96,27 @@ def best_17_5_big_test():
     print("Num commands:",len(comms))
     return comms
 
+# ran on the 139 (the 256 core machine)
+def best_24_5_big_test():
+    probs = problems.list_all_downward_solved_problems()
+    planDD_argument_map =  {
+        "$timeout" : "180s",
+        "$mode" : "build_bdd",
+        "$addition_flags" : " --build_order grtyumix:pec --variable_order x:vohjk --goal_variables_first --initial_state_variables_first --exact_one_constraint ",
+    }
+    downward_argument_map = dict(arguments.standart_downward_argument_map)
+    arg = ("best_24_5_big_test", planDD_argument_map, downward_argument_map)
+    args = [arg]
+
+    comms = commandfile.generate_command_calls(probs, args)
+    print("Num problems:",len(probs))
+    print("Num configs:",len(args))
+    print("Num commands:",len(comms))
+    return comms
+
 
 comms = []
-comms += best_17_5_big_test()
+comms += best_24_5_big_test()
 
 commandfile.generate_parallel_file_from_calls(comms)
 
