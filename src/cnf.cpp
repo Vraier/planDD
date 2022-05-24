@@ -53,6 +53,9 @@ int cnf::get_variable_index_without_adding(int var_index, variable_tag tag, int 
 
 // TODO implement
 tagged_variable cnf::get_planning_info_for_variable(int index){
+    if(m_inverse_variable_map.find(index) == m_inverse_variable_map.end()) {
+        return std::make_tuple(-1, none_variable, -1, -1);
+    }
     return m_inverse_variable_map[index];
 }
 

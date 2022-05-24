@@ -97,9 +97,17 @@ void bdd_manager::add_exactly_one_constraint(std::vector<int> &variables) {
     // order variables by the variable order
     // variable in the lowest layer comes first
     // variable in the highest layer comes last
-    std::vector<int> ordered_variables;  // TODO really order them by variable order
-    for (int i = variables.size() - 1; i >= 0; i--) {
-        ordered_variables.push_back(variables[i]);
+    std::vector<std::pair<int, int>> layer_zipped_vars;
+    for(int i = 0; i < variables.size(); i++){
+        int var = variables[i];
+        int layer = Cudd_ReadPerm(m_bdd_manager, var);
+        layer_zipped_vars.push_back(std::make_pair(layer, var));
+    }
+    // sort it descending by layer
+    std::sort(layer_zipped_vars.begin(), layer_zipped_vars.end(), std::greater<>());
+    std::vector<int> ordered_variables;
+    for(int i = 0; i < layer_zipped_vars.size(); i++) {
+        ordered_variables.push_back(layer_zipped_vars[i].second);
     }
 
     DdNode *false_node = Cudd_ReadLogicZero(m_bdd_manager);

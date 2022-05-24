@@ -105,9 +105,7 @@ int main(int argc, char *argv[]) {
         cnf_encoder encoder(options.m_values, parser.m_sas_problem);
         planning_cnf::cnf clauses = encoder.encode_cnf(options.m_values.timesteps);
 
-        std::vector<int> var_order = variable_order::order_variables(clauses, options.m_values.variable_order,
-                                                                     options.m_values.goal_variables_first,
-                                                                     options.m_values.initial_state_variables_first);
+        std::vector<int> var_order = variable_order::order_variables(clauses, options.m_values);
         bdd_manager builder(clauses.get_num_variables());
         builder.set_variable_order(var_order);
 

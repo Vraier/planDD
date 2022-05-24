@@ -45,6 +45,7 @@ cnf cnf_encoder::encode_cnf(int timesteps) {
     construct_changing_atom_implies_action_clauses(timesteps);
 
     LOG_MESSAGE(log_level::info) << "Constructed a total of " << m_cnf.get_num_clauses() << " clauses";
+    LOG_MESSAGE(log_level::info) << "Constructed a total of " << m_cnf.get_num_constraints() << " constraints";
     LOG_MESSAGE(log_level::info) << "Constructed a total of " << m_cnf.get_num_variables()
                                  << " variables (with helper)";
 

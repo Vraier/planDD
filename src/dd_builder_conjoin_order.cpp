@@ -196,10 +196,11 @@ std::vector<tagged_logic_primitiv> order_clauses(cnf &cnf, option_values &option
                 }
             }
         }
+        // if exact one constraint 
         if(constraint_order_tag != none_constraint){
             for (int t = 0; t <= cnf.get_num_timesteps(); t++) {
                 for(exactly_one_constraint e: tagged_constraints[constraint_order_tag][t]){
-                    interleved_clauses.push_back(std::make_pair(e, logic_exact_one));
+                    total_clauses.push_back(std::make_pair(e, logic_exact_one));
                 }
             }
         }

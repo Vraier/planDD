@@ -93,7 +93,11 @@ std::vector<int> put_variables_of_tag_first(planning_cnf::cnf &cnf, std::vector<
     return goal_first_variables;
 }
 
-std::vector<int> order_variables(planning_cnf::cnf &cnf, std::string build_order, bool goal_first, bool init_state_first){
+std::vector<int> order_variables(planning_cnf::cnf &cnf, option_values &options){
+
+    std::string build_order = options.variable_order;
+    bool goal_first = options.goal_variables_first;
+    bool init_state_first = options.initial_state_variables_first;
     
     if (!is_valid_variable_order_string(build_order)) {
         LOG_MESSAGE(log_level::error) << "Can't build the following variable order " << build_order;

@@ -5,6 +5,7 @@
 #include <map>
 
 #include "cnf.h"
+#include "options.h"
 
 namespace variable_order {
 
@@ -24,6 +25,6 @@ categorized_variables categorize_variables(planning_cnf::cnf &cnf);
 std::vector<int> put_variables_of_tag_first(planning_cnf::cnf &cnf, std::vector<int> &current_order, planning_cnf::clause_tag front_tag);
 // returns a vector V that represents a permutation of the variables of the cnf problem
 // The i-th entry of the permutation array contains the index of the variable that should be brought to the i-th level
-std::vector<int> order_variables(planning_cnf::cnf &cnf, std::string build_order, bool goal_first, bool init_state_first);
+std::vector<int> order_variables(planning_cnf::cnf &cnf, option_values &options);
 
 };
