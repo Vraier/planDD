@@ -78,7 +78,7 @@ def variable_order_with_ladder_test():
     print("Num commands:",len(comms))
     return comms
 
-# ran on the 139 (the 256 core machine)
+# ran on the 139? (the 256 core machine)
 def best_17_5_big_test():
     probs = problems.list_all_downward_solved_problems()
     planDD_argument_map =  {
@@ -96,7 +96,8 @@ def best_17_5_big_test():
     print("Num commands:",len(comms))
     return comms
 
-# ran on the 139 (the 256 core machine)
+
+# not run yet
 def best_24_5_big_test():
     probs = problems.list_all_downward_solved_problems()
     planDD_argument_map =  {
@@ -113,6 +114,8 @@ def best_24_5_big_test():
     print("Num configs:",len(args))
     print("Num commands:",len(comms))
     return comms
+
+# TODO test all var orders with all conjoin orders
 
 
 comms = []
