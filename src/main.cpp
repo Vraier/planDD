@@ -31,15 +31,10 @@ int main(int argc, char *argv[]) {
         LOG_MESSAGE(log_level::info) << "You unlocked full control. good luck modifying the source code";
 
         int num_variables = options.m_values.timesteps;
-        std::vector<int> constraint;
-        for (int i = 1; i <= num_variables; i++) {
-            constraint.push_back(i);
-        }
-
         bdd_manager builder(num_variables);
 
         LOG_MESSAGE(log_level::debug) << "Starting hack back rocket";
-        builder.add_exactly_one_constraint(constraint);
+        builder.hack_back_rocket_method();
         LOG_MESSAGE(log_level::debug) << "Landed Hack back rocket";
 
         LOG_MESSAGE(log_level::debug) << builder.get_short_statistics();

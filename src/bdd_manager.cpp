@@ -98,7 +98,7 @@ void bdd_manager::add_exactly_one_constraint(std::vector<int> &variables) {
     // variable in the lowest layer comes first
     // variable in the highest layer comes last
     std::vector<std::pair<int, int>> layer_zipped_vars;
-    for(int i = 0; i < variables.size(); i++){
+    for (int i = 0; i < variables.size(); i++) {
         int var = variables[i];
         int layer = Cudd_ReadPerm(m_bdd_manager, var);
         layer_zipped_vars.push_back(std::make_pair(layer, var));
@@ -106,7 +106,7 @@ void bdd_manager::add_exactly_one_constraint(std::vector<int> &variables) {
     // sort it descending by layer
     std::sort(layer_zipped_vars.begin(), layer_zipped_vars.end(), std::greater<>());
     std::vector<int> ordered_variables;
-    for(int i = 0; i < layer_zipped_vars.size(); i++) {
+    for (int i = 0; i < layer_zipped_vars.size(); i++) {
         ordered_variables.push_back(layer_zipped_vars[i].second);
     }
 
@@ -151,30 +151,60 @@ void bdd_manager::add_exactly_one_constraint(std::vector<int> &variables) {
 }
 
 void bdd_manager::hack_back_rocket_method() {
-    DdNode *exact_one_true = Cudd_ReadOne(m_bdd_manager);
-    Cudd_Ref(exact_one_true);
-    DdNode *exact_zero_true = Cudd_ReadLogicZero(m_bdd_manager);
-    Cudd_Ref(exact_zero_true);
 
-    DdNode *var_i = Cudd_bddIthVar(m_bdd_manager, 3);
-    Cudd_Ref(var_i);
-    DdNode *ite = Cudd_bddIte(m_bdd_manager, var_i, exact_zero_true, exact_one_true);
-    Cudd_Ref(ite);
-    Cudd_RecursiveDeref(m_bdd_manager, var_i);
-    Cudd_RecursiveDeref(m_bdd_manager, exact_one_true);
-    Cudd_RecursiveDeref(m_bdd_manager, exact_zero_true);
+    //DdNode *exact_one_true = Cudd_ReadOne(m_bdd_manager);
+    //Cudd_Ref(exact_one_true);
+    //DdNode *exact_zero_true = Cudd_ReadLogicZero(m_bdd_manager);
+    //Cudd_Ref(exact_zero_true);
 
-    // conjoin the clause with the root node
-    DdNode *temp = Cudd_bddAnd(m_bdd_manager, m_root_node, ite);
-    Cudd_Ref(temp);
-    Cudd_RecursiveDeref(m_bdd_manager, m_root_node);
-    Cudd_RecursiveDeref(m_bdd_manager, ite);
-    m_root_node = temp;
+    bdd_manager single_step(4);
+
+    std::vector<int> constraint;
+    for (int i = 1; i <= 4; i++) {
+        constraint.push_back(i);
+    }
+
+    single_step.add_exactly_one_constraint(constraint);
+    add_exactly_one_constraint(constraint);
+
+    DdNode *from[4];
+    DdNode *to[4];
+
+    from[0] = Cudd_bddIthVar(m_bdd_manager, 1);
+    from[1] = Cudd_bddIthVar(m_bdd_manager, 2);
+    from[2] = Cudd_bddIthVar(m_bdd_manager, 3);
+    from[3] = Cudd_bddIthVar(m_bdd_manager, 4);
+
+    to[0] = Cudd_bddIthVar(m_bdd_manager, 5);
+    to[1] = Cudd_bddIthVar(m_bdd_manager, 6);
+    to[2] = Cudd_bddIthVar(m_bdd_manager, 7);
+    to[3] = Cudd_bddIthVar(m_bdd_manager, 8);
+
+    m_root_node = Cudd_bddSwapVariables(m_bdd_manager, m_root_node, from, to, 4);
+
+    DdNode *copied_bdd = Cudd_bddTransfer(single_step.m_bdd_manager, m_bdd_manager, single_step.m_root_node);
+    m_root_node = Cudd_bddAnd(m_bdd_manager, m_root_node, copied_bdd);
+
+    //DdNode *var_i = Cudd_bddIthVar(m_bdd_manager, 3);
+    //Cudd_Ref(var_i);
+    //DdNode *ite = Cudd_bddIte(m_bdd_manager, var_i, exact_zero_true, exact_one_true);
+    //Cudd_Ref(ite);
+    //Cudd_RecursiveDeref(m_bdd_manager, var_i);
+    //Cudd_RecursiveDeref(m_bdd_manager, exact_one_true);
+    //Cudd_RecursiveDeref(m_bdd_manager, exact_zero_true);
+//
+    //// conjoin the clause with the root node
+    //DdNode *temp = Cudd_bddAnd(m_bdd_manager, m_root_node, ite);
+    //Cudd_Ref(temp);
+    //Cudd_RecursiveDeref(m_bdd_manager, m_root_node);
+    //Cudd_RecursiveDeref(m_bdd_manager, ite);
+    //m_root_node = temp;
 }
 
-void bdd_manager::set_variable_order(std::vector<int> &variable_order){
-    LOG_MESSAGE(log_level::info) << "Setting variable order msize: " << Cudd_ReadSize(m_bdd_manager) << " osize: " << variable_order.size();
-    int* order = &variable_order[0];
+void bdd_manager::set_variable_order(std::vector<int> &variable_order) {
+    LOG_MESSAGE(log_level::info) << "Setting variable order msize: " << Cudd_ReadSize(m_bdd_manager)
+                                 << " osize: " << variable_order.size();
+    int *order = &variable_order[0];
     Cudd_ShuffleHeap(m_bdd_manager, order);
 }
 

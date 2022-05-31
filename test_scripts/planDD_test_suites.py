@@ -97,7 +97,7 @@ def best_17_5_big_test():
     return comms
 
 
-# not run yet
+# run on 136 with 32 cores
 def best_24_5_big_test():
     probs = problems.list_all_downward_solved_problems()
     planDD_argument_map =  {

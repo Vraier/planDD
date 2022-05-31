@@ -10,6 +10,10 @@ def print_big_information_from_dicts(all_dics):
     not_finished_dd_dics = [d for d in all_dics if not d["error_while_encoding"] and d["has_finished_cnf"] and not d["has_finished"]]
     solved_dics = [d for d in all_dics if not d["error_while_encoding"] and d["has_finished_cnf"] and d["has_finished"]]
 
+    time_for_solved = [(d["finish_time"], d["domain_desc"]) for d in solved_dics]
+    time_for_solved = sorted(time_for_solved)
+    print(time_for_solved)
+
     print("Compiling Information: ########################################################")
     print("Conjoin Order", all_dics[0]["config_build_order"])
 
@@ -109,7 +113,19 @@ def print_ifnormation_for_multiple_dicts(suites):
 #print_ifnormation_for_multiple_dicts(read_whole_set_of_tests_from_file("../test_output/variable_order_no_ladder"))
 #print_ifnormation_for_multiple_dicts(read_whole_set_of_tests_from_file("../test_output/variable_order_with_ladder"))
 
-domain_to_dic = {}
-for dic in read_all_information_from_file("../test_output/best17_5_big_test.pkl"):
-    domain_to_dic[dic["domain_desc"]] = dic
-plot_data.plot_progress_during_execution(domain_to_dic["gripperprob02pddl"])
+# best approach week 24/5
+#write_all_information_to_file("../../test_output/best_17_5_big_test", "../../test_output/best_17_5_big_test.pkl")
+#write_all_information_to_file("../../test_output/best_24_5_big_test", "../../test_output/best_24_5_big_test.pkl")
+
+print_big_information_from_dicts(read_all_information_from_file("../../test_output/best_17_5_big_test.pkl"))
+print_big_information_from_dicts(read_all_information_from_file("../../test_output/best_24_5_big_test.pkl"))
+
+domain_to_dic_a = {}
+domain_to_dic_b = {}
+for dic in read_all_information_from_file("../../test_output/best_17_5_big_test.pkl"):
+    domain_to_dic_a[dic["domain_desc"]] = dic
+for dic in read_all_information_from_file("../../test_output/best_24_5_big_test.pkl"):
+    domain_to_dic_b[dic["domain_desc"]] = dic
+
+#plot_data.plot_progress_during_execution(domain_to_dic_a["blocksprobBLOCKS52pddl"])
+#plot_data.plot_progress_during_execution(domain_to_dic_b["blocksprobBLOCKS52pddl"])
