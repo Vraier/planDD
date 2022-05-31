@@ -1,4 +1,4 @@
-#include "bdd_manager.h"
+#include "bdd_container.h"
 
 #include "logging.h"
 #include "dd_builder_conjoin_order.h"
@@ -80,9 +80,7 @@ void bdd_manager::write_bdd_to_dot_file(std::string filename) {
     fclose(outfile);
 }
 
-void bdd_manager::conjoin_clause(std::vector<int> &clause) {
-    conjoin_clause(clause, m_bdd_manager, m_root_node);
-}
+void bdd_manager::conjoin_clause(std::vector<int> &clause) { conjoin_clause(clause, m_bdd_manager, m_root_node); }
 
 void bdd_manager::conjoin_clause(std::vector<int> &clause, DdManager *manager, DdNode *root_node) {
     // build the disjunction of the literals in the clause
@@ -169,11 +167,10 @@ void bdd_manager::add_exactly_one_constraint(std::vector<int> &variables) {
 }
 
 void bdd_manager::hack_back_rocket_method() {
-
-    //DdNode *exact_one_true = Cudd_ReadOne(m_bdd_manager);
-    //Cudd_Ref(exact_one_true);
-    //DdNode *exact_zero_true = Cudd_ReadLogicZero(m_bdd_manager);
-    //Cudd_Ref(exact_zero_true);
+    // DdNode *exact_one_true = Cudd_ReadOne(m_bdd_manager);
+    // Cudd_Ref(exact_one_true);
+    // DdNode *exact_zero_true = Cudd_ReadLogicZero(m_bdd_manager);
+    // Cudd_Ref(exact_zero_true);
 
     bdd_manager single_step(4);
 
@@ -203,20 +200,20 @@ void bdd_manager::hack_back_rocket_method() {
     DdNode *copied_bdd = Cudd_bddTransfer(single_step.m_bdd_manager, m_bdd_manager, single_step.m_root_node);
     m_root_node = Cudd_bddAnd(m_bdd_manager, m_root_node, copied_bdd);
 
-    //DdNode *var_i = Cudd_bddIthVar(m_bdd_manager, 3);
-    //Cudd_Ref(var_i);
-    //DdNode *ite = Cudd_bddIte(m_bdd_manager, var_i, exact_zero_true, exact_one_true);
-    //Cudd_Ref(ite);
-    //Cudd_RecursiveDeref(m_bdd_manager, var_i);
-    //Cudd_RecursiveDeref(m_bdd_manager, exact_one_true);
-    //Cudd_RecursiveDeref(m_bdd_manager, exact_zero_true);
-//
+    // DdNode *var_i = Cudd_bddIthVar(m_bdd_manager, 3);
+    // Cudd_Ref(var_i);
+    // DdNode *ite = Cudd_bddIte(m_bdd_manager, var_i, exact_zero_true, exact_one_true);
+    // Cudd_Ref(ite);
+    // Cudd_RecursiveDeref(m_bdd_manager, var_i);
+    // Cudd_RecursiveDeref(m_bdd_manager, exact_one_true);
+    // Cudd_RecursiveDeref(m_bdd_manager, exact_zero_true);
+    //
     //// conjoin the clause with the root node
-    //DdNode *temp = Cudd_bddAnd(m_bdd_manager, m_root_node, ite);
-    //Cudd_Ref(temp);
-    //Cudd_RecursiveDeref(m_bdd_manager, m_root_node);
-    //Cudd_RecursiveDeref(m_bdd_manager, ite);
-    //m_root_node = temp;
+    // DdNode *temp = Cudd_bddAnd(m_bdd_manager, m_root_node, ite);
+    // Cudd_Ref(temp);
+    // Cudd_RecursiveDeref(m_bdd_manager, m_root_node);
+    // Cudd_RecursiveDeref(m_bdd_manager, ite);
+    // m_root_node = temp;
 }
 
 void bdd_manager::set_variable_order(std::vector<int> &variable_order) {
@@ -239,30 +236,28 @@ std::vector<int> bdd_manager::get_variable_order() {
     return layer_to_variable_index;
 }
 
-
-void bdd_manager::build_bdd_for_single_step(planning_cnf::cnf &clauses) {
+void bdd_manager::build_bdd_for_single_step(planning_logic::cnf &clauses) {
     conjoin_order::categorized_clauses tagged_clauses = conjoin_order::categorize_clauses(clauses);
 
-    std::vector<planning_cnf::clause> preconditions, effects, frame;
-    preconditions = tagged_clauses[planning_cnf::precondition][0];
-    effects = tagged_clauses[planning_cnf::effect][0];
-    frame = tagged_clauses[planning_cnf::changing_atoms][0];
+    std::vector<planning_logic::clause> preconditions, effects, frame;
+    preconditions = tagged_clauses[planning_logic::precondition][0];
+    effects = tagged_clauses[planning_logic::effect][0];
+    frame = tagged_clauses[planning_logic::changing_atoms][0];
 
-    for(planning_cnf::clause_tag tag: {planning_cnf::precondition, planning_cnf::effect, planning_cnf::changing_atoms}){
-        std::vector<planning_cnf::clause> sub_clauses = tagged_clauses[tag][0];
-        for(int i = 0; i < sub_clauses.size(); i++){
-            planning_cnf::clause c = sub_clauses[i];
+    for (planning_logic::clause_tag tag :
+         {planning_logic::precondition, planning_logic::effect, planning_logic::changing_atoms}) {
+        std::vector<planning_logic::clause> sub_clauses = tagged_clauses[tag][0];
+        for (int i = 0; i < sub_clauses.size(); i++) {
+            planning_logic::clause c = sub_clauses[i];
             conjoin_clause(c, m_single_step_manager, m_single_step_root_node);
         }
     }
 }
 
-DdNode* bdd_manager::get_bdd_for_timestep(planning_cnf::cnf &clauses, int timestep){
-
+DdNode *bdd_manager::get_bdd_for_timestep(planning_logic::cnf &clauses, int timestep) {
     // calculate transltaion of variable indizes between timesteps
     std::map<int, int> timestep_translation;
     std::map<int, int> invers_translation;
-
 
     // TODO
     return NULL;

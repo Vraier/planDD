@@ -2,9 +2,9 @@
 
 #include "logging.h"
 
-using namespace planning_cnf;
+using namespace planning_logic;
 
-namespace conjoin_order{
+namespace conjoin_order {
 
 // used to interpret the order of clauses from the command line options
 std::map<char, clause_tag> char_clause_tag_map = {
@@ -12,8 +12,9 @@ std::map<char, clause_tag> char_clause_tag_map = {
     {'u', at_most_op},    {'m', mutex}, {'p', precondition}, {'e', effect},      {'c', changing_atoms},
 };
 std::map<char, constraint_tag> char_constraint_tag_map = {
-    {'i', none_constraint}, {'g', none_constraint}, {'r', exact_one_var},   {'t', none_constraint}, {'y', exact_one_op},
-    {'u', none_constraint}, {'m', none_constraint}, {'p', none_constraint}, {'e', none_constraint}, {'c', none_constraint},
+    {'i', none_constraint}, {'g', none_constraint}, {'r', exact_one_var},   {'t', none_constraint},
+    {'y', exact_one_op},    {'u', none_constraint}, {'m', none_constraint}, {'p', none_constraint},
+    {'e', none_constraint}, {'c', none_constraint},
 };
 
 bool is_valid_conjoin_order_string(std::string build_order) {
@@ -22,7 +23,7 @@ bool is_valid_conjoin_order_string(std::string build_order) {
     if (!std::is_permutation(build_order.begin(), build_order.end(), standart_permutation.begin(),
                              standart_permutation.end())) {
         LOG_MESSAGE(log_level::error) << "Build order has to be a permutation of " + standart_permutation + " but is "
-                                        << build_order;
+                                      << build_order;
         return false;
     }
 
@@ -120,14 +121,11 @@ categorized_constraints categorize_constraints(cnf &cnf) {
             total_constraints += tagged_constraints[t][k].size();
         }
         LOG_MESSAGE(log_level::info) << "Categorized " << total_constraints << " constraints of tag " << t;
-        
     }
     return tagged_constraints;
 }
 
-
 std::vector<tagged_logic_primitiv> order_clauses(cnf &cnf, option_values &options) {
-
     std::string build_order = options.build_order;
 
     if (!is_valid_conjoin_order_string(build_order)) {
@@ -157,14 +155,14 @@ std::vector<tagged_logic_primitiv> order_clauses(cnf &cnf, option_values &option
             constraint_tag constraint_order_tag = char_constraint_tag_map[current_char];
 
             // add all the clauses for timestep t and tag order_tag
-            for(clause c: tagged_clauses[order_tag][t]){
+            for (clause c : tagged_clauses[order_tag][t]) {
                 interleved_clauses.push_back(std::make_pair(c, logic_clause));
             }
-            //interleved_clauses.insert(interleved_clauses.end(), tagged_clauses[order_tag][t].begin(),
-            //                          tagged_clauses[order_tag][t].end());
-            // add the exactly one constraints for the at_least_var or at_leat_op
-            if(constraint_order_tag != none_constraint){
-                for(exactly_one_constraint e: tagged_constraints[constraint_order_tag][t]){
+            // interleved_clauses.insert(interleved_clauses.end(), tagged_clauses[order_tag][t].begin(),
+            //                           tagged_clauses[order_tag][t].end());
+            //  add the exactly one constraints for the at_least_var or at_leat_op
+            if (constraint_order_tag != none_constraint) {
+                for (exactly_one_constraint e : tagged_constraints[constraint_order_tag][t]) {
                     interleved_clauses.push_back(std::make_pair(e, logic_exact_one));
                 }
             }
@@ -184,30 +182,30 @@ std::vector<tagged_logic_primitiv> order_clauses(cnf &cnf, option_values &option
         constraint_tag constraint_order_tag = char_constraint_tag_map[current_char];
         // only add first timestep
         if (order_tag == initial_state || order_tag == goal) {
-            for(clause c: tagged_clauses[order_tag][0]){
+            for (clause c : tagged_clauses[order_tag][0]) {
                 total_clauses.push_back(std::make_pair(c, logic_clause));
             }
         }
         // add all timesteps
         else {
             for (int t = 0; t <= cnf.get_num_timesteps(); t++) {
-                for(clause c: tagged_clauses[order_tag][t]){
+                for (clause c : tagged_clauses[order_tag][t]) {
                     total_clauses.push_back(std::make_pair(c, logic_clause));
                 }
             }
         }
-        // if exact one constraint 
-        if(constraint_order_tag != none_constraint){
+        // if exact one constraint
+        if (constraint_order_tag != none_constraint) {
             for (int t = 0; t <= cnf.get_num_timesteps(); t++) {
-                for(exactly_one_constraint e: tagged_constraints[constraint_order_tag][t]){
+                for (exactly_one_constraint e : tagged_constraints[constraint_order_tag][t]) {
                     total_clauses.push_back(std::make_pair(e, logic_exact_one));
                 }
             }
         }
     }
-    
+
     LOG_MESSAGE(log_level::info) << "Sorted a total of " << total_clauses.size() << " clauses";
     return total_clauses;
 }
 
-};
+};  // namespace conjoin_order

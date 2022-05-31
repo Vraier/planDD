@@ -4,23 +4,31 @@
 #include <string>
 #include <vector>
 
-
 /* TODO: i really have to refactor the cnf code:
  * rename it to someting like logic containter
  * make variable and clause storing more uniform and eliminate the categorize clause/variable functions
  * make names of enums more consistent
  */
-namespace planning_cnf {
+namespace planning_logic {
+
+enum variable_tag {
+    plan_variable,
+    plan_action,
+    h_amost_variable,
+    h_amost_operator,
+    h_amost_mutex,
+    none_variable,
+};
 
 enum clause_tag {
-    initial_state,  // revelvant for timestep 0
-    goal,           // only for tiemestep n
-    at_least_var,   // for timestep 0..n
-    at_most_var,    // 0..n
-    at_least_op,    // 0..n-1
-    at_most_op,     // ipex:mc
-    mutex,          // igxpc:m -> i0gn m0m1m2..mn p0..pn c0..cn
-    precondition,   // igmx:cp -> i0gn m0m1..mn c0p0 c1p1..cnpn
+    initial_state,
+    goal,
+    at_least_var,
+    at_most_var,
+    at_least_op,
+    at_most_op,
+    mutex,
+    precondition,
     effect,
     changing_atoms,
     none_clause,
@@ -32,16 +40,7 @@ enum constraint_tag {
     none_constraint,
 };
 
-enum variable_tag {
-    plan_variable,
-    plan_action,
-    h_amost_variable,
-    h_amost_operator,
-    h_amost_mutex,
-    none_variable,
-};
-
-enum logic_primitive_type{
+enum logic_primitive_type {
     logic_clause,
     logic_exact_one,
 };
@@ -68,14 +67,13 @@ class cnf {
 
     std::vector<tagged_constraint> m_constraints;
 
-   public:   
-
+   public:
     // maps information about planning variable to variable index of cnf formula
     // are used by the variable ordering algorithm
     std::map<tagged_variable, int> m_variable_map;
     std::map<int, tagged_variable> m_inverse_variable_map;
 
-    cnf(int num_timesteps); 
+    cnf(int num_timesteps);
     cnf(std::string file_path);
     ~cnf();
 
@@ -86,7 +84,7 @@ class cnf {
     // adds a constraint that ensures that exactly one variable from constraints is true
     void add_exact_one_constraint(exactly_one_constraint constraint, constraint_tag tag, int timestep);
 
-    // These methos get the information about a variable/action from a planning problem and return 
+    // These methos get the information about a variable/action from a planning problem and return
     // the variable index into the cnf formula
     // They also add is to the pool of variables
     // This method is used for planning variables: var_index, tag, timestep, value
@@ -122,4 +120,4 @@ class cnf {
     static std::tuple<int, int, std::vector<clause>> parse_cnf_file_to_clauses(std::string file_path);
 };
 
-}  // namespace planning_cnf
+}  // namespace planning_logic

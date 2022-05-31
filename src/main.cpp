@@ -10,9 +10,8 @@
 #include "logging.h"
 #include "options.h"
 #include "sas_parser.h"
-#include "sdd_manager.h"
-#include "bdd_manager.h"  // always include this last >:(
-
+#include "sdd_container.h"
+#include "bdd_container.h"  // always include this last >:(
 
 int main(int argc, char *argv[]) {
     initialize_logging();
@@ -44,14 +43,14 @@ int main(int argc, char *argv[]) {
     }
 
     if (options.m_values.cnf_to_bdd) {
-        std::tuple<int, int, std::vector<planning_cnf::clause>> cnf_data =
-            planning_cnf::cnf::parse_cnf_file_to_clauses(options.m_values.cnf_file);
+        std::tuple<int, int, std::vector<planning_logic::clause>> cnf_data =
+            planning_logic::cnf::parse_cnf_file_to_clauses(options.m_values.cnf_file);
         int num_variables = std::get<0>(cnf_data);
         // int num_clauses = std::get<1>(cnf_data);
-        std::vector<planning_cnf::clause> clauses = std::get<2>(cnf_data);
+        std::vector<planning_logic::clause> clauses = std::get<2>(cnf_data);
         bdd_manager builder(num_variables);
 
-        for (planning_cnf::clause c : clauses) {
+        for (planning_logic::clause c : clauses) {
             builder.conjoin_clause(c);
         }
 
@@ -84,7 +83,7 @@ int main(int argc, char *argv[]) {
         }
 
         cnf_encoder encoder(options.m_values, parser.m_sas_problem);
-        planning_cnf::cnf clauses = encoder.encode_cnf(options.m_values.timesteps);
+        planning_logic::cnf clauses = encoder.encode_cnf(options.m_values.timesteps);
         clauses.write_to_file(options.m_values.cnf_file);
 
         return 0;
@@ -98,27 +97,25 @@ int main(int argc, char *argv[]) {
         }
 
         cnf_encoder encoder(options.m_values, parser.m_sas_problem);
-        planning_cnf::cnf clauses = encoder.encode_cnf(options.m_values.timesteps);
+        planning_logic::cnf clauses = encoder.encode_cnf(options.m_values.timesteps);
 
         std::vector<int> var_order = variable_order::order_variables(clauses, options.m_values);
         bdd_manager builder(clauses.get_num_variables());
         builder.set_variable_order(var_order);
 
-        
-        //std::vector<int> builder_order = builder.get_variable_order();
-        //for(int i = 0; i < builder_order.size(); i++){
-        //    std::cout << "Layer " << i << ", " << builder_order[i] << ": " <<
-        //encoder.decode_cnf_variable(builder_order[i]) << std::endl;
-        //}
-        
+        // std::vector<int> builder_order = builder.get_variable_order();
+        // for(int i = 0; i < builder_order.size(); i++){
+        //     std::cout << "Layer " << i << ", " << builder_order[i] << ": " <<
+        // encoder.decode_cnf_variable(builder_order[i]) << std::endl;
+        // }
 
         dd_builder::construct_dd_linear_disjoint(builder, clauses, options.m_values);
 
-        //std::vector<int> builder_order = builder.get_variable_order();
-        //for(int i = 0; i < builder_order.size(); i++){
-        //    std::cout << "Layer " << i << ", " << builder_order[i] << ": " <<
-        //encoder.decode_cnf_variable(builder_order[i]) << std::endl;
-        //}
+        // std::vector<int> builder_order = builder.get_variable_order();
+        // for(int i = 0; i < builder_order.size(); i++){
+        //     std::cout << "Layer " << i << ", " << builder_order[i] << ": " <<
+        // encoder.decode_cnf_variable(builder_order[i]) << std::endl;
+        // }
 
         builder.print_bdd();
         return 0;
@@ -132,7 +129,7 @@ int main(int argc, char *argv[]) {
         }
 
         cnf_encoder encoder(options.m_values, parser.m_sas_problem);
-        planning_cnf::cnf clauses = encoder.encode_cnf(options.m_values.timesteps);
+        planning_logic::cnf clauses = encoder.encode_cnf(options.m_values.timesteps);
 
         // encoder.write_cnf_to_file(options.m_values.cnf_file, clauses);
         sdd_manager builder(clauses.get_num_variables());
@@ -152,7 +149,7 @@ int main(int argc, char *argv[]) {
         }
 
         cnf_encoder encoder(options.m_values, parser.m_sas_problem);
-        planning_cnf::cnf clauses = encoder.encode_cnf(options.m_values.timesteps);
+        planning_logic::cnf clauses = encoder.encode_cnf(options.m_values.timesteps);
         clauses.write_to_file(options.m_values.cnf_file);
 
         LOG_MESSAGE(log_level::info) << "Envoking minisat";
@@ -175,7 +172,7 @@ int main(int argc, char *argv[]) {
 
         // encode it into cnf file
         cnf_encoder encoder(options.m_values, parser.m_sas_problem);
-        planning_cnf::cnf clauses = encoder.encode_cnf(options.m_values.timesteps);
+        planning_logic::cnf clauses = encoder.encode_cnf(options.m_values.timesteps);
         clauses.write_to_file(options.m_values.cnf_file);
 
         std::vector<bool> current_assignment;
@@ -208,7 +205,7 @@ int main(int argc, char *argv[]) {
                 // add the negated variable (because of boolean algebra)
                 new_blocking_clause.push_back(current_assignment[i] ? -i : i);
             }
-            clauses.add_clause(new_blocking_clause, planning_cnf::none_clause, -1);
+            clauses.add_clause(new_blocking_clause, planning_logic::none_clause, -1);
             clauses.write_to_file(options.m_values.cnf_file);
             num_solutions++;
         }

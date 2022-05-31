@@ -1,4 +1,4 @@
-#include "cnf.h"
+#include "planning_logic_formula.h"
 
 #include <fstream>
 #include <iostream>
@@ -7,23 +7,21 @@
 #include "logging.h"
 
 // TODO rename to something like planning logic formula
-using namespace planning_cnf;
+using namespace planning_logic;
 
-cnf::cnf(int num_timestpes){
-    m_num_timesteps = num_timestpes;
-}
+cnf::cnf(int num_timestpes) { m_num_timesteps = num_timestpes; }
 
-cnf::~cnf(){}
+cnf::~cnf() {}
 
 void cnf::add_clause(std::vector<int> clause, clause_tag tag, int timestep) {
     m_tagged_clauses.push_back(std::make_tuple(clause, tag, timestep));
 }
 
-void cnf::add_exact_one_constraint(exactly_one_constraint constraint, constraint_tag tag, int timestep){
+void cnf::add_exact_one_constraint(exactly_one_constraint constraint, constraint_tag tag, int timestep) {
     m_constraints.push_back(std::make_tuple(constraint, tag, timestep));
 }
 
-int cnf::get_variable_index(int var_index, variable_tag tag, int timestep, int value){
+int cnf::get_variable_index(int var_index, variable_tag tag, int timestep, int value) {
     tagged_variable var = std::make_tuple(var_index, tag, timestep, value);
     if (m_variable_map.find(var) == m_variable_map.end()) {
         int size = m_variable_map.size();
@@ -35,7 +33,7 @@ int cnf::get_variable_index(int var_index, variable_tag tag, int timestep, int v
     return m_variable_map[var];
 }
 
-int cnf::get_variable_index_without_adding(int var_index, variable_tag tag, int timestep, int value){
+int cnf::get_variable_index_without_adding(int var_index, variable_tag tag, int timestep, int value) {
     tagged_variable var = std::make_tuple(var_index, tag, timestep, value);
     if (m_variable_map.find(var) == m_variable_map.end()) {
         return -1;
@@ -43,17 +41,17 @@ int cnf::get_variable_index_without_adding(int var_index, variable_tag tag, int 
     return m_variable_map[var];
 }
 
-int cnf::get_variable_index(int var_index, variable_tag tag, int timestep){
+int cnf::get_variable_index(int var_index, variable_tag tag, int timestep) {
     return get_variable_index(var_index, tag, timestep, 0);
 }
 
-int cnf::get_variable_index_without_adding(int var_index, variable_tag tag, int timestep){
+int cnf::get_variable_index_without_adding(int var_index, variable_tag tag, int timestep) {
     return get_variable_index_without_adding(var_index, tag, timestep, 0);
 }
 
 // TODO implement
-tagged_variable cnf::get_planning_info_for_variable(int index){
-    if(m_inverse_variable_map.find(index) == m_inverse_variable_map.end()) {
+tagged_variable cnf::get_planning_info_for_variable(int index) {
+    if (m_inverse_variable_map.find(index) == m_inverse_variable_map.end()) {
         return std::make_tuple(-1, none_variable, -1, -1);
     }
     return m_inverse_variable_map[index];
@@ -86,8 +84,7 @@ void cnf::write_to_file(std::string filepath) {
     }
 }
 
-std::tuple<int, int, std::vector<clause>> cnf::parse_cnf_file_to_clauses(std::string file_path){
-
+std::tuple<int, int, std::vector<clause>> cnf::parse_cnf_file_to_clauses(std::string file_path) {
     LOG_MESSAGE(log_level::info) << "Starting to parse cnf file to clauses";
 
     std::vector<clause> all_clauses;
@@ -100,17 +97,19 @@ std::tuple<int, int, std::vector<clause>> cnf::parse_cnf_file_to_clauses(std::st
     iss = std::istringstream(line);
     std::string s_p, s_cnf;
     int num_variables, num_clauses;
-    iss >> s_p; iss >> s_cnf; 
-    iss >> num_variables; iss >> num_clauses;
+    iss >> s_p;
+    iss >> s_cnf;
+    iss >> num_variables;
+    iss >> num_clauses;
 
     LOG_MESSAGE(log_level::debug) << s_p << " " << s_cnf << " " << num_variables << " " << num_clauses;
 
-    while(std::getline(infile, line)){
+    while (std::getline(infile, line)) {
         iss = std::istringstream(line);
         clause new_clause;
         int var;
         iss >> var;
-        while(var != 0) {
+        while (var != 0) {
             new_clause.push_back(var);
             iss >> var;
         }

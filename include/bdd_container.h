@@ -5,7 +5,7 @@
 #include <vector>
 
 #include "dd_buildable.h"
-#include "cnf.h"
+#include "planning_logic_formula.h"
 
 extern "C" {
 #include "cudd.h"
@@ -23,9 +23,9 @@ class bdd_manager : public virtual dd_buildable {
 
     //Functions for building the bdd timestep by timestep
     // builds the bdd for the precondition/effect and frameclauses of timestep 0
-    void build_bdd_for_single_step(planning_cnf::cnf &clauses);
+    void build_bdd_for_single_step(planning_logic::cnf &clauses);
     // returns a node for the main bdd_manager that represents the bdd for a single timestep 
-    DdNode* get_bdd_for_timestep(planning_cnf::cnf &clauses, int timestep);
+    DdNode* get_bdd_for_timestep(planning_logic::cnf &clauses, int timestep);
     // returns the variable order for timesetep 0 as used by the sub manager
     std::vector<int> get_variable_order_for_single_step();
     // extends the variable order for timestep 0 to all timesteps

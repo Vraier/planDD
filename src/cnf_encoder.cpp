@@ -6,7 +6,7 @@
 
 #include "logging.h"
 
-using namespace planning_cnf;
+using namespace planning_logic;
 
 cnf cnf_encoder::encode_cnf(int timesteps) {
     LOG_MESSAGE(log_level::info) << "Start encoding SAS problem into CNF problem";
@@ -19,7 +19,7 @@ cnf cnf_encoder::encode_cnf(int timesteps) {
     construct_goal_holds_clauses(timesteps);
 
     // either use encoding as cnf or directly into dd
-    if(!m_options.exact_one_constraint){
+    if (!m_options.exact_one_constraint) {
         construct_at_least_one_value_clause(timesteps);
 
         construct_at_most_one_value_clause(timesteps);
@@ -27,8 +27,7 @@ cnf cnf_encoder::encode_cnf(int timesteps) {
         construct_at_least_one_action_clauses(timesteps);
 
         construct_at_most_one_action_clauses(timesteps);
-    }
-    else {
+    } else {
         construct_exact_one_value_constraint(timesteps);
 
         construct_exact_one_action_constraint(timesteps);
@@ -185,8 +184,8 @@ void cnf_encoder::construct_at_most_one_action_clauses(int timesteps) {
     }
 }
 
-void cnf_encoder::construct_exact_one_value_constraint(int timesteps){
-    for (int t = 0; t <= timesteps; t++){
+void cnf_encoder::construct_exact_one_value_constraint(int timesteps) {
+    for (int t = 0; t <= timesteps; t++) {
         for (int v = 0; v < m_sas_problem.m_variabels.size(); v++) {
             std::vector<int> exact_one_should_be_true;
             for (int val = 0; val < m_sas_problem.m_variabels[v].m_range; val++) {
@@ -199,7 +198,7 @@ void cnf_encoder::construct_exact_one_value_constraint(int timesteps){
     }
 }
 
-void cnf_encoder::construct_exact_one_action_constraint(int timesteps){
+void cnf_encoder::construct_exact_one_action_constraint(int timesteps) {
     for (int t = 0; t < timesteps; t++) {
         std::vector<int> exact_one_should_be_true;
         for (int op = 0; op < m_sas_problem.m_operators.size(); op++) {
@@ -210,7 +209,6 @@ void cnf_encoder::construct_exact_one_action_constraint(int timesteps){
         m_cnf.add_exact_one_constraint(exact_one_should_be_true, exact_one_op, t);
     }
 }
-
 
 // If action a is applied at step t, then pre(a) holds at step t.
 // TODO: i am not sure if this is correct (i didnt use every information from
@@ -390,13 +388,14 @@ std::string cnf_encoder::decode_cnf_variable(int index) {
     int v_timestep = std::get<2>(info);
     int v_value = std::get<3>(info);
 
-    // determin type of 
+    // determin type of
     std::string type;
     std::string name;
     switch (tag) {
         case plan_variable:
             type = "plan_variable";
-            name =  m_sas_problem.m_variabels[v_index].m_name + ": " + m_sas_problem.m_variabels[v_index].m_symbolic_names[v_value];
+            name = m_sas_problem.m_variabels[v_index].m_name + ": " +
+                   m_sas_problem.m_variabels[v_index].m_symbolic_names[v_value];
             break;
         case plan_action:
             type = "plan_action";

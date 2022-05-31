@@ -5,14 +5,14 @@
 #include <unordered_map>
 #include <vector>
 
-#include "cnf.h"
+#include "planning_logic_formula.h"
 #include "options.h"
 #include "sas_parser.h"
 
 class cnf_encoder {
    public:
     cnf_encoder(option_values &options, sas_problem &problem) : m_options(options), m_sas_problem(problem), m_cnf(0) {}
-    planning_cnf::cnf encode_cnf(int timesteps);
+    planning_logic::cnf encode_cnf(int timesteps);
 
     // parses a cnf solution from minisat into a bool vector
     // assignemnt gives the truth value for the ith variable (index 0 of assignment has no meaningful value)
@@ -38,7 +38,7 @@ class cnf_encoder {
 
     // vector of clauses. Each clause is represented by a vector of literals
     // the values fo the literals refer to the symbol_map
-    planning_cnf::cnf m_cnf;
+    planning_logic::cnf m_cnf;
 
     // TODO
     // All three: sas_problem, symbol map and cnf are needed to produce human readable output.
@@ -47,12 +47,12 @@ class cnf_encoder {
     // generates a set of clauses that gurarantee that at most on of the variables is true
     // can insert helper variables in the symbol map, depending wich at most one type is chosen
     std::vector<std::vector<int>> generate_at_most_one_constraint(std::vector<int> &variables,
-                                                                  planning_cnf::variable_tag constraint_type,
+                                                                  planning_logic::variable_tag constraint_type,
                                                                   int timestep);
     // Should only be called once per timestep and constraint_type
     // otherwise the helper variables will get reused
     std::vector<std::vector<int>> generate_at_most_one_constraint_ladder(std::vector<int> &variables,
-                                                                         planning_cnf::variable_tag constraint_type,
+                                                                         planning_logic::variable_tag constraint_type,
                                                                          int timestep);
     // pairwise generates no additional helper variables
     std::vector<std::vector<int>> generate_at_most_one_constraint_pairwise(std::vector<int> &variables);

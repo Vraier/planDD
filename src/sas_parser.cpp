@@ -64,7 +64,7 @@ int sas_parser::parse_sas_version(std::ifstream &infile) {
     std::string line;
     std::istringstream iss;
 
-    //LOG_MESSAGE(log_level::info) << "Parsing version";
+    // LOG_MESSAGE(log_level::info) << "Parsing version";
     std::getline(infile, line);
     if (line != "begin_version") {
         LOG_MESSAGE(log_level::error) << "Expected begin_version";
@@ -87,7 +87,7 @@ int sas_parser::parse_sas_version(std::ifstream &infile) {
 int sas_parser::parse_sas_metric(std::ifstream &infile) {
     std::string line;
 
-    //LOG_MESSAGE(log_level::info) << "Parsing metric";
+    // LOG_MESSAGE(log_level::info) << "Parsing metric";
     std::getline(infile, line);
     if (line != "begin_metric") {
         LOG_MESSAGE(log_level::error) << "expected begin_metric" << std::endl;
@@ -112,7 +112,7 @@ int sas_parser::parse_sas_variables(std::ifstream &infile) {
     std::istringstream iss;
     int num_variables;
 
-    //LOG_MESSAGE(log_level::info) << "Parsing variables" << std::endl;
+    // LOG_MESSAGE(log_level::info) << "Parsing variables" << std::endl;
     std::getline(infile, line);
     iss = std::istringstream(line);
     iss >> num_variables;
@@ -159,7 +159,7 @@ int sas_parser::parse_sas_mutex(std::ifstream &infile) {
     std::istringstream iss;
     int num_mutexes;
 
-    //LOG_MESSAGE(log_level::info) << "Parsing mutexes" << std::endl;
+    // LOG_MESSAGE(log_level::info) << "Parsing mutexes" << std::endl;
     std::getline(infile, line);
     iss = std::istringstream(line);
     iss >> num_mutexes;
@@ -201,7 +201,7 @@ int sas_parser::parse_sas_initial_state(std::ifstream &infile) {
     std::string line;
     std::istringstream iss;
 
-    //LOG_MESSAGE(log_level::info) << "Parsing initial state" << std::endl;
+    // LOG_MESSAGE(log_level::info) << "Parsing initial state" << std::endl;
     std::getline(infile, line);
     if (line != "begin_state") {
         LOG_MESSAGE(log_level::error) << "Expected begin_state" << std::endl;
@@ -229,7 +229,7 @@ int sas_parser::parse_sas_goal(std::ifstream &infile) {
     std::string line;
     std::istringstream iss;
 
-    //LOG_MESSAGE(log_level::info) << "Parsing goal" << std::endl;
+    // LOG_MESSAGE(log_level::info) << "Parsing goal" << std::endl;
     std::getline(infile, line);
     if (line != "begin_goal") {
         LOG_MESSAGE(log_level::error) << "Expected begin_goal";
@@ -262,7 +262,7 @@ int sas_parser::parse_sas_operator(std::ifstream &infile) {
     std::istringstream iss;
     int num_operators;
 
-    //LOG_MESSAGE(log_level::info) << "Parsing operators" << std::endl;
+    // LOG_MESSAGE(log_level::info) << "Parsing operators" << std::endl;
     std::getline(infile, line);
     iss = std::istringstream(line);
     iss >> num_operators;

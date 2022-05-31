@@ -7,7 +7,6 @@
 #include <boost/smart_ptr/shared_ptr.hpp>
 
 void initialize_logging() {
-
     // print everything to console
     boost::shared_ptr<boost::log::sinks::synchronous_sink<boost::log::sinks::text_ostream_backend>> console_sink =
         boost::log::add_console_log(
@@ -15,13 +14,15 @@ void initialize_logging() {
             boost::log::keywords::format =
                 (boost::log::expressions::stream
                  << "[" << boost::log::expressions::attr<boost::log::attributes::timer::value_type>("Uptime") << "]"
-                 << "[" << boost::log::trivial::severity << "]"
+                 << "[" << boost::log::trivial::severity
+                 << "]"
                  //<< "[" << boost::log::expressions::attr<std::string>("File") << ":"
                  //<< boost::log::expressions::attr<int>("Line") << ":"
                  //<< boost::log::expressions::attr<std::string>("Function") << "()]"
                  << " " << boost::log::expressions::smessage));
 
-    // TODO, this is supposed to decrease performance significantly (i measured ~1-2sec) but i need it to dont loose output on log files
+    // TODO, this is supposed to decrease performance significantly (i measured ~1-2sec) but i need it to dont loose
+    // output on log files
     console_sink->locked_backend()->auto_flush(true);
 
     boost::shared_ptr<boost::log::core> core = boost::log::core::get();

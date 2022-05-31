@@ -3,7 +3,7 @@
 #include "dd_builder_conjoin_order.h"
 #include "logging.h"
 
-using namespace planning_cnf;
+using namespace planning_logic;
 
 namespace dd_builder {
 
@@ -23,18 +23,18 @@ void construct_dd_linear_disjoint(dd_buildable &dd, cnf &cnf, option_values &opt
     // conjoin the clauses in the correct order
     int percent = 0;
     for (int i = 0; i < sorted_primitives.size(); i++) {
-        planning_cnf::logic_primitive primitive = sorted_primitives[i].first;
-        planning_cnf::logic_primitive_type primitive_type = sorted_primitives[i].second;
+        planning_logic::logic_primitive primitive = sorted_primitives[i].first;
+        planning_logic::logic_primitive_type primitive_type = sorted_primitives[i].second;
 
-        if(primitive_type == logic_clause){
+        if (primitive_type == logic_clause) {
             dd.conjoin_clause(primitive);
-        } else if(primitive_type == logic_exact_one) {
+        } else if (primitive_type == logic_exact_one) {
             dd.add_exactly_one_constraint(primitive);
         } else {
             LOG_MESSAGE(log_level::warning) << "Unknown logic primitive type during DD construction";
         }
 
-        int new_percent = (100*(i+1))/sorted_primitives.size();
+        int new_percent = (100 * (i + 1)) / sorted_primitives.size();
         if (new_percent > percent) {
             percent = new_percent;
             LOG_MESSAGE(log_level::info) << "Conjoined " << percent << "% of all clauses. " + dd.get_short_statistics();

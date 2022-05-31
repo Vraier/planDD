@@ -36,9 +36,9 @@ find_package(Boost ${BOOST_VERSION} EXACT REQUIRED
 add_executable(planDD)
 target_sources(planDD
 	PRIVATE
-		"src/bdd_manager.cpp" "src/cnf.cpp" "src/cnf_encoder.cpp" "src/dd_builder_conjoin_order.cpp"
+		"src/bdd_container.cpp" "src/planning_logic_formula.cpp" "src/cnf_encoder.cpp" "src/dd_builder_conjoin_order.cpp"
 		"src/dd_builder.cpp" "src/dd_builder_variable_order.cpp" "src/logging.cpp" "src/main.cpp"
-		"src/options.cpp" "src/sas_parser.cpp" "src/sdd_manager.cpp"
+		"src/options.cpp" "src/sas_parser.cpp" "src/sdd_container.cpp"
 		"src/fnf/compiler.c" "src/fnf/fnf.c" "src/fnf/io.c" "src/fnf/utils.c")
 
 target_include_directories(planDD PRIVATE "include")
