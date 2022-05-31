@@ -4,6 +4,12 @@
 #include <string>
 #include <vector>
 
+
+/* TODO: i really have to refactor the cnf code:
+ * rename it to someting like logic containter
+ * make variable and clause storing more uniform and eliminate the categorize clause/variable functions
+ * make names of enums more consistent
+ */
 namespace planning_cnf {
 
 enum clause_tag {

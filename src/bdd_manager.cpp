@@ -1,6 +1,7 @@
-#include "logging.h"
-
 #include "bdd_manager.h"
+
+#include "logging.h"
+#include "dd_builder_conjoin_order.h"
 
 bdd_manager::bdd_manager(int num_variables) {
     // add one more variable to account for variable with index 0
@@ -8,14 +9,19 @@ bdd_manager::bdd_manager(int num_variables) {
 
     m_bdd_manager = Cudd_Init(m_num_variables, 0, CUDD_UNIQUE_SLOTS, CUDD_CACHE_SLOTS, 0);
     Cudd_AutodynEnable(m_bdd_manager, CUDD_REORDER_SIFT);
+    m_single_step_manager = Cudd_Init(m_num_variables, 0, CUDD_UNIQUE_SLOTS, CUDD_CACHE_SLOTS, 0);
+    Cudd_AutodynEnable(m_single_step_manager, CUDD_REORDER_SIFT);
     // Cudd_SetMaxCacheHard(m_bdd_manager, 62500000);
 
     // force var with index 0 to be true
     m_root_node = Cudd_bddIthVar(m_bdd_manager, 0);
+    m_single_step_root_node = Cudd_bddIthVar(m_single_step_manager, 0);
     Cudd_Ref(m_root_node);
+    Cudd_Ref(m_single_step_root_node);
 }
 
 bdd_manager::~bdd_manager() {
+    // check if all nodes were dereferenced corretly (no memory leaks (:)
     Cudd_RecursiveDeref(m_bdd_manager, m_root_node);
     int num_zero_reference_nodes = Cudd_CheckZeroRef(m_bdd_manager);
     if (num_zero_reference_nodes != 0) {
@@ -23,7 +29,15 @@ bdd_manager::~bdd_manager() {
                                         << Cudd_CheckZeroRef(m_bdd_manager);
     }
 
+    Cudd_RecursiveDeref(m_single_step_manager, m_single_step_root_node);
+    num_zero_reference_nodes = Cudd_CheckZeroRef(m_single_step_manager);
+    if (num_zero_reference_nodes != 0) {
+        LOG_MESSAGE(log_level::warning) << "#Nodes with non-zero reference count in sub bdd manager (should be 0): "
+                                        << Cudd_CheckZeroRef(m_single_step_manager);
+    }
+
     Cudd_Quit(m_bdd_manager);
+    Cudd_Quit(m_single_step_manager);
 }
 
 void bdd_manager::reduce_heap() {
@@ -67,30 +81,34 @@ void bdd_manager::write_bdd_to_dot_file(std::string filename) {
 }
 
 void bdd_manager::conjoin_clause(std::vector<int> &clause) {
+    conjoin_clause(clause, m_bdd_manager, m_root_node);
+}
+
+void bdd_manager::conjoin_clause(std::vector<int> &clause, DdManager *manager, DdNode *root_node) {
     // build the disjunction of the literals in the clause
     DdNode *var, *tmp;
-    DdNode *disjunction = Cudd_ReadLogicZero(m_bdd_manager);
+    DdNode *disjunction = Cudd_ReadLogicZero(manager);
     Cudd_Ref(disjunction);
 
     for (int j = 0; j < clause.size(); j++) {
-        var = Cudd_bddIthVar(m_bdd_manager, std::abs(clause[j]));
+        var = Cudd_bddIthVar(manager, std::abs(clause[j]));
 
         if (clause[j] > 0) {
-            tmp = Cudd_bddOr(m_bdd_manager, var, disjunction);
+            tmp = Cudd_bddOr(manager, var, disjunction);
         } else {
-            tmp = Cudd_bddOr(m_bdd_manager, Cudd_Not(var), disjunction);
+            tmp = Cudd_bddOr(manager, Cudd_Not(var), disjunction);
         }
         Cudd_Ref(tmp);
-        Cudd_RecursiveDeref(m_bdd_manager, disjunction);
+        Cudd_RecursiveDeref(manager, disjunction);
         disjunction = tmp;
     }
 
     // conjoin the clause with the root node
-    tmp = Cudd_bddAnd(m_bdd_manager, m_root_node, disjunction);
+    tmp = Cudd_bddAnd(manager, root_node, disjunction);
     Cudd_Ref(tmp);
-    Cudd_RecursiveDeref(m_bdd_manager, m_root_node);
-    Cudd_RecursiveDeref(m_bdd_manager, disjunction);
-    m_root_node = tmp;
+    Cudd_RecursiveDeref(manager, root_node);
+    Cudd_RecursiveDeref(manager, disjunction);
+    root_node = tmp;
 }
 
 void bdd_manager::add_exactly_one_constraint(std::vector<int> &variables) {
@@ -178,8 +196,6 @@ void bdd_manager::set_variable_order(std::vector<int> &variable_order){
     Cudd_ShuffleHeap(m_bdd_manager, order);
 }
 
-// This method returns the variable permutation
-// the ith entry of the return vector dictates what variable (index) resides in the ith layer of the bdd
 std::vector<int> bdd_manager::get_variable_order() {
     std::vector<int> layer_to_variable_index(m_num_variables, -1);
     for (int i = 0; i <= m_num_variables; i++) {
@@ -193,5 +209,31 @@ std::vector<int> bdd_manager::get_variable_order() {
     return layer_to_variable_index;
 }
 
-// TODO: find out what swapvars, bddpermute does
-// what is a variable map?
+
+void bdd_manager::build_bdd_for_single_step(planning_cnf::cnf &clauses) {
+    conjoin_order::categorized_clauses tagged_clauses = conjoin_order::categorize_clauses(clauses);
+
+    std::vector<planning_cnf::clause> preconditions, effects, frame;
+    preconditions = tagged_clauses[planning_cnf::precondition][0];
+    effects = tagged_clauses[planning_cnf::effect][0];
+    frame = tagged_clauses[planning_cnf::changing_atoms][0];
+
+    for(planning_cnf::clause_tag tag: {planning_cnf::precondition, planning_cnf::effect, planning_cnf::changing_atoms}){
+        std::vector<planning_cnf::clause> sub_clauses = tagged_clauses[tag][0];
+        for(int i = 0; i < sub_clauses.size(); i++){
+            planning_cnf::clause c = sub_clauses[i];
+            conjoin_clause(c, m_single_step_manager, m_single_step_root_node);
+        }
+    }
+}
+
+DdNode* bdd_manager::get_bdd_for_timestep(planning_cnf::cnf &clauses, int timestep){
+
+    // calculate transltaion of variable indizes between timesteps
+    std::map<int, int> timestep_translation;
+    std::map<int, int> invers_translation;
+
+
+    // TODO
+    return NULL;
+}
