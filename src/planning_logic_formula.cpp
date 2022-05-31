@@ -17,7 +17,7 @@ void cnf::add_clause(std::vector<int> clause, clause_tag tag, int timestep) {
     m_tagged_clauses.push_back(std::make_tuple(clause, tag, timestep));
 }
 
-void cnf::add_exact_one_constraint(exactly_one_constraint constraint, constraint_tag tag, int timestep) {
+void cnf::add_exact_one_constraint(eo_constraint constraint, eo_constraint_tag tag, int timestep) {
     m_constraints.push_back(std::make_tuple(constraint, tag, timestep));
 }
 
@@ -52,7 +52,7 @@ int cnf::get_variable_index_without_adding(int var_index, variable_tag tag, int 
 // TODO implement
 tagged_variable cnf::get_planning_info_for_variable(int index) {
     if (m_inverse_variable_map.find(index) == m_inverse_variable_map.end()) {
-        return std::make_tuple(-1, none_variable, -1, -1);
+        return std::make_tuple(-1, variable_none, -1, -1);
     }
     return m_inverse_variable_map[index];
 }
@@ -62,7 +62,7 @@ clause_tag cnf::get_clause_tag(int i) { return std::get<1>(m_tagged_clauses[i]);
 int cnf::get_clause_timestep(int i) { return std::get<2>(m_tagged_clauses[i]); }
 
 std::vector<int> cnf::get_constraint(int i) { return std::get<0>(m_constraints[i]); }
-constraint_tag cnf::get_constraint_tag(int i) { return std::get<1>(m_constraints[i]); }
+eo_constraint_tag cnf::get_constraint_tag(int i) { return std::get<1>(m_constraints[i]); }
 int cnf::get_constraint_timestep(int i) { return std::get<2>(m_constraints[i]); }
 
 int cnf::get_num_variables() { return m_variable_map.size(); }

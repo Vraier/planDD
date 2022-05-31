@@ -28,7 +28,7 @@ void construct_dd_linear_disjoint(dd_buildable &dd, cnf &cnf, option_values &opt
 
         if (primitive_type == logic_clause) {
             dd.conjoin_clause(primitive);
-        } else if (primitive_type == logic_exact_one) {
+        } else if (primitive_type == logic_eo) {
             dd.add_exactly_one_constraint(primitive);
         } else {
             LOG_MESSAGE(log_level::warning) << "Unknown logic primitive type during DD construction";

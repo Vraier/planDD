@@ -10,7 +10,7 @@ namespace variable_order {
 
 // used to interpret the order of clauses from the command line options
 std::map<char, variable_tag> char_tag_map = {
-    {'v', plan_variable}, {'o', plan_action}, {'h', h_amost_variable}, {'j', h_amost_operator}, {'k', h_amost_mutex},
+    {'v', variable_plan_var}, {'o', variable_plan_op}, {'h', variable_h_amost_variable}, {'j', variable_h_amost_operator}, {'k', variable_h_amost_mutex},
 };
 
 bool is_valid_variable_order_string(std::string build_order) {
@@ -32,7 +32,7 @@ categorized_variables categorize_variables(planning_logic::cnf &cnf) {
     categorized_variables tagged_variables;
 
     // give every vector #timestpes+1 buckets
-    for (int tag_int = initial_state; tag_int <= none_variable; tag_int++) {
+    for (int tag_int = clause_ini_state; tag_int <= variable_none; tag_int++) {
         variable_tag t = static_cast<variable_tag>(tag_int);
         tagged_variables[t] = std::vector<std::vector<int>>(cnf.get_num_timesteps() + 1);
     }
@@ -54,7 +54,7 @@ categorized_variables categorize_variables(planning_logic::cnf &cnf) {
     }
 
     // print info about how many variables each tag has
-    for (int tag_int = plan_variable; tag_int <= none_variable; tag_int++) {
+    for (int tag_int = variable_plan_var; tag_int <= variable_none; tag_int++) {
         variable_tag t = static_cast<variable_tag>(tag_int);
 
         int total_variables = 0;
@@ -152,10 +152,10 @@ std::vector<int> order_variables(planning_logic::cnf &cnf, option_values &option
 
     // move goal or initial_state variable first
     if (goal_first) {
-        total_variables = put_variables_of_tag_first(cnf, total_variables, goal);
+        total_variables = put_variables_of_tag_first(cnf, total_variables, clause_goal);
     }
     if (init_state_first) {
-        total_variables = put_variables_of_tag_first(cnf, total_variables, initial_state);
+        total_variables = put_variables_of_tag_first(cnf, total_variables, clause_ini_state);
     }
 
     LOG_MESSAGE(log_level::info) << "Sorted a total of " << total_variables.size() << " variables";

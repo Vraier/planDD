@@ -14,7 +14,7 @@ typedef std::pair<planning_logic::logic_primitive, planning_logic::logic_primiti
 // each tag represents a buckets, each tag buckets is divided into subbuckets for each timesetep
 // the subbuckets have an arbitrary order and contain the actual cnf clauses
 typedef std::map<planning_logic::clause_tag, std::vector<std::vector<planning_logic::clause>>> categorized_clauses;
-typedef std::map<planning_logic::constraint_tag, std::vector<std::vector<planning_logic::exactly_one_constraint>>> categorized_constraints;
+typedef std::map<planning_logic::eo_constraint_tag, std::vector<std::vector<planning_logic::eo_constraint>>> categorized_constraints;
 
 // checks if the string can be used as a build order
 bool is_valid_conjoin_order_string(std::string build_order);

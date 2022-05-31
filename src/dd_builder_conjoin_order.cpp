@@ -8,13 +8,13 @@ namespace conjoin_order {
 
 // used to interpret the order of clauses from the command line options
 std::map<char, clause_tag> char_clause_tag_map = {
-    {'i', initial_state}, {'g', goal},  {'r', at_least_var}, {'t', at_most_var}, {'y', at_least_op},
-    {'u', at_most_op},    {'m', mutex}, {'p', precondition}, {'e', effect},      {'c', changing_atoms},
+    {'i', clause_ini_state}, {'g', clause_goal},  {'r', clause_al_var}, {'t', clause_am_var}, {'y', clause_al_op},
+    {'u', clause_am_op},    {'m', clause_mutex}, {'p', clause_precon}, {'e', clause_effect},      {'c', clause_frame},
 };
-std::map<char, constraint_tag> char_constraint_tag_map = {
-    {'i', none_constraint}, {'g', none_constraint}, {'r', exact_one_var},   {'t', none_constraint},
-    {'y', exact_one_op},    {'u', none_constraint}, {'m', none_constraint}, {'p', none_constraint},
-    {'e', none_constraint}, {'c', none_constraint},
+std::map<char, eo_constraint_tag> char_constraint_tag_map = {
+    {'i', eo_none}, {'g', eo_none}, {'r', eo_var},   {'t', eo_none},
+    {'y', eo_op},    {'u', eo_none}, {'m', eo_none}, {'p', eo_none},
+    {'e', eo_none}, {'c', eo_none},
 };
 
 bool is_valid_conjoin_order_string(std::string build_order) {
@@ -48,11 +48,11 @@ categorized_clauses categorize_clauses(cnf &cnf) {
 
     // initilize the timestep buckets for the map
     categorized_clauses tagged_clauses;
-    for (int tag_int = initial_state; tag_int <= none_clause; tag_int++) {
+    for (int tag_int = clause_ini_state; tag_int <= clause_none; tag_int++) {
         clause_tag t = static_cast<clause_tag>(tag_int);
 
         // we only need one timestep
-        if (t == initial_state || t == goal || t == none_clause) {
+        if (t == clause_ini_state || t == clause_goal || t == clause_none) {
             tagged_clauses[t] = std::vector<std::vector<clause>>(1);
         }
         // we need one bucket for each timestep
@@ -64,9 +64,9 @@ categorized_clauses categorize_clauses(cnf &cnf) {
     // categorize clauses by tag and timestep
     for (int i = 0; i < cnf.get_num_clauses(); i++) {
         clause_tag t = cnf.get_clause_tag(i);
-        if (t == initial_state || t == goal) {
+        if (t == clause_ini_state || t == clause_goal) {
             tagged_clauses[t][0].push_back(cnf.get_clause(i));
-        } else if (t == none_clause) {
+        } else if (t == clause_none) {
             LOG_MESSAGE(log_level::error) << "Unknown tag during dd building: " << t;
             return std::map<clause_tag, std::vector<std::vector<clause>>>();
         } else {
@@ -75,11 +75,11 @@ categorized_clauses categorize_clauses(cnf &cnf) {
     }
 
     // print info about how many clauses each tag has
-    for (int tag_int = initial_state; tag_int <= none_clause; tag_int++) {
+    for (int tag_int = clause_ini_state; tag_int <= clause_none; tag_int++) {
         clause_tag t = static_cast<clause_tag>(tag_int);
 
         // we only need one timestep
-        if (t == initial_state || t == goal || t == none_clause) {
+        if (t == clause_ini_state || t == clause_goal || t == clause_none) {
             LOG_MESSAGE(log_level::info) << "Categorized " << tagged_clauses[t][0].size() << " clauses of tag " << t;
         }
         // we need one bucket for each timestep
@@ -100,21 +100,21 @@ categorized_constraints categorize_constraints(cnf &cnf) {
 
     // initilize the timestep buckets for the map
     categorized_constraints tagged_constraints;
-    for (int tag_int = exact_one_var; tag_int <= none_constraint; tag_int++) {
-        constraint_tag t = static_cast<constraint_tag>(tag_int);
+    for (int tag_int = eo_var; tag_int <= eo_none; tag_int++) {
+        eo_constraint_tag t = static_cast<eo_constraint_tag>(tag_int);
 
-        tagged_constraints[t] = std::vector<std::vector<exactly_one_constraint>>(cnf.get_num_timesteps() + 1);
+        tagged_constraints[t] = std::vector<std::vector<eo_constraint>>(cnf.get_num_timesteps() + 1);
     }
 
     // categorize clauses by tag and timestep
     for (int i = 0; i < cnf.get_num_constraints(); i++) {
-        constraint_tag t = cnf.get_constraint_tag(i);
+        eo_constraint_tag t = cnf.get_constraint_tag(i);
         tagged_constraints[t][cnf.get_constraint_timestep(i)].push_back(cnf.get_constraint(i));
     }
 
     // print info about how many clauses each tag has
-    for (int tag_int = exact_one_var; tag_int <= none_constraint; tag_int++) {
-        constraint_tag t = static_cast<constraint_tag>(tag_int);
+    for (int tag_int = eo_var; tag_int <= eo_none; tag_int++) {
+        eo_constraint_tag t = static_cast<eo_constraint_tag>(tag_int);
 
         int total_constraints = 0;
         for (int k = 0; k <= cnf.get_num_timesteps(); k++) {
@@ -152,7 +152,7 @@ std::vector<tagged_logic_primitiv> order_clauses(cnf &cnf, option_values &option
         for (int i = 0; i < interleaved_order.size(); i++) {
             char current_char = interleaved_order[i];
             clause_tag order_tag = char_clause_tag_map[current_char];
-            constraint_tag constraint_order_tag = char_constraint_tag_map[current_char];
+            eo_constraint_tag constraint_order_tag = char_constraint_tag_map[current_char];
 
             // add all the clauses for timestep t and tag order_tag
             for (clause c : tagged_clauses[order_tag][t]) {
@@ -161,9 +161,9 @@ std::vector<tagged_logic_primitiv> order_clauses(cnf &cnf, option_values &option
             // interleved_clauses.insert(interleved_clauses.end(), tagged_clauses[order_tag][t].begin(),
             //                           tagged_clauses[order_tag][t].end());
             //  add the exactly one constraints for the at_least_var or at_leat_op
-            if (constraint_order_tag != none_constraint) {
-                for (exactly_one_constraint e : tagged_constraints[constraint_order_tag][t]) {
-                    interleved_clauses.push_back(std::make_pair(e, logic_exact_one));
+            if (constraint_order_tag != eo_none) {
+                for (eo_constraint e : tagged_constraints[constraint_order_tag][t]) {
+                    interleved_clauses.push_back(std::make_pair(e, logic_eo));
                 }
             }
         }
@@ -179,9 +179,9 @@ std::vector<tagged_logic_primitiv> order_clauses(cnf &cnf, option_values &option
         }
 
         clause_tag order_tag = char_clause_tag_map[current_char];
-        constraint_tag constraint_order_tag = char_constraint_tag_map[current_char];
+        eo_constraint_tag constraint_order_tag = char_constraint_tag_map[current_char];
         // only add first timestep
-        if (order_tag == initial_state || order_tag == goal) {
+        if (order_tag == clause_ini_state || order_tag == clause_goal) {
             for (clause c : tagged_clauses[order_tag][0]) {
                 total_clauses.push_back(std::make_pair(c, logic_clause));
             }
@@ -195,10 +195,10 @@ std::vector<tagged_logic_primitiv> order_clauses(cnf &cnf, option_values &option
             }
         }
         // if exact one constraint
-        if (constraint_order_tag != none_constraint) {
+        if (constraint_order_tag != eo_none) {
             for (int t = 0; t <= cnf.get_num_timesteps(); t++) {
-                for (exactly_one_constraint e : tagged_constraints[constraint_order_tag][t]) {
-                    total_clauses.push_back(std::make_pair(e, logic_exact_one));
+                for (eo_constraint e : tagged_constraints[constraint_order_tag][t]) {
+                    total_clauses.push_back(std::make_pair(e, logic_eo));
                 }
             }
         }

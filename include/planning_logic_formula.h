@@ -12,48 +12,49 @@
 namespace planning_logic {
 
 enum variable_tag {
-    plan_variable,
-    plan_action,
-    h_amost_variable,
-    h_amost_operator,
-    h_amost_mutex,
-    none_variable,
+    variable_plan_var,
+    variable_plan_op,
+    variable_h_amost_variable,
+    variable_h_amost_operator,
+    variable_h_amost_mutex,
+    variable_none,
 };
 
 enum clause_tag {
-    initial_state,
-    goal,
-    at_least_var,
-    at_most_var,
-    at_least_op,
-    at_most_op,
-    mutex,
-    precondition,
-    effect,
-    changing_atoms,
-    none_clause,
+    clause_ini_state,
+    clause_goal,
+    clause_al_var, // at least one var is true
+    clause_am_var, // at most one var is true
+    clause_al_op,
+    clause_am_op,
+    clause_mutex,
+    clause_precon,
+    clause_effect,
+    clause_frame,
+    clause_none,
 };
 
-enum constraint_tag {
-    exact_one_var,
-    exact_one_op,
-    none_constraint,
+// exactly one variable is true
+enum eo_constraint_tag {
+    eo_var,
+    eo_op,
+    eo_none,
 };
 
 enum logic_primitive_type {
     logic_clause,
-    logic_exact_one,
+    logic_eo,
 };
 
 // logic primitive can be a clause or an exactly one constraint
 typedef std::vector<int> logic_primitive;
 typedef std::vector<int> clause;
-typedef std::vector<int> exactly_one_constraint;
+typedef std::vector<int> eo_constraint;
 
 // definition of clause, tag, timestep
 typedef std::tuple<clause, clause_tag, int> tagged_clause;
 // definition of constraint, tag, timestep
-typedef std::tuple<exactly_one_constraint, constraint_tag, int> tagged_constraint;
+typedef std::tuple<eo_constraint, eo_constraint_tag, int> tagged_constraint;
 // index of the variable into planning problem, tag, timestep, value (in case of planning variable)
 typedef std::tuple<int, variable_tag, int, int> tagged_variable;
 
@@ -82,7 +83,7 @@ class cnf {
     void add_clause(clause clause, clause_tag tag, int timestep);
 
     // adds a constraint that ensures that exactly one variable from constraints is true
-    void add_exact_one_constraint(exactly_one_constraint constraint, constraint_tag tag, int timestep);
+    void add_exact_one_constraint(eo_constraint constraint, eo_constraint_tag tag, int timestep);
 
     // These methos get the information about a variable/action from a planning problem and return
     // the variable index into the cnf formula
@@ -104,8 +105,8 @@ class cnf {
     clause_tag get_clause_tag(int i);
     int get_clause_timestep(int i);
     // the same but for the exact one variable is true constraints
-    exactly_one_constraint get_constraint(int i);
-    constraint_tag get_constraint_tag(int i);
+    eo_constraint get_constraint(int i);
+    eo_constraint_tag get_constraint_tag(int i);
     int get_constraint_timestep(int i);
 
     int get_num_variables();

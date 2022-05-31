@@ -1,7 +1,7 @@
-#include "bdd_container.h"
-
 #include "logging.h"
 #include "dd_builder_conjoin_order.h"
+
+#include "bdd_container.h"
 
 bdd_manager::bdd_manager(int num_variables) {
     // add one more variable to account for variable with index 0
@@ -9,15 +9,12 @@ bdd_manager::bdd_manager(int num_variables) {
 
     m_bdd_manager = Cudd_Init(m_num_variables, 0, CUDD_UNIQUE_SLOTS, CUDD_CACHE_SLOTS, 0);
     Cudd_AutodynEnable(m_bdd_manager, CUDD_REORDER_SIFT);
-    m_single_step_manager = Cudd_Init(m_num_variables, 0, CUDD_UNIQUE_SLOTS, CUDD_CACHE_SLOTS, 0);
-    Cudd_AutodynEnable(m_single_step_manager, CUDD_REORDER_SIFT);
+
     // Cudd_SetMaxCacheHard(m_bdd_manager, 62500000);
 
     // force var with index 0 to be true
     m_root_node = Cudd_bddIthVar(m_bdd_manager, 0);
-    m_single_step_root_node = Cudd_bddIthVar(m_single_step_manager, 0);
     Cudd_Ref(m_root_node);
-    Cudd_Ref(m_single_step_root_node);
 }
 
 bdd_manager::~bdd_manager() {
@@ -29,15 +26,7 @@ bdd_manager::~bdd_manager() {
                                         << Cudd_CheckZeroRef(m_bdd_manager);
     }
 
-    Cudd_RecursiveDeref(m_single_step_manager, m_single_step_root_node);
-    num_zero_reference_nodes = Cudd_CheckZeroRef(m_single_step_manager);
-    if (num_zero_reference_nodes != 0) {
-        LOG_MESSAGE(log_level::warning) << "#Nodes with non-zero reference count in sub bdd manager (should be 0): "
-                                        << Cudd_CheckZeroRef(m_single_step_manager);
-    }
-
     Cudd_Quit(m_bdd_manager);
-    Cudd_Quit(m_single_step_manager);
 }
 
 void bdd_manager::reduce_heap() {
@@ -80,33 +69,31 @@ void bdd_manager::write_bdd_to_dot_file(std::string filename) {
     fclose(outfile);
 }
 
-void bdd_manager::conjoin_clause(std::vector<int> &clause) { conjoin_clause(clause, m_bdd_manager, m_root_node); }
-
-void bdd_manager::conjoin_clause(std::vector<int> &clause, DdManager *manager, DdNode *root_node) {
+void bdd_manager::conjoin_clause(std::vector<int> &clause) {
     // build the disjunction of the literals in the clause
     DdNode *var, *tmp;
-    DdNode *disjunction = Cudd_ReadLogicZero(manager);
+    DdNode *disjunction = Cudd_ReadLogicZero(m_bdd_manager);
     Cudd_Ref(disjunction);
 
     for (int j = 0; j < clause.size(); j++) {
-        var = Cudd_bddIthVar(manager, std::abs(clause[j]));
+        var = Cudd_bddIthVar(m_bdd_manager, std::abs(clause[j]));
 
         if (clause[j] > 0) {
-            tmp = Cudd_bddOr(manager, var, disjunction);
+            tmp = Cudd_bddOr(m_bdd_manager, var, disjunction);
         } else {
-            tmp = Cudd_bddOr(manager, Cudd_Not(var), disjunction);
+            tmp = Cudd_bddOr(m_bdd_manager, Cudd_Not(var), disjunction);
         }
         Cudd_Ref(tmp);
-        Cudd_RecursiveDeref(manager, disjunction);
+        Cudd_RecursiveDeref(m_bdd_manager, disjunction);
         disjunction = tmp;
     }
 
     // conjoin the clause with the root node
-    tmp = Cudd_bddAnd(manager, root_node, disjunction);
+    tmp = Cudd_bddAnd(m_bdd_manager, m_root_node, disjunction);
     Cudd_Ref(tmp);
-    Cudd_RecursiveDeref(manager, root_node);
-    Cudd_RecursiveDeref(manager, disjunction);
-    root_node = tmp;
+    Cudd_RecursiveDeref(m_bdd_manager, m_root_node);
+    Cudd_RecursiveDeref(m_bdd_manager, disjunction);
+    m_root_node = tmp;
 }
 
 void bdd_manager::add_exactly_one_constraint(std::vector<int> &variables) {
@@ -240,16 +227,16 @@ void bdd_manager::build_bdd_for_single_step(planning_logic::cnf &clauses) {
     conjoin_order::categorized_clauses tagged_clauses = conjoin_order::categorize_clauses(clauses);
 
     std::vector<planning_logic::clause> preconditions, effects, frame;
-    preconditions = tagged_clauses[planning_logic::precondition][0];
-    effects = tagged_clauses[planning_logic::effect][0];
-    frame = tagged_clauses[planning_logic::changing_atoms][0];
+    preconditions = tagged_clauses[planning_logic::clause_precon][0];
+    effects = tagged_clauses[planning_logic::clause_effect][0];
+    frame = tagged_clauses[planning_logic::clause_frame][0];
 
     for (planning_logic::clause_tag tag :
-         {planning_logic::precondition, planning_logic::effect, planning_logic::changing_atoms}) {
+         {planning_logic::clause_precon, planning_logic::clause_effect, planning_logic::clause_frame}) {
         std::vector<planning_logic::clause> sub_clauses = tagged_clauses[tag][0];
         for (int i = 0; i < sub_clauses.size(); i++) {
             planning_logic::clause c = sub_clauses[i];
-            conjoin_clause(c, m_single_step_manager, m_single_step_root_node);
+            //conjoin_clause(c, m_single_step_manager, m_single_step_root_node);
         }
     }
 }

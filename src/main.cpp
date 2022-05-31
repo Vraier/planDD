@@ -205,7 +205,7 @@ int main(int argc, char *argv[]) {
                 // add the negated variable (because of boolean algebra)
                 new_blocking_clause.push_back(current_assignment[i] ? -i : i);
             }
-            clauses.add_clause(new_blocking_clause, planning_logic::none_clause, -1);
+            clauses.add_clause(new_blocking_clause, planning_logic::clause_none, -1);
             clauses.write_to_file(options.m_values.cnf_file);
             num_solutions++;
         }

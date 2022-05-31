@@ -17,8 +17,8 @@ extern "C" {
 class bdd_manager : public virtual dd_buildable {
    private:
     /* data */
-    DdManager *m_bdd_manager, *m_single_step_manager;
-    DdNode *m_root_node, *m_single_step_root_node;
+    DdManager *m_bdd_manager;
+    DdNode *m_root_node;
     int m_num_variables;
 
     //Functions for building the bdd timestep by timestep
@@ -30,8 +30,6 @@ class bdd_manager : public virtual dd_buildable {
     std::vector<int> get_variable_order_for_single_step();
     // extends the variable order for timestep 0 to all timesteps
     std::vector<int> extend_variable_order_to_all_steps(std::vector<int> &single_step_order);
-
-    void conjoin_clause(std::vector<int> &clause, DdManager *manager, DdNode *root_node);
 
    public:
     bdd_manager(int num_variables);
