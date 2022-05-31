@@ -9,5 +9,5 @@
 
 namespace dd_builder
 {    
-    void construct_dd_linear_disjoint(dd_buildable &dd, planning_logic::cnf &cnf, option_values &options);
+    void construct_dd_linear_disjoint(dd_buildable &dd, planning_logic::formula &cnf, option_values &options);
 }

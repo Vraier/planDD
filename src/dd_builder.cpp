@@ -7,7 +7,7 @@ using namespace planning_logic;
 
 namespace dd_builder {
 
-void construct_dd_linear_disjoint(dd_buildable &dd, cnf &cnf, option_values &options) {
+void construct_dd_linear_disjoint(dd_buildable &dd, formula &cnf, option_values &options) {
     LOG_MESSAGE(log_level::info) << "Start constructing DD";
 
     // TODO: handle empty sorted_clause (or error for variable order)

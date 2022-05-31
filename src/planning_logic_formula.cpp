@@ -9,20 +9,22 @@
 // TODO rename to something like planning logic formula
 using namespace planning_logic;
 
-cnf::cnf(int num_timestpes) { m_num_timesteps = num_timestpes; }
+formula::formula(int num_timestpes) { m_num_timesteps = num_timestpes; }
 
-cnf::~cnf() {}
+formula::~formula() {}
 
-void cnf::add_clause(std::vector<int> clause, clause_tag tag, int timestep) {
-    m_tagged_clauses.push_back(std::make_tuple(clause, tag, timestep));
+void formula::add_clause(std::vector<int> clause, clause_tag tag, int timestep) {
+    m_clause_map[std::make_tuple(tag, timestep)].push_back(clause);
+    m_num_clauses++;
 }
 
-void cnf::add_exact_one_constraint(eo_constraint constraint, eo_constraint_tag tag, int timestep) {
-    m_constraints.push_back(std::make_tuple(constraint, tag, timestep));
+void formula::add_exact_one_constraint(eo_constraint constraint, eo_constraint_tag tag, int timestep) {
+    m_eo_constraint_map[std::make_tuple(tag, timestep)].push_back(constraint);
+    m_num_eo_constraints++;
 }
 
-int cnf::get_variable_index(int var_index, variable_tag tag, int timestep, int value) {
-    tagged_variable var = std::make_tuple(var_index, tag, timestep, value);
+int formula::get_variable_index(variable_tag tag, int timestep, int var_index, int value) {
+    tagged_variable var = std::make_tuple(tag, timestep, var_index, value);
     if (m_variable_map.find(var) == m_variable_map.end()) {
         int size = m_variable_map.size();
         m_variable_map[var] = size + 1;
@@ -33,58 +35,50 @@ int cnf::get_variable_index(int var_index, variable_tag tag, int timestep, int v
     return m_variable_map[var];
 }
 
-int cnf::get_variable_index_without_adding(int var_index, variable_tag tag, int timestep, int value) {
-    tagged_variable var = std::make_tuple(var_index, tag, timestep, value);
+int formula::get_variable_index_without_adding(variable_tag tag, int timestep, int var_index, int value) {
+    tagged_variable var = std::make_tuple(tag, timestep, var_index, value);
     if (m_variable_map.find(var) == m_variable_map.end()) {
         return -1;
     }
     return m_variable_map[var];
 }
 
-int cnf::get_variable_index(int var_index, variable_tag tag, int timestep) {
-    return get_variable_index(var_index, tag, timestep, 0);
+int formula::get_variable_index(variable_tag tag, int timestep, int var_index) {
+    return get_variable_index(tag, timestep, var_index, 0);
 }
 
-int cnf::get_variable_index_without_adding(int var_index, variable_tag tag, int timestep) {
-    return get_variable_index_without_adding(var_index, tag, timestep, 0);
+int formula::get_variable_index_without_adding(variable_tag tag, int timestep, int var_index) {
+    return get_variable_index_without_adding(tag, timestep, var_index, 0);
 }
 
-// TODO implement
-tagged_variable cnf::get_planning_info_for_variable(int index) {
+tagged_variable formula::get_planning_info_for_variable(int index) {
     if (m_inverse_variable_map.find(index) == m_inverse_variable_map.end()) {
-        return std::make_tuple(-1, variable_none, -1, -1);
+        return std::make_tuple(variable_none, -1, -1, -1);
     }
     return m_inverse_variable_map[index];
 }
 
-std::vector<int> cnf::get_clause(int i) { return std::get<0>(m_tagged_clauses[i]); }
-clause_tag cnf::get_clause_tag(int i) { return std::get<1>(m_tagged_clauses[i]); }
-int cnf::get_clause_timestep(int i) { return std::get<2>(m_tagged_clauses[i]); }
+int formula::get_num_variables() { return m_variable_map.size(); }
+int formula::get_num_clauses() { return m_num_clauses; }
+int formula::get_num_constraints() { return m_num_eo_constraints; }
+int formula::get_num_timesteps() { return m_num_timesteps; }
 
-std::vector<int> cnf::get_constraint(int i) { return std::get<0>(m_constraints[i]); }
-eo_constraint_tag cnf::get_constraint_tag(int i) { return std::get<1>(m_constraints[i]); }
-int cnf::get_constraint_timestep(int i) { return std::get<2>(m_constraints[i]); }
-
-int cnf::get_num_variables() { return m_variable_map.size(); }
-int cnf::get_num_clauses() { return m_tagged_clauses.size(); }
-int cnf::get_num_constraints() { return m_constraints.size(); }
-int cnf::get_num_timesteps() { return m_num_timesteps; }
-
-void cnf::write_to_file(std::string filepath) {
+// TODO: fix
+void formula::write_to_file(std::string filepath) {
     std::fstream file_out;
     file_out.open(filepath, std::ios_base::out);
 
     file_out << "p cnf " << get_num_variables() << " " << get_num_clauses() << std::endl;
     for (int i = 0; i < get_num_clauses(); i++) {
-        std::vector<int> clause = get_clause(i);
-        for (int l : clause) {
-            file_out << l << " ";
-        }
+        //std::vector<int> clause = get_clause(i);
+        //for (int l : clause) {
+        //    file_out << l << " ";
+        //}
         file_out << "0" << std::endl;
     }
 }
 
-std::tuple<int, int, std::vector<clause>> cnf::parse_cnf_file_to_clauses(std::string file_path) {
+std::tuple<int, int, std::vector<clause>> formula::parse_cnf_file_to_clauses(std::string file_path) {
     LOG_MESSAGE(log_level::info) << "Starting to parse cnf file to clauses";
 
     std::vector<clause> all_clauses;

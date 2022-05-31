@@ -14,7 +14,7 @@ extern "C" {
 
 // code wont compile if i #include <iostream> after util.h
 
-class bdd_manager : public virtual dd_buildable {
+class bdd_container : public virtual dd_buildable {
    private:
     /* data */
     DdManager *m_bdd_manager;
@@ -23,19 +23,28 @@ class bdd_manager : public virtual dd_buildable {
 
     //Functions for building the bdd timestep by timestep
     // builds the bdd for the precondition/effect and frameclauses of timestep 0
-    void build_bdd_for_single_step(planning_logic::cnf &clauses);
+    void build_bdd_for_single_step(planning_logic::formula &clauses);
     // returns a node for the main bdd_manager that represents the bdd for a single timestep 
-    DdNode* get_bdd_for_timestep(planning_logic::cnf &clauses, int timestep);
+    DdNode* copy_bdd_to_other_container(bdd_container &copy_to);
+    // swaps the variables from two timesteps
+    void swap_variables_to_other_timestep(int timesetp_from, int timestep_to);
     // returns the variable order for timesetep 0 as used by the sub manager
     std::vector<int> get_variable_order_for_single_step();
     // extends the variable order for timestep 0 to all timesteps
     std::vector<int> extend_variable_order_to_all_steps(std::vector<int> &single_step_order);
 
    public:
-    bdd_manager(int num_variables);
-    virtual ~bdd_manager();
+    // constructor for bdd manager. The number of used variables should be clear from the start
+    // this is important for counting the number of solutions and variable ordering
+    bdd_container(int num_variables);
+    virtual ~bdd_container();
 
-    // reorders the variables
+    // adds a clause to the root node
+    virtual void conjoin_clause(std::vector<int> &clause);
+    // adds an exact one constraint to the root node
+    virtual void add_exactly_one_constraint(std::vector<int> &variables);
+
+    // reorders the variables with the reorder_shift_converge method
     void reduce_heap();
 
     // The i-th entry of the permutation array contains the index of the variable that should be brought to the i-th level
@@ -45,15 +54,12 @@ class bdd_manager : public virtual dd_buildable {
     std::vector<int> get_variable_order();
 
     // Wirtes all the information about the CUDD manager to std::out
-    void print_bdd();
+    void print_bdd_info();
     // returns a short string with a few information about the current stae of CUDD
     // can be used to evaluate the progress of CUDD during the execution of the program
     virtual std::string get_short_statistics();
     // writes the bdd to a file in dot format
     void write_bdd_to_dot_file(std::string filename);
-
-    virtual void conjoin_clause(std::vector<int> &clause);
-    virtual void add_exactly_one_constraint(std::vector<int> &variables);
     
     // function is purely for debugging purpose. allows entry point to bdd manager
     void hack_back_rocket_method();

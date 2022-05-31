@@ -12,7 +12,7 @@
 class cnf_encoder {
    public:
     cnf_encoder(option_values &options, sas_problem &problem) : m_options(options), m_sas_problem(problem), m_cnf(0) {}
-    planning_logic::cnf encode_cnf(int timesteps);
+    planning_logic::formula encode_cnf(int timesteps);
 
     // parses a cnf solution from minisat into a bool vector
     // assignemnt gives the truth value for the ith variable (index 0 of assignment has no meaningful value)
@@ -38,7 +38,7 @@ class cnf_encoder {
 
     // vector of clauses. Each clause is represented by a vector of literals
     // the values fo the literals refer to the symbol_map
-    planning_logic::cnf m_cnf;
+    planning_logic::formula m_cnf;
 
     // TODO
     // All three: sas_problem, symbol map and cnf are needed to produce human readable output.

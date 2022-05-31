@@ -21,10 +21,10 @@ bool is_valid_conjoin_order_string(std::string build_order);
 
 // catgeorizes the clauses of a planning cnf into buckets.
 // each tag gets a bucket. Each buckets is hase one subbucket for each timestep
-categorized_clauses categorize_clauses(planning_logic::cnf &cnf);
+categorized_clauses categorize_clauses(planning_logic::formula &cnf);
 // same for the planning constraints
-categorized_constraints categorize_constraints(planning_logic::cnf &cnf);
+categorized_constraints categorize_constraints(planning_logic::formula &cnf);
 
 // uses the categorized clauses to order them in one single vector according to a build order
-std::vector<tagged_logic_primitiv> order_clauses(planning_logic::cnf &cnf, option_values &options);
+std::vector<tagged_logic_primitiv> order_clauses(planning_logic::formula &cnf, option_values &options);
 };

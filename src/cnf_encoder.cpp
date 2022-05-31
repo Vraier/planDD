@@ -8,11 +8,11 @@
 
 using namespace planning_logic;
 
-cnf cnf_encoder::encode_cnf(int timesteps) {
+formula cnf_encoder::encode_cnf(int timesteps) {
     LOG_MESSAGE(log_level::info) << "Start encoding SAS problem into CNF problem";
     LOG_MESSAGE(log_level::info) << "Starting to generate all clauses for the CNF problem";
 
-    m_cnf = cnf(timesteps);
+    m_cnf = formula(timesteps);
 
     construct_initial_state_clauses();
 
@@ -70,20 +70,20 @@ std::vector<std::vector<int>> cnf_encoder::generate_at_most_one_constraint_ladde
     for (int i = 0; i < variables.size(); i++) {
         if (i != 0 && i != variables.size() - 1) {  // first and last helper variable dont need this clause
             std::vector<int> new_clause;
-            new_clause.push_back(-m_cnf.get_variable_index(i - 1, constraint_type, timestep));  // !si-1
-            new_clause.push_back(m_cnf.get_variable_index(i, constraint_type, timestep));       // si
+            new_clause.push_back(-m_cnf.get_variable_index(constraint_type, timestep, i - 1));  // !si-1
+            new_clause.push_back(m_cnf.get_variable_index(constraint_type, timestep, i));       // si
             all_new_clauses.push_back(new_clause);
         }
         if (i != variables.size() - 1) {  // last variable does not need this implication
             std::vector<int> new_clause;
             new_clause.push_back(-variables[i]);                                           // !Xi
-            new_clause.push_back(m_cnf.get_variable_index(i, constraint_type, timestep));  // si
+            new_clause.push_back(m_cnf.get_variable_index(constraint_type, timestep, i));  // si
             all_new_clauses.push_back(new_clause);
         }
         if (i != 0) {  // first vaiable does not need this implication
             std::vector<int> new_clause;
             new_clause.push_back(-variables[i]);                                                // !Xi
-            new_clause.push_back(-m_cnf.get_variable_index(i - 1, constraint_type, timestep));  // !si-1
+            new_clause.push_back(-m_cnf.get_variable_index(constraint_type, timestep, i - 1));  // !si-1
             all_new_clauses.push_back(new_clause);
         }
     }
@@ -109,7 +109,7 @@ void cnf_encoder::construct_initial_state_clauses() {
     for (int var = 0; var < m_sas_problem.m_variabels.size(); var++) {
         for (int val = 0; val < m_sas_problem.m_variabels[var].m_range; val++) {
             std::vector<int> new_clause;
-            int sym_index = m_cnf.get_variable_index(var, variable_plan_var, 0, val);
+            int sym_index = m_cnf.get_variable_index(variable_plan_var, 0, var, val);
             if (m_sas_problem.m_initial_state[var] == val) {
                 new_clause.push_back(sym_index);
             } else {
@@ -127,7 +127,7 @@ void cnf_encoder::construct_at_least_one_value_clause(int timesteps) {
         for (int v = 0; v < m_sas_problem.m_variabels.size(); v++) {
             std::vector<int> new_clause;
             for (int val = 0; val < m_sas_problem.m_variabels[v].m_range; val++) {
-                int var_index = m_cnf.get_variable_index(v, variable_plan_var, t, val);
+                int var_index = m_cnf.get_variable_index(variable_plan_var, t, v, val);
                 new_clause.push_back(var_index);
             }
             m_cnf.add_clause(new_clause, clause_al_var, t);
@@ -141,7 +141,7 @@ void cnf_encoder::construct_at_most_one_value_clause(int timesteps) {
         for (int v = 0; v < m_sas_problem.m_variabels.size(); v++) {
             std::vector<int> at_most_one_should_be_true;
             for (int val = 0; val < m_sas_problem.m_variabels[v].m_range; val++) {
-                int index = m_cnf.get_variable_index(v, variable_plan_var, t, val);
+                int index = m_cnf.get_variable_index(variable_plan_var, t, v, val);
                 at_most_one_should_be_true.push_back(index);
             }
 
@@ -159,7 +159,7 @@ void cnf_encoder::construct_at_least_one_action_clauses(int timesteps) {
     for (int t = 0; t < timesteps; t++) {
         std::vector<int> new_clause;
         for (int op = 0; op < m_sas_problem.m_operators.size(); op++) {
-            int sym_index = m_cnf.get_variable_index(op, variable_plan_op, t);
+            int sym_index = m_cnf.get_variable_index(variable_plan_op, t, op);
             new_clause.push_back(sym_index);
         }
 
@@ -172,7 +172,7 @@ void cnf_encoder::construct_at_most_one_action_clauses(int timesteps) {
     for (int t = 0; t < timesteps; t++) {
         std::vector<int> at_most_one_should_be_true;
         for (int op = 0; op < m_sas_problem.m_operators.size(); op++) {
-            int index = m_cnf.get_variable_index(op, variable_plan_op, t);
+            int index = m_cnf.get_variable_index(variable_plan_op, t, op);
             at_most_one_should_be_true.push_back(index);
         }
 
@@ -189,7 +189,7 @@ void cnf_encoder::construct_exact_one_value_constraint(int timesteps) {
         for (int v = 0; v < m_sas_problem.m_variabels.size(); v++) {
             std::vector<int> exact_one_should_be_true;
             for (int val = 0; val < m_sas_problem.m_variabels[v].m_range; val++) {
-                int index = m_cnf.get_variable_index(v, variable_plan_var, t, val);
+                int index = m_cnf.get_variable_index(variable_plan_var, t, v, val);
                 exact_one_should_be_true.push_back(index);
             }
 
@@ -202,7 +202,7 @@ void cnf_encoder::construct_exact_one_action_constraint(int timesteps) {
     for (int t = 0; t < timesteps; t++) {
         std::vector<int> exact_one_should_be_true;
         for (int op = 0; op < m_sas_problem.m_operators.size(); op++) {
-            int index = m_cnf.get_variable_index(op, variable_plan_op, t);
+            int index = m_cnf.get_variable_index(variable_plan_op, t, op);
             exact_one_should_be_true.push_back(index);
         }
 
@@ -227,8 +227,8 @@ void cnf_encoder::construct_precondition_clauses(int timesteps) {
                 }
 
                 int index_op, index_precondition;
-                index_op = m_cnf.get_variable_index(op, variable_plan_op, t);
-                index_precondition = m_cnf.get_variable_index(effected_var, variable_plan_var, t, effected_old_val);
+                index_op = m_cnf.get_variable_index(variable_plan_op, t, op);
+                index_precondition = m_cnf.get_variable_index(variable_plan_var, t, effected_var, effected_old_val);
 
                 std::vector<int> new_clause;
                 new_clause.push_back(-index_op);
@@ -250,8 +250,8 @@ void cnf_encoder::construct_effect_clauses(int timesteps) {
                 effected_new_val = std::get<2>(m_sas_problem.m_operators[op].m_effects[eff]);
 
                 int index_op, index_effect;
-                index_op = m_cnf.get_variable_index(op, variable_plan_op, t);
-                index_effect = m_cnf.get_variable_index(effected_var, variable_plan_var, t + 1, effected_new_val);
+                index_op = m_cnf.get_variable_index(variable_plan_op, t, op);
+                index_effect = m_cnf.get_variable_index(variable_plan_var, t + 1, effected_var, effected_new_val);
 
                 std::vector<int> new_clause;
                 new_clause.push_back(-index_op);
@@ -268,7 +268,7 @@ void cnf_encoder::construct_goal_holds_clauses(int timesteps) {
     for (int g = 0; g < m_sas_problem.m_goal.size(); g++) {
         std::vector<int> new_clause;
         std::pair<int, int> goal_value = m_sas_problem.m_goal[g];
-        int index_var = m_cnf.get_variable_index(goal_value.first, variable_plan_var, timesteps, goal_value.second);
+        int index_var = m_cnf.get_variable_index(variable_plan_var, timesteps, goal_value.first, goal_value.second);
 
         new_clause.push_back(index_var);
         m_cnf.add_clause(new_clause, clause_goal, timesteps);
@@ -289,8 +289,8 @@ void cnf_encoder::construct_changing_atom_implies_action_clauses(int timesteps) 
 
                     std::vector<int> new_clause;
                     int index_val1, index_val2;
-                    index_val1 = m_cnf.get_variable_index(v, variable_plan_var, t, val1);
-                    index_val2 = m_cnf.get_variable_index(v, variable_plan_var, t + 1, val2);
+                    index_val1 = m_cnf.get_variable_index(variable_plan_var, t, v, val1);
+                    index_val2 = m_cnf.get_variable_index(variable_plan_var, t + 1, v, val2);
                     new_clause.push_back(-index_val1);
                     new_clause.push_back(-index_val2);
 
@@ -308,7 +308,7 @@ void cnf_encoder::construct_changing_atom_implies_action_clauses(int timesteps) 
                             // the right value if everything is met, add it to
                             // the clause
                             if ((effected_var == v) && (val_post == val2) && ((val_pre == val1) || (val_pre == -1))) {
-                                int index_possible_op = m_cnf.get_variable_index(op, variable_plan_op, t);
+                                int index_possible_op = m_cnf.get_variable_index(variable_plan_op, t, op);
                                 new_clause.push_back(index_possible_op);
                                 // break; // this is a fishy break :D, therfore
                                 // i comment it out. Be we dont have to check
@@ -332,7 +332,7 @@ void cnf_encoder::construct_mutex_clauses(int timesteps) {
             std::vector<int> at_most_one_should_be_true;
             for (int i = 0; i < m_sas_problem.m_mutex_groups[m].size(); i++) {
                 std::pair<int, int> var_val_pair = m_sas_problem.m_mutex_groups[m][i];
-                int index = m_cnf.get_variable_index(var_val_pair.first, variable_plan_var, t, var_val_pair.second);
+                int index = m_cnf.get_variable_index(variable_plan_var, t, var_val_pair.first, var_val_pair.second);
                 at_most_one_should_be_true.push_back(index);
             }
 
@@ -383,10 +383,10 @@ std::vector<bool> cnf_encoder::parse_cnf_solution(std::string filepath) {
 
 std::string cnf_encoder::decode_cnf_variable(int index) {
     tagged_variable info = m_cnf.get_planning_info_for_variable(index);
-    int v_index = std::get<0>(info);
-    variable_tag tag = std::get<1>(info);
-    int v_timestep = std::get<2>(info);
-    int v_value = std::get<3>(info);
+    variable_tag tag = std::get<0>(info);
+    int v_timestep = std::get<1>(info);
+    int v_value = std::get<2>(info);
+    int v_index = std::get<3>(info);
 
     // determin type of
     std::string type;
@@ -431,7 +431,7 @@ void cnf_encoder::decode_cnf_solution(std::vector<bool> &assignment) {
         std::cout << "Step " << t << " has the following state:" << std::endl;
         for (int v = 0; v < m_sas_problem.m_variabels.size(); v++) {
             for (int val = 0; val < m_sas_problem.m_variabels[v].m_range; val++) {
-                int idx = m_cnf.get_variable_index_without_adding(v, variable_plan_var, t, val);
+                int idx = m_cnf.get_variable_index_without_adding(variable_plan_var, t, v, val);
                 if (assignment[idx]) {
                     std::cout << m_sas_problem.m_variabels[v].m_name << ": "
                               << m_sas_problem.m_variabels[v].m_symbolic_names[val] << std::endl;
@@ -442,7 +442,7 @@ void cnf_encoder::decode_cnf_solution(std::vector<bool> &assignment) {
         // print information about the operators used
         if (t == m_cnf.get_num_timesteps()) continue;  // dont print an operator for the last state (there is none)
         for (int op = 0; op < m_sas_problem.m_operators.size(); op++) {
-            int idx = m_cnf.get_variable_index_without_adding(op, variable_plan_op, t);
+            int idx = m_cnf.get_variable_index_without_adding(variable_plan_op, t, op);
             if (assignment[idx]) {
                 std::cout << "operator: " << m_sas_problem.m_operators[op].m_name << std::endl;
             }
@@ -455,7 +455,7 @@ void cnf_encoder::decode_cnf_solution(std::vector<bool> &assignment) {
         goal_var = m_sas_problem.m_goal[g].first;
         goal_val = m_sas_problem.m_goal[g].second;
         goal_idx =
-            m_cnf.get_variable_index_without_adding(goal_var, variable_plan_var, m_cnf.get_num_timesteps(), goal_val);
+            m_cnf.get_variable_index_without_adding(variable_plan_var, m_cnf.get_num_timesteps(), goal_var, goal_val);
         std::cout << "Variable " << m_sas_problem.m_variabels[goal_var].m_name << " has value "
                   << m_sas_problem.m_variabels[goal_var].m_symbolic_names[goal_val];
         if (assignment[goal_idx]) {

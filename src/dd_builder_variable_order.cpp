@@ -26,7 +26,7 @@ bool is_valid_variable_order_string(std::string build_order) {
     return true;
 }
 
-categorized_variables categorize_variables(planning_logic::cnf &cnf) {
+categorized_variables categorize_variables(planning_logic::formula &cnf) {
     LOG_MESSAGE(log_level::info) << "Starting to categorize variables";
 
     categorized_variables tagged_variables;
@@ -68,7 +68,7 @@ categorized_variables categorize_variables(planning_logic::cnf &cnf) {
 }
 
 // current_order[i] = what variable is at layer i?
-std::vector<int> put_variables_of_tag_first(planning_logic::cnf &cnf, std::vector<int> &current_order,
+std::vector<int> put_variables_of_tag_first(planning_logic::formula &cnf, std::vector<int> &current_order,
                                             clause_tag front_tag) {
     // find all variables that are affected by the goal
     std::set<int> goal_variables;
@@ -95,7 +95,7 @@ std::vector<int> put_variables_of_tag_first(planning_logic::cnf &cnf, std::vecto
     return goal_first_variables;
 }
 
-std::vector<int> order_variables(planning_logic::cnf &cnf, option_values &options) {
+std::vector<int> order_variables(planning_logic::formula &cnf, option_values &options) {
     std::string build_order = options.variable_order;
     bool goal_first = options.goal_variables_first;
     bool init_state_first = options.initial_state_variables_first;

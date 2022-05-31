@@ -43,7 +43,7 @@ bool is_valid_conjoin_order_string(std::string build_order) {
     return true;
 }
 
-categorized_clauses categorize_clauses(cnf &cnf) {
+categorized_clauses categorize_clauses(formula &cnf) {
     LOG_MESSAGE(log_level::info) << "Starting to categorize clauses";
 
     // initilize the timestep buckets for the map
@@ -95,7 +95,7 @@ categorized_clauses categorize_clauses(cnf &cnf) {
     return tagged_clauses;
 }
 
-categorized_constraints categorize_constraints(cnf &cnf) {
+categorized_constraints categorize_constraints(formula &cnf) {
     LOG_MESSAGE(log_level::info) << "Starting to categorize clauses";
 
     // initilize the timestep buckets for the map
@@ -125,7 +125,7 @@ categorized_constraints categorize_constraints(cnf &cnf) {
     return tagged_constraints;
 }
 
-std::vector<tagged_logic_primitiv> order_clauses(cnf &cnf, option_values &options) {
+std::vector<tagged_logic_primitiv> order_clauses(formula &cnf, option_values &options) {
     std::string build_order = options.build_order;
 
     if (!is_valid_conjoin_order_string(build_order)) {
