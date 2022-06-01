@@ -27,9 +27,10 @@ class bdd_manager : public virtual dd_buildable {
     // returns a node for the main bdd_manager that represents the bdd for a single timestep 
     DdNode* get_bdd_for_timestep(planning_logic::cnf &clauses, int timestep);
     // returns the variable order for timesetep 0 as used by the sub manager
-    std::vector<int> get_variable_order_for_single_step();
+    // maps var idx -> layer in bdd (there are no gaps in the layers)
+    std::vector<int> get_variable_order_for_single_step(std::map<planning_logic::tagged_variable, int> &variable_map);
     // extends the variable order for timestep 0 to all timesteps
-    std::vector<int> extend_variable_order_to_all_steps(std::vector<int> &single_step_order);
+    std::vector<int> extend_variable_order_to_all_steps(std::map<planning_logic::tagged_variable, int> &variable_map, int timesteps, std::vector<int> &single_step_order);
 
     void conjoin_clause(std::vector<int> &clause, DdManager *manager, DdNode *root_node);
 
