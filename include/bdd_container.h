@@ -29,9 +29,10 @@ class bdd_container : public virtual dd_buildable {
     // swaps the variables from two timesteps
     void swap_variables_to_other_timestep(int timesetp_from, int timestep_to);
     // returns the variable order for timesetep 0 as used by the sub manager
-    std::vector<int> get_variable_order_for_single_step();
+    // maps var idx -> layer in bdd (there are no gaps in the layers)
+    std::vector<int> get_variable_order_for_single_step(std::map<planning_logic::tagged_variable, int> &variable_map);
     // extends the variable order for timestep 0 to all timesteps
-    std::vector<int> extend_variable_order_to_all_steps(std::vector<int> &single_step_order);
+    std::vector<int> extend_variable_order_to_all_steps(std::map<planning_logic::tagged_variable, int> &variable_map, int timesteps, std::vector<int> &single_step_order);
 
    public:
     // constructor for bdd manager. The number of used variables should be clear from the start

@@ -248,5 +248,51 @@ DdNode *bdd_container::copy_bdd_to_other_container(bdd_container &copy_to) {
 }
 
 void bdd_container::swap_variables_to_other_timestep(int timesetp_from, int timestep_to){
+    //TODO
     return;
+}
+
+std::vector<int> bdd_container::get_variable_order_for_single_step(std::map<planning_logic::tagged_variable, int> &variable_map){
+
+    std::map<int, int> index_to_layer;
+    std::vector<int> variable_order; // maps var index to layer
+
+    for(std::map<planning_logic::tagged_variable, int>::iterator iter = variable_map.begin(); iter != variable_map.end(); ++iter) {
+        planning_logic::tagged_variable tagged_var = iter->first;
+        int index = iter->second;
+
+        int t = std::get<2>(tagged_var);
+        if(t != 0) {
+            continue;
+        }
+
+        int layer = Cudd_ReadPerm(m_bdd_manager, index);
+        index_to_layer[index] = layer;
+    }
+
+    for(std::map<int, int>::iterator iter = index_to_layer.begin(); iter != index_to_layer.end(); ++iter) {
+        int layer = iter->second;
+        variable_order.push_back(layer);
+    }
+
+    return variable_order;
+}
+
+std::vector<int> bdd_container::extend_variable_order_to_all_steps(std::map<planning_logic::tagged_variable, int> &variable_map, int timesteps, std::vector<int> &single_step_order){
+
+    int num_variables_in_one_timestep = single_step_order.size();
+    std::vector<int> total_order(num_variables_in_one_timestep * (1+timesteps));
+
+    for(std::map<planning_logic::tagged_variable, int>::iterator iter = variable_map.begin(); iter != variable_map.end(); ++iter) {
+        planning_logic::tagged_variable tagged_var = iter->first;
+        int index = iter->second;
+
+        int t = std::get<2>(tagged_var);
+
+        // create a var tupe that represents the variable in timestep 0
+        planning_logic::tagged_variable zero_step_tagged_var = tagged_var;
+        std::get<2>(zero_step_tagged_var) = 0; 
+
+        // todo: do this later
+    }
 }
