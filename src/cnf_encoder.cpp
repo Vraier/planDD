@@ -8,6 +8,8 @@
 
 using namespace planning_logic;
 
+
+//TODO construct every var at beginning (like in the old days)
 formula cnf_encoder::encode_cnf(int timesteps) {
     LOG_MESSAGE(log_level::info) << "Start encoding SAS problem into CNF problem";
     LOG_MESSAGE(log_level::info) << "Starting to generate all clauses for the CNF problem";

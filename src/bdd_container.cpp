@@ -247,9 +247,40 @@ DdNode *bdd_container::copy_bdd_to_other_container(bdd_container &copy_to) {
     return copied_bdd;
 }
 
-void bdd_container::swap_variables_to_other_timestep(int timesetp_from, int timestep_to){
-    //TODO
-    return;
+void bdd_container::swap_variables_to_other_timestep(std::map<planning_logic::tagged_variable, int> &variable_map, int timestep_from, int timestep_to){
+
+    // first i just calculate the mapping
+    std::vector<int> indices_from, indices_to;
+    for(std::map<planning_logic::tagged_variable, int>::iterator iter = variable_map.begin(); iter != variable_map.end(); ++iter) {
+        planning_logic::tagged_variable tagged_var = iter->first;
+        int var_index = iter->second;
+
+        // since the variable map orders variables in the order: tag, timestep, index, value, i dont have to sort them when calculating the mapping (they are already sorted)
+        int t = std::get<1>(tagged_var);
+        if(t == timestep_from){
+            indices_from.push_back(var_index);
+        }
+        if(t == timestep_to){
+            indices_to.push_back(var_index);
+        }
+    }
+
+    // TODO assert both arrays have same size
+    // now i construct the necessary arrays for CUDD
+    int variables_in_single_timestep = indices_from.size();
+    DdNode** nodes_from = new DdNode*[variables_in_single_timestep];
+    DdNode** nodes_to = new DdNode*[variables_in_single_timestep];
+
+    for(int i = 0; i < variables_in_single_timestep; i++){
+        nodes_from[i] = Cudd_bddIthVar(m_bdd_manager, indices_from[i]);
+        nodes_to[i] = Cudd_bddIthVar(m_bdd_manager, indices_to[i]);
+    }
+
+    // now perform the swapping
+    DdNode *temp_node = Cudd_bddSwapVariables(m_bdd_manager, m_root_node, nodes_from, nodes_to, variables_in_single_timestep);
+    Cudd_Ref(temp_node);
+    Cudd_RecursiveDeref(m_bdd_manager, m_root_node);
+    m_root_node = temp_node;
 }
 
 std::vector<int> bdd_container::get_variable_order_for_single_step(std::map<planning_logic::tagged_variable, int> &variable_map){
@@ -261,7 +292,7 @@ std::vector<int> bdd_container::get_variable_order_for_single_step(std::map<plan
         planning_logic::tagged_variable tagged_var = iter->first;
         int index = iter->second;
 
-        int t = std::get<2>(tagged_var);
+        int t = std::get<1>(tagged_var);
         if(t != 0) {
             continue;
         }
@@ -286,11 +317,11 @@ std::vector<int> bdd_container::extend_variable_order_to_all_steps(std::map<plan
     for(std::map<planning_logic::tagged_variable, int>::iterator iter = variable_map.begin(); iter != variable_map.end(); ++iter) {
         planning_logic::tagged_variable tagged_var = iter->first;
         int index = iter->second;
-        int t = std::get<2>(tagged_var);
+        int t = std::get<1>(tagged_var);
 
         // create a var tuple that represents the variable in timestep 0 and calculates its layer in the single step bdd
         planning_logic::tagged_variable zero_step_tagged_var = tagged_var;
-        std::get<2>(zero_step_tagged_var) = 0; 
+        std::get<1>(zero_step_tagged_var) = 0; 
         int index_of_zero_step_var = variable_map[zero_step_tagged_var];
         int layer_in_zero_step = single_step_order[index_of_zero_step_var];
 

@@ -27,7 +27,7 @@ class bdd_container : public virtual dd_buildable {
     // returns a node for the main bdd_manager that represents the bdd for a single timestep 
     DdNode* copy_bdd_to_other_container(bdd_container &copy_to);
     // swaps the variables from two timesteps
-    void swap_variables_to_other_timestep(int timesetp_from, int timestep_to);
+    void swap_variables_to_other_timestep(std::map<planning_logic::tagged_variable, int> &variable_map, int timestep_from, int timestep_to);
     // returns the variable order for timesetep 0 as used by the sub manager
     // maps var idx -> layer in bdd (there are no gaps in the layers)
     std::vector<int> get_variable_order_for_single_step(std::map<planning_logic::tagged_variable, int> &variable_map);

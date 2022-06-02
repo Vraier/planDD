@@ -4,11 +4,7 @@
 #include <string>
 #include <vector>
 
-/* TODO: i really have to refactor the cnf code:
- * rename it to someting like logic containter
- * make variable and clause storing more uniform and eliminate the categorize clause/variable functions
- * make names of enums more consistent
- */
+// TODO: maybe make tagged var, clause, etc to struct
 namespace planning_logic {
 
 enum variable_tag {
@@ -57,18 +53,6 @@ typedef std::tuple<clause_tag, int> tagged_clause;
 typedef std::tuple<eo_constraint_tag, int> tagged_constraint;
 // variable tag, timestep, index of the variable (and value if it exist, 0 else)
 typedef std::tuple<variable_tag, int, int, int> tagged_variable;
-
-
-
-// each tag represents a bucket, each tag bucket is divided into subbuckets for each timesetep
-// the subbuckets are sorted by the indize of the variable in the planning context (and then value)
-typedef std::map<planning_logic::variable_tag, std::vector<std::vector<int>>> categorized_variables;
-// each tag represents a buckets, each tag buckets is divided into subbuckets for each timestep
-// the subbuckets have an arbitrary order and contain the actual cnf clauses
-typedef std::map<planning_logic::clause_tag, std::vector<std::vector<planning_logic::clause>>> categorized_clauses;
-typedef std::map<planning_logic::eo_constraint_tag, std::vector<std::vector<planning_logic::eo_constraint>>> categorized_constraints;
-
-
 
 class formula {
    private:
