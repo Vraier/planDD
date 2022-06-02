@@ -281,6 +281,9 @@ void bdd_container::swap_variables_to_other_timestep(std::map<planning_logic::ta
     Cudd_Ref(temp_node);
     Cudd_RecursiveDeref(m_bdd_manager, m_root_node);
     m_root_node = temp_node;
+
+    delete[] nodes_from;
+    delete[] nodes_to;
 }
 
 std::vector<int> bdd_container::get_variable_order_for_single_step(std::map<planning_logic::tagged_variable, int> &variable_map){
