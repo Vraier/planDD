@@ -204,8 +204,8 @@ void bdd_container::hack_back_rocket_method() {
 }
 
 void bdd_container::set_variable_order(std::vector<int> &variable_order) {
-    LOG_MESSAGE(log_level::info) << "Setting variable order msize: " << Cudd_ReadSize(m_bdd_manager)
-                                 << " osize: " << variable_order.size();
+    LOG_MESSAGE(log_level::info) << "Setting variable order. manager size: " << Cudd_ReadSize(m_bdd_manager)
+                                 << " order size: " << variable_order.size();
     int *order = &variable_order[0];
     Cudd_ShuffleHeap(m_bdd_manager, order);
 }
@@ -281,18 +281,22 @@ std::vector<int> bdd_container::get_variable_order_for_single_step(std::map<plan
 std::vector<int> bdd_container::extend_variable_order_to_all_steps(std::map<planning_logic::tagged_variable, int> &variable_map, int timesteps, std::vector<int> &single_step_order){
 
     int num_variables_in_one_timestep = single_step_order.size();
-    std::vector<int> total_order(num_variables_in_one_timestep * (1+timesteps));
+    std::vector<int> total_order(num_variables_in_one_timestep * (1+timesteps)); // maps var index to layer
 
     for(std::map<planning_logic::tagged_variable, int>::iterator iter = variable_map.begin(); iter != variable_map.end(); ++iter) {
         planning_logic::tagged_variable tagged_var = iter->first;
         int index = iter->second;
-
         int t = std::get<2>(tagged_var);
 
-        // create a var tupe that represents the variable in timestep 0
+        // create a var tuple that represents the variable in timestep 0 and calculates its layer in the single step bdd
         planning_logic::tagged_variable zero_step_tagged_var = tagged_var;
         std::get<2>(zero_step_tagged_var) = 0; 
+        int index_of_zero_step_var = variable_map[zero_step_tagged_var];
+        int layer_in_zero_step = single_step_order[index_of_zero_step_var];
 
-        // todo: do this later
+        // calculate the corret layer of the var in the total order
+        total_order[index] = (t*num_variables_in_one_timestep) + layer_in_zero_step;
     }
+
+    return total_order;
 }
