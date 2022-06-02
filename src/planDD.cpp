@@ -14,18 +14,20 @@
 #include "bdd_container.h"  // always include this last >:(
 
 int main(int argc, char *argv[]) {
+
+    // start logging
     initialize_logging();
 
+    // parse command line options
     option_parser options;
     options.parse_command_line(argc, argv);
-
     options.print_variable_map();
-
     if (!options.check_validity()) {
         options.print_help();
         return 0;
     }
 
+    // branch into correct program mode
     if (options.m_values.hack_debug) {
         return planDD::hack_debug(options.m_values);
     }
@@ -87,9 +89,29 @@ int planDD::build_bdd(option_values opt_values) {
     bdd_container builder(clauses.get_num_variables());
     builder.set_variable_order(var_order);
 
-    dd_builder::construct_dd_linear_disjoint(builder, clauses, opt_values);
+    dd_builder::construct_dd_clause_linear(builder, clauses, opt_values);
 
     builder.print_bdd_info();
+    return 0;
+}
+int planDD::build_bdd_by_layer(option_values opt_values) {
+    sas_parser parser(opt_values.sas_file);
+    if (parser.start_parsing() == -1) {
+        LOG_MESSAGE(log_level::error) << "Error while parsing sas_file";
+        return 0;
+    }
+
+    cnf_encoder encoder(opt_values, parser.m_sas_problem);
+    planning_logic::formula clauses = encoder.encode_cnf(opt_values.timesteps);
+
+    std::vector<int> var_order = variable_order::order_variables(clauses, opt_values);
+    bdd_container main_builder(clauses.get_num_variables());
+    main_builder.set_variable_order(var_order);
+    bdd_container single_step_builder(clauses.get_num_variables());
+    single_step_builder.set_variable_order(var_order);
+
+    dd_builder::construct_bdd_by_layer(main_builder, single_step_builder, clauses, opt_values);
+
     return 0;
 }
 
@@ -107,7 +129,7 @@ int planDD::build_sdd(option_values opt_values) {
     sdd_manager builder(clauses.get_num_variables());
     LOG_MESSAGE(log_level::info) << "Start building sdd";
 
-    dd_builder::construct_dd_linear_disjoint(builder, clauses, opt_values);
+    dd_builder::construct_dd_clause_linear(builder, clauses, opt_values);
     builder.print_sdd();
 
     return 0;

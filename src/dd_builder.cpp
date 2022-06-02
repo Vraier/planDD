@@ -10,7 +10,6 @@ namespace dd_builder {
 void construct_dd_linear_disjoint(dd_buildable &dd, formula &cnf, option_values &options) {
     LOG_MESSAGE(log_level::info) << "Start constructing DD";
 
-    // TODO: handle empty sorted_clause (or error for variable order)
     // sort the clauses (disjoint and interleaved)
     std::vector<conjoin_order::tagged_logic_primitiv> sorted_primitives = conjoin_order::order_clauses(cnf, options);
 
