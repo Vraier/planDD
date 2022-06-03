@@ -49,18 +49,11 @@ void print_info_about_number_of_logic_primitives(formula &cnf) {
     for (int tag_int = clause_ini_state; tag_int <= clause_none; tag_int++) {
         clause_tag tag = static_cast<clause_tag>(tag_int);
 
-        // we only need one timestep
-        if (tag == clause_ini_state || tag == clause_goal || tag == clause_none) {
-            LOG_MESSAGE(log_level::info) << "Categorized " << cnf.m_clause_map[std::make_tuple(tag, 0)].size() << " clauses of tag " << tag;
+        int total_clauses = 0;
+        for (int t = 0; t <= cnf.get_num_timesteps(); t++) {
+            total_clauses += cnf.m_clause_map[std::make_tuple(tag, t)].size();
         }
-        // we need one bucket for each timestep
-        else {
-            int total_clauses = 0;
-            for (int t = 0; t <= cnf.get_num_timesteps(); t++) {
-                total_clauses += cnf.m_clause_map[std::make_tuple(tag, t)].size();
-            }
-            LOG_MESSAGE(log_level::info) << "Categorized " << total_clauses << " clauses of tag " << tag;
-        }
+        LOG_MESSAGE(log_level::info) << "Categorized " << total_clauses << " clauses of tag " << tag;
     }
 
     // print info about how many constraints each tag has
@@ -133,22 +126,14 @@ std::vector<tagged_logic_primitiv> order_clauses(formula &cnf, option_values &op
         clause_tag order_tag = char_clause_tag_map[current_char];
         eo_constraint_tag constraint_order_tag = char_constraint_tag_map[current_char];
 
-        // only add first timestep
-        if (order_tag == clause_ini_state || order_tag == clause_goal) {
-            tagged_clause curr_clause_category = std::make_tuple(order_tag, 0);
+        // add all timesteps
+        for (int t = 0; t <= cnf.get_num_timesteps(); t++) {
+            tagged_clause curr_clause_category = std::make_tuple(order_tag, t);
             for (clause c : cnf.m_clause_map[curr_clause_category]) {
                 total_clauses.push_back(std::make_pair(c, logic_clause));
             }
         }
-        // add all timesteps
-        else {
-            for (int t = 0; t <= cnf.get_num_timesteps(); t++) {
-                tagged_clause curr_clause_category = std::make_tuple(order_tag, t);
-                for (clause c : cnf.m_clause_map[curr_clause_category]) {
-                    total_clauses.push_back(std::make_pair(c, logic_clause));
-                }
-            }
-        }
+        
         // if exact one constraint
         if (constraint_order_tag != eo_none) {
             for (int t = 0; t <= cnf.get_num_timesteps(); t++) {
@@ -160,7 +145,7 @@ std::vector<tagged_logic_primitiv> order_clauses(formula &cnf, option_values &op
         }
     }
 
-    LOG_MESSAGE(log_level::info) << "Sorted a total of " << total_clauses.size() << " clauses";
+    LOG_MESSAGE(log_level::info) << "Ordered a total of " << total_clauses.size() << " clauses";
     return total_clauses;
 }
 
