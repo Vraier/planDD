@@ -61,6 +61,8 @@ class formula {
     int m_num_clauses;
     int m_num_eo_constraints;
 
+   public:
+
     // maps tag and timestep to all clauses that belong to this pair
     std::map<tagged_clause, std::vector<clause>> m_clause_map;
     std::map<tagged_constraint, std::vector<eo_constraint>> m_eo_constraint_map;
@@ -69,8 +71,6 @@ class formula {
     // are used by the variable ordering algorithm
     std::map<tagged_variable, int> m_variable_map;
     std::map<int, tagged_variable> m_inverse_variable_map;
-
-   public:
 
     formula(int num_timesteps);
     formula(std::string file_path);
