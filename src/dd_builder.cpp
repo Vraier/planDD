@@ -7,7 +7,7 @@ using namespace planning_logic;
 
 namespace dd_builder {
 
-void construct_dd_linear_disjoint(dd_buildable &dd, formula &cnf, option_values &options) {
+void construct_dd_clause_linear(dd_buildable &dd, formula &cnf, option_values &options) {
     LOG_MESSAGE(log_level::info) << "Start constructing DD";
 
     // sort the clauses (disjoint and interleaved)
@@ -41,5 +41,9 @@ void construct_dd_linear_disjoint(dd_buildable &dd, formula &cnf, option_values 
     }
 
     LOG_MESSAGE(log_level::info) << "Finished constructing DD";
+}
+
+void construct_bdd_by_layer(bdd_container &main_bdd, bdd_container &single_step_bdd, formula &cnf, option_values &options){
+    return;
 }
 }  // namespace dd_builder

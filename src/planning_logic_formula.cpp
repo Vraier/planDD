@@ -9,7 +9,11 @@
 // TODO rename to something like planning logic formula
 using namespace planning_logic;
 
-formula::formula(int num_timestpes) { m_num_timesteps = num_timestpes; }
+formula::formula(int num_timestpes) { 
+    m_num_timesteps = num_timestpes; 
+    m_num_clauses = 0;
+    m_num_eo_constraints = 0;
+}
 
 formula::~formula() {}
 

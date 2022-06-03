@@ -5,13 +5,13 @@
 #include <iostream>
 #include <vector>
 
-#include "cnf_encoder.h"
-#include "dd_builder.h"
-#include "dd_builder_variable_order.h"
 #include "logging.h"
+#include "cnf_encoder.h"
 #include "sas_parser.h"
 #include "sdd_container.h"
-#include "bdd_container.h"  // always include this last >:(
+#include "bdd_container.h" 
+#include "dd_builder.h"
+#include "dd_builder_variable_order.h"
 
 int main(int argc, char *argv[]) {
 
@@ -73,6 +73,8 @@ int planDD::hack_debug(option_values opt_values) {
     builder.print_bdd_info();
 
     builder.write_bdd_to_dot_file("exactly_one_constraint.dot");
+
+    return 0;
 }
 
 int planDD::build_bdd(option_values opt_values) {

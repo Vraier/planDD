@@ -86,7 +86,7 @@ std::vector<int> put_variables_of_tag_first(formula &cnf, std::vector<int> &curr
         new_order.push_back(i);
     }
     for (int i = 0; i < current_order.size(); i++) {
-        if (front_variables.find(current_order[i]) == goal_variables.end()) {
+        if (front_variables.find(current_order[i]) == front_variables.end()) {
             new_order.push_back(current_order[i]);
         }
     }
