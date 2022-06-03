@@ -43,9 +43,9 @@ categorized_variables categorize_variables(planning_logic::formula &cnf) {
         // get information about the variable
         tagged_variable tag_var = iter->first;
         int cnf_index = iter->second;
-        variable_tag tag = std::get<1>(tag_var);
-        // int index = std::get<0>(tag_var);
-        int timestep = std::get<2>(tag_var);
+        variable_tag tag = std::get<0>(tag_var);
+        int timestep = std::get<1>(tag_var);
+        // int index = std::get<2>(tag_var);
         // int value = std::get<3>(tag_var);
         // LOG_MESSAGE(log_level::trace) << " Handeling variable idx:" << index << " tag:" << tag << " t:" << timestep
         // << " val:" << value;
@@ -68,31 +68,30 @@ categorized_variables categorize_variables(planning_logic::formula &cnf) {
 }
 
 // current_order[i] = what variable is at layer i?
-std::vector<int> put_variables_of_tag_first(planning_logic::formula &cnf, std::vector<int> &current_order,
-                                            clause_tag front_tag) {
-    // find all variables that are affected by the goal
-    std::set<int> goal_variables;
-    for (int i = 0; i < cnf.get_num_clauses(); i++) {
-        if (cnf.get_clause_tag(i) == front_tag) {
-            clause goal_clause = cnf.get_clause(i);
-            for (int j = 0; j < goal_clause.size(); j++) {
-                goal_variables.insert(std::abs(goal_clause[j]));
+std::vector<int> put_variables_of_tag_first(formula &cnf, std::vector<int> &current_order, clause_tag front_tag) {
+    // find all variables that are affected by the given tag
+    std::set<int> front_variables;
+    for(int t = 0; t <= cnf.get_num_timesteps(); t++){
+        tagged_clause curr_category = std::make_tuple(front_tag, t);
+        for(clause c: cnf.m_clause_map[curr_category]){
+            for (int j = 0; j < c.size(); j++) {
+                front_variables.insert(std::abs(c[j]));
             }
         }
     }
 
     // first append all the goal variables and than the rest (the rest keeps its order)
-    std::vector<int> goal_first_variables;
-    for (int i : goal_variables) {
-        goal_first_variables.push_back(i);
+    std::vector<int> new_order;
+    for (int i : front_variables) {
+        new_order.push_back(i);
     }
     for (int i = 0; i < current_order.size(); i++) {
-        if (goal_variables.find(current_order[i]) == goal_variables.end()) {
-            goal_first_variables.push_back(current_order[i]);
+        if (front_variables.find(current_order[i]) == goal_variables.end()) {
+            new_order.push_back(current_order[i]);
         }
     }
 
-    return goal_first_variables;
+    return new_order;
 }
 
 std::vector<int> order_variables(planning_logic::formula &cnf, option_values &options) {

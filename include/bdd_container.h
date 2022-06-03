@@ -6,6 +6,9 @@
 
 #include "dd_buildable.h"
 #include "planning_logic_formula.h"
+// TODO: this is the biggest hack. if i include it here i dont have to put bdd_container include to the end?
+// ask someone else
+#include "logging.h"
 
 extern "C" {
 #include "cudd.h"

@@ -224,16 +224,10 @@ std::vector<int> bdd_container::get_variable_order() {
 }
 
 void bdd_container::build_bdd_for_single_step(planning_logic::formula &clauses) {
-    conjoin_order::categorized_clauses tagged_clauses = conjoin_order::categorize_clauses(clauses);
-
-    std::vector<planning_logic::clause> preconditions, effects, frame;
-    preconditions = tagged_clauses[planning_logic::clause_precon][0];
-    effects = tagged_clauses[planning_logic::clause_effect][0];
-    frame = tagged_clauses[planning_logic::clause_frame][0];
 
     for (planning_logic::clause_tag tag :
          {planning_logic::clause_precon, planning_logic::clause_effect, planning_logic::clause_frame}) {
-        std::vector<planning_logic::clause> sub_clauses = tagged_clauses[tag][0];
+        std::vector<planning_logic::clause> sub_clauses = clauses.m_clause_map[std::make_tuple(tag, 0)];
         for (int i = 0; i < sub_clauses.size(); i++) {
             planning_logic::clause c = sub_clauses[i];
             conjoin_clause(c);

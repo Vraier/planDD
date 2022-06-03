@@ -1,9 +1,9 @@
 #pragma once
 
 #include "dd_buildable.h"
-#include "bdd_container.h"
 #include "planning_logic_formula.h"
 #include "options.h"
+#include "bdd_container.h"
 
 namespace dd_builder
 {    
