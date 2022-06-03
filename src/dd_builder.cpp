@@ -43,7 +43,23 @@ void construct_dd_clause_linear(dd_buildable &dd, formula &cnf, option_values &o
     LOG_MESSAGE(log_level::info) << "Finished constructing DD";
 }
 
+void construct_dd_single_timestep(dd_buildable &dd, formula &cnf, option_values &options) {
+
+    LOG_MESSAGE(log_level::info) << "Start constructing DD for a single timestep";
+    // sort the clauses for timestep 0
+    std::vector<conjoin_order::tagged_logic_primitiv> sorted_primitives = conjoin_order::order_clauses_for_single_timestep(cnf, options);
+
+    for(int i = 0; i < sorted_primitives.size(); i++){
+        dd.conjoin_clause(sorted_primitives[i].first);
+    }
+
+    LOG_MESSAGE(log_level::info) << "Finished constructing DD for a single timestep";
+}
+
 void construct_bdd_by_layer(bdd_container &main_bdd, bdd_container &single_step_bdd, formula &cnf, option_values &options){
+    
+    construct_dd_single_timestep(single_step_dd, cnf, options);
+    
     return;
 }
 }  // namespace dd_builder

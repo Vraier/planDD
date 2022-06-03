@@ -149,4 +149,43 @@ std::vector<tagged_logic_primitiv> order_clauses(formula &cnf, option_values &op
     return total_clauses;
 }
 
+std::vector<tagged_logic_primitiv> order_clauses_for_single_timestep(planning_logic::formula &cnf, option_values &options){
+    std::string build_order = options.build_order;
+
+    // TODO maybe do another check? only precon, effect and frame matters here
+    // TODO maybe do an own oder string for layer by layer building
+    if (!is_valid_conjoin_order_string(build_order)) {
+        LOG_MESSAGE(log_level::error) << "Can't build the following conjoin order " << build_order;
+        return std::vector<tagged_logic_primitiv>();
+    }
+
+    print_info_about_number_of_logic_primitives(cnf);
+
+    // contains the result at the end
+    std::vector<tagged_logic_primitiv> result_clauses;
+
+    // split the order into first and second part (in a really complicated manner)
+    std::stringstream ss(build_order);
+    std::string disjoin_order, interleaved_order;
+    std::getline(ss, disjoin_order, ':');
+    std::getline(ss, interleaved_order, ':');
+
+
+    for (int i = 0; i < interleaved_order.size(); i++) {
+        char current_char = interleaved_order[i];
+        clause_tag order_tag = char_clause_tag_map[current_char];
+        if(order_tag != clause_precon || order_tag != clause_effect || order_tag != clause_frame){
+            continue;
+        }
+        tagged_clause curr_clause_category = std::make_tuple(order_tag, 0);
+
+        // add all the clauses for timestep 0 and tag order_tag
+        for (clause c : cnf.m_clause_map[curr_clause_category]) {
+            interleved_clauses.push_back(std::make_pair(c, logic_clause));
+        }
+    }
+
+    return result_clauses;  
+}
+
 };  // namespace conjoin_order

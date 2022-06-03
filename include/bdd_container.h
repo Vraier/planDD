@@ -24,19 +24,6 @@ class bdd_container : public virtual dd_buildable {
     DdNode *m_root_node;
     int m_num_variables;
 
-    //Functions for building the bdd timestep by timestep
-    // builds the bdd for the precondition/effect and frameclauses of timestep 0
-    void build_bdd_for_single_step(planning_logic::formula &clauses);
-    // returns a node for the main bdd_manager that represents the bdd for a single timestep 
-    DdNode* copy_bdd_to_other_container(bdd_container &copy_to);
-    // swaps the variables from two timesteps
-    void swap_variables_to_other_timestep(std::map<planning_logic::tagged_variable, int> &variable_map, int timestep_from, int timestep_to);
-    // returns the variable order for timesetep 0 as used by the sub manager
-    // maps var idx -> layer in bdd (there are no gaps in the layers)
-    std::vector<int> get_variable_order_for_single_step(std::map<planning_logic::tagged_variable, int> &variable_map);
-    // extends the variable order for timestep 0 to all timesteps
-    std::vector<int> extend_variable_order_to_all_steps(std::map<planning_logic::tagged_variable, int> &variable_map, int timesteps, std::vector<int> &single_step_order);
-
    public:
     // constructor for bdd manager. The number of used variables should be clear from the start
     // this is important for counting the number of solutions and variable ordering
@@ -67,4 +54,15 @@ class bdd_container : public virtual dd_buildable {
     
     // function is purely for debugging purpose. allows entry point to bdd manager
     void hack_back_rocket_method();
+
+    //Functions for building the bdd timestep by timestep
+    // returns a node for the main bdd_manager that represents the bdd for a single timestep 
+    DdNode* copy_bdd_to_other_container(bdd_container &copy_to);
+    // swaps the variables from two timesteps
+    void swap_variables_to_other_timestep(std::map<planning_logic::tagged_variable, int> &variable_map, int timestep_from, int timestep_to);
+    // returns the variable order for timesetep 0 as used by the sub manager
+    // maps var idx -> layer in bdd (there are no gaps in the layers)
+    std::vector<int> get_variable_order_for_single_step(std::map<planning_logic::tagged_variable, int> &variable_map);
+    // extends the variable order for timestep 0 to all timesteps
+    std::vector<int> extend_variable_order_to_all_steps(std::map<planning_logic::tagged_variable, int> &variable_map, int timesteps, std::vector<int> &single_step_order);
 };

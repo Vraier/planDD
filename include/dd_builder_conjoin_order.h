@@ -20,4 +20,7 @@ void print_info_about_number_of_logic_primitives(planning_logic::formula &cnf);
 
 // uses the categorized clauses to order them in one single vector according to a build order
 std::vector<tagged_logic_primitiv> order_clauses(planning_logic::formula &cnf, option_values &options);
+
+// same as order clauses but only orders the precondition, effect and frame clauses for timeset 0
+std::vector<tagged_logic_primitiv> order_clauses_for_single_timestep(planning_logic::formula &cnf, option_values &options);
 };

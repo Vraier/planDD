@@ -223,18 +223,6 @@ std::vector<int> bdd_container::get_variable_order() {
     return layer_to_variable_index;
 }
 
-void bdd_container::build_bdd_for_single_step(planning_logic::formula &clauses) {
-
-    for (planning_logic::clause_tag tag :
-         {planning_logic::clause_precon, planning_logic::clause_effect, planning_logic::clause_frame}) {
-        std::vector<planning_logic::clause> sub_clauses = clauses.m_clause_map[std::make_tuple(tag, 0)];
-        for (int i = 0; i < sub_clauses.size(); i++) {
-            planning_logic::clause c = sub_clauses[i];
-            conjoin_clause(c);
-        }
-    }
-}
-
 DdNode *bdd_container::copy_bdd_to_other_container(bdd_container &copy_to) {
 
     DdNode *copied_bdd = Cudd_bddTransfer(m_bdd_manager, copy_to.m_bdd_manager, m_root_node);
