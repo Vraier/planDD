@@ -18,6 +18,8 @@ void option_parser::parse_command_line(int argc, char *argv[]) {
          "Builds a bdd from a cnf file")  //
         ("build_bdd", po::bool_switch(&m_values.build_bdd)->default_value(false),
          "tries to build the bdd for the given planning problem")  //
+        ("build_bdd_by_layer", po::bool_switch(&m_values.build_bdd_by_layer)->default_value(false),
+         "tries to build the bdd for the given planning problem layer by layer")  //
         ("build_sdd", po::bool_switch(&m_values.build_sdd)->default_value(false),
          "tries to build the sdd for the given planning problem")  //
         ("single_minisat", po::bool_switch(&m_values.single_minisat)->default_value(false),
@@ -58,7 +60,7 @@ void option_parser::parse_command_line(int argc, char *argv[]) {
 }
 
 bool option_parser::check_validity() {
-    if ((m_values.encode_cnf + m_values.build_bdd + m_values.build_sdd + m_values.single_minisat +
+    if ((m_values.encode_cnf + m_values.build_bdd + m_values.build_bdd_by_layer + m_values.build_sdd + m_values.single_minisat +
          m_values.count_minisat + m_values.hack_debug + m_values.cnf_to_bdd) != 1) {
         std::cout << "You have to choose exactly one mode." << std::endl;
         return false;

@@ -39,6 +39,7 @@ class bdd_container : public virtual dd_buildable {
     void reduce_heap();
 
     // The i-th entry of the permutation array contains the index of the variable that should be brought to the i-th level
+    // indx -> layer
     void set_variable_order(std::vector<int> &variable_order);
     // returns the permutation of the variable order
     // the i-th entry contains the the level in the BDD in which the ith variable resides in
@@ -57,7 +58,7 @@ class bdd_container : public virtual dd_buildable {
 
     //Functions for building the bdd timestep by timestep
     // returns a node for the main bdd_manager that represents the bdd for a single timestep 
-    DdNode* copy_bdd_to_other_container(bdd_container &copy_to);
+    void copy_and_conjoin_bdd_from_another_container(bdd_container &copy_from);
     // swaps the variables from two timesteps
     void swap_variables_to_other_timestep(std::map<planning_logic::tagged_variable, int> &variable_map, int timestep_from, int timestep_to);
     // returns the variable order for timesetep 0 as used by the sub manager

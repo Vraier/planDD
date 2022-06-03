@@ -181,7 +181,7 @@ std::vector<tagged_logic_primitiv> order_clauses_for_single_timestep(planning_lo
 
         // add all the clauses for timestep 0 and tag order_tag
         for (clause c : cnf.m_clause_map[curr_clause_category]) {
-            interleved_clauses.push_back(std::make_pair(c, logic_clause));
+            result_clauses.push_back(std::make_pair(c, logic_clause));
         }
     }
 

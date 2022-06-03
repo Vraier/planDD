@@ -36,6 +36,10 @@ int main(int argc, char *argv[]) {
         return planDD::build_bdd(options.m_values);
     }
 
+    if (options.m_values.build_bdd_by_layer) {
+        return planDD::build_bdd_by_layer(options.m_values);
+    }
+
     if (options.m_values.build_sdd) {
         return planDD::build_sdd(options.m_values);
     }
@@ -96,6 +100,7 @@ int planDD::build_bdd(option_values opt_values) {
     builder.print_bdd_info();
     return 0;
 }
+
 int planDD::build_bdd_by_layer(option_values opt_values) {
     sas_parser parser(opt_values.sas_file);
     if (parser.start_parsing() == -1) {

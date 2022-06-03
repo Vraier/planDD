@@ -223,10 +223,19 @@ std::vector<int> bdd_container::get_variable_order() {
     return layer_to_variable_index;
 }
 
-DdNode *bdd_container::copy_bdd_to_other_container(bdd_container &copy_to) {
+void bdd_container::copy_and_conjoin_bdd_from_another_container(bdd_container &copy_from) {
 
-    DdNode *copied_bdd = Cudd_bddTransfer(m_bdd_manager, copy_to.m_bdd_manager, m_root_node);
-    return copied_bdd;
+    // transfer the bdd from one manager to another
+    DdNode *copied_bdd = Cudd_bddTransfer(copy_from.m_bdd_manager, m_bdd_manager, copy_from.m_root_node);
+    Cudd_Ref(copied_bdd);
+
+    // conjoin the transferd bdd with the root node
+    DdNode *tmp = Cudd_bddAnd(m_bdd_manager, m_root_node, copied_bdd);
+    Cudd_Ref(tmp);
+    Cudd_RecursiveDeref(m_bdd_manager, m_root_node);
+    Cudd_RecursiveDeref(m_bdd_manager, copied_bdd);
+
+    m_root_node = tmp;
 }
 
 void bdd_container::swap_variables_to_other_timestep(std::map<planning_logic::tagged_variable, int> &variable_map, int timestep_from, int timestep_to){
