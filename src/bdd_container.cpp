@@ -224,6 +224,7 @@ std::vector<int> bdd_container::get_variable_order() {
 }
 
 void bdd_container::copy_and_conjoin_bdd_from_another_container(bdd_container &copy_from) {
+    LOG_MESSAGE(log_level::info) << "Copying bdd to another"; 
     // transfer the bdd from one manager to another
     DdNode *copied_bdd = Cudd_bddTransfer(copy_from.m_bdd_manager, m_bdd_manager, copy_from.m_root_node);
     Cudd_Ref(copied_bdd);
@@ -239,6 +240,7 @@ void bdd_container::copy_and_conjoin_bdd_from_another_container(bdd_container &c
 
 void bdd_container::swap_variables_to_other_timestep(std::map<planning_logic::tagged_variable, int> &variable_map,
                                                      int timestep_from, int timestep_to) {
+    LOG_MESSAGE(log_level::info) << "Swapping variables from t=" << timestep_from << " to t=" << timestep_to; 
     // first i just calculate the mapping
     std::vector<int> indices_from, indices_to;
     for (std::map<planning_logic::tagged_variable, int>::iterator iter = variable_map.begin();
@@ -307,7 +309,7 @@ std::map<int, int> bdd_container::get_variable_order_for_single_step(
         consolidated_index_to_layer[index] = new_layer;
         new_layer++;
 
-        std::cout << "index: " << index << " layer: " << layer << " newLayer: " << new_layer-1 << std::endl;
+        //std::cout << "index: " << index << " layer: " << layer << " newLayer: " << new_layer-1 << std::endl;
     }
 
     return consolidated_index_to_layer;

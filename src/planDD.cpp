@@ -9,12 +9,13 @@
 #include "cnf_encoder.h"
 #include "sas_parser.h"
 #include "sdd_container.h"
-#include "bdd_container.h" 
 #include "dd_builder.h"
 #include "dd_builder_variable_order.h"
+#include "dd_builder_conjoin_order.h"
+#include "bdd_container.h"
+
 
 int main(int argc, char *argv[]) {
-
     // start logging
     initialize_logging();
 
@@ -95,7 +96,9 @@ int planDD::build_bdd(option_values opt_values) {
     bdd_container builder(clauses.get_num_variables());
     builder.set_variable_order(var_order);
 
-    dd_builder::construct_dd_clause_linear(builder, clauses, opt_values);
+    std::vector<conjoin_order::tagged_logic_primitiv> all_primitives =
+        conjoin_order::order_clauses(clauses, opt_values);
+    dd_builder::construct_dd_clause_linear(builder, all_primitives);
 
     builder.print_bdd_info();
     return 0;
@@ -118,6 +121,7 @@ int planDD::build_bdd_by_layer(option_values opt_values) {
     single_step_builder.set_variable_order(var_order);
 
     dd_builder::construct_bdd_by_layer(main_builder, single_step_builder, clauses, opt_values);
+    main_builder.print_bdd_info();
 
     return 0;
 }
@@ -136,7 +140,9 @@ int planDD::build_sdd(option_values opt_values) {
     sdd_manager builder(clauses.get_num_variables());
     LOG_MESSAGE(log_level::info) << "Start building sdd";
 
-    dd_builder::construct_dd_clause_linear(builder, clauses, opt_values);
+    std::vector<conjoin_order::tagged_logic_primitiv> all_primitives =
+        conjoin_order::order_clauses(clauses, opt_values);
+    dd_builder::construct_dd_clause_linear(builder, all_primitives);
     builder.print_sdd();
 
     return 0;
