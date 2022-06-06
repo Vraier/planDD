@@ -158,9 +158,7 @@ std::vector<tagged_logic_primitiv> order_clauses_for_single_timestep(planning_lo
         LOG_MESSAGE(log_level::error) << "Can't build the following conjoin order " << build_order;
         return std::vector<tagged_logic_primitiv>();
     }
-
-    print_info_about_number_of_logic_primitives(cnf);
-
+    
     // contains the result at the end
     std::vector<tagged_logic_primitiv> result_clauses;
 
@@ -174,9 +172,10 @@ std::vector<tagged_logic_primitiv> order_clauses_for_single_timestep(planning_lo
     for (int i = 0; i < interleaved_order.size(); i++) {
         char current_char = interleaved_order[i];
         clause_tag order_tag = char_clause_tag_map[current_char];
-        if(order_tag != clause_precon || order_tag != clause_effect || order_tag != clause_frame){
+        if(order_tag != clause_precon && order_tag != clause_effect && order_tag != clause_frame){
             continue;
         }
+        LOG_MESSAGE(log_level::info) << "Ordering clauses of char " << current_char << " for single step bdd";
         tagged_clause curr_clause_category = std::make_tuple(order_tag, 0);
 
         // add all the clauses for timestep 0 and tag order_tag
@@ -184,6 +183,8 @@ std::vector<tagged_logic_primitiv> order_clauses_for_single_timestep(planning_lo
             result_clauses.push_back(std::make_pair(c, logic_clause));
         }
     }
+
+    LOG_MESSAGE(log_level::info) << "Ordered a total of " << result_clauses.size() << " clauses for single step bdd";
 
     return result_clauses;  
 }

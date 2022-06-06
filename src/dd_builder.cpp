@@ -61,19 +61,28 @@ void construct_bdd_by_layer(bdd_container &main_bdd, bdd_container &single_step_
 
     // build the bdd for a single timestep
     construct_dd_single_timestep(single_step_bdd, cnf, options);
+    single_step_bdd.print_bdd_info();
+    //single_step_bdd.write_bdd_to_dot_file("single_step_bdd.dot");
 
     // extend the order to all timestep in both bdds
     LOG_MESSAGE(log_level::info) << "Calculating and extending new variable order";
-    std::vector<int> single_step_var_order = single_step_bdd.get_variable_order_for_single_step(cnf.m_variable_map);
+    std::map<int, int> single_step_var_order = single_step_bdd.get_variable_order_for_single_step(cnf.m_variable_map);
     std::vector<int> order_for_all_timesteps = single_step_bdd.extend_variable_order_to_all_steps(
-        cnf.m_variable_map, options.timesteps, single_step_var_order);
-    single_step_bdd.set_variable_order(order_for_all_timesteps);
+        cnf.m_variable_map, single_step_var_order);
+    
+
+    std::vector<int> single_step_order = single_step_bdd.get_variable_order();
+    for(int i = 0; i < order_for_all_timesteps.size(); i++){
+        std::cout << "index: " << i << " old layer: " << single_step_order[i] << " new layer: " <<  order_for_all_timesteps[i] << std::endl;
+    }
+
+    //single_step_bdd.set_variable_order(order_for_all_timesteps);
     main_bdd.set_variable_order(order_for_all_timesteps);
 
     // build the main bdd layer by layer
     // copying the bdd from the single step one
     for (int t = 0; t <= options.timesteps; t++) {
-        LOG_MESSAGE(log_level::info) << "Conjoining single step bdd for timestep " << t;
+        LOG_MESSAGE(log_level::info) << "Conjoining single step bdd for timestep " << t << " " << main_bdd.get_short_statistics();
         single_step_bdd.swap_variables_to_other_timestep(cnf.m_variable_map, 0, t);
         main_bdd.copy_and_conjoin_bdd_from_another_container(single_step_bdd);
         single_step_bdd.swap_variables_to_other_timestep(cnf.m_variable_map, t, 0);

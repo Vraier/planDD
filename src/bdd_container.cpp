@@ -211,20 +211,19 @@ void bdd_container::set_variable_order(std::vector<int> &variable_order) {
 }
 
 std::vector<int> bdd_container::get_variable_order() {
-    std::vector<int> layer_to_variable_index(m_num_variables, -1);
+    std::vector<int> index_to_layer(m_num_variables, -1);
     for (int i = 0; i <= m_num_variables; i++) {
         // tells us at what layer the var resides in
         int layer_of_variable_i = Cudd_ReadPerm(m_bdd_manager, i);
         if (layer_of_variable_i == -1) {  // variable does not exist
             continue;
         }
-        layer_to_variable_index[layer_of_variable_i] = i;
+        index_to_layer[i] = layer_of_variable_i;
     }
-    return layer_to_variable_index;
+    return index_to_layer;
 }
 
 void bdd_container::copy_and_conjoin_bdd_from_another_container(bdd_container &copy_from) {
-
     // transfer the bdd from one manager to another
     DdNode *copied_bdd = Cudd_bddTransfer(copy_from.m_bdd_manager, m_bdd_manager, copy_from.m_root_node);
     Cudd_Ref(copied_bdd);
@@ -238,20 +237,22 @@ void bdd_container::copy_and_conjoin_bdd_from_another_container(bdd_container &c
     m_root_node = tmp;
 }
 
-void bdd_container::swap_variables_to_other_timestep(std::map<planning_logic::tagged_variable, int> &variable_map, int timestep_from, int timestep_to){
-
+void bdd_container::swap_variables_to_other_timestep(std::map<planning_logic::tagged_variable, int> &variable_map,
+                                                     int timestep_from, int timestep_to) {
     // first i just calculate the mapping
     std::vector<int> indices_from, indices_to;
-    for(std::map<planning_logic::tagged_variable, int>::iterator iter = variable_map.begin(); iter != variable_map.end(); ++iter) {
+    for (std::map<planning_logic::tagged_variable, int>::iterator iter = variable_map.begin();
+         iter != variable_map.end(); ++iter) {
         planning_logic::tagged_variable tagged_var = iter->first;
         int var_index = iter->second;
 
-        // since the variable map orders variables in the order: tag, timestep, index, value, i dont have to sort them when calculating the mapping (they are already sorted)
+        // since the variable map orders variables in the order: tag, timestep, index, value, i dont have to sort them
+        // when calculating the mapping (they are already sorted)
         int t = std::get<1>(tagged_var);
-        if(t == timestep_from){
+        if (t == timestep_from) {
             indices_from.push_back(var_index);
         }
-        if(t == timestep_to){
+        if (t == timestep_to) {
             indices_to.push_back(var_index);
         }
     }
@@ -259,16 +260,17 @@ void bdd_container::swap_variables_to_other_timestep(std::map<planning_logic::ta
     // TODO assert both arrays have same size
     // now i construct the necessary arrays for CUDD
     int variables_in_single_timestep = indices_from.size();
-    DdNode** nodes_from = new DdNode*[variables_in_single_timestep];
-    DdNode** nodes_to = new DdNode*[variables_in_single_timestep];
+    DdNode **nodes_from = new DdNode *[variables_in_single_timestep];
+    DdNode **nodes_to = new DdNode *[variables_in_single_timestep];
 
-    for(int i = 0; i < variables_in_single_timestep; i++){
+    for (int i = 0; i < variables_in_single_timestep; i++) {
         nodes_from[i] = Cudd_bddIthVar(m_bdd_manager, indices_from[i]);
         nodes_to[i] = Cudd_bddIthVar(m_bdd_manager, indices_to[i]);
     }
 
     // now perform the swapping
-    DdNode *temp_node = Cudd_bddSwapVariables(m_bdd_manager, m_root_node, nodes_from, nodes_to, variables_in_single_timestep);
+    DdNode *temp_node =
+        Cudd_bddSwapVariables(m_bdd_manager, m_root_node, nodes_from, nodes_to, variables_in_single_timestep);
     Cudd_Ref(temp_node);
     Cudd_RecursiveDeref(m_bdd_manager, m_root_node);
     m_root_node = temp_node;
@@ -277,51 +279,79 @@ void bdd_container::swap_variables_to_other_timestep(std::map<planning_logic::ta
     delete[] nodes_to;
 }
 
-std::vector<int> bdd_container::get_variable_order_for_single_step(std::map<planning_logic::tagged_variable, int> &variable_map){
+std::map<int, int> bdd_container::get_variable_order_for_single_step(
+    std::map<planning_logic::tagged_variable, int> &variable_map) {
+    std::map<int, int> layer_to_index;
+    std::map<int, int> consolidated_index_to_layer; // same as above but with no gaps in the layers
+    // dummy 0 var has alway should be at layer 0
+    layer_to_index[0] = 0;
 
-    std::map<int, int> index_to_layer;
-    std::vector<int> variable_order; // maps var index to layer
-
-    for(std::map<planning_logic::tagged_variable, int>::iterator iter = variable_map.begin(); iter != variable_map.end(); ++iter) {
+    for (std::map<planning_logic::tagged_variable, int>::iterator iter = variable_map.begin();
+         iter != variable_map.end(); ++iter) {
         planning_logic::tagged_variable tagged_var = iter->first;
         int index = iter->second;
 
         int t = std::get<1>(tagged_var);
-        if(t != 0) {
+        if (t != 0) {
             continue;
         }
 
         int layer = Cudd_ReadPerm(m_bdd_manager, index);
-        index_to_layer[index] = layer;
+        layer_to_index[layer] = index;
     }
 
-    for(std::map<int, int>::iterator iter = index_to_layer.begin(); iter != index_to_layer.end(); ++iter) {
-        int layer = iter->second;
-        variable_order.push_back(layer);
+    int new_layer = 0;
+    for (std::map<int, int>::iterator iter = layer_to_index.begin(); iter != layer_to_index.end(); ++iter) {
+        int layer = iter->first;
+        int index = iter->second;
+        consolidated_index_to_layer[index] = new_layer;
+        new_layer++;
+
+        std::cout << "index: " << index << " layer: " << layer << " newLayer: " << new_layer-1 << std::endl;
     }
 
-    return variable_order;
+    return consolidated_index_to_layer;
 }
 
-std::vector<int> bdd_container::extend_variable_order_to_all_steps(std::map<planning_logic::tagged_variable, int> &variable_map, int timesteps, std::vector<int> &single_step_order){
+std::vector<int> bdd_container::extend_variable_order_to_all_steps(
+    std::map<planning_logic::tagged_variable, int> &variable_map, std::map<int, int> &single_step_order) {
+
+    LOG_MESSAGE(log_level::info) << "Extending Variable order to multiple timesteps. single step size: "
+                                 << single_step_order.size();
 
     int num_variables_in_one_timestep = single_step_order.size();
-    std::vector<int> total_order(num_variables_in_one_timestep * (1+timesteps)); // maps var index to layer
+    std::map<int, int> layer_to_index;    
+    std::vector<int> result_index_to_layer_map;
 
-    for(std::map<planning_logic::tagged_variable, int>::iterator iter = variable_map.begin(); iter != variable_map.end(); ++iter) {
+    for (std::map<planning_logic::tagged_variable, int>::iterator iter = variable_map.begin();
+         iter != variable_map.end(); ++iter) {
         planning_logic::tagged_variable tagged_var = iter->first;
         int index = iter->second;
         int t = std::get<1>(tagged_var);
 
         // create a var tuple that represents the variable in timestep 0 and calculates its layer in the single step bdd
         planning_logic::tagged_variable zero_step_tagged_var = tagged_var;
-        std::get<1>(zero_step_tagged_var) = 0; 
+        std::get<1>(zero_step_tagged_var) = 0;
         int index_of_zero_step_var = variable_map[zero_step_tagged_var];
         int layer_in_zero_step = single_step_order[index_of_zero_step_var];
+        int layer_in_t_step = (t * num_variables_in_one_timestep) + layer_in_zero_step;
 
-        // calculate the corret layer of the var in the total order
-        total_order[index] = (t*num_variables_in_one_timestep) + layer_in_zero_step;
+        layer_to_index[layer_in_t_step] = index;
     }
 
-    return total_order;
+    // consolidate the layers
+    result_index_to_layer_map = std::vector<int>(variable_map.size() + 1); // +1 for the dummy 0 var
+    result_index_to_layer_map[0] = 0;
+    int new_layer = 1;
+    for (std::map<int, int>::iterator iter = layer_to_index.begin(); iter != layer_to_index.end(); ++iter) {
+        int layer = iter->first;
+        int index = iter->second;
+        result_index_to_layer_map[index] = new_layer;
+        new_layer++;
+
+        //std::cout << "index: " << index << " layer: " << layer << " newLayer: " << new_layer-1 << std::endl;
+    }
+
+    LOG_MESSAGE(log_level::info) << "Extendet size is: " << result_index_to_layer_map.size();
+    return result_index_to_layer_map;
 }

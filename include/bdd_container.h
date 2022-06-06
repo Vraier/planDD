@@ -43,6 +43,7 @@ class bdd_container : public virtual dd_buildable {
     void set_variable_order(std::vector<int> &variable_order);
     // returns the permutation of the variable order
     // the i-th entry contains the the level in the BDD in which the ith variable resides in
+    // indx -> layer
     std::vector<int> get_variable_order();
 
     // Wirtes all the information about the CUDD manager to std::out
@@ -63,7 +64,7 @@ class bdd_container : public virtual dd_buildable {
     void swap_variables_to_other_timestep(std::map<planning_logic::tagged_variable, int> &variable_map, int timestep_from, int timestep_to);
     // returns the variable order for timesetep 0 as used by the sub manager
     // maps var idx -> layer in bdd (there are no gaps in the layers)
-    std::vector<int> get_variable_order_for_single_step(std::map<planning_logic::tagged_variable, int> &variable_map);
+    std::map<int, int> get_variable_order_for_single_step(std::map<planning_logic::tagged_variable, int> &variable_map);
     // extends the variable order for timestep 0 to all timesteps
-    std::vector<int> extend_variable_order_to_all_steps(std::map<planning_logic::tagged_variable, int> &variable_map, int timesteps, std::vector<int> &single_step_order);
+    std::vector<int> extend_variable_order_to_all_steps(std::map<planning_logic::tagged_variable, int> &variable_map, std::map<int, int> &single_step_order);
 };
