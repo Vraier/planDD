@@ -43,6 +43,44 @@ void bdd_container::print_bdd_info() {
     Cudd_PrintInfo(m_bdd_manager, *fout);
 }
 
+std::vector<std::vector<bool>> bdd_container::list_minterms(int max) {
+
+    LOG_MESSAGE(log_level::info) << "Start finding minterms";
+
+    DdNode *curr_node = m_root_node;
+    Cudd_Ref(curr_node);
+    std::vector<std::vector<bool>> assignments;
+
+    DdNode **nodes = new DdNode *[m_num_variables];
+    for (int i = 0; i < m_num_variables; i++) {
+        nodes[i] = Cudd_bddIthVar(m_bdd_manager, i);
+    }
+
+    while (curr_node != Cudd_ReadLogicZero(m_bdd_manager) && assignments.size() < max) {
+        DdNode *minterm = Cudd_bddPickOneMinterm(m_bdd_manager, curr_node, nodes, m_num_variables);
+        Cudd_Ref(minterm);
+        // construct new assignment vector
+        std::vector<bool> new_assignment;
+        for(int i = 0; i < m_num_variables; i++){
+            new_assignment.push_back(Cudd_bddLeq(m_bdd_manager, minterm, nodes[i]) == 0 ? false: true);
+        }
+
+        DdNode *new_curr = Cudd_bddAnd(m_bdd_manager, curr_node, Cudd_Not(minterm));
+        Cudd_Ref(new_curr);
+        Cudd_RecursiveDeref(m_bdd_manager, curr_node);
+        Cudd_RecursiveDeref(m_bdd_manager, minterm);
+        curr_node = new_curr;
+
+        assignments.push_back(new_assignment);
+    }
+
+    Cudd_RecursiveDeref(m_bdd_manager, curr_node);
+    delete[] nodes;
+
+    LOG_MESSAGE(log_level::info) << "Finished finding minterms";
+    return assignments;
+}
+
 std::string bdd_container::get_short_statistics() {
     long num_nodes = Cudd_ReadNodeCount(m_bdd_manager);
     long num_peak_nodes = Cudd_ReadPeakNodeCount(m_bdd_manager);

@@ -67,18 +67,30 @@ int main(int argc, char *argv[]) {
 int planDD::hack_debug(option_values opt_values) {
     LOG_MESSAGE(log_level::info) << "You unlocked full control. good luck modifying the source code";
 
-    int num_variables = opt_values.timesteps;
-    bdd_container builder(num_variables);
+    sas_parser parser(opt_values.sas_file);
+    if (parser.start_parsing() == -1) {
+        LOG_MESSAGE(log_level::error) << "Error while parsing sas_file";
+        return 0;
+    }
 
-    LOG_MESSAGE(log_level::debug) << "Starting hack back rocket";
-    builder.hack_back_rocket_method();
-    LOG_MESSAGE(log_level::debug) << "Landed Hack back rocket";
+    cnf_encoder encoder(opt_values, parser.m_sas_problem);
+    planning_logic::formula clauses = encoder.encode_cnf(opt_values.timesteps);
 
-    LOG_MESSAGE(log_level::debug) << builder.get_short_statistics();
-    builder.print_bdd_info();
+    std::vector<int> var_order = variable_order::order_variables(clauses, opt_values);
+    bdd_container builder(clauses.get_num_variables());
+    builder.set_variable_order(var_order);
 
-    builder.write_bdd_to_dot_file("exactly_one_constraint.dot");
+    std::vector<conjoin_order::tagged_logic_primitiv> all_primitives =
+        conjoin_order::order_clauses(clauses, opt_values);
+    dd_builder::construct_dd_clause_linear(builder, all_primitives);
+    builder.reduce_heap();
 
+    std::vector<std::vector<bool>> assignments = builder.list_minterms(20);
+    LOG_MESSAGE(log_level::info) << "Start printting " << assignments.size() << " assignments";
+
+    for(int i = 0; i < assignments.size(); i++){
+        encoder.decode_cnf_solution(assignments[i]);
+    }
     return 0;
 }
 
@@ -99,8 +111,10 @@ int planDD::build_bdd(option_values opt_values) {
     std::vector<conjoin_order::tagged_logic_primitiv> all_primitives =
         conjoin_order::order_clauses(clauses, opt_values);
     dd_builder::construct_dd_clause_linear(builder, all_primitives);
+    builder.reduce_heap();
 
     builder.print_bdd_info();
+    //builder.write_bdd_to_dot_file("normal_bdd.dot");
     return 0;
 }
 
@@ -121,6 +135,8 @@ int planDD::build_bdd_by_layer(option_values opt_values) {
     single_step_builder.set_variable_order(var_order);
 
     dd_builder::construct_bdd_by_layer(main_builder, single_step_builder, clauses, opt_values);
+    main_builder.reduce_heap();
+    
     main_builder.print_bdd_info();
 
     return 0;

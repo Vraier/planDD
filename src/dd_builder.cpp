@@ -41,6 +41,7 @@ void construct_bdd_by_layer(bdd_container &main_bdd, bdd_container &single_step_
     std::vector<conjoin_order::tagged_logic_primitiv> single_step_primitives =
         conjoin_order::order_clauses_for_single_timestep(cnf, options);
     construct_dd_clause_linear(single_step_bdd, single_step_primitives);
+    single_step_bdd.reduce_heap();
     // single_step_bdd.print_bdd_info();
     // single_step_bdd.write_bdd_to_dot_file("single_step_bdd.dot");
 
@@ -50,11 +51,11 @@ void construct_bdd_by_layer(bdd_container &main_bdd, bdd_container &single_step_
     std::vector<int> order_for_all_timesteps =
         single_step_bdd.extend_variable_order_to_all_steps(cnf.m_variable_map, single_step_var_order);
 
-    std::vector<int> single_step_order = single_step_bdd.get_variable_order();
-    for (int i = 0; i < order_for_all_timesteps.size(); i++) {
-        std::cout << "index: " << i << " old layer: " << single_step_order[i]
-                  << " new layer: " << order_for_all_timesteps[i] << std::endl;
-    }
+    //std::vector<int> single_step_order = single_step_bdd.get_variable_order();
+    //for (int i = 0; i < order_for_all_timesteps.size(); i++) {
+    //    std::cout << "index: " << i << " old layer: " << single_step_order[i]
+    //              << " new layer: " << order_for_all_timesteps[i] << std::endl;
+    //}
 
     // single_step_bdd.set_variable_order(order_for_all_timesteps);
     main_bdd.set_variable_order(order_for_all_timesteps);
@@ -76,6 +77,7 @@ void construct_bdd_by_layer(bdd_container &main_bdd, bdd_container &single_step_
     }
 
     LOG_MESSAGE(log_level::info) << "Finished conjoining all timesteps";
+
     return;
 }
 }  // namespace dd_builder
