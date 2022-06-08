@@ -40,6 +40,9 @@ class cnf_encoder {
     // the values fo the literals refer to the symbol_map
     planning_logic::formula m_cnf;
 
+    // makes it easier to debug everything ith the variables have a fixed mapping each times
+    void construct_initial_symbol_map(int timesteps);
+
     // TODO
     // All three: sas_problem, symbol map and cnf are needed to produce human readable output.
     // They depend on each other. I have to make sure that no inconsistencies occur between them in this class

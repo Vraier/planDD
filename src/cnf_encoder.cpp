@@ -8,13 +8,13 @@
 
 using namespace planning_logic;
 
-
-//TODO construct every var at beginning (like in the old days)
 formula cnf_encoder::encode_cnf(int timesteps) {
     LOG_MESSAGE(log_level::info) << "Start encoding SAS problem into CNF problem";
     LOG_MESSAGE(log_level::info) << "Starting to generate all clauses for the CNF problem";
 
     m_cnf = formula(timesteps);
+
+    construct_initial_symbol_map(timesteps);
 
     construct_initial_state_clauses();
 
@@ -104,6 +104,24 @@ std::vector<std::vector<int>> cnf_encoder::generate_at_most_one_constraint_pairw
         }
     }
     return all_new_clauses;
+}
+
+void cnf_encoder::construct_initial_symbol_map(int timesteps) {
+    for (int t = 0; t <= timesteps; t++) {
+        // construct all variables indizes
+        for (int var = 0; var < m_sas_problem.m_variabels.size(); var++) {
+            for (int val = 0; val < m_sas_problem.m_variabels[var].m_range; val++) {
+                m_cnf.get_variable_index(variable_plan_var, t, var, val);
+            }
+        }
+        // construct action indizes
+        if (t != timesteps) {
+            for (int op = 0; op < m_sas_problem.m_operators.size(); op++) {
+                m_cnf.get_variable_index(variable_plan_op, t, op);
+            }
+        }
+    }
+    LOG_MESSAGE(log_level::info) << "Constructed " << m_cnf.get_num_variables() << " variables in initial step";
 }
 
 // The initial state must hold at t = 0.
@@ -213,8 +231,6 @@ void cnf_encoder::construct_exact_one_action_constraint(int timesteps) {
 }
 
 // If action a is applied at step t, then pre(a) holds at step t.
-// TODO: i am not sure if this is correct (i didnt use every information from
-// the operators)
 void cnf_encoder::construct_precondition_clauses(int timesteps) {
     for (int t = 0; t < timesteps; t++) {
         for (int op = 0; op < m_sas_problem.m_operators.size(); op++) {

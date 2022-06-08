@@ -44,7 +44,6 @@ void bdd_container::print_bdd_info() {
 }
 
 std::vector<std::vector<bool>> bdd_container::list_minterms(int max) {
-
     LOG_MESSAGE(log_level::info) << "Start finding minterms";
 
     DdNode *curr_node = m_root_node;
@@ -61,8 +60,8 @@ std::vector<std::vector<bool>> bdd_container::list_minterms(int max) {
         Cudd_Ref(minterm);
         // construct new assignment vector
         std::vector<bool> new_assignment;
-        for(int i = 0; i < m_num_variables; i++){
-            new_assignment.push_back(Cudd_bddLeq(m_bdd_manager, minterm, nodes[i]) == 0 ? false: true);
+        for (int i = 0; i < m_num_variables; i++) {
+            new_assignment.push_back(Cudd_bddLeq(m_bdd_manager, minterm, nodes[i]) == 0 ? false : true);
         }
 
         DdNode *new_curr = Cudd_bddAnd(m_bdd_manager, curr_node, Cudd_Not(minterm));
@@ -191,55 +190,7 @@ void bdd_container::add_exactly_one_constraint(std::vector<int> &variables) {
     m_root_node = tmp;
 }
 
-void bdd_container::hack_back_rocket_method() {
-    // DdNode *exact_one_true = Cudd_ReadOne(m_bdd_manager);
-    // Cudd_Ref(exact_one_true);
-    // DdNode *exact_zero_true = Cudd_ReadLogicZero(m_bdd_manager);
-    // Cudd_Ref(exact_zero_true);
-
-    bdd_container single_step(4);
-
-    std::vector<int> constraint;
-    for (int i = 1; i <= 4; i++) {
-        constraint.push_back(i);
-    }
-
-    single_step.add_exactly_one_constraint(constraint);
-    add_exactly_one_constraint(constraint);
-
-    DdNode *from[4];
-    DdNode *to[4];
-
-    from[0] = Cudd_bddIthVar(m_bdd_manager, 1);
-    from[1] = Cudd_bddIthVar(m_bdd_manager, 2);
-    from[2] = Cudd_bddIthVar(m_bdd_manager, 3);
-    from[3] = Cudd_bddIthVar(m_bdd_manager, 4);
-
-    to[0] = Cudd_bddIthVar(m_bdd_manager, 5);
-    to[1] = Cudd_bddIthVar(m_bdd_manager, 6);
-    to[2] = Cudd_bddIthVar(m_bdd_manager, 7);
-    to[3] = Cudd_bddIthVar(m_bdd_manager, 8);
-
-    m_root_node = Cudd_bddSwapVariables(m_bdd_manager, m_root_node, from, to, 4);
-
-    DdNode *copied_bdd = Cudd_bddTransfer(single_step.m_bdd_manager, m_bdd_manager, single_step.m_root_node);
-    m_root_node = Cudd_bddAnd(m_bdd_manager, m_root_node, copied_bdd);
-
-    // DdNode *var_i = Cudd_bddIthVar(m_bdd_manager, 3);
-    // Cudd_Ref(var_i);
-    // DdNode *ite = Cudd_bddIte(m_bdd_manager, var_i, exact_zero_true, exact_one_true);
-    // Cudd_Ref(ite);
-    // Cudd_RecursiveDeref(m_bdd_manager, var_i);
-    // Cudd_RecursiveDeref(m_bdd_manager, exact_one_true);
-    // Cudd_RecursiveDeref(m_bdd_manager, exact_zero_true);
-    //
-    //// conjoin the clause with the root node
-    // DdNode *temp = Cudd_bddAnd(m_bdd_manager, m_root_node, ite);
-    // Cudd_Ref(temp);
-    // Cudd_RecursiveDeref(m_bdd_manager, m_root_node);
-    // Cudd_RecursiveDeref(m_bdd_manager, ite);
-    // m_root_node = temp;
-}
+void bdd_container::hack_back_rocket_method() { return; }
 
 void bdd_container::set_variable_order(std::vector<int> &variable_order) {
     LOG_MESSAGE(log_level::info) << "Setting variable order. manager size: " << Cudd_ReadSize(m_bdd_manager)
@@ -262,7 +213,7 @@ std::vector<int> bdd_container::get_variable_order() {
 }
 
 void bdd_container::copy_and_conjoin_bdd_from_another_container(bdd_container &copy_from) {
-    LOG_MESSAGE(log_level::info) << "Copying bdd to another"; 
+    LOG_MESSAGE(log_level::info) << "Copying bdd to another";
     // transfer the bdd from one manager to another
     DdNode *copied_bdd = Cudd_bddTransfer(copy_from.m_bdd_manager, m_bdd_manager, copy_from.m_root_node);
     Cudd_Ref(copied_bdd);
@@ -276,41 +227,37 @@ void bdd_container::copy_and_conjoin_bdd_from_another_container(bdd_container &c
     m_root_node = tmp;
 }
 
-void bdd_container::swap_variables_to_other_timestep(std::map<planning_logic::tagged_variable, int> &variable_map,
-                                                     int timestep_from, int timestep_to) {
-    LOG_MESSAGE(log_level::info) << "Swapping variables from t=" << timestep_from << " to t=" << timestep_to; 
-    // first i just calculate the mapping
-    std::vector<int> indices_from, indices_to;
-    for (std::map<planning_logic::tagged_variable, int>::iterator iter = variable_map.begin();
-         iter != variable_map.end(); ++iter) {
-        planning_logic::tagged_variable tagged_var = iter->first;
-        int var_index = iter->second;
+void bdd_container::swap_variables(std::vector<int> &variables_from, std::vector<int> &variables_to) {
+    if (variables_from.size() != variables_to.size()) {
+        LOG_MESSAGE(log_level::error) << "Arrays have different sizes while swapping variables: "
+                                      << variables_from.size() << ", " << variables_to.size();
+        return;
+    }
 
-        // since the variable map orders variables in the order: tag, timestep, index, value, i dont have to sort them
-        // when calculating the mapping (they are already sorted)
-        int t = std::get<1>(tagged_var);
-        if (t == timestep_from) {
-            indices_from.push_back(var_index);
-        }
-        if (t == timestep_to) {
-            indices_to.push_back(var_index);
+    // TODO: remove this n^2 check
+    for (int i = 0; i < variables_from.size(); i++) {
+        for (int j = 0; j < variables_to.size(); j++) {
+            if (variables_from[i] == variables_to[j]) {
+                LOG_MESSAGE(log_level::error) << "Found same indice in both arrays while swapping";
+                return;
+            }
         }
     }
 
-    // TODO assert both arrays have same size
-    // now i construct the necessary arrays for CUDD
-    int variables_in_single_timestep = indices_from.size();
-    DdNode **nodes_from = new DdNode *[variables_in_single_timestep];
-    DdNode **nodes_to = new DdNode *[variables_in_single_timestep];
+    LOG_MESSAGE(log_level::info) << "Swapping " << variables_from.size() << " variables";
 
-    for (int i = 0; i < variables_in_single_timestep; i++) {
-        nodes_from[i] = Cudd_bddIthVar(m_bdd_manager, indices_from[i]);
-        nodes_to[i] = Cudd_bddIthVar(m_bdd_manager, indices_to[i]);
+    // construct the necessary arrays for CUDD
+    int num_variables = variables_from.size();
+    DdNode **nodes_from = new DdNode *[num_variables];
+    DdNode **nodes_to = new DdNode *[num_variables];
+
+    for (int i = 0; i < num_variables; i++) {
+        nodes_from[i] = Cudd_bddIthVar(m_bdd_manager, variables_from[i]);
+        nodes_to[i] = Cudd_bddIthVar(m_bdd_manager, variables_to[i]);
     }
 
     // now perform the swapping
-    DdNode *temp_node =
-        Cudd_bddSwapVariables(m_bdd_manager, m_root_node, nodes_from, nodes_to, variables_in_single_timestep);
+    DdNode *temp_node = Cudd_bddSwapVariables(m_bdd_manager, m_root_node, nodes_from, nodes_to, num_variables);
     Cudd_Ref(temp_node);
     Cudd_RecursiveDeref(m_bdd_manager, m_root_node);
     m_root_node = temp_node;
@@ -319,10 +266,93 @@ void bdd_container::swap_variables_to_other_timestep(std::map<planning_logic::ta
     delete[] nodes_to;
 }
 
+void bdd_container::permute_variables(std::vector<int> &permutation) {
+
+    int num_variables = permutation.size();
+
+    // TODO: remove this n^2 check
+    for (int i = 0; i < num_variables; i++) {
+        for (int j = i+1; j < num_variables; j++) {
+            if (permutation[i] == permutation[j]) {
+                LOG_MESSAGE(log_level::error) << "pemutation is has duplicates";
+                return;
+            }
+        }
+    }
+
+    LOG_MESSAGE(log_level::info) << "Permuating " << num_variables << " variables";
+
+    // construct the necessary arrays for CUDD
+    DdNode **nodes_identity = new DdNode *[num_variables];
+    int *perm_array = new int[num_variables];
+
+    for (int i = 0; i < num_variables; i++) {
+        nodes_identity[i] = Cudd_bddIthVar(m_bdd_manager, i);
+        perm_array[i] = permutation[i];
+    }
+
+    // now perform the swapping
+    DdNode *temp_node = Cudd_bddPermute(m_bdd_manager, m_root_node, perm_array);
+    Cudd_Ref(temp_node);
+    Cudd_RecursiveDeref(m_bdd_manager, m_root_node);
+    m_root_node = temp_node;
+
+    delete[] nodes_identity;
+    delete[] perm_array;
+}
+
+std::string to_str(planning_logic::tagged_variable v) {
+    std::string result = "(" + std::to_string(std::get<0>(v)) + " " + std::to_string(std::get<1>(v)) + " " +
+                         std::to_string(std::get<2>(v)) + " " + std::to_string(std::get<3>(v)) + ")";
+    return result;
+}
+
+void bdd_container::swap_variables_to_other_timestep(std::map<planning_logic::tagged_variable, int> &variable_map,
+                                                     int t_diff, int num_timesteps) {
+    LOG_MESSAGE(log_level::info) << "Swapping variables from t_diff=" << t_diff;
+    if (t_diff == 0) {
+        // nothing to do
+        return;
+    }
+
+    std::vector<int> from_to_index(variable_map.size() + 1);
+    from_to_index[0] = 0;  // dummy variable does not get permuted
+
+    // calculate the mapping
+    for (std::map<planning_logic::tagged_variable, int>::iterator iter = variable_map.begin();
+         iter != variable_map.end(); ++iter) {
+        planning_logic::tagged_variable tagged_var = iter->first;
+        planning_logic::variable_tag tag = std::get<0>(tagged_var);
+        int t = std::get<1>(tagged_var);
+        int t_to;
+
+        // also allow negative t_diffs
+        if (tag == planning_logic::variable_plan_var) {
+            int modulus = num_timesteps + 1;
+            t_to = (modulus + t + t_diff) % modulus;
+        }
+        if (tag == planning_logic::variable_plan_op) {
+            int modulus = num_timesteps;
+            t_to = (modulus + t + t_diff) % modulus;
+        }
+
+        planning_logic::tagged_variable tagged_var_to = tagged_var;
+        std::get<1>(tagged_var_to) = t_to;
+        from_to_index[variable_map[tagged_var]] = variable_map[tagged_var_to];
+    }
+
+    for (int i = 0; i < from_to_index.size(); i++) {
+        std::cout << from_to_index[i] << " ";
+    }
+    std::cout << std::endl;
+
+    permute_variables(from_to_index);
+}
+
 std::map<int, int> bdd_container::get_variable_order_for_single_step(
     std::map<planning_logic::tagged_variable, int> &variable_map) {
     std::map<int, int> layer_to_index;
-    std::map<int, int> consolidated_index_to_layer; // same as above but with no gaps in the layers
+    std::map<int, int> consolidated_index_to_layer;  // same as above but with no gaps in the layers
     // dummy 0 var has alway should be at layer 0
     layer_to_index[0] = 0;
 
@@ -347,7 +377,7 @@ std::map<int, int> bdd_container::get_variable_order_for_single_step(
         consolidated_index_to_layer[index] = new_layer;
         new_layer++;
 
-        //std::cout << "index: " << index << " layer: " << layer << " newLayer: " << new_layer-1 << std::endl;
+        // std::cout << "index: " << index << " layer: " << layer << " newLayer: " << new_layer-1 << std::endl;
     }
 
     return consolidated_index_to_layer;
@@ -355,12 +385,11 @@ std::map<int, int> bdd_container::get_variable_order_for_single_step(
 
 std::vector<int> bdd_container::extend_variable_order_to_all_steps(
     std::map<planning_logic::tagged_variable, int> &variable_map, std::map<int, int> &single_step_order) {
-
     LOG_MESSAGE(log_level::info) << "Extending Variable order to multiple timesteps. single step size: "
                                  << single_step_order.size();
 
     int num_variables_in_one_timestep = single_step_order.size();
-    std::map<int, int> layer_to_index;    
+    std::map<int, int> layer_to_index;
     std::vector<int> result_index_to_layer_map;
 
     for (std::map<planning_logic::tagged_variable, int>::iterator iter = variable_map.begin();
@@ -380,7 +409,7 @@ std::vector<int> bdd_container::extend_variable_order_to_all_steps(
     }
 
     // consolidate the layers
-    result_index_to_layer_map = std::vector<int>(variable_map.size() + 1); // +1 for the dummy 0 var
+    result_index_to_layer_map = std::vector<int>(variable_map.size() + 1);  // +1 for the dummy 0 var
     result_index_to_layer_map[0] = 0;
     int new_layer = 1;
     for (std::map<int, int>::iterator iter = layer_to_index.begin(); iter != layer_to_index.end(); ++iter) {
@@ -389,7 +418,7 @@ std::vector<int> bdd_container::extend_variable_order_to_all_steps(
         result_index_to_layer_map[index] = new_layer;
         new_layer++;
 
-        //std::cout << "index: " << index << " layer: " << layer << " newLayer: " << new_layer-1 << std::endl;
+        // std::cout << "index: " << index << " layer: " << layer << " newLayer: " << new_layer-1 << std::endl;
     }
 
     LOG_MESSAGE(log_level::info) << "Extendet size is: " << result_index_to_layer_map.size();

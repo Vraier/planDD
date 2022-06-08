@@ -67,30 +67,32 @@ int main(int argc, char *argv[]) {
 int planDD::hack_debug(option_values opt_values) {
     LOG_MESSAGE(log_level::info) << "You unlocked full control. good luck modifying the source code";
 
-    sas_parser parser(opt_values.sas_file);
-    if (parser.start_parsing() == -1) {
-        LOG_MESSAGE(log_level::error) << "Error while parsing sas_file";
-        return 0;
+    int num_variables = (opt_values.timesteps * 4) + 1;
+
+    bdd_container copy_from(num_variables);
+    bdd_container main_builder(num_variables);
+
+    std::vector<int> exact_one;
+    for(int i = 0; i < 4; i++){
+        exact_one.push_back(i+1);
     }
 
-    cnf_encoder encoder(opt_values, parser.m_sas_problem);
-    planning_logic::formula clauses = encoder.encode_cnf(opt_values.timesteps);
+    copy_from.add_exactly_one_constraint(exact_one);
 
-    std::vector<int> var_order = variable_order::order_variables(clauses, opt_values);
-    bdd_container builder(clauses.get_num_variables());
-    builder.set_variable_order(var_order);
+    for(int t = 0; t < opt_values.timesteps; t++){
+        std::vector<int> indx_to;
+        for(int i = 0; i < 4; i++){
+            indx_to.push_back((t*4)+i+1);
+        }
 
-    std::vector<conjoin_order::tagged_logic_primitiv> all_primitives =
-        conjoin_order::order_clauses(clauses, opt_values);
-    dd_builder::construct_dd_clause_linear(builder, all_primitives);
-    builder.reduce_heap();
+        copy_from.swap_variables(exact_one, indx_to);
+        main_builder.copy_and_conjoin_bdd_from_another_container(copy_from);
+        copy_from.swap_variables(indx_to, exact_one);
 
-    std::vector<std::vector<bool>> assignments = builder.list_minterms(20);
-    LOG_MESSAGE(log_level::info) << "Start printting " << assignments.size() << " assignments";
-
-    for(int i = 0; i < assignments.size(); i++){
-        encoder.decode_cnf_solution(assignments[i]);
+        main_builder.write_bdd_to_dot_file("after_step_" + std::to_string(t) + ".dot");
+        main_builder.print_bdd_info();
     }
+
     return 0;
 }
 
@@ -136,6 +138,13 @@ int planDD::build_bdd_by_layer(option_values opt_values) {
 
     dd_builder::construct_bdd_by_layer(main_builder, single_step_builder, clauses, opt_values);
     main_builder.reduce_heap();
+
+    std::vector<std::vector<bool>> assignments = main_builder.list_minterms(2);
+    LOG_MESSAGE(log_level::info) << "Start printting " << assignments.size() << " assignments";
+
+    for(int i = 0; i < assignments.size(); i++){
+        encoder.decode_cnf_solution(assignments[i]);
+    }
     
     main_builder.print_bdd_info();
 
