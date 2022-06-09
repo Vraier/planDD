@@ -19,11 +19,19 @@ bool is_valid_conjoin_order_string(std::string build_order);
 void print_info_about_number_of_logic_primitives(planning_logic::formula &cnf);
 
 // uses the categorized clauses to order them in one single vector according to a build order
-std::vector<tagged_logic_primitiv> order_clauses(planning_logic::formula &cnf, option_values &options);
+std::vector<tagged_logic_primitiv> order_all_clauses(planning_logic::formula &cnf, option_values &options);
 
 // same as order clauses but only orders the precondition, effect and frame clauses for timeset 0
-std::vector<tagged_logic_primitiv> order_clauses_for_single_timestep(planning_logic::formula &cnf, option_values &options);
+std::vector<tagged_logic_primitiv> order_clauses_for_layer(planning_logic::formula &cnf, int layer);
 
 // same as order clauses but only orders the initial state, goal and mutex
-std::vector<tagged_logic_primitiv> order_clauses_for_no_timestep(planning_logic::formula &cnf, option_values &options);
-};
+std::vector<tagged_logic_primitiv> order_clauses_for_foundation(planning_logic::formula &cnf);
+
+// helper methods:
+// find the primitives of all timesteps for a given primitive type. ordered by timesteps ascending
+std::vector<tagged_logic_primitiv> collect_primitives_for_all_timesteps(planning_logic::formula &cnf,
+                                                                        char primitive_type);
+// find the primitives of a specifiv timestep
+std::vector<tagged_logic_primitiv> collect_primitives_for_single_timestep(planning_logic::formula &cnf,
+                                                                          char primitive_type, int timestep);
+};  // namespace conjoin_order

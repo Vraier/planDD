@@ -66,7 +66,7 @@ void print_info_about_number_of_logic_primitives(formula &cnf) {
     }
 }
 
-std::vector<tagged_logic_primitiv> order_clauses(formula &cnf, option_values &options) {
+std::vector<tagged_logic_primitiv> order_all_clauses(formula &cnf, option_values &options) {
     std::string build_order = options.build_order;
 
     if (!is_valid_conjoin_order_string(build_order)) {
@@ -91,55 +91,22 @@ std::vector<tagged_logic_primitiv> order_clauses(formula &cnf, option_values &op
         for (int i = 0; i < interleaved_order.size(); i++) {
             char current_char = interleaved_order[i];
 
-            clause_tag order_tag = char_clause_tag_map[current_char];
-            eo_constraint_tag constraint_order_tag = char_constraint_tag_map[current_char];
-            tagged_clause curr_clause_category = std::make_tuple(order_tag, t);
-            tagged_constraint curr_constraint_category = std::make_tuple(constraint_order_tag, t);
-
-            // add all the clauses for timestep t and tag order_tag
-            for (clause c : cnf.m_clause_map[curr_clause_category]) {
-                interleved_clauses.push_back(std::make_pair(c, logic_clause));
-            }
-            // interleved_clauses.insert(interleved_clauses.end(), tagged_clauses[order_tag][t].begin(),
-            //                           tagged_clauses[order_tag][t].end());
-            //  add the exactly one constraints for the at_least_var or at_leat_op
-            if (constraint_order_tag != eo_none) {
-                for (eo_constraint e : cnf.m_eo_constraint_map[curr_constraint_category]) {
-                    interleved_clauses.push_back(std::make_pair(e, logic_eo));
-                }
-            }
+            std::vector<tagged_logic_primitiv> temp_clauses =
+                collect_primitives_for_single_timestep(cnf, current_char, t);
+            interleved_clauses.insert(interleved_clauses.end(), temp_clauses.begin(), temp_clauses.end());
         }
     }
 
     for (int i = 0; i < disjoin_order.size(); i++) {
         char current_char = disjoin_order[i];
-
         // add the interleved part
         if (current_char == 'x') {
             total_clauses.insert(total_clauses.end(), interleved_clauses.begin(), interleved_clauses.end());
             continue;
         }
 
-        clause_tag order_tag = char_clause_tag_map[current_char];
-        eo_constraint_tag constraint_order_tag = char_constraint_tag_map[current_char];
-
-        // add all timesteps
-        for (int t = 0; t <= cnf.get_num_timesteps(); t++) {
-            tagged_clause curr_clause_category = std::make_tuple(order_tag, t);
-            for (clause c : cnf.m_clause_map[curr_clause_category]) {
-                total_clauses.push_back(std::make_pair(c, logic_clause));
-            }
-        }
-
-        // if exact one constraint
-        if (constraint_order_tag != eo_none) {
-            for (int t = 0; t <= cnf.get_num_timesteps(); t++) {
-                tagged_constraint curr_constraint_category = std::make_tuple(constraint_order_tag, t);
-                for (eo_constraint e : cnf.m_eo_constraint_map[curr_constraint_category]) {
-                    total_clauses.push_back(std::make_pair(e, logic_eo));
-                }
-            }
-        }
+        std::vector<tagged_logic_primitiv> temp_clauses = collect_primitives_for_all_timesteps(cnf, current_char);
+        total_clauses.insert(total_clauses.end(), temp_clauses.begin(), temp_clauses.end());
     }
 
     // this reverses the order of the clauses. It allows the variables with the highes timesteps to be conjoined first
@@ -152,140 +119,92 @@ std::vector<tagged_logic_primitiv> order_clauses(formula &cnf, option_values &op
     return total_clauses;
 }
 
-std::vector<tagged_logic_primitiv> order_clauses_for_single_timestep(planning_logic::formula &cnf,
-                                                                     option_values &options) {
-    LOG_MESSAGE(log_level::info) << "Ordering clauses for single step bdd";
-    std::string build_order = options.build_order;
-
+std::vector<tagged_logic_primitiv> order_clauses_for_layer(planning_logic::formula &cnf, int layer) {
     // TODO maybe do another check? only precon, effect and frame matters here
     // TODO maybe do an own oder string for layer by layer building
-    if (!is_valid_conjoin_order_string(build_order)) {
-        LOG_MESSAGE(log_level::error) << "Can't build the following conjoin order " << build_order;
-        return std::vector<tagged_logic_primitiv>();
-    }
+    // TODO: do a full check on all the possible orders
+    LOG_MESSAGE(log_level::info) << "Ordering clauses for single layer " << layer;
 
     // contains the result at the end
     std::vector<tagged_logic_primitiv> result_clauses;
 
-    // split the order into first and second part (in a really complicated manner)
-    std::stringstream ss(build_order);
-    std::string disjoin_order, interleaved_order;
-    std::getline(ss, disjoin_order, ':');
-    std::getline(ss, interleaved_order, ':');
+    const std::string clauses_to_add = "rtyumpec";
+    std::vector<tagged_logic_primitiv> temp_clauses;
 
-    
-    for (int i = 0; i < disjoin_order.size(); i++) {
-        char current_char = disjoin_order[i];
-        // add the interleved part
-        if (current_char == 'x') {
-            continue;
+    for (char c : clauses_to_add) {
+        temp_clauses = collect_primitives_for_single_timestep(cnf, c, layer);
+        // if we add at least or at most one var clauses, also do it for the second timestep
+        if (c == 'r' || c == 't' || c == 'y' || c == 'u'|| c == 'm') {
+            std::vector<tagged_logic_primitiv> second_layer = collect_primitives_for_single_timestep(cnf, c, layer + 1);
+            temp_clauses.insert(temp_clauses.end(), second_layer.begin(), second_layer.end());
         }
-
-        clause_tag order_tag = char_clause_tag_map[current_char];
-        eo_constraint_tag constraint_order_tag = char_constraint_tag_map[current_char];
-
-        if (order_tag != clause_ini_state && order_tag != clause_goal) {
-            LOG_MESSAGE(log_level::info) << "Ordering clauses of char " << current_char << " for single step bdd";
-            tagged_clause curr_clause_category = std::make_tuple(order_tag, 0);
-            for (clause c : cnf.m_clause_map[curr_clause_category]) {
-                result_clauses.push_back(std::make_pair(c, logic_clause));
-            }
-            curr_clause_category = std::make_tuple(order_tag, 1);
-            for (clause c : cnf.m_clause_map[curr_clause_category]) {
-                result_clauses.push_back(std::make_pair(c, logic_clause));
-            }
-        }
-
-        // if exact one constraint
-        if (constraint_order_tag != eo_none) {
-            LOG_MESSAGE(log_level::info) << "Ordering constraints of char " << current_char << " for single step bdd";
-            tagged_constraint curr_constraint_category = std::make_tuple(constraint_order_tag, 0);
-            for (eo_constraint e : cnf.m_eo_constraint_map[curr_constraint_category]) {
-                result_clauses.push_back(std::make_pair(e, logic_eo));
-            }
-            curr_constraint_category = std::make_tuple(constraint_order_tag, 1);
-            for (eo_constraint e : cnf.m_eo_constraint_map[curr_constraint_category]) {
-                result_clauses.push_back(std::make_pair(e, logic_eo));
-            }
-        }
-    }
-    
-
-    for (int i = 0; i < interleaved_order.size(); i++) {
-        char current_char = interleaved_order[i];
-        clause_tag order_tag = char_clause_tag_map[current_char];
-        if (order_tag != clause_precon && order_tag != clause_effect && order_tag != clause_frame) {
-            continue;
-        }
-        LOG_MESSAGE(log_level::info) << "Ordering clauses of char " << current_char << " for single step bdd";
-        tagged_clause curr_clause_category = std::make_tuple(order_tag, 0);
-
-        // add all the clauses for timestep 0 and tag order_tag
-        for (clause c : cnf.m_clause_map[curr_clause_category]) {
-            result_clauses.push_back(std::make_pair(c, logic_clause));
-        }
+        result_clauses.insert(result_clauses.end(), temp_clauses.begin(), temp_clauses.end());
     }
 
-    LOG_MESSAGE(log_level::info) << "Ordered a total of " << result_clauses.size() << " clauses for single step bdd";
-
+    LOG_MESSAGE(log_level::info) << "Ordered a total of " << result_clauses.size() << " clauses for single layer "
+                                 << layer;
     return result_clauses;
 }
 
-std::vector<tagged_logic_primitiv> order_clauses_for_no_timestep(planning_logic::formula &cnf, option_values &options) {
-    LOG_MESSAGE(log_level::info) << "Ordering clauses for no step bdd";
-    std::string build_order = options.build_order;
-
-    // TODO maybe do another check? only precon, effect and frame matters here
-    // TODO maybe do an own oder string for layer by layer building
-    if (!is_valid_conjoin_order_string(build_order)) {
-        LOG_MESSAGE(log_level::error) << "Can't build the following conjoin order " << build_order;
-        return std::vector<tagged_logic_primitiv>();
-    }
+std::vector<tagged_logic_primitiv> order_clauses_for_foundation(planning_logic::formula &cnf) {
+    LOG_MESSAGE(log_level::info) << "Ordering clauses for foundation";
 
     // contains the result at the end
     std::vector<tagged_logic_primitiv> result_clauses;
 
-    // split the order into first and second part (in a really complicated manner)
-    std::stringstream ss(build_order);
-    std::string disjoin_order, interleaved_order;
-    std::getline(ss, disjoin_order, ':');
-    std::getline(ss, interleaved_order, ':');
+    const std::string clauses_to_add = "ig";
+    std::vector<tagged_logic_primitiv> temp_clauses;
 
-    for (int i = 0; i < disjoin_order.size(); i++) {
-        char current_char = disjoin_order[i];
-        if (current_char == 'x') {
-            continue;
+    for (char c : clauses_to_add) {
+        temp_clauses = collect_primitives_for_all_timesteps(cnf, c);
+        result_clauses.insert(result_clauses.end(), temp_clauses.begin(), temp_clauses.end());
+    }
+
+    LOG_MESSAGE(log_level::info) << "Ordered a total of " << result_clauses.size() << " clauses for foundation";
+    return result_clauses;
+}
+
+std::vector<tagged_logic_primitiv> collect_primitives_for_all_timesteps(formula &cnf, char primitive_type) {
+    std::vector<tagged_logic_primitiv> result_primitives;
+    clause_tag clause_order_tag = char_clause_tag_map[primitive_type];
+    eo_constraint_tag constraint_order_tag = char_constraint_tag_map[primitive_type];
+
+    for (int t = 0; t <= cnf.get_num_timesteps(); t++) {
+        tagged_clause curr_clause_category = std::make_tuple(clause_order_tag, t);
+        tagged_constraint curr_constraint_category = std::make_tuple(constraint_order_tag, t);
+
+        // add all the clauses for timestep t and tag order_tag
+        for (clause c : cnf.m_clause_map[curr_clause_category]) {
+            result_primitives.push_back(std::make_pair(c, logic_clause));
         }
-
-        clause_tag order_tag = char_clause_tag_map[current_char];
-        eo_constraint_tag constraint_order_tag = char_constraint_tag_map[current_char];
-
-        // add all timesteps if it is no preco, eff, frame clause
-        if (order_tag != clause_precon && order_tag != clause_effect && order_tag != clause_frame) {
-            LOG_MESSAGE(log_level::info) << "Ordering clause of char " << current_char << " for no step bdd";
-            for (int t = 0; t <= cnf.get_num_timesteps(); t++) {
-                tagged_clause curr_clause_category = std::make_tuple(order_tag, t);
-                for (clause c : cnf.m_clause_map[curr_clause_category]) {
-                    result_clauses.push_back(std::make_pair(c, logic_clause));
-                }
-            }
-        }
-        // if exact one constraint
-        if (constraint_order_tag != eo_none) {
-            LOG_MESSAGE(log_level::info) << "Ordering constraint of char " << current_char << " for no step bdd";
-            for (int t = 0; t <= cnf.get_num_timesteps(); t++) {
-                tagged_constraint curr_constraint_category = std::make_tuple(constraint_order_tag, t);
-                for (eo_constraint e : cnf.m_eo_constraint_map[curr_constraint_category]) {
-                    result_clauses.push_back(std::make_pair(e, logic_eo));
-                }
-            }
+        //  add the exactly one constraints for the at_least_var or at_leat_op
+        for (eo_constraint c : cnf.m_eo_constraint_map[curr_constraint_category]) {
+            result_primitives.push_back(std::make_pair(c, logic_eo));
         }
     }
 
-    LOG_MESSAGE(log_level::info) << "Ordered a total of " << result_clauses.size()
-                                 << " logic primitives for no step bdd";
+    return result_primitives;
+}
 
-    return result_clauses;
+std::vector<tagged_logic_primitiv> collect_primitives_for_single_timestep(formula &cnf, char primitive_type,
+                                                                          int timestep) {
+    std::vector<tagged_logic_primitiv> result_primitives;
+    clause_tag clause_order_tag = char_clause_tag_map[primitive_type];
+    eo_constraint_tag constraint_order_tag = char_constraint_tag_map[primitive_type];
+
+    tagged_clause curr_clause_category = std::make_tuple(clause_order_tag, timestep);
+    tagged_constraint curr_constraint_category = std::make_tuple(constraint_order_tag, timestep);
+
+    // add all the clauses for timestep t and tag order_tag
+    for (clause c : cnf.m_clause_map[curr_clause_category]) {
+        result_primitives.push_back(std::make_pair(c, logic_clause));
+    }
+    //  add the exactly one constraints for the at_least_var or at_leat_op
+    for (eo_constraint c : cnf.m_eo_constraint_map[curr_constraint_category]) {
+        result_primitives.push_back(std::make_pair(c, logic_eo));
+    }
+
+    return result_primitives;
 }
 
 };  // namespace conjoin_order

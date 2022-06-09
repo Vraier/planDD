@@ -36,11 +36,14 @@ void construct_dd_clause_linear(dd_buildable &dd, std::vector<conjoin_order::tag
 }
 
 void construct_bdd_by_layer(bdd_container &bdd, formula &cnf, option_values &options) {
+    const int main_bdd_idx = 0;
+    const int single_step_bdd_idx = 1;
+
     // build the bdd for a single timestep
     LOG_MESSAGE(log_level::info) << "Start building single step BDD";
     std::vector<conjoin_order::tagged_logic_primitiv> single_step_primitives =
-        conjoin_order::order_clauses_for_single_timestep(cnf, options);
-    construct_dd_clause_linear(bdd, single_step_primitives, 1);
+        conjoin_order::order_clauses_for_layer(cnf, 0);
+    construct_dd_clause_linear(bdd, single_step_primitives, single_step_bdd_idx);
     bdd.reduce_heap();
 
     // apply the extended variable map to the main bdd
@@ -50,16 +53,16 @@ void construct_bdd_by_layer(bdd_container &bdd, formula &cnf, option_values &opt
     // build the bdd for no timestep
     LOG_MESSAGE(log_level::info) << "Start building no step BDD";
     std::vector<conjoin_order::tagged_logic_primitiv> no_step_primitives =
-        conjoin_order::order_clauses_for_no_timestep(cnf, options);
-    construct_dd_clause_linear(bdd, no_step_primitives, 0);
+        conjoin_order::order_clauses_for_foundation(cnf);
+    construct_dd_clause_linear(bdd, no_step_primitives, main_bdd_idx);
 
     // build the main bdd layer by layer
     // copying the bdd from the single step one to the main bdd
     std::vector<int> permutation = cnf.calculate_permutation_by_timesteps(1);
     for (int t = 0; t < options.timesteps; t++) {
-        LOG_MESSAGE(log_level::info) << "Adding timestep for t=" << t << " " << bdd.get_short_statistics(0);
-        bdd.conjoin_two_bdds(0, 1, 0);
-        bdd.permute_variables(permutation, 1, 1);
+        LOG_MESSAGE(log_level::info) << "Adding timestep for t=" << t << " " << bdd.get_short_statistics(main_bdd_idx);
+        bdd.conjoin_two_bdds(main_bdd_idx, single_step_bdd_idx, main_bdd_idx);
+        bdd.permute_variables(permutation, single_step_bdd_idx, single_step_bdd_idx);
     }
 
     LOG_MESSAGE(log_level::info) << "Finished conjoining all timesteps";

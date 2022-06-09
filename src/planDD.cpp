@@ -111,7 +111,7 @@ int planDD::build_bdd(option_values opt_values) {
     builder.set_variable_order(var_order);
 
     std::vector<conjoin_order::tagged_logic_primitiv> all_primitives =
-        conjoin_order::order_clauses(clauses, opt_values);
+        conjoin_order::order_all_clauses(clauses, opt_values);
     dd_builder::construct_dd_clause_linear(builder, all_primitives);
     builder.reduce_heap();
 
@@ -132,7 +132,7 @@ int planDD::build_bdd_by_layer(option_values opt_values) {
 
     std::vector<int> var_order = variable_order::order_variables(clauses, opt_values);
     bdd_container main_builder(2, clauses.get_num_variables());
-    main_builder.set_variable_order(var_order);
+    //main_builder.set_variable_order(var_order);
 
     dd_builder::construct_bdd_by_layer(main_builder, clauses, opt_values);
     main_builder.reduce_heap();
@@ -164,7 +164,7 @@ int planDD::build_sdd(option_values opt_values) {
     LOG_MESSAGE(log_level::info) << "Start building sdd";
 
     std::vector<conjoin_order::tagged_logic_primitiv> all_primitives =
-        conjoin_order::order_clauses(clauses, opt_values);
+        conjoin_order::order_all_clauses(clauses, opt_values);
     dd_builder::construct_dd_clause_linear(builder, all_primitives);
     builder.print_sdd();
 
