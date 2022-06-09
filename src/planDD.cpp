@@ -69,8 +69,8 @@ int planDD::hack_debug(option_values opt_values) {
 
     int num_variables = (opt_values.timesteps * 4) + 1;
 
-    bdd_container copy_from(num_variables);
-    bdd_container main_builder(num_variables);
+    bdd_container copy_from(1, num_variables);
+    bdd_container main_builder(1, num_variables);
 
     std::vector<int> exact_one;
     for(int i = 0; i < 4; i++){
@@ -107,7 +107,7 @@ int planDD::build_bdd(option_values opt_values) {
     planning_logic::formula clauses = encoder.encode_cnf(opt_values.timesteps);
 
     std::vector<int> var_order = variable_order::order_variables(clauses, opt_values);
-    bdd_container builder(clauses.get_num_variables());
+    bdd_container builder(1, clauses.get_num_variables());
     builder.set_variable_order(var_order);
 
     std::vector<conjoin_order::tagged_logic_primitiv> all_primitives =
@@ -131,20 +131,20 @@ int planDD::build_bdd_by_layer(option_values opt_values) {
     planning_logic::formula clauses = encoder.encode_cnf(opt_values.timesteps);
 
     std::vector<int> var_order = variable_order::order_variables(clauses, opt_values);
-    bdd_container main_builder(clauses.get_num_variables());
+    bdd_container main_builder(1, clauses.get_num_variables());
     main_builder.set_variable_order(var_order);
-    bdd_container single_step_builder(clauses.get_num_variables());
+    bdd_container single_step_builder(1, clauses.get_num_variables());
     single_step_builder.set_variable_order(var_order);
 
     dd_builder::construct_bdd_by_layer(main_builder, single_step_builder, clauses, opt_values);
     main_builder.reduce_heap();
 
-    std::vector<std::vector<bool>> assignments = main_builder.list_minterms(2);
-    LOG_MESSAGE(log_level::info) << "Start printting " << assignments.size() << " assignments";
+    //std::vector<std::vector<bool>> assignments = main_builder.list_minterms(2);
+    //LOG_MESSAGE(log_level::info) << "Start printting " << assignments.size() << " assignments";
 
-    for(int i = 0; i < assignments.size(); i++){
-        encoder.decode_cnf_solution(assignments[i]);
-    }
+    //for(int i = 0; i < assignments.size(); i++){
+    //    encoder.decode_cnf_solution(assignments[i]);
+    //}
     
     main_builder.print_bdd_info();
 
@@ -193,7 +193,7 @@ int planDD::cnf_to_bdd(option_values opt_values) {
     int num_variables = std::get<0>(cnf_data);
     // int num_clauses = std::get<1>(cnf_data);
     std::vector<planning_logic::clause> clauses = std::get<2>(cnf_data);
-    bdd_container builder(num_variables);
+    bdd_container builder(1, num_variables);
 
     for (planning_logic::clause c : clauses) {
         builder.conjoin_clause(c);

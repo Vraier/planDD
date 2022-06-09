@@ -12,7 +12,7 @@ sdd_manager::sdd_manager(int num_variables) {
 
 sdd_manager::~sdd_manager() { sdd_manager_free(m_sdd_manager); }
 
-void sdd_manager::conjoin_clause(std::vector<int> &clause) {
+void sdd_manager::conjoin_clause(std::vector<int> &clause, int sdd_index) {
     // build the disjunction of the literals in the clause
 
     SddNode *var, *tmp;
@@ -41,10 +41,10 @@ void sdd_manager::conjoin_clause(std::vector<int> &clause) {
     m_root_node = tmp;
 }
 
-void sdd_manager::add_exactly_one_constraint(std::vector<int> &variables) {
+void sdd_manager::add_exactly_one_constraint(std::vector<int> &variables, int sdd_index){
     // TODO implement
     return;
-}
+} 
 
 void sdd_manager::print_sdd() {
     LOG_MESSAGE(log_level::info) << "Printing LibSDD statistics...";

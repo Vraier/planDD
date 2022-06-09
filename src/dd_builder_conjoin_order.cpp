@@ -173,10 +173,47 @@ std::vector<tagged_logic_primitiv> order_clauses_for_single_timestep(planning_lo
     std::getline(ss, disjoin_order, ':');
     std::getline(ss, interleaved_order, ':');
 
+    
+    for (int i = 0; i < disjoin_order.size(); i++) {
+        char current_char = disjoin_order[i];
+        // add the interleved part
+        if (current_char == 'x') {
+            continue;
+        }
+
+        clause_tag order_tag = char_clause_tag_map[current_char];
+        eo_constraint_tag constraint_order_tag = char_constraint_tag_map[current_char];
+
+        if (order_tag != clause_ini_state && order_tag != clause_goal) {
+            LOG_MESSAGE(log_level::info) << "Ordering clauses of char " << current_char << " for single step bdd";
+            tagged_clause curr_clause_category = std::make_tuple(order_tag, 0);
+            for (clause c : cnf.m_clause_map[curr_clause_category]) {
+                result_clauses.push_back(std::make_pair(c, logic_clause));
+            }
+            curr_clause_category = std::make_tuple(order_tag, 1);
+            for (clause c : cnf.m_clause_map[curr_clause_category]) {
+                result_clauses.push_back(std::make_pair(c, logic_clause));
+            }
+        }
+
+        // if exact one constraint
+        if (constraint_order_tag != eo_none) {
+            LOG_MESSAGE(log_level::info) << "Ordering constraints of char " << current_char << " for single step bdd";
+            tagged_constraint curr_constraint_category = std::make_tuple(constraint_order_tag, 0);
+            for (eo_constraint e : cnf.m_eo_constraint_map[curr_constraint_category]) {
+                result_clauses.push_back(std::make_pair(e, logic_eo));
+            }
+            curr_constraint_category = std::make_tuple(constraint_order_tag, 1);
+            for (eo_constraint e : cnf.m_eo_constraint_map[curr_constraint_category]) {
+                result_clauses.push_back(std::make_pair(e, logic_eo));
+            }
+        }
+    }
+    
+
     for (int i = 0; i < interleaved_order.size(); i++) {
         char current_char = interleaved_order[i];
         clause_tag order_tag = char_clause_tag_map[current_char];
-        eo_constraint_tag constraint_order_tag = char_constraint_tag_map[current_char];
         if (order_tag != clause_precon && order_tag != clause_effect && order_tag != clause_frame) {
             continue;
         }

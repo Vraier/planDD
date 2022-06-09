@@ -35,6 +35,7 @@ void construct_dd_clause_linear(dd_buildable &dd, std::vector<conjoin_order::tag
 
 void construct_bdd_by_layer(bdd_container &main_bdd, bdd_container &single_step_bdd, formula &cnf,
                             option_values &options) {
+
     // build the bdd for a single timestep
     LOG_MESSAGE(log_level::info) << "Start building single step BDD";
     std::vector<conjoin_order::tagged_logic_primitiv> single_step_primitives =
@@ -46,7 +47,7 @@ void construct_bdd_by_layer(bdd_container &main_bdd, bdd_container &single_step_
     LOG_MESSAGE(log_level::info) << "Calculating and extending new variable order";
     std::map<int, int> single_step_var_order = single_step_bdd.get_variable_order_for_single_step(cnf.m_variable_map);
     std::vector<int> order_for_all_timesteps =
-        single_step_bdd.extend_variable_order_to_all_steps(cnf.m_variable_map, single_step_var_order);
+        single_step_bdd.extend_variable_order_to_all_steps(cnf.m_variable_map, single_step_var_order); 
 
     // std::vector<int> single_step_order = single_step_bdd.get_variable_order();
     // for (int i = 0; i < order_for_all_timesteps.size(); i++) {
@@ -55,8 +56,8 @@ void construct_bdd_by_layer(bdd_container &main_bdd, bdd_container &single_step_
     // }
 
     // apply the extended variable map to the main bdd
-    // single_step_bdd.set_variable_order(order_for_all_timesteps);
-    // main_bdd.set_variable_order(order_for_all_timesteps);
+    //single_step_bdd.set_variable_order(order_for_all_timesteps);
+    //main_bdd.set_variable_order(order_for_all_timesteps);
 
     // build the bdd for no timestep
     LOG_MESSAGE(log_level::info) << "Start building no step BDD";
@@ -65,18 +66,18 @@ void construct_bdd_by_layer(bdd_container &main_bdd, bdd_container &single_step_
     construct_dd_clause_linear(main_bdd, no_step_primitives);
 
     // build the main bdd layer by layer
-    // copying the bdd from the single step one
-
-    LOG_MESSAGE(log_level::info) << "Special Conjoining single step bdd for timestep " << 0 << " "
-                                 << main_bdd.get_short_statistics();
-    single_step_bdd.swap_variables_to_other_timestep(cnf.m_variable_map, 0, options.timesteps);
-    main_bdd.copy_and_conjoin_bdd_from_another_container(single_step_bdd);
-
-    for (int t = 1; t < options.timesteps; t++) {
+    // copying the bdd from the single step one to the main bdd
+    for (int t = 0; t < options.timesteps; t++) {
         LOG_MESSAGE(log_level::info) << "Conjoining single step bdd for timestep " << t << " "
                                      << main_bdd.get_short_statistics();
-        single_step_bdd.swap_variables_to_other_timestep(cnf.m_variable_map, 1, options.timesteps);
         main_bdd.copy_and_conjoin_bdd_from_another_container(single_step_bdd);
+        single_step_bdd.swap_variables_to_other_timestep(cnf.m_variable_map, 1, options.timesteps);
+
+        // single_step
+        // a0 -> a1
+        // b0 -> b1
+        // c0 -> c1
+
         // single_step_bdd.swap_variables_to_other_timestep(cnf.m_variable_map, t, 0);
     }
 

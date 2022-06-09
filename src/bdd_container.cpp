@@ -3,7 +3,7 @@
 
 #include "bdd_container.h"
 
-bdd_container::bdd_container(int num_variables) {
+bdd_container::bdd_container(int num_bdds, int num_variables) {
     // add one more variable to account for variable with index 0
     m_num_variables = num_variables + 1;
 
@@ -12,14 +12,20 @@ bdd_container::bdd_container(int num_variables) {
 
     // Cudd_SetMaxCacheHard(m_bdd_manager, 62500000);
 
-    // force var with index 0 to be true
-    m_root_node = Cudd_bddIthVar(m_bdd_manager, 0);
-    Cudd_Ref(m_root_node);
+    // construct correct abount of root nodes
+    m_root_nodes = std::vector<DdNode *>(num_bdds);
+    for (int i = 0; i < num_bdds; i++) {
+        // force var with index 0 to be true
+        m_root_nodes[i] = Cudd_bddIthVar(m_bdd_manager, 0);
+        Cudd_Ref(m_root_nodes[i]);
+    }
 }
 
 bdd_container::~bdd_container() {
     // check if all nodes were dereferenced corretly (no memory leaks (:)
-    Cudd_RecursiveDeref(m_bdd_manager, m_root_node);
+    for (int i = 0; i < m_root_nodes.size(); i++) {
+        Cudd_RecursiveDeref(m_bdd_manager, m_root_nodes[i]);
+    }
     int num_zero_reference_nodes = Cudd_CheckZeroRef(m_bdd_manager);
     if (num_zero_reference_nodes != 0) {
         LOG_MESSAGE(log_level::warning) << "#Nodes with non-zero reference count (should be 0): "
@@ -32,13 +38,13 @@ bdd_container::~bdd_container() {
 void bdd_container::reduce_heap() {
     LOG_MESSAGE(log_level::info) << "Start reducing heap manually";
     Cudd_ReduceHeap(m_bdd_manager, CUDD_REORDER_SIFT_CONVERGE, 1);
-    LOG_MESSAGE(log_level::info) << "Finished reducing heap";
+    LOG_MESSAGE(log_level::info) << "Finished reducing heap. New size: " << Cudd_ReadNodeCount(m_bdd_manager);
 }
 
 void bdd_container::print_bdd_info() {
     LOG_MESSAGE(log_level::info) << "Printing CUDD statistics...";
-    LOG_MESSAGE(log_level::info) << "Number of nodes: " << Cudd_DagSize(m_root_node) << ", Number of solutions: "
-                                 << Cudd_CountMinterm(m_bdd_manager, m_root_node, m_num_variables);
+    LOG_MESSAGE(log_level::info) << "Number of nodes: " << Cudd_DagSize(m_root_nodes[0]) << ", Number of solutions: "
+                                 << Cudd_CountMinterm(m_bdd_manager, m_root_nodes[0], m_num_variables);
     FILE **fout = &stdout;
     Cudd_PrintInfo(m_bdd_manager, *fout);
 }
@@ -46,7 +52,7 @@ void bdd_container::print_bdd_info() {
 std::vector<std::vector<bool>> bdd_container::list_minterms(int max) {
     LOG_MESSAGE(log_level::info) << "Start finding minterms";
 
-    DdNode *curr_node = m_root_node;
+    DdNode *curr_node = m_root_nodes[0];
     Cudd_Ref(curr_node);
     std::vector<std::vector<bool>> assignments;
 
@@ -94,7 +100,7 @@ std::string bdd_container::get_short_statistics() {
 
 // Writes a dot file representing the argument DDs
 void bdd_container::write_bdd_to_dot_file(std::string filename) {
-    DdNode *add = Cudd_BddToAdd(m_bdd_manager, m_root_node);
+    DdNode *add = Cudd_BddToAdd(m_bdd_manager, m_root_nodes[0]);
     Cudd_Ref(add);
     FILE *outfile;  // output file pointer for .dot file
     outfile = fopen(filename.c_str(), "w");
@@ -106,7 +112,7 @@ void bdd_container::write_bdd_to_dot_file(std::string filename) {
     fclose(outfile);
 }
 
-void bdd_container::conjoin_clause(std::vector<int> &clause) {
+void bdd_container::conjoin_clause(std::vector<int> &clause, int bdd_index) {
     // build the disjunction of the literals in the clause
     DdNode *var, *tmp;
     DdNode *disjunction = Cudd_ReadLogicZero(m_bdd_manager);
@@ -126,14 +132,14 @@ void bdd_container::conjoin_clause(std::vector<int> &clause) {
     }
 
     // conjoin the clause with the root node
-    tmp = Cudd_bddAnd(m_bdd_manager, m_root_node, disjunction);
+    tmp = Cudd_bddAnd(m_bdd_manager, m_root_nodes[bdd_index], disjunction);
     Cudd_Ref(tmp);
-    Cudd_RecursiveDeref(m_bdd_manager, m_root_node);
+    Cudd_RecursiveDeref(m_bdd_manager, m_root_nodes[bdd_index]);
     Cudd_RecursiveDeref(m_bdd_manager, disjunction);
-    m_root_node = tmp;
+    m_root_nodes[bdd_index] = tmp;
 }
 
-void bdd_container::add_exactly_one_constraint(std::vector<int> &variables) {
+void bdd_container::add_exactly_one_constraint(std::vector<int> &variables, int bdd_index) {
     // order variables by the variable order
     // variable in the lowest layer comes first
     // variable in the highest layer comes last
@@ -183,11 +189,11 @@ void bdd_container::add_exactly_one_constraint(std::vector<int> &variables) {
     Cudd_RecursiveDeref(m_bdd_manager, exact_zero_true);
 
     // conjoin the root node for the exact one constraint with the root node of the bdd
-    DdNode *tmp = Cudd_bddAnd(m_bdd_manager, m_root_node, constraint_root_node);
+    DdNode *tmp = Cudd_bddAnd(m_bdd_manager, m_root_nodes[bdd_index], constraint_root_node);
     Cudd_Ref(tmp);
-    Cudd_RecursiveDeref(m_bdd_manager, m_root_node);
+    Cudd_RecursiveDeref(m_bdd_manager, m_root_nodes[bdd_index]);
     Cudd_RecursiveDeref(m_bdd_manager, constraint_root_node);
-    m_root_node = tmp;
+    m_root_nodes[bdd_index] = tmp;
 }
 
 void bdd_container::hack_back_rocket_method() { return; }
@@ -195,7 +201,7 @@ void bdd_container::hack_back_rocket_method() { return; }
 void bdd_container::set_variable_order(std::vector<int> &variable_order) {
     LOG_MESSAGE(log_level::info) << "Setting variable order. manager size: " << Cudd_ReadSize(m_bdd_manager)
                                  << " order size: " << variable_order.size();
-    int *order = &variable_order[0];
+    int *order = variable_order.data();
     Cudd_ShuffleHeap(m_bdd_manager, order);
 }
 
@@ -215,16 +221,17 @@ std::vector<int> bdd_container::get_variable_order() {
 void bdd_container::copy_and_conjoin_bdd_from_another_container(bdd_container &copy_from) {
     LOG_MESSAGE(log_level::info) << "Copying bdd to another";
     // transfer the bdd from one manager to another
-    DdNode *copied_bdd = Cudd_bddTransfer(copy_from.m_bdd_manager, m_bdd_manager, copy_from.m_root_node);
+    DdNode *copied_bdd = Cudd_bddTransfer(copy_from.m_bdd_manager, m_bdd_manager, copy_from.m_root_nodes[0]);
     Cudd_Ref(copied_bdd);
 
+    LOG_MESSAGE(log_level::info) << "Conjoining the copied bdd";
     // conjoin the transferd bdd with the root node
-    DdNode *tmp = Cudd_bddAnd(m_bdd_manager, m_root_node, copied_bdd);
+    DdNode *tmp = Cudd_bddAnd(m_bdd_manager, m_root_nodes[0], copied_bdd);
     Cudd_Ref(tmp);
-    Cudd_RecursiveDeref(m_bdd_manager, m_root_node);
+    Cudd_RecursiveDeref(m_bdd_manager, m_root_nodes[0]);
     Cudd_RecursiveDeref(m_bdd_manager, copied_bdd);
 
-    m_root_node = tmp;
+    m_root_nodes[0] = tmp;
 }
 
 void bdd_container::swap_variables(std::vector<int> &variables_from, std::vector<int> &variables_to) {
@@ -257,22 +264,38 @@ void bdd_container::swap_variables(std::vector<int> &variables_from, std::vector
     }
 
     // now perform the swapping
-    DdNode *temp_node = Cudd_bddSwapVariables(m_bdd_manager, m_root_node, nodes_from, nodes_to, num_variables);
+    DdNode *temp_node = Cudd_bddSwapVariables(m_bdd_manager, m_root_nodes[0], nodes_from, nodes_to, num_variables);
     Cudd_Ref(temp_node);
-    Cudd_RecursiveDeref(m_bdd_manager, m_root_node);
-    m_root_node = temp_node;
+    Cudd_RecursiveDeref(m_bdd_manager, m_root_nodes[0]);
+    m_root_nodes[0] = temp_node;
 
     delete[] nodes_from;
     delete[] nodes_to;
 }
 
-void bdd_container::permute_variables(std::vector<int> &permutation) {
+void bdd_container::permute_variables(std::vector<int> &permutation, int source_bdd, int destination_bdd) {
+    
+    int num_variables = permutation.size();
+    if (num_variables != Cudd_ReadSize(m_bdd_manager)) {
+        LOG_MESSAGE(log_level::error) << "Cant permutate variables. Permutation size: " << num_variables
+                                      << ", manager size: " << Cudd_ReadSize(m_bdd_manager);
+        return;
+    }
+    LOG_MESSAGE(log_level::info) << "Permuating " << num_variables << " variables";
 
+    // now perform the swapping
+    DdNode *temp_node = Cudd_bddPermute(m_bdd_manager, m_root_nodes[source_bdd], permutation.data());
+    Cudd_Ref(temp_node);
+    Cudd_RecursiveDeref(m_bdd_manager, m_root_nodes[destination_bdd]);
+    m_root_nodes[destination_bdd] = temp_node;
+}
+
+void bdd_container::permute_variables(std::vector<int> &permutation) {
     int num_variables = permutation.size();
 
     // TODO: remove this n^2 check
     for (int i = 0; i < num_variables; i++) {
-        for (int j = i+1; j < num_variables; j++) {
+        for (int j = i + 1; j < num_variables; j++) {
             if (permutation[i] == permutation[j]) {
                 LOG_MESSAGE(log_level::error) << "pemutation is has duplicates";
                 return;
@@ -292,10 +315,10 @@ void bdd_container::permute_variables(std::vector<int> &permutation) {
     }
 
     // now perform the swapping
-    DdNode *temp_node = Cudd_bddPermute(m_bdd_manager, m_root_node, perm_array);
+    DdNode *temp_node = Cudd_bddPermute(m_bdd_manager, m_root_nodes[0], perm_array);
     Cudd_Ref(temp_node);
-    Cudd_RecursiveDeref(m_bdd_manager, m_root_node);
-    m_root_node = temp_node;
+    Cudd_RecursiveDeref(m_bdd_manager, m_root_nodes[0]);
+    m_root_nodes[0] = temp_node;
 
     delete[] nodes_identity;
     delete[] perm_array;
@@ -341,10 +364,10 @@ void bdd_container::swap_variables_to_other_timestep(std::map<planning_logic::ta
         from_to_index[variable_map[tagged_var]] = variable_map[tagged_var_to];
     }
 
-    for (int i = 0; i < from_to_index.size(); i++) {
-        std::cout << from_to_index[i] << " ";
-    }
-    std::cout << std::endl;
+    // for (int i = 0; i < from_to_index.size(); i++) {
+    //     std::cout << from_to_index[i] << " ";
+    // }
+    // std::cout << std::endl;
 
     permute_variables(from_to_index);
 }
@@ -372,7 +395,7 @@ std::map<int, int> bdd_container::get_variable_order_for_single_step(
 
     int new_layer = 0;
     for (std::map<int, int>::iterator iter = layer_to_index.begin(); iter != layer_to_index.end(); ++iter) {
-        int layer = iter->first;
+        //int layer = iter->first;
         int index = iter->second;
         consolidated_index_to_layer[index] = new_layer;
         new_layer++;
@@ -413,7 +436,7 @@ std::vector<int> bdd_container::extend_variable_order_to_all_steps(
     result_index_to_layer_map[0] = 0;
     int new_layer = 1;
     for (std::map<int, int>::iterator iter = layer_to_index.begin(); iter != layer_to_index.end(); ++iter) {
-        int layer = iter->first;
+        //int layer = iter->first;
         int index = iter->second;
         result_index_to_layer_map[index] = new_layer;
         new_layer++;

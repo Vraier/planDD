@@ -23,12 +23,9 @@ class sdd_manager : public virtual dd_buildable  {
 
     void print_sdd();
     virtual std::string get_short_statistics();
-    // void write_bdd_to_dot_file(DdNode *bdd, std::string filename);
-    SddNode *construct_bdd_from_cnf(std::vector<std::vector<int>> &cnf);
-    SddNode *construct_bdd_from_cnf_binary(std::vector<std::vector<int>> &cnf);
 
-    virtual void conjoin_clause(std::vector<int> &clause);
-    virtual void add_exactly_one_constraint(std::vector<int> &variables);
+    virtual void conjoin_clause(std::vector<int> &clause, int sdd_index = 0);
+    virtual void add_exactly_one_constraint(std::vector<int> &variables, int sdd_index = 0);
 };
 
 /*
