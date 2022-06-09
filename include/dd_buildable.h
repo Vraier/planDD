@@ -13,5 +13,5 @@ public:
     // conjoins the bdd with the root node
     // should contain at least one variable
     virtual void add_exactly_one_constraint(std::vector<int> &variables, int dd_index = 0) = 0;
-    virtual std::string get_short_statistics() = 0;
+    virtual std::string get_short_statistics(int dd_index = 0) = 0;
 };

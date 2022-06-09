@@ -86,8 +86,8 @@ std::vector<std::vector<bool>> bdd_container::list_minterms(int max) {
     return assignments;
 }
 
-std::string bdd_container::get_short_statistics() {
-    long num_nodes = Cudd_ReadNodeCount(m_bdd_manager);
+std::string bdd_container::get_short_statistics(int bdd_index) {
+    long num_nodes = Cudd_DagSize(m_root_nodes[bdd_index]);
     long num_peak_nodes = Cudd_ReadPeakNodeCount(m_bdd_manager);
     long num_reorderings = Cudd_ReadReorderings(m_bdd_manager);
     long num_mem_bytes = Cudd_ReadMemoryInUse(m_bdd_manager);
@@ -323,6 +323,14 @@ void bdd_container::permute_variables(std::vector<int> &permutation) {
     delete[] nodes_identity;
     delete[] perm_array;
 }
+
+void bdd_container::conjoin_two_bdds(int bbd_a, int bdd_b, int bdd_result){
+    DdNode *tmp = Cudd_bddAnd(m_bdd_manager, m_root_nodes[bbd_a], m_root_nodes[bdd_b]);
+    Cudd_Ref(tmp);
+    Cudd_RecursiveDeref(m_bdd_manager, m_root_nodes[bdd_result]);
+    m_root_nodes[bdd_result] = tmp;
+}
+
 
 std::string to_str(planning_logic::tagged_variable v) {
     std::string result = "(" + std::to_string(std::get<0>(v)) + " " + std::to_string(std::get<1>(v)) + " " +

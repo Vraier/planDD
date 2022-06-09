@@ -22,7 +22,7 @@ class sdd_manager : public virtual dd_buildable  {
     ~sdd_manager();
 
     void print_sdd();
-    virtual std::string get_short_statistics();
+    virtual std::string get_short_statistics(int sdd_index = 0);
 
     virtual void conjoin_clause(std::vector<int> &clause, int sdd_index = 0);
     virtual void add_exactly_one_constraint(std::vector<int> &variables, int sdd_index = 0);

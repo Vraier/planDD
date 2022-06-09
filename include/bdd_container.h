@@ -53,7 +53,7 @@ class bdd_container : public virtual dd_buildable {
     std::vector<std::vector<bool>> list_minterms(int max);
     // returns a short string with a few information about the current stae of CUDD
     // can be used to evaluate the progress of CUDD during the execution of the program
-    virtual std::string get_short_statistics();
+    virtual std::string get_short_statistics(int bdd_index = 0);
     // writes the bdd to a file in dot format
     void write_bdd_to_dot_file(std::string filename);
 
@@ -64,6 +64,8 @@ class bdd_container : public virtual dd_buildable {
     // permutes the variables in source bdd according to the given permutation
     // write the result into destionation bdd. the old bdd in destination gets freed and is lost
     void permute_variables(std::vector<int> &permutation, int source_bdd, int destination_bdd);
+    // conjoins bdd a and b and stores the result. the old destination bdd get freed and is lost
+    void conjoin_two_bdds(int bbd_a, int bdd_b, int bdd_result);
 
     //  returns a node for the main bdd_manager that represents the bdd for a single timestep
     void copy_and_conjoin_bdd_from_another_container(bdd_container &copy_from);

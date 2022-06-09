@@ -102,6 +102,9 @@ class formula {
     int get_num_constraints();
     int get_num_timesteps();
 
+    // calculate a mapping that advances the timestep of every variable bt t_diff
+    std::vector<int> calculate_permutation_by_timesteps(int t_diff);
+
     // writes the cnf to file in standart format
     void write_to_file(std::string filepath);
     // take a cnf file and tries to parse it into a set of clauses (kind of inverse for above)
