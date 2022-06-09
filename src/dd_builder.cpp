@@ -69,4 +69,68 @@ void construct_bdd_by_layer(bdd_container &bdd, formula &cnf, option_values &opt
 
     return;
 }
+
+void construct_bdd_by_layer_bidirectional(bdd_container &bdd, formula &cnf, option_values &options) {
+    const int main_begin_idx = 0;
+    const int main_end_idx = 1;
+    const int init_step_bdd_idx = 2;
+    const int goal_step_bdd_idx = 3;
+
+    // build the bdd for a single timestep
+    LOG_MESSAGE(log_level::info) << "Start building init step BDD";
+    std::vector<conjoin_order::tagged_logic_primitiv> init_step_primitives =
+        conjoin_order::order_clauses_for_layer(cnf, 0);
+    construct_dd_clause_linear(bdd, init_step_primitives, init_step_bdd_idx);
+    bdd.reduce_heap();
+    LOG_MESSAGE(log_level::info) << "Start building goal step BDD";
+    std::vector<conjoin_order::tagged_logic_primitiv> goal_step_primitives =
+        conjoin_order::order_clauses_for_layer(cnf, options.timesteps-1);
+    construct_dd_clause_linear(bdd, goal_step_primitives, goal_step_bdd_idx);
+    bdd.reduce_heap();
+
+    // apply the extended variable map to the main bdd
+    // single_step_bdd.set_variable_order(order_for_all_timesteps);
+    // main_bdd.set_variable_order(order_for_all_timesteps);
+
+    // build the bdd for no timestep
+    LOG_MESSAGE(log_level::info) << "Start building init foundation BDD";
+    std::vector<conjoin_order::tagged_logic_primitiv> init_foundation_primitives =
+        conjoin_order::order_clauses_for_foundation(cnf);
+    construct_dd_clause_linear(bdd, init_foundation_primitives, main_begin_idx);
+    LOG_MESSAGE(log_level::info) << "Start building goal foundation BDD";
+    std::vector<conjoin_order::tagged_logic_primitiv> goal_foundation_primitives =
+        conjoin_order::order_clauses_for_foundation(cnf);
+    construct_dd_clause_linear(bdd, goal_foundation_primitives, main_end_idx);
+
+    int t_begin = 0;
+    int t_end = options.timesteps - 1;
+    bool forward_step = true;
+    std::vector<int> forward_permutation = cnf.calculate_permutation_by_timesteps(1);
+    std::vector<int> backward_permutation = cnf.calculate_permutation_by_timesteps(-1);
+
+    while (t_begin <= t_end) {
+        if (forward_step) {
+            LOG_MESSAGE(log_level::info) << "Adding forward timestep for t=" << t_begin << " "
+                                         << bdd.get_short_statistics(main_begin_idx);
+            bdd.conjoin_two_bdds(main_begin_idx, init_step_bdd_idx, main_begin_idx);
+            bdd.permute_variables(forward_permutation, init_step_bdd_idx, init_step_bdd_idx);
+            t_begin++;
+            forward_step = false;
+        } else {
+            LOG_MESSAGE(log_level::info) << "Adding backward timestep for t=" << t_end << " "
+                                         << bdd.get_short_statistics(main_end_idx);
+            bdd.conjoin_two_bdds(main_end_idx, goal_step_bdd_idx, main_end_idx);
+            bdd.permute_variables(backward_permutation, goal_step_bdd_idx, goal_step_bdd_idx);
+            t_end--;
+            forward_step = true;
+        }
+    }
+    LOG_MESSAGE(log_level::info) << "Doing final conjoin";
+    bdd.conjoin_two_bdds(main_begin_idx, main_end_idx, main_begin_idx);
+
+    LOG_MESSAGE(log_level::info) << "Finished conjoining all timesteps";
+
+    return;
+}
+
 }  // namespace dd_builder

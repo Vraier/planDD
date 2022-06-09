@@ -131,10 +131,10 @@ int planDD::build_bdd_by_layer(option_values opt_values) {
     planning_logic::formula clauses = encoder.encode_cnf(opt_values.timesteps);
 
     std::vector<int> var_order = variable_order::order_variables(clauses, opt_values);
-    bdd_container main_builder(2, clauses.get_num_variables());
+    bdd_container main_builder(4, clauses.get_num_variables());
     //main_builder.set_variable_order(var_order);
 
-    dd_builder::construct_bdd_by_layer(main_builder, clauses, opt_values);
+    dd_builder::construct_bdd_by_layer_bidirectional(main_builder, clauses, opt_values);
     main_builder.reduce_heap();
 
     //std::vector<std::vector<bool>> assignments = main_builder.list_minterms(2);

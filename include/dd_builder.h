@@ -13,5 +13,6 @@ void construct_dd_clause_linear(dd_buildable &dd, std::vector<conjoin_order::tag
                                 int dd_index = 0);
 
 // builds a bdd for a single step and then copies it to the opter container for each timestep
-void construct_bdd_by_layer(bdd_container &main_bdd, planning_logic::formula &cnf, option_values &options);
+void construct_bdd_by_layer(bdd_container &bdd, planning_logic::formula &cnf, option_values &options);
+void construct_bdd_by_layer_bidirectional(bdd_container &bdd, planning_logic::formula &cnf, option_values &options);
 }  // namespace dd_builder
