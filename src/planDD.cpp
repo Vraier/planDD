@@ -85,9 +85,9 @@ int planDD::hack_debug(option_values opt_values) {
             indx_to.push_back((t*4)+i+1);
         }
 
-        copy_from.swap_variables(exact_one, indx_to);
+        //copy_from.swap_variables(exact_one, indx_to);
         main_builder.copy_and_conjoin_bdd_from_another_container(copy_from);
-        copy_from.swap_variables(indx_to, exact_one);
+        //copy_from.swap_variables(indx_to, exact_one);
 
         main_builder.write_bdd_to_dot_file("after_step_" + std::to_string(t) + ".dot");
         main_builder.print_bdd_info();

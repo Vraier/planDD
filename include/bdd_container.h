@@ -37,6 +37,15 @@ class bdd_container : public virtual dd_buildable {
     // adds an exact one constraint to the root node
     void add_exactly_one_constraint(std::vector<int> &variables, int bdd_index = 0);
 
+    // Functions for building the bdd timestep by timestep
+    // permutes the variables in source bdd according to the given permutation
+    // write the result into destionation bdd. the old bdd in destination gets freed and is lost
+    void permute_variables(std::vector<int> &permutation, int source_bdd, int destination_bdd);
+    // conjoins bdd a and b and stores the result. the old destination bdd get freed and is lost
+    void conjoin_two_bdds(int bbd_a, int bdd_b, int bdd_result);
+    //  returns a node for the main bdd_manager that represents the bdd for a single timestep
+    void copy_and_conjoin_bdd_from_another_container(bdd_container &copy_from);
+
     // The i-th entry of the permutation array contains the index of the variable that should be brought to the i-th
     // level indx -> layer
     void set_variable_order(std::vector<int> &variable_order);
@@ -60,20 +69,6 @@ class bdd_container : public virtual dd_buildable {
     // function is purely for debugging purpose. allows entry point to bdd manager
     void hack_back_rocket_method();
 
-    // Functions for building the bdd timestep by timestep
-    // permutes the variables in source bdd according to the given permutation
-    // write the result into destionation bdd. the old bdd in destination gets freed and is lost
-    void permute_variables(std::vector<int> &permutation, int source_bdd, int destination_bdd);
-    // conjoins bdd a and b and stores the result. the old destination bdd get freed and is lost
-    void conjoin_two_bdds(int bbd_a, int bdd_b, int bdd_result);
-
-    //  returns a node for the main bdd_manager that represents the bdd for a single timestep
-    void copy_and_conjoin_bdd_from_another_container(bdd_container &copy_from);
-    void swap_variables(std::vector<int> &variables_from, std::vector<int> &variables_to);
-    void permute_variables(std::vector<int> &permutation);
-    // swaps the variables from two timesteps
-    void swap_variables_to_other_timestep(std::map<planning_logic::tagged_variable, int> &variable_map, int t_diff,
-                                          int num_timesteps);
     // returns the variable order for timesetep 0 as used by the sub manager
     // maps var idx -> layer in bdd (there are no gaps in the layers)
     std::map<int, int> get_variable_order_for_single_step(std::map<planning_logic::tagged_variable, int> &variable_map);

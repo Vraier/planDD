@@ -234,45 +234,6 @@ void bdd_container::copy_and_conjoin_bdd_from_another_container(bdd_container &c
     m_root_nodes[0] = tmp;
 }
 
-void bdd_container::swap_variables(std::vector<int> &variables_from, std::vector<int> &variables_to) {
-    if (variables_from.size() != variables_to.size()) {
-        LOG_MESSAGE(log_level::error) << "Arrays have different sizes while swapping variables: "
-                                      << variables_from.size() << ", " << variables_to.size();
-        return;
-    }
-
-    // TODO: remove this n^2 check
-    for (int i = 0; i < variables_from.size(); i++) {
-        for (int j = 0; j < variables_to.size(); j++) {
-            if (variables_from[i] == variables_to[j]) {
-                LOG_MESSAGE(log_level::error) << "Found same indice in both arrays while swapping";
-                return;
-            }
-        }
-    }
-
-    LOG_MESSAGE(log_level::info) << "Swapping " << variables_from.size() << " variables";
-
-    // construct the necessary arrays for CUDD
-    int num_variables = variables_from.size();
-    DdNode **nodes_from = new DdNode *[num_variables];
-    DdNode **nodes_to = new DdNode *[num_variables];
-
-    for (int i = 0; i < num_variables; i++) {
-        nodes_from[i] = Cudd_bddIthVar(m_bdd_manager, variables_from[i]);
-        nodes_to[i] = Cudd_bddIthVar(m_bdd_manager, variables_to[i]);
-    }
-
-    // now perform the swapping
-    DdNode *temp_node = Cudd_bddSwapVariables(m_bdd_manager, m_root_nodes[0], nodes_from, nodes_to, num_variables);
-    Cudd_Ref(temp_node);
-    Cudd_RecursiveDeref(m_bdd_manager, m_root_nodes[0]);
-    m_root_nodes[0] = temp_node;
-
-    delete[] nodes_from;
-    delete[] nodes_to;
-}
-
 void bdd_container::permute_variables(std::vector<int> &permutation, int source_bdd, int destination_bdd) {
     
     int num_variables = permutation.size();
@@ -290,41 +251,8 @@ void bdd_container::permute_variables(std::vector<int> &permutation, int source_
     m_root_nodes[destination_bdd] = temp_node;
 }
 
-void bdd_container::permute_variables(std::vector<int> &permutation) {
-    int num_variables = permutation.size();
-
-    // TODO: remove this n^2 check
-    for (int i = 0; i < num_variables; i++) {
-        for (int j = i + 1; j < num_variables; j++) {
-            if (permutation[i] == permutation[j]) {
-                LOG_MESSAGE(log_level::error) << "pemutation is has duplicates";
-                return;
-            }
-        }
-    }
-
-    LOG_MESSAGE(log_level::info) << "Permuating " << num_variables << " variables";
-
-    // construct the necessary arrays for CUDD
-    DdNode **nodes_identity = new DdNode *[num_variables];
-    int *perm_array = new int[num_variables];
-
-    for (int i = 0; i < num_variables; i++) {
-        nodes_identity[i] = Cudd_bddIthVar(m_bdd_manager, i);
-        perm_array[i] = permutation[i];
-    }
-
-    // now perform the swapping
-    DdNode *temp_node = Cudd_bddPermute(m_bdd_manager, m_root_nodes[0], perm_array);
-    Cudd_Ref(temp_node);
-    Cudd_RecursiveDeref(m_bdd_manager, m_root_nodes[0]);
-    m_root_nodes[0] = temp_node;
-
-    delete[] nodes_identity;
-    delete[] perm_array;
-}
-
 void bdd_container::conjoin_two_bdds(int bbd_a, int bdd_b, int bdd_result){
+    LOG_MESSAGE(log_level::info) << "Conjoining two bdds";
     DdNode *tmp = Cudd_bddAnd(m_bdd_manager, m_root_nodes[bbd_a], m_root_nodes[bdd_b]);
     Cudd_Ref(tmp);
     Cudd_RecursiveDeref(m_bdd_manager, m_root_nodes[bdd_result]);
@@ -332,53 +260,6 @@ void bdd_container::conjoin_two_bdds(int bbd_a, int bdd_b, int bdd_result){
 }
 
 
-std::string to_str(planning_logic::tagged_variable v) {
-    std::string result = "(" + std::to_string(std::get<0>(v)) + " " + std::to_string(std::get<1>(v)) + " " +
-                         std::to_string(std::get<2>(v)) + " " + std::to_string(std::get<3>(v)) + ")";
-    return result;
-}
-
-void bdd_container::swap_variables_to_other_timestep(std::map<planning_logic::tagged_variable, int> &variable_map,
-                                                     int t_diff, int num_timesteps) {
-    LOG_MESSAGE(log_level::info) << "Swapping variables from t_diff=" << t_diff;
-    if (t_diff == 0) {
-        // nothing to do
-        return;
-    }
-
-    std::vector<int> from_to_index(variable_map.size() + 1);
-    from_to_index[0] = 0;  // dummy variable does not get permuted
-
-    // calculate the mapping
-    for (std::map<planning_logic::tagged_variable, int>::iterator iter = variable_map.begin();
-         iter != variable_map.end(); ++iter) {
-        planning_logic::tagged_variable tagged_var = iter->first;
-        planning_logic::variable_tag tag = std::get<0>(tagged_var);
-        int t = std::get<1>(tagged_var);
-        int t_to;
-
-        // also allow negative t_diffs
-        if (tag == planning_logic::variable_plan_var) {
-            int modulus = num_timesteps + 1;
-            t_to = (modulus + t + t_diff) % modulus;
-        }
-        if (tag == planning_logic::variable_plan_op) {
-            int modulus = num_timesteps;
-            t_to = (modulus + t + t_diff) % modulus;
-        }
-
-        planning_logic::tagged_variable tagged_var_to = tagged_var;
-        std::get<1>(tagged_var_to) = t_to;
-        from_to_index[variable_map[tagged_var]] = variable_map[tagged_var_to];
-    }
-
-    // for (int i = 0; i < from_to_index.size(); i++) {
-    //     std::cout << from_to_index[i] << " ";
-    // }
-    // std::cout << std::endl;
-
-    permute_variables(from_to_index);
-}
 
 std::map<int, int> bdd_container::get_variable_order_for_single_step(
     std::map<planning_logic::tagged_variable, int> &variable_map) {

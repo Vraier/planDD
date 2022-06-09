@@ -36,25 +36,12 @@ void construct_dd_clause_linear(dd_buildable &dd, std::vector<conjoin_order::tag
 }
 
 void construct_bdd_by_layer(bdd_container &bdd, formula &cnf, option_values &options) {
-
     // build the bdd for a single timestep
     LOG_MESSAGE(log_level::info) << "Start building single step BDD";
     std::vector<conjoin_order::tagged_logic_primitiv> single_step_primitives =
         conjoin_order::order_clauses_for_single_timestep(cnf, options);
     construct_dd_clause_linear(bdd, single_step_primitives, 1);
     bdd.reduce_heap();
-
-    // extend the order to all timesteps in the main bdd
-    //LOG_MESSAGE(log_level::info) << "Calculating and extending new variable order";
-    //std::map<int, int> single_step_var_order = bdd.get_variable_order_for_single_step(cnf.m_variable_map);
-    //std::vector<int> order_for_all_timesteps =
-    //    bdd.extend_variable_order_to_all_steps(cnf.m_variable_map, single_step_var_order);
-
-    // std::vector<int> single_step_order = single_step_bdd.get_variable_order();
-    // for (int i = 0; i < order_for_all_timesteps.size(); i++) {
-    //     std::cout << "index: " << i << " old layer: " << single_step_order[i]
-    //               << " new layer: " << order_for_all_timesteps[i] << std::endl;
-    // }
 
     // apply the extended variable map to the main bdd
     // single_step_bdd.set_variable_order(order_for_all_timesteps);
@@ -70,10 +57,9 @@ void construct_bdd_by_layer(bdd_container &bdd, formula &cnf, option_values &opt
     // copying the bdd from the single step one to the main bdd
     std::vector<int> permutation = cnf.calculate_permutation_by_timesteps(1);
     for (int t = 0; t < options.timesteps; t++) {
-        LOG_MESSAGE(log_level::info) << "Conjoining single step bdd for timestep " << t << " "
-                                     << bdd.get_short_statistics(0);
+        LOG_MESSAGE(log_level::info) << "Adding timestep for t=" << t << " " << bdd.get_short_statistics(0);
         bdd.conjoin_two_bdds(0, 1, 0);
-        bdd.permute_variables(permutation,1,1);
+        bdd.permute_variables(permutation, 1, 1);
     }
 
     LOG_MESSAGE(log_level::info) << "Finished conjoining all timesteps";
