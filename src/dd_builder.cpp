@@ -36,33 +36,88 @@ void construct_dd_clause_linear(dd_buildable &dd, std::vector<conjoin_order::tag
 }
 
 void construct_bdd_by_layer(bdd_container &bdd, formula &cnf, option_values &options) {
+
+    std::string build_order = options.build_order;
+    if(!conjoin_order::is_valid_layer_order_string(build_order)){
+        LOG_MESSAGE(log_level::error) << "Build order string is not compatible wit layer building";
+        return;
+    }
+
+    // split the order into parts (in a really complicated manner)
+    std::stringstream ss(build_order);
+    std::string ini_seed, layer_seed, goal_seed;
+    std::getline(ss, ini_seed, ':');
+    std::getline(ss, layer_seed, ':');
+    std::getline(ss, goal_seed, ':');
+
+    // indizes of the different bdds
     const int main_bdd_idx = 0;
-    const int single_step_bdd_idx = 1;
+    std::vector<int> layer_bdd_idxs(options.timesteps);
+    // permute variables by one timestep
+    std::vector<int> permutation = cnf.calculate_permutation_by_timesteps(1);
 
-    // build the bdd for a single timestep
-    LOG_MESSAGE(log_level::info) << "Start building single step BDD";
-    std::vector<conjoin_order::tagged_logic_primitiv> single_step_primitives =
-        conjoin_order::order_clauses_for_layer(cnf, 0);
-    construct_dd_clause_linear(bdd, single_step_primitives, single_step_bdd_idx);
-    bdd.reduce_heap();
+    // build the initial layer bdds
+    LOG_MESSAGE(log_level::info) << "Start building layer BDDs";
+    // constructs the first layer
+    const int first_layer = 0;
+    layer_bdd_idxs[first_layer] = 2;
+    std::vector<conjoin_order::tagged_logic_primitiv> layer_primitives =
+    conjoin_order::order_clauses_for_layer(cnf, first_layer, layer_seed);
+    construct_dd_clause_linear(bdd, layer_primitives, layer_bdd_idxs[first_layer]);
 
+    // construct the layer bdds only when needed
+    if(options.layer_on_the_fly){
+        for(int i = 1; i < options.timesteps; i++){
+            layer_bdd_idxs[i] = 2; // only need one bdd slot
+        }
+        // no bdds need to be constructed
+        bdd.reduce_heap();
+    } 
+    // construct all layer bdds at the beginning
+    else {
+        for(int i = 1; i < options.timesteps; i++){
+            layer_bdd_idxs[i] = i+2;
+            // construct new bdd form sccratch or by permutating the variables of the predecessor
+            if(options.use_layer_permutation){
+                bdd.permute_variables(permutation, layer_bdd_idxs[i-1], layer_bdd_idxs[i]);
+            }
+            else {
+                std::vector<conjoin_order::tagged_logic_primitiv> layer_primitives =
+                conjoin_order::order_clauses_for_layer(cnf, i, layer_seed);
+                construct_dd_clause_linear(bdd, layer_primitives, layer_bdd_idxs[i]);
+            }
+        }
+
+        bdd.reduce_heap();
+    }
+
+    // TODO think about variable ordering
     // apply the extended variable map to the main bdd
     // single_step_bdd.set_variable_order(order_for_all_timesteps);
     // main_bdd.set_variable_order(order_for_all_timesteps);
 
-    // build the bdd for no timestep
-    LOG_MESSAGE(log_level::info) << "Start building no step BDD";
-    std::vector<conjoin_order::tagged_logic_primitiv> no_step_primitives =
-        conjoin_order::order_clauses_for_foundation(cnf);
-    construct_dd_clause_linear(bdd, no_step_primitives, main_bdd_idx);
+    // build the bdd for the foundation bdd
+    LOG_MESSAGE(log_level::info) << "Start building foundation BDD";
+    std::vector<conjoin_order::tagged_logic_primitiv> foundation_primitives =
+        conjoin_order::order_clauses_for_foundation(cnf, ini_seed);
+    construct_dd_clause_linear(bdd, foundation_primitives, main_bdd_idx);
 
     // build the main bdd layer by layer
-    // copying the bdd from the single step one to the main bdd
-    std::vector<int> permutation = cnf.calculate_permutation_by_timesteps(1);
-    for (int t = 0; t < options.timesteps; t++) {
+    LOG_MESSAGE(log_level::info) << "Adding timestep for t=" << first_layer << " " << bdd.get_short_statistics(main_bdd_idx);
+    bdd.conjoin_two_bdds(main_bdd_idx, layer_bdd_idxs[first_layer], main_bdd_idx);
+    for (int t = 1; t < options.timesteps; t++) {
         LOG_MESSAGE(log_level::info) << "Adding timestep for t=" << t << " " << bdd.get_short_statistics(main_bdd_idx);
-        bdd.conjoin_two_bdds(main_bdd_idx, single_step_bdd_idx, main_bdd_idx);
-        bdd.permute_variables(permutation, single_step_bdd_idx, single_step_bdd_idx);
+        if(options.layer_on_the_fly){
+            // construct new needed bdd
+            if(options.use_layer_permutation){
+                bdd.permute_variables(permutation, layer_bdd_idxs[t-1], layer_bdd_idxs[t]);
+            } else {
+                std::vector<conjoin_order::tagged_logic_primitiv> layer_primitives =
+                conjoin_order::order_clauses_for_layer(cnf, t, layer_seed);
+                construct_dd_clause_linear(bdd, layer_primitives, layer_bdd_idxs[t]);
+            }
+        }
+        bdd.conjoin_two_bdds(main_bdd_idx, layer_bdd_idxs[t], main_bdd_idx);
     }
 
     LOG_MESSAGE(log_level::info) << "Finished conjoining all timesteps";
@@ -76,15 +131,22 @@ void construct_bdd_by_layer_bidirectional(bdd_container &bdd, formula &cnf, opti
     const int init_step_bdd_idx = 2;
     const int goal_step_bdd_idx = 3;
 
+    // split the order into parts (in a really complicated manner)
+    std::stringstream ss(options.build_order);
+    std::string ini_seed, layer_seed, goal_seed;
+    std::getline(ss, ini_seed, ':');
+    std::getline(ss, layer_seed, ':');
+    std::getline(ss, goal_seed, ':');
+
     // build the bdd for a single timestep
     LOG_MESSAGE(log_level::info) << "Start building init step BDD";
     std::vector<conjoin_order::tagged_logic_primitiv> init_step_primitives =
-        conjoin_order::order_clauses_for_layer(cnf, 0);
+        conjoin_order::order_clauses_for_layer(cnf, 0, layer_seed);
     construct_dd_clause_linear(bdd, init_step_primitives, init_step_bdd_idx);
     bdd.reduce_heap();
     LOG_MESSAGE(log_level::info) << "Start building goal step BDD";
     std::vector<conjoin_order::tagged_logic_primitiv> goal_step_primitives =
-        conjoin_order::order_clauses_for_layer(cnf, options.timesteps-1);
+        conjoin_order::order_clauses_for_layer(cnf, options.timesteps-1, layer_seed);
     construct_dd_clause_linear(bdd, goal_step_primitives, goal_step_bdd_idx);
     bdd.reduce_heap();
 
@@ -95,11 +157,11 @@ void construct_bdd_by_layer_bidirectional(bdd_container &bdd, formula &cnf, opti
     // build the bdd for no timestep
     LOG_MESSAGE(log_level::info) << "Start building init foundation BDD";
     std::vector<conjoin_order::tagged_logic_primitiv> init_foundation_primitives =
-        conjoin_order::order_clauses_for_foundation(cnf);
+        conjoin_order::order_clauses_for_foundation(cnf, ini_seed);
     construct_dd_clause_linear(bdd, init_foundation_primitives, main_begin_idx);
     LOG_MESSAGE(log_level::info) << "Start building goal foundation BDD";
     std::vector<conjoin_order::tagged_logic_primitiv> goal_foundation_primitives =
-        conjoin_order::order_clauses_for_foundation(cnf);
+        conjoin_order::order_clauses_for_foundation(cnf, goal_seed);
     construct_dd_clause_linear(bdd, goal_foundation_primitives, main_end_idx);
 
     int t_begin = 0;

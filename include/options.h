@@ -9,11 +9,14 @@ struct option_values {
     std::string sas_file, ass_file, cnf_file;
     // Program modes
     bool encode_cnf, cnf_to_bdd, build_bdd, build_bdd_by_layer, build_sdd, single_minisat, count_minisat, hack_debug;
+    
+    int timesteps;
     // DD building parameters
     std::string build_order, variable_order;
     bool reverse_order;
     bool include_mutex, use_ladder_encoding, exact_one_constraint, goal_variables_first, initial_state_variables_first;
-    int timesteps;
+    // DD layer building
+    bool layer_on_the_fly, use_layer_permutation;
 };
 
 /**

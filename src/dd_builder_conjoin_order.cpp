@@ -2,6 +2,8 @@
 
 #include "logging.h"
 
+#include <algorithm>
+
 using namespace planning_logic;
 
 namespace conjoin_order {
@@ -16,7 +18,7 @@ std::map<char, eo_constraint_tag> char_constraint_tag_map = {
     {'u', eo_none}, {'m', eo_none}, {'p', eo_none}, {'e', eo_none}, {'c', eo_none},
 };
 
-bool is_valid_conjoin_order_string(std::string build_order) {
+bool is_valid_conjoin_order_string(std::string &build_order) {
     // check if string is permutation
     std::string standart_permutation = "grtyumix:pec";
     if (!std::is_permutation(build_order.begin(), build_order.end(), standart_permutation.begin(),
@@ -39,6 +41,26 @@ bool is_valid_conjoin_order_string(std::string build_order) {
         return false;
     }
 
+    return true;
+}
+
+int count_char(std::string str, char c){
+    int count = 0;
+    for(char a: str){
+        if (a == c) {
+            count++;
+        }
+    }
+    return count;
+}
+
+bool is_valid_layer_order_string(std::string &build_order) {
+    // check if string is permutation
+    int num_colons = count_char(build_order, ':');
+    if(num_colons != 2){
+        LOG_MESSAGE(log_level::error) << "Build contains wrong number of colons (must be 2)";
+        return false;
+    }
     return true;
 }
 
@@ -119,22 +141,18 @@ std::vector<tagged_logic_primitiv> order_all_clauses(formula &cnf, option_values
     return total_clauses;
 }
 
-std::vector<tagged_logic_primitiv> order_clauses_for_layer(planning_logic::formula &cnf, int layer) {
-    // TODO maybe do another check? only precon, effect and frame matters here
-    // TODO maybe do an own oder string for layer by layer building
-    // TODO: do a full check on all the possible orders
+std::vector<tagged_logic_primitiv> order_clauses_for_layer(planning_logic::formula &cnf, int layer, std::string &order_string) {
     LOG_MESSAGE(log_level::info) << "Ordering clauses for single layer " << layer;
 
     // contains the result at the end
     std::vector<tagged_logic_primitiv> result_clauses;
-
-    const std::string clauses_to_add = "rtyumpec";
     std::vector<tagged_logic_primitiv> temp_clauses;
 
-    for (char c : clauses_to_add) {
+    for (char c : order_string) {
         temp_clauses = collect_primitives_for_single_timestep(cnf, c, layer);
         // if we add at least or at most one var clauses, also do it for the second timestep
         if (c == 'r' || c == 't' || c == 'y' || c == 'u'|| c == 'm') {
+            // does NOT conatin pec
             std::vector<tagged_logic_primitiv> second_layer = collect_primitives_for_single_timestep(cnf, c, layer + 1);
             temp_clauses.insert(temp_clauses.end(), second_layer.begin(), second_layer.end());
         }
@@ -146,16 +164,14 @@ std::vector<tagged_logic_primitiv> order_clauses_for_layer(planning_logic::formu
     return result_clauses;
 }
 
-std::vector<tagged_logic_primitiv> order_clauses_for_foundation(planning_logic::formula &cnf) {
+std::vector<tagged_logic_primitiv> order_clauses_for_foundation(planning_logic::formula &cnf, std::string &order_string) {
     LOG_MESSAGE(log_level::info) << "Ordering clauses for foundation";
 
     // contains the result at the end
     std::vector<tagged_logic_primitiv> result_clauses;
-
-    const std::string clauses_to_add = "ig";
     std::vector<tagged_logic_primitiv> temp_clauses;
 
-    for (char c : clauses_to_add) {
+    for (char c : order_string) {
         temp_clauses = collect_primitives_for_all_timesteps(cnf, c);
         result_clauses.insert(result_clauses.end(), temp_clauses.begin(), temp_clauses.end());
     }
