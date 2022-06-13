@@ -16,7 +16,7 @@ struct option_values {
     bool reverse_order;
     bool include_mutex, use_ladder_encoding, exact_one_constraint, goal_variables_first, initial_state_variables_first;
     // DD layer building
-    bool layer_on_the_fly, use_layer_permutation;
+    bool bidirectional, share_foundations, layer_on_the_fly, use_layer_permutation;
 };
 
 /**

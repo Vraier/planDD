@@ -55,6 +55,12 @@ void option_parser::parse_command_line(int argc, char *argv[]) {
          po::bool_switch(&m_values.initial_state_variables_first)->default_value(false),
          "If this flag is set, variables in initial state clauses will be moved to the front of the variable order")  //
         // layer building
+        ("bidirectional",
+         po::bool_switch(&m_values.bidirectional)->default_value(false),
+         "If this flag is set, the the bdd layer construction will work in a bidriectional manner")  //
+         ("share_foundations",
+         po::bool_switch(&m_values.share_foundations)->default_value(false),
+         "If this flag is set during bidirectional lyer construction, both start nodes of the bidirectional search will be the same")  //
         ("layer_on_the_fly",
          po::bool_switch(&m_values.layer_on_the_fly)->default_value(false),
          "If this flag is set, the layer bdds will be constructed after the previous layer bdd was conjoined")  //
