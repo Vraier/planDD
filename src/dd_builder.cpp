@@ -7,7 +7,7 @@ using namespace planning_logic;
 namespace dd_builder {
 
 void construct_dd_clause_linear(dd_buildable &dd, std::vector<conjoin_order::tagged_logic_primitiv> &logic_primitives,
-                                int dd_index) {
+                                int dd_index, bool silent) {
     LOG_MESSAGE(log_level::info) << "Start constructing DD";
 
     // conjoin the clauses in the correct order
@@ -27,8 +27,10 @@ void construct_dd_clause_linear(dd_buildable &dd, std::vector<conjoin_order::tag
         int new_percent = (100 * (i + 1)) / logic_primitives.size();
         if (new_percent > percent) {
             percent = new_percent;
-            LOG_MESSAGE(log_level::info) << "Conjoined " << percent
-                                         << "% of all clauses. " + dd.get_short_statistics(dd_index);
+            if(!silent){
+                LOG_MESSAGE(log_level::info) << "Conjoined " << percent
+                                             << "% of all clauses. " + dd.get_short_statistics(dd_index);
+            }
         }
     }
 
@@ -63,7 +65,7 @@ void construct_bdd_by_layer(bdd_container &bdd, formula &cnf, option_values &opt
     layer_bdd_idxs[first_layer] = 2;
     std::vector<conjoin_order::tagged_logic_primitiv> layer_primitives =
     conjoin_order::order_clauses_for_layer(cnf, first_layer, layer_seed);
-    construct_dd_clause_linear(bdd, layer_primitives, layer_bdd_idxs[first_layer]);
+    construct_dd_clause_linear(bdd, layer_primitives, layer_bdd_idxs[first_layer], true);
 
     // construct the layer bdds only when needed
     if(options.layer_on_the_fly){
@@ -84,7 +86,7 @@ void construct_bdd_by_layer(bdd_container &bdd, formula &cnf, option_values &opt
             else {
                 std::vector<conjoin_order::tagged_logic_primitiv> layer_primitives =
                 conjoin_order::order_clauses_for_layer(cnf, i, layer_seed);
-                construct_dd_clause_linear(bdd, layer_primitives, layer_bdd_idxs[i]);
+                construct_dd_clause_linear(bdd, layer_primitives, layer_bdd_idxs[i], true);
             }
         }
 
@@ -100,7 +102,7 @@ void construct_bdd_by_layer(bdd_container &bdd, formula &cnf, option_values &opt
     LOG_MESSAGE(log_level::info) << "Start building foundation BDD";
     std::vector<conjoin_order::tagged_logic_primitiv> foundation_primitives =
         conjoin_order::order_clauses_for_foundation(cnf, ini_seed);
-    construct_dd_clause_linear(bdd, foundation_primitives, main_bdd_idx);
+    construct_dd_clause_linear(bdd, foundation_primitives, main_bdd_idx, true);
 
     // build the main bdd layer by layer
     LOG_MESSAGE(log_level::info) << "Adding timestep for t=" << first_layer << " " << bdd.get_short_statistics(main_bdd_idx);
@@ -114,7 +116,7 @@ void construct_bdd_by_layer(bdd_container &bdd, formula &cnf, option_values &opt
             } else {
                 std::vector<conjoin_order::tagged_logic_primitiv> layer_primitives =
                 conjoin_order::order_clauses_for_layer(cnf, t, layer_seed);
-                construct_dd_clause_linear(bdd, layer_primitives, layer_bdd_idxs[t]);
+                construct_dd_clause_linear(bdd, layer_primitives, layer_bdd_idxs[t], true);
             }
         }
         bdd.conjoin_two_bdds(main_bdd_idx, layer_bdd_idxs[t], main_bdd_idx);

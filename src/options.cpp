@@ -53,7 +53,14 @@ void option_parser::parse_command_line(int argc, char *argv[]) {
          "If this flag is set, variables in goal clauses will be moved to the front of the variable order")  //
         ("initial_state_variables_first",
          po::bool_switch(&m_values.initial_state_variables_first)->default_value(false),
-         "If this flag is set, variables in initial state clauses will be moved to the front of the variable order");  //
+         "If this flag is set, variables in initial state clauses will be moved to the front of the variable order")  //
+        // layer building
+        ("layer_on_the_fly",
+         po::bool_switch(&m_values.layer_on_the_fly)->default_value(false),
+         "If this flag is set, the layer bdds will be constructed after the previous layer bdd was conjoined")  //
+         ("use_layer_permutation",
+         po::bool_switch(&m_values.use_layer_permutation)->default_value(false),
+         "If this flag is set, the new layer bdd will be constructed using a variable permutation");  //
 
     po::store(po::parse_command_line(argc, argv, m_option_desc), m_argument_map);
     po::notify(m_argument_map);

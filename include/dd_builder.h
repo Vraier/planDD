@@ -10,7 +10,7 @@ namespace dd_builder {
 // orders the clauses acording to the given order and conjoins one clause per time
 // does no variable ordering
 void construct_dd_clause_linear(dd_buildable &dd, std::vector<conjoin_order::tagged_logic_primitiv> &logic_primitives,
-                                int dd_index = 0);
+                                int dd_index = 0, bool silent = false);
 
 // builds a bdd for a single step and then copies it to the opter container for each timestep
 void construct_bdd_by_layer(bdd_container &bdd, planning_logic::formula &cnf, option_values &options);
