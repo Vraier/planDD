@@ -32,6 +32,8 @@ class bdd_container : public virtual dd_buildable {
     bdd_container(int num_bdds, int num_variables);
     virtual ~bdd_container();
 
+    // frees all the nodes under this bdd
+    void clear_bdd(int bdd_index = 0);
     // adds a clause to the root node
     void conjoin_clause(std::vector<int> &clause, int bdd_index = 0);
     // adds an exact one constraint to the root node

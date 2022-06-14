@@ -114,6 +114,7 @@ void construct_bdd_by_layer(bdd_container &bdd, formula &cnf, option_values &opt
             if(options.use_layer_permutation){
                 bdd.permute_variables(permutation, layer_bdd_idxs[t-1], layer_bdd_idxs[t]);
             } else {
+                bdd.clear_bdd(layer_bdd_idxs[t]);
                 std::vector<conjoin_order::tagged_logic_primitiv> layer_primitives =
                 conjoin_order::order_clauses_for_layer(cnf, t, layer_seed);
                 construct_dd_clause_linear(bdd, layer_primitives, layer_bdd_idxs[t], true);
