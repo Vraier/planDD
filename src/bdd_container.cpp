@@ -113,7 +113,7 @@ void bdd_container::write_bdd_to_dot_file(std::string filename) {
 }
 
 void bdd_container::clear_bdd(int bdd_index){
-    Cudd_RecursivDeref(m_bdd_manager, m_root_nodes[bdd_index]);
+    Cudd_RecursiveDeref(m_bdd_manager, m_root_nodes[bdd_index]);
     m_root_nodes[bdd_index] = Cudd_bddIthVar(m_bdd_manager, 0);
     Cudd_Ref(m_root_nodes[bdd_index]);
 }
