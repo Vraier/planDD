@@ -16,11 +16,28 @@ standart_downward_argument_map = {
 def generate_layer_building_unidirectional_argument_maps():
     all_dics = []
     all_conjoin_orders = generate_all_layer_orders_unidirectional()
+    flags = generate_all_layer_unidirectional_flags()
     for order in all_conjoin_orders:
-        new_p_dic = dict(standart_planDD_argument_map)
-        new_p_dic["$addition_flags"] += (" --build_order " + order)    
-        new_p_dic["$mode"] = "build_bdd_by_layer"
-        all_dics.append(new_p_dic)    
+        for flg in flags:
+            new_p_dic = dict(standart_planDD_argument_map)
+            new_p_dic["$addition_flags"] += (" --build_order " + order) + " " + flg   
+            new_p_dic["$mode"] = "build_bdd_by_layer"
+            all_dics.append(new_p_dic)    
+    return all_dics
+
+# TODO use best flags of unidirectional here
+def generate_layer_building_bidirectional_argument_maps():
+    all_dics = []
+    all_conjoin_orders = generate_all_layer_orders_bidirectional()
+    flags = generate_all_layer_bidirectional_flags()
+    for order in all_conjoin_orders:
+        for flg in flags:
+            new_p_dic = dict(standart_planDD_argument_map)
+            new_p_dic["$addition_flags"] += (" --build_order " + order)
+            new_p_dic["$addition_flags"] += " --bidirectional"
+            new_p_dic["$addition_flags"] += " " + flg   
+            new_p_dic["$mode"] = "build_bdd_by_layer"
+            all_dics.append(new_p_dic)    
     return all_dics
 
 def generate_all_interleaved_argument_maps():
@@ -73,6 +90,18 @@ def generate_all_variable_order_maps_with_ladder_encoding():
 ########################################################################################
 # Helper methods that generate sets of arguments
 
+def generate_all_layer_bidirectional_flags():
+    result = ["", "--share_foundations"]
+    return result
+
+def generate_all_layer_unidirectional_flags():
+    result = []
+    possible_flags = ["--use_layer_permutation", "--layer_on_the_fly"]
+    powerset = list(chain.from_iterable(combinations(possible_flags, r) for r in range(len(possible_flags)+1)))
+    for subset in powerset:
+        result.append(" ".join(list(subset)))
+    return result
+    
 def generate_all_layer_orders_unidirectional():
     ini_foundations = ["ig", "igrtyum", "rtyumig"]
     layers = ["rtyum" + "".join(p) for p in itertools.permutations(["p", "e", "c"])]
@@ -173,5 +202,4 @@ def generate_variable_orders_with_herlper_variables():
     return all_orders
 
 
-print(len(generate_all_layer_orders_bidirectional()))
-print(generate_all_layer_orders_bidirectional())
+print(len(generate_layer_building_unidirectional_argument_maps()))
