@@ -13,6 +13,16 @@ standart_downward_argument_map = {
     "$problem_path" : "prob.pddl"
 }
 
+def generate_layer_building_unidirectional_argument_maps():
+    all_dics = []
+    all_conjoin_orders = generate_all_layer_orders_unidirectional()
+    for order in all_conjoin_orders:
+        new_p_dic = dict(standart_planDD_argument_map)
+        new_p_dic["$addition_flags"] += (" --build_order " + order)    
+        new_p_dic["$mode"] = "build_bdd_by_layer"
+        all_dics.append(new_p_dic)    
+    return all_dics
+
 def generate_all_interleaved_argument_maps():
     all_dics = []
     all_interleaved_orders = generate_all_interleaved_clause_orders()
@@ -60,7 +70,28 @@ def generate_all_variable_order_maps_with_ladder_encoding():
     return all_dics
 
 
+########################################################################################
 # Helper methods that generate sets of arguments
+
+def generate_all_layer_orders_unidirectional():
+    ini_foundations = ["ig", "igrtyum", "rtyumig"]
+    layers = ["rtyum" + "".join(p) for p in itertools.permutations(["p", "e", "c"])]
+    result = []
+    for ini in ini_foundations:
+        for layer in layers:
+            result.append(ini + ":" + layer + ":")
+    return result
+
+def generate_all_layer_orders_bidirectional():
+    ini_foundations = ["i", "irtyum", "rtyumi", "ig"]
+    goal_foundations = ["g", "grtyum", "rtyumg", "ig"]
+    layers = ["rtyum" + "".join(p) for p in itertools.permutations(["p", "e", "c"])]
+    result = []
+    for ini in ini_foundations:
+        for goal in goal_foundations:
+            for layer in layers:
+                result.append(ini + ":" + layer + ":" + goal)
+    return result
 
 # Generates only disjoint orders
 def generate_all_disjoint_clause_orders():
@@ -141,3 +172,6 @@ def generate_variable_orders_with_herlper_variables():
     
     return all_orders
 
+
+print(len(generate_all_layer_orders_bidirectional()))
+print(generate_all_layer_orders_bidirectional())
