@@ -126,7 +126,7 @@ def layer_unidirectional_building_test():
         planDD_argument_map = dict(arg_dicts[i])
         downward_argument_map = dict(arguments.standart_downward_argument_map)
         
-        planDD_argument_map["$timeout"] = "60s"
+        planDD_argument_map["$timeout"] = "120s"
         args.append((suite_name, planDD_argument_map, downward_argument_map))
 
     comms = commandfile.generate_command_calls(probs, args)
