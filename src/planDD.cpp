@@ -138,16 +138,8 @@ int planDD::build_bdd_by_layer(option_values opt_values) {
     if(opt_values.bidirectional) {
         dd_builder::construct_bdd_by_layer_bidirectional(main_builder, clauses, opt_values);
     } else {
-        dd_builder::construct_bdd_by_layer(main_builder, clauses, opt_values);
+        dd_builder::construct_bdd_by_layer_unidirectional(main_builder, clauses, opt_values);
     }
-    main_builder.reduce_heap();
-
-    //std::vector<std::vector<bool>> assignments = main_builder.list_minterms(2);
-    //LOG_MESSAGE(log_level::info) << "Start printting " << assignments.size() << " assignments";
-
-    //for(int i = 0; i < assignments.size(); i++){
-    //    encoder.decode_cnf_solution(assignments[i]);
-    //}
     
     main_builder.print_bdd_info();
 

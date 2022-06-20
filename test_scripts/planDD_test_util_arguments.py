@@ -20,7 +20,8 @@ def generate_layer_building_unidirectional_argument_maps():
     for order in all_conjoin_orders:
         for flg in flags:
             new_p_dic = dict(standart_planDD_argument_map)
-            new_p_dic["$addition_flags"] += (" --build_order " + order) + " " + flg   
+            new_p_dic["$timeout"] = "120s"
+            new_p_dic["$addition_flags"] += (" --build_order " + order) + " --exact_one_constraint " + flg   
             new_p_dic["$mode"] = "build_bdd_by_layer"
             all_dics.append(new_p_dic)    
     return all_dics
@@ -33,8 +34,9 @@ def generate_layer_building_bidirectional_argument_maps():
     for order in all_conjoin_orders:
         for flg in flags:
             new_p_dic = dict(standart_planDD_argument_map)
+            new_p_dic["$timeout"] = "120s"
             new_p_dic["$addition_flags"] += (" --build_order " + order)
-            new_p_dic["$addition_flags"] += " --bidirectional"
+            new_p_dic["$addition_flags"] += " --exact_one_constraint --bidirectional "
             new_p_dic["$addition_flags"] += " " + flg   
             new_p_dic["$mode"] = "build_bdd_by_layer"
             all_dics.append(new_p_dic)    
@@ -202,4 +204,4 @@ def generate_variable_orders_with_herlper_variables():
     return all_orders
 
 
-print(len(generate_layer_building_unidirectional_argument_maps()))
+#print(len(generate_layer_building_unidirectional_argument_maps()))
