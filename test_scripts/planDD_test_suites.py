@@ -134,7 +134,7 @@ def layer_unidirectional_building_test():
     print("Num commands:",len(comms))
     return comms
 
-# ...
+# 137
 def layer_bidirectional_building_test():
     probs = problems.list_all_easy_opt_strips_problems()
     arg_dicts = arguments.generate_layer_building_bidirectional_argument_maps()

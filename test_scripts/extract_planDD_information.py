@@ -12,6 +12,7 @@ def compile_information_about_planDD_into_dic(domain_desc, file_path):
 
     # general information
     info["domain_desc"] = domain_desc
+    info["file_path"] = file_path
     info["config"] = extract_config(file_path)
     insert_config_information_into_info_dict(info)
     info["cudd_config"] = extract_CUDD_config(file_path)

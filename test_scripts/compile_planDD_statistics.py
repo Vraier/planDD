@@ -51,6 +51,7 @@ def get_small_information_from_dicts(all_dics, key_arguments):
     for a in key_arguments:
         config_discription += a[7:] + ": " + all_dics[0][a] + " "
 
+    example_filepath = all_dics[0]["file_path"]
     solved_dics = [d for d in all_dics if not d["error_while_encoding"] and d["has_finished_cnf"] and d["has_finished"]]
 
     average_peak_of_nodes = statistics.mean([get_peak_number_of_nodes_from_info(i) for i in solved_dics])
@@ -60,14 +61,21 @@ def get_small_information_from_dicts(all_dics, key_arguments):
 
     info_string = "{} #Solved: {}, Avg. finish time {:0.2f}s, Avg. peak nodes {:0.0f}, Avg. live nodes {:0.0f}, Avg. BDD size {:0.0f}".format(config_discription, len(solved_dics), average_finish_time, average_peak_of_nodes, average_peak_of_live_nodes, average_bdd_nodes) 
 
-    return (len(solved_dics), info_string)
+    return (len(solved_dics), example_filepath, info_string)
 
 def print_information_for_multiple_dicts(suites, config_differences):
     compiled_infos = []
     for s in suites:
         compiled_infos.append(get_small_information_from_dicts(s, config_differences))
-    for (num_solved, info_text) in sorted(compiled_infos):
+    
+    sorted_infos = sorted(compiled_infos)
+    for (num_solved, example_filepath, info_text) in sorted_infos:
         print(info_text)
+
+    num_best_candidates = min(10, len(sorted_infos))
+    print("Printing", num_best_candidates, "best candidates")
+    for i in range(num_best_candidates):
+        print(str(i+1), sorted_infos[::-1][i][1])
 
 
 
@@ -137,13 +145,14 @@ layer_buildinng_differences = [
     ]
 
 #write_whole_set_of_tests_to_file("../../test_output/variable_order_with_ladder")
-print_information_for_multiple_dicts(read_whole_set_of_tests_from_file("../../test_output/variable_order_with_ladder"), variable_order_differences)
-print("###############################")
+#print_information_for_multiple_dicts(read_whole_set_of_tests_from_file("../../test_output/variable_order_with_ladder"), variable_order_differences)
+#print("###############################")
 
 #write_whole_set_of_tests_to_file("../../test_output/variable_order_no_ladder")
-print_information_for_multiple_dicts(read_whole_set_of_tests_from_file("../../test_output/variable_order_no_ladder"), variable_order_differences)
-print("###############################")
+#print_information_for_multiple_dicts(read_whole_set_of_tests_from_file("../../test_output/variable_order_no_ladder"), variable_order_differences)
+#print("###############################")
 
 
 #write_whole_set_of_tests_to_file("../../test_output/layer_unidirectional")
-print_information_for_multiple_dicts(read_whole_set_of_tests_from_file("../../test_output/layer_unidirectional"), layer_buildinng_differences)
+dics_unidirectional = read_whole_set_of_tests_from_file("../../test_output/layer_unidirectional")
+print_information_for_multiple_dicts(dics_unidirectional, layer_buildinng_differences)
