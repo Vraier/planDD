@@ -62,26 +62,12 @@ def get_small_information_from_dicts(all_dics, key_arguments):
 
     return (len(solved_dics), info_string)
 
-def print_information_for_multiple_dicts(suites):
-
+def print_information_for_multiple_dicts(suites, config_differences):
     compiled_infos = []
-    config_differences = [
-        #"config_build_order", 
-        "config_variable_order", 
-        #"config_include_mutex",
-        #"config_goal_variables_first", 
-        #"config_initial_state_variables_first", 
-        #"config_use_ladder_encoding",
-        #"config_use_layer_permutation",
-        #"config_layer_on_the_fly"
-    ]
-
     for s in suites:
         compiled_infos.append(get_small_information_from_dicts(s, config_differences))
-
     for (num_solved, info_text) in sorted(compiled_infos):
         print(info_text)
-        pass
 
 
 
@@ -135,14 +121,29 @@ def print_information_for_multiple_dicts(suites):
 #print_information_for_multiple_dicts(read_whole_set_of_tests_from_file("../../test_output/big_interleaved"))
 #print("###############################")
 
-#write_whole_set_of_tests_to_file("../../test_output/variable_order_no_ladder")
-print_information_for_multiple_dicts(read_whole_set_of_tests_from_file("../../test_output/variable_order_no_ladder"))
-print("###############################")
+variable_order_differences = [
+        "config_variable_order", 
+        "config_include_mutex",
+        "config_goal_variables_first", 
+        "config_initial_state_variables_first", 
+        "config_use_ladder_encoding",
+
+    ]
+
+layer_buildinng_differences = [
+        "config_build_order", 
+        "config_use_layer_permutation",
+        "config_layer_on_the_fly"
+    ]
 
 #write_whole_set_of_tests_to_file("../../test_output/variable_order_with_ladder")
-print_information_for_multiple_dicts(read_whole_set_of_tests_from_file("../../test_output/variable_order_with_ladder"))
+print_information_for_multiple_dicts(read_whole_set_of_tests_from_file("../../test_output/variable_order_with_ladder"), variable_order_differences)
+print("###############################")
+
+#write_whole_set_of_tests_to_file("../../test_output/variable_order_no_ladder")
+print_information_for_multiple_dicts(read_whole_set_of_tests_from_file("../../test_output/variable_order_no_ladder"), variable_order_differences)
 print("###############################")
 
 
 #write_whole_set_of_tests_to_file("../../test_output/layer_unidirectional")
-#print_information_for_multiple_dicts(read_whole_set_of_tests_from_file("../../test_output/layer_unidirectional"))
+print_information_for_multiple_dicts(read_whole_set_of_tests_from_file("../../test_output/layer_unidirectional"), layer_buildinng_differences)

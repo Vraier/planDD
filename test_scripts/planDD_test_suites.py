@@ -119,10 +119,28 @@ def best_24_5_big_test():
 def layer_unidirectional_building_test():
     probs = problems.list_all_easy_opt_strips_problems()
     arg_dicts = arguments.generate_layer_building_unidirectional_argument_maps()
-    print(arg_dicts)
     args = []
     for i in range(len(arg_dicts)):
         suite_name = "layer_unidirectional_" + str(i)
+        planDD_argument_map = dict(arg_dicts[i])
+        downward_argument_map = dict(arguments.standart_downward_argument_map)
+        
+        planDD_argument_map["$timeout"] = "120s"
+        args.append((suite_name, planDD_argument_map, downward_argument_map))
+
+    comms = commandfile.generate_command_calls(probs, args)
+    print("Num problems:",len(probs))
+    print("Num configs:",len(args))
+    print("Num commands:",len(comms))
+    return comms
+
+# ...
+def layer_bidirectional_building_test():
+    probs = problems.list_all_easy_opt_strips_problems()
+    arg_dicts = arguments.generate_layer_building_bidirectional_argument_maps()
+    args = []
+    for i in range(len(arg_dicts)):
+        suite_name = "layer_bidirectional_" + str(i)
         planDD_argument_map = dict(arg_dicts[i])
         downward_argument_map = dict(arguments.standart_downward_argument_map)
         
@@ -140,7 +158,7 @@ def layer_unidirectional_building_test():
 
 
 comms = []
-comms += layer_unidirectional_building_test()
+comms += layer_bidirectional_building_test()
 
 commandfile.generate_parallel_file_from_calls(comms)
 

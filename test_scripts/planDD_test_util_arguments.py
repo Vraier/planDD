@@ -26,7 +26,6 @@ def generate_layer_building_unidirectional_argument_maps():
             all_dics.append(new_p_dic)    
     return all_dics
 
-# TODO use best flags of unidirectional here
 def generate_layer_building_bidirectional_argument_maps():
     all_dics = []
     all_conjoin_orders = generate_all_layer_orders_bidirectional()
@@ -36,7 +35,7 @@ def generate_layer_building_bidirectional_argument_maps():
             new_p_dic = dict(standart_planDD_argument_map)
             new_p_dic["$timeout"] = "120s"
             new_p_dic["$addition_flags"] += (" --build_order " + order)
-            new_p_dic["$addition_flags"] += " --exact_one_constraint --bidirectional "
+            new_p_dic["$addition_flags"] += " --exact_one_constraint --bidirectional --layer_on_the_fly"
             new_p_dic["$addition_flags"] += " " + flg   
             new_p_dic["$mode"] = "build_bdd_by_layer"
             all_dics.append(new_p_dic)    
@@ -93,7 +92,7 @@ def generate_all_variable_order_maps_with_ladder_encoding():
 # Helper methods that generate sets of arguments
 
 def generate_all_layer_bidirectional_flags():
-    result = ["", "--share_foundations"]
+    result = ["", "--share_foundations", "--use_layer_permutation", "--use_layer_permutation --share_foundations"]
     return result
 
 def generate_all_layer_unidirectional_flags():
@@ -116,7 +115,7 @@ def generate_all_layer_orders_unidirectional():
 def generate_all_layer_orders_bidirectional():
     ini_foundations = ["i", "irtyum", "rtyumi", "ig"]
     goal_foundations = ["g", "grtyum", "rtyumg", "ig"]
-    layers = ["rtyum" + "".join(p) for p in itertools.permutations(["p", "e", "c"])]
+    layers = ["rtyumpec"]
     result = []
     for ini in ini_foundations:
         for goal in goal_foundations:
