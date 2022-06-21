@@ -33,8 +33,7 @@ void construct_dd_clause_linear(dd_buildable &dd, std::vector<conjoin_order::tag
             }
         }
     }
-
-    LOG_MESSAGE(log_level::info) << "Finished constructing final DD";
+    LOG_MESSAGE(log_level::info) << "Finished constructing DD";
 }
 
 void construct_bdd_by_layer_unidirectional(bdd_container &bdd, formula &cnf, option_values &options) {

@@ -135,17 +135,21 @@ def extract_has_finished_constructing_cnf(file_path):
 def extract_has_finished(file_path):
     with open(file_path, "r") as f:
         for line in f:
-            p = re.compile("\[.*\]\[info\] Finished constructing DD.*")
-            if p.match(line):
+            p1 = re.compile("\[(.*)\]\[info\] Finished constructing DD.*")
+            p2 = re.compile("\[(.*)\]\[info\] Finished constructing final DD.*")
+            p3 = re.compile("\[(.*)\]\[info\] Printing CUDD statistics\.\.\..*")
+            if p3.match(line):
                 return True
     return False
 
 def extract_finish_time(file_path):
     with open(file_path, "r") as f:
         for line in f:
-            p = re.compile("\[(.*)\]\[info\] Finished constructing DD.*")
-            if p.match(line):
-                time_string = p.search(line).group(1)
+            p1 = re.compile("\[(.*)\]\[info\] Finished constructing DD.*")
+            p2 = re.compile("\[(.*)\]\[info\] Finished constructing final DD.*")
+            p3 = re.compile("\[(.*)\]\[info\] Printing CUDD statistics\.\.\..*")
+            if p3.match(line):
+                time_string = p3.search(line).group(1)
                 return convert_time_string_to_float(time_string)
     return -1
 

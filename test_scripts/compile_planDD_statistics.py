@@ -62,16 +62,18 @@ def get_small_information_from_dicts(all_dics, key_arguments):
 
     return (len(solved_dics), info_string)
 
-def print_ifnormation_for_multiple_dicts(suites):
+def print_information_for_multiple_dicts(suites):
 
     compiled_infos = []
     config_differences = [
         #"config_build_order", 
         "config_variable_order", 
-        "config_include_mutex",
-        "config_goal_variables_first", 
-        "config_initial_state_variables_first", 
-        #"config_use_ladder_encoding"
+        #"config_include_mutex",
+        #"config_goal_variables_first", 
+        #"config_initial_state_variables_first", 
+        #"config_use_ladder_encoding",
+        #"config_use_layer_permutation",
+        #"config_layer_on_the_fly"
     ]
 
     for s in suites:
@@ -117,15 +119,30 @@ def print_ifnormation_for_multiple_dicts(suites):
 #write_all_information_to_file("../../test_output/best_17_5_big_test", "../../test_output/best_17_5_big_test.pkl")
 #write_all_information_to_file("../../test_output/best_24_5_big_test", "../../test_output/best_24_5_big_test.pkl")
 
-print_big_information_from_dicts(read_all_information_from_file("../../test_output/best_17_5_big_test.pkl"))
-print_big_information_from_dicts(read_all_information_from_file("../../test_output/best_24_5_big_test.pkl"))
-
-domain_to_dic_a = {}
-domain_to_dic_b = {}
-for dic in read_all_information_from_file("../../test_output/best_17_5_big_test.pkl"):
-    domain_to_dic_a[dic["domain_desc"]] = dic
-for dic in read_all_information_from_file("../../test_output/best_24_5_big_test.pkl"):
-    domain_to_dic_b[dic["domain_desc"]] = dic
+#print_big_information_from_dicts(read_all_information_from_file("../../test_output/best_17_5_big_test.pkl"))
+#print_big_information_from_dicts(read_all_information_from_file("../../test_output/best_24_5_big_test.pkl"))
+#
+#domain_to_dic_a = {}
+#domain_to_dic_b = {}
+#for dic in read_all_information_from_file("../../test_output/best_17_5_big_test.pkl"):
+#    domain_to_dic_a[dic["domain_desc"]] = dic
+#for dic in read_all_information_from_file("../../test_output/best_24_5_big_test.pkl"):
+#    domain_to_dic_b[dic["domain_desc"]] = dic
 
 #plot_data.plot_progress_during_execution(domain_to_dic_a["blocksprobBLOCKS52pddl"])
 #plot_data.plot_progress_during_execution(domain_to_dic_b["blocksprobBLOCKS52pddl"])
+
+#print_information_for_multiple_dicts(read_whole_set_of_tests_from_file("../../test_output/big_interleaved"))
+#print("###############################")
+
+#write_whole_set_of_tests_to_file("../../test_output/variable_order_no_ladder")
+print_information_for_multiple_dicts(read_whole_set_of_tests_from_file("../../test_output/variable_order_no_ladder"))
+print("###############################")
+
+#write_whole_set_of_tests_to_file("../../test_output/variable_order_with_ladder")
+print_information_for_multiple_dicts(read_whole_set_of_tests_from_file("../../test_output/variable_order_with_ladder"))
+print("###############################")
+
+
+#write_whole_set_of_tests_to_file("../../test_output/layer_unidirectional")
+#print_information_for_multiple_dicts(read_whole_set_of_tests_from_file("../../test_output/layer_unidirectional"))
