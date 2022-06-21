@@ -154,11 +154,42 @@ def layer_bidirectional_building_test():
     return comms
 
 
+def best_triple_21_6_big_test():
+    probs = problems.list_all_downward_solved_problems()
+    planDD_argument_map_old_best =  {
+        "$timeout" : "300s",
+        "$mode" : "build_bdd",
+        "$addition_flags" : " --build_order grtyumix:pec --variable_order x:vohjk --goal_variables_first --initial_state_variables_first --exact_one_constraint ",
+    }
+    planDD_argument_map_layer_unidirectional =  {
+        "$timeout" : "300s",
+        "$mode" : "build_bdd_by_layer",
+        "$addition_flags" : " --build_order ig:rtyumpec: --exact_one_constraint --layer_on_the_fly ",
+    }
+    planDD_argument_map_layer_bidirectional =  {
+        "$timeout" : "300s",
+        "$mode" : "build_bdd_by_layer",
+        "$addition_flags" : " --build_order ig:rtyumpec:ig --exact_one_constraint --bidirectional --layer_on_the_fly --use_layer_permutation ",
+    }
+    downward_argument_map = dict(arguments.standart_downward_argument_map)
+    arg1 = ("best_triple_21_6_big_test_old", planDD_argument_map_old_best, downward_argument_map)
+    arg2 = ("best_triple_21_6_big_test_uni", planDD_argument_map_layer_unidirectional, downward_argument_map)
+    arg3 = ("best_triple_21_6_big_test_bi", planDD_argument_map_layer_bidirectional, downward_argument_map)
+    args = [arg1, arg2, arg3]
+
+    comms = commandfile.generate_command_calls(probs, args)
+    print("Num problems:",len(probs))
+    print("Num configs:",len(args))
+    print("Num commands:",len(comms))
+    return comms
+
+
+
 # TODO test all var orders with all conjoin orders
 
 
 comms = []
-comms += layer_bidirectional_building_test()
+comms += best_triple_21_6_big_test()
 
 commandfile.generate_parallel_file_from_calls(comms)
 

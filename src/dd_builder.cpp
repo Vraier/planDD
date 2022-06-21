@@ -191,11 +191,11 @@ void construct_bdd_by_layer_bidirectional(bdd_container &bdd, formula &cnf, opti
     LOG_MESSAGE(log_level::info) << "Start building initial state foundation BDD";
     std::vector<conjoin_order::tagged_logic_primitiv> init_foundation_primitives =
         conjoin_order::order_clauses_for_foundation(cnf, ini_seed);
-    construct_dd_clause_linear(bdd, init_foundation_primitives, main_begin_idx);
+    construct_dd_clause_linear(bdd, init_foundation_primitives, main_begin_idx, true);
     LOG_MESSAGE(log_level::info) << "Start building goal foundation BDD";
     std::vector<conjoin_order::tagged_logic_primitiv> goal_foundation_primitives =
         conjoin_order::order_clauses_for_foundation(cnf, goal_seed);
-    construct_dd_clause_linear(bdd, goal_foundation_primitives, main_end_idx);
+    construct_dd_clause_linear(bdd, goal_foundation_primitives, main_end_idx, true);
 
     int t_begin = 0;
     int t_end = options.timesteps - 1;

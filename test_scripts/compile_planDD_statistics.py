@@ -141,7 +141,8 @@ variable_order_differences = [
 layer_buildinng_differences = [
         "config_build_order", 
         "config_use_layer_permutation",
-        "config_layer_on_the_fly"
+        "config_layer_on_the_fly",
+        "config_share_foundations",
     ]
 
 #write_whole_set_of_tests_to_file("../../test_output/variable_order_with_ladder")
@@ -156,3 +157,7 @@ layer_buildinng_differences = [
 #write_whole_set_of_tests_to_file("../../test_output/layer_unidirectional")
 dics_unidirectional = read_whole_set_of_tests_from_file("../../test_output/layer_unidirectional")
 print_information_for_multiple_dicts(dics_unidirectional, layer_buildinng_differences)
+
+#write_whole_set_of_tests_to_file("../../test_output/layer_bidirectional")
+dics_bidirectional = read_whole_set_of_tests_from_file("../../test_output/layer_bidirectional")
+print_information_for_multiple_dicts(dics_bidirectional, layer_buildinng_differences)
