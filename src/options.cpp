@@ -58,13 +58,16 @@ void option_parser::parse_command_line(int argc, char *argv[]) {
         ("bidirectional",
          po::bool_switch(&m_values.bidirectional)->default_value(false),
          "If this flag is set, the the bdd layer construction will work in a bidriectional manner")  //
-         ("share_foundations",
+        ("share_foundations",
          po::bool_switch(&m_values.share_foundations)->default_value(false),
          "If this flag is set during bidirectional lyer construction, both start nodes of the bidirectional search will be the same")  //
         ("layer_on_the_fly",
          po::bool_switch(&m_values.layer_on_the_fly)->default_value(false),
          "If this flag is set, the layer bdds will be constructed after the previous layer bdd was conjoined")  //
-         ("use_layer_permutation",
+        ("reverse_layer_building",
+         po::bool_switch(&m_values.reverse_layer_building)->default_value(false),
+         "If this flag is set, the layer bdds will be constructed, beginning from the goal, from last timestep to first")  //
+        ("use_layer_permutation",
          po::bool_switch(&m_values.use_layer_permutation)->default_value(false),
          "If this flag is set, the new layer bdd will be constructed using a variable permutation");  //
 

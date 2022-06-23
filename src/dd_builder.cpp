@@ -53,15 +53,24 @@ void construct_bdd_by_layer_unidirectional(bdd_container &bdd, formula &cnf, opt
 
     // indizes of the different bdds
     const int main_bdd_idx = 0;
+    // maps layer index to bdd index of the manager
     std::vector<int> layer_bdd_idxs(options.timesteps);
+
+    int permutation_direction, first_layer;
+    if(options.reverse_layer_building){
+        permutation_direction = -1;
+        first_layer = options.timesteps -1;
+    } else {
+        permutation_direction = -1;
+        first_layer = 0;
+    }
     // permute variables by one timestep
-    std::vector<int> forward_permutation = cnf.calculate_permutation_by_timesteps(1);
+    std::vector<int> permutation = cnf.calculate_permutation_by_timesteps(permutation_direction);
 
     // build the initial layer bdds
     LOG_MESSAGE(log_level::info) << "Start building layer BDDs";
     // constructs the first layer
-    const int first_layer = 0;
-    layer_bdd_idxs[first_layer] = 2;
+    layer_bdd_idxs[first_layer] = first_layer + 2;
     LOG_MESSAGE(log_level::info) << "Building first layer";
     std::vector<conjoin_order::tagged_logic_primitiv> layer_primitives =
     conjoin_order::order_clauses_for_layer(cnf, first_layer, layer_seed);
@@ -70,24 +79,28 @@ void construct_bdd_by_layer_unidirectional(bdd_container &bdd, formula &cnf, opt
     // construct the layer bdds only when needed
     if(options.layer_on_the_fly){
         for(int i = 1; i < options.timesteps; i++){
-            layer_bdd_idxs[i] = 2; // only need one bdd slot
+            layer_bdd_idxs[i] = first_layer + 2; // only need one bdd slot
         }
         // no bdds need to be constructed
     } 
     // construct all layer bdds at the beginning
     else {
         LOG_MESSAGE(log_level::info) << "Building all other layers";
-        for(int i = 1; i < options.timesteps; i++){
-            layer_bdd_idxs[i] = i+2;
-            // construct new bdd form sccratch or by permutating the variables of the predecessor
+        int curr_layer = first_layer + permutation_direction;
+        while(curr_layer >= 0 && curr_layer < options.timesteps){
+            layer_bdd_idxs[curr_layer] = curr_layer+2;
+
+            // construct new bdd form scratch or by permutating the variables of the predecessor
             if(options.use_layer_permutation){
-                bdd.permute_variables(forward_permutation, layer_bdd_idxs[i-1], layer_bdd_idxs[i]);
+                bdd.permute_variables(permutation, layer_bdd_idxs[curr_layer-permutation_direction], layer_bdd_idxs[curr_layer]);
             }
             else {
                 std::vector<conjoin_order::tagged_logic_primitiv> layer_primitives =
-                conjoin_order::order_clauses_for_layer(cnf, i, layer_seed);
-                construct_dd_clause_linear(bdd, layer_primitives, layer_bdd_idxs[i], true);
+                conjoin_order::order_clauses_for_layer(cnf, curr_layer, layer_seed);
+                construct_dd_clause_linear(bdd, layer_primitives, layer_bdd_idxs[curr_layer], true);
             }
+
+            curr_layer += permutation_direction;
         }
     }
     bdd.reduce_heap();
@@ -107,22 +120,29 @@ void construct_bdd_by_layer_unidirectional(bdd_container &bdd, formula &cnf, opt
     // build the main bdd layer by layer
     LOG_MESSAGE(log_level::info) << "Adding timestep for t=" << first_layer << " " << bdd.get_short_statistics(main_bdd_idx);
     bdd.conjoin_two_bdds(main_bdd_idx, layer_bdd_idxs[first_layer], main_bdd_idx);
-    for (int t = 1; t < options.timesteps; t++) {
-        LOG_MESSAGE(log_level::info) << "Adding timestep for t=" << t << " " << bdd.get_short_statistics(main_bdd_idx);
-        if(options.layer_on_the_fly){
-            // construct new needed bdd
+
+    int curr_layer = first_layer;
+    int num_layer_conjoins = 0;
+    while(num_layer_conjoins < options.timesteps){
+
+        LOG_MESSAGE(log_level::info) << "Adding timestep for t=" << first_layer << " " << bdd.get_short_statistics(main_bdd_idx);
+        bdd.conjoin_two_bdds(main_bdd_idx, layer_bdd_idxs[first_layer], main_bdd_idx);
+
+        if(num_layer_conjoins != options.timesteps -1){
+            // construct new bdd (only if this is not the last bdd)
             if(options.use_layer_permutation){
-                bdd.permute_variables(forward_permutation, layer_bdd_idxs[t-1], layer_bdd_idxs[t]);
+                bdd.permute_variables(permutation, layer_bdd_idxs[curr_layer-permutation_direction], layer_bdd_idxs[curr_layer]);
             } else {
-                bdd.clear_bdd(layer_bdd_idxs[t]);
+                bdd.clear_bdd(layer_bdd_idxs[curr_layer]);
                 std::vector<conjoin_order::tagged_logic_primitiv> layer_primitives =
-                conjoin_order::order_clauses_for_layer(cnf, t, layer_seed);
-                construct_dd_clause_linear(bdd, layer_primitives, layer_bdd_idxs[t], true);
+                conjoin_order::order_clauses_for_layer(cnf, curr_layer, layer_seed);
+                construct_dd_clause_linear(bdd, layer_primitives, layer_bdd_idxs[curr_layer], true);
             }
         }
-        bdd.conjoin_two_bdds(main_bdd_idx, layer_bdd_idxs[t], main_bdd_idx);
-    }
 
+        curr_layer += permutation_direction;
+        num_layer_conjoins++;
+    }
     LOG_MESSAGE(log_level::info) << "Finished constructing final DD";
 }
 
