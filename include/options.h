@@ -3,7 +3,7 @@
 #include <boost/program_options.hpp>
 #include <iostream>
 
-// TODO make _ to -
+// TODO make '_' to '-' and think about better names
 struct option_values {
     // Files
     std::string sas_file, ass_file, cnf_file;
@@ -16,7 +16,7 @@ struct option_values {
     bool reverse_order;
     bool include_mutex, use_ladder_encoding, exact_one_constraint, goal_variables_first, initial_state_variables_first;
     // DD layer building
-    bool bidirectional, share_foundations, use_layer_permutation, reverse_layer_building;
+    bool bidirectional, exponential, share_foundations, use_layer_permutation, reverse_layer_building;
 };
 
 /**

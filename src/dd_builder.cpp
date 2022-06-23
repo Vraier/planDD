@@ -218,4 +218,92 @@ void construct_bdd_by_layer_bidirectional(bdd_container &bdd, formula &cnf, opti
     LOG_MESSAGE(log_level::info) << "Finished constructing final DD";
 }
 
+// unoptimized implementation of integer power
+int ipow(int base, int exponent){
+    int result = 1;
+    while (exponent != 0)
+    {
+        if ((exponent % 2) == 1){
+            result *= base;
+            exponent -= 1;
+        } else {
+            base *= base;
+            exponent /= 2;
+        }
+    }
+    return result;
+}
+
+void construct_dd_by_layer_exponentially(bdd_container &bdd, formula &cnf, option_values &options){
+
+    // TODO two ways: construct 2^ceil(log(t)) layers or construct the exact amount. See if first one is faster
+    std::string build_order = options.build_order;
+    if(!conjoin_order::is_valid_layer_order_string(build_order)){
+        LOG_MESSAGE(log_level::error) << "Build order string is not compatible wit layer building";
+        return;
+    }
+
+    // split the order into parts (in a really complicated manner)
+    std::stringstream ss(options.build_order);
+    std::string ini_seed, layer_seed, goal_seed;
+    std::getline(ss, ini_seed, ':');
+    std::getline(ss, layer_seed, ':');
+    std::getline(ss, goal_seed, ':');
+
+    const int main_bdd_idx = 0;
+
+    // build the bdd for the foundation bdd
+    LOG_MESSAGE(log_level::info) << "Start building initial state foundation BDD";
+    std::vector<conjoin_order::tagged_logic_primitiv> foundation_primitives =
+        conjoin_order::order_clauses_for_foundation(cnf, ini_seed);
+    construct_dd_clause_linear(bdd, foundation_primitives, main_bdd_idx, true);
+
+    // information about the block we want to build next
+    int curr_block_size = 1;
+    int curr_block_idx = 0;
+
+    LOG_MESSAGE(log_level::info) << "Building first layer";
+    std::vector<conjoin_order::tagged_logic_primitiv> layer_primitives =
+    conjoin_order::order_clauses_for_layer(cnf, curr_block_idx, layer_seed);
+    construct_dd_clause_linear(bdd, layer_primitives, curr_block_idx+2, true);
+    bdd.reduce_heap();
+    curr_block_size *= 2;
+    curr_block_idx += 1;
+
+    while(curr_block_size < options.timesteps){
+
+        LOG_MESSAGE(log_level::info) << "Constructing " << curr_block_size << " layers";
+        auto perm = cnf.calculate_permutation_by_timesteps(curr_block_size/2);
+        bdd.permute_variables(perm, curr_block_idx+1, curr_block_idx+2);
+        bdd.conjoin_two_bdds(curr_block_idx+1, curr_block_idx+2, curr_block_idx+2);
+
+        curr_block_size *= 2;
+        curr_block_idx += 1;
+    }
+    curr_block_idx--;
+
+    LOG_MESSAGE(log_level::info) << "Finished exponential construction. Putting everything together";
+    int total_size = 0;
+    for(int i = curr_block_idx; i >= 0; i--){
+        int curr_block_size = ipow(2, curr_block_idx);
+
+        if(total_size + curr_block_size <= options.timesteps){
+            LOG_MESSAGE(log_level::info) << "Adding block of size " << curr_block_size << " bdd has size " << total_size;
+
+            auto perm = cnf.calculate_permutation_by_timesteps(total_size);
+            bdd.permute_variables(perm, curr_block_idx+2, curr_block_idx+2);
+            bdd.conjoin_two_bdds(main_bdd_idx, curr_block_idx+2, main_bdd_idx);
+
+            total_size += curr_block_size;
+
+        } else {
+            LOG_MESSAGE(log_level::info) << "Can't add block of size " << curr_block_size << " bdd has size " << total_size;
+        }
+        bdd.clear_bdd(curr_block_idx+2);
+
+    }
+
+    LOG_MESSAGE(log_level::info) << "Finished constructing final DD";
+}
+
 }  // namespace dd_builder

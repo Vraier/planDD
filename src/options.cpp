@@ -58,6 +58,9 @@ void option_parser::parse_command_line(int argc, char *argv[]) {
         ("bidirectional",
          po::bool_switch(&m_values.bidirectional)->default_value(false),
          "If this flag is set, the the bdd layer construction will work in a bidriectional manner")  //
+        ("exponential",
+         po::bool_switch(&m_values.reverse_layer_building)->default_value(false),
+         "If this flag is set, the layers will be constructed exponentially.")  //
         ("share_foundations",
          po::bool_switch(&m_values.share_foundations)->default_value(false),
          "If this flag is set during bidirectional lyer construction, both start nodes of the bidirectional search will be the same")  //
