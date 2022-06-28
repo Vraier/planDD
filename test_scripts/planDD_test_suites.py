@@ -183,13 +183,48 @@ def best_triple_21_6_big_test():
     print("Num commands:",len(comms))
     return comms
 
+def best_triple_28_6_big_test():
+    probs = problems.list_all_downward_solved_problems()
+    planDD_argument_map_old_best =  {
+        "$timeout" : "300s",
+        "$mode" : "build_bdd",
+        "$addition_flags" : " --build_order grtyumix:pec --variable_order x:vohjk --goal_variables_first --initial_state_variables_first --exact_one_constraint ",
+    }
+    planDD_argument_map_layer_reverse_no_perm =  {
+        "$timeout" : "300s",
+        "$mode" : "build_bdd_by_layer",
+        "$addition_flags" : " --build_order ig:rtyumpec: --exact_one_constraint --reverse_layer_building ",
+    }
+    planDD_argument_map_layer_reverse_with_perm =  {
+        "$timeout" : "300s",
+        "$mode" : "build_bdd_by_layer",
+        "$addition_flags" : " --build_order ig:rtyumpec: --exact_one_constraint --reverse_layer_building --use_layer_permutation ",
+    }
+    planDD_argument_map_layer_exponential =  {
+        "$timeout" : "300s",
+        "$mode" : "build_bdd_by_layer",
+        "$addition_flags" : " --build_order ig:rtyumpec: --exact_one_constraint --exponential ",
+    }
+    downward_argument_map = dict(arguments.standart_downward_argument_map)
+    arg1 = ("best_triple_28_6_big_test_old", planDD_argument_map_old_best, downward_argument_map)
+    arg2 = ("best_triple_28_6_big_test_reverse_no_perm", planDD_argument_map_layer_reverse_no_perm, downward_argument_map)
+    arg3 = ("best_triple_28_6_big_test_reverse_with_perm", planDD_argument_map_layer_reverse_with_perm, downward_argument_map)
+    arg4 = ("best_triple_28_6_big_test_expo", planDD_argument_map_layer_exponential, downward_argument_map)
+    args = [arg1, arg2, arg3, arg4]
+
+    comms = commandfile.generate_command_calls(probs, args)
+    print("Num problems:",len(probs))
+    print("Num configs:",len(args))
+    print("Num commands:",len(comms))
+    return comms
+
 
 
 # TODO test all var orders with all conjoin orders
 
 
 comms = []
-comms += best_triple_21_6_big_test()
+comms += best_triple_28_6_big_test()
 
 commandfile.generate_parallel_file_from_calls(comms)
 
