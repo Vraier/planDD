@@ -55,20 +55,17 @@ void option_parser::parse_command_line(int argc, char *argv[]) {
          po::bool_switch(&m_values.initial_state_variables_first)->default_value(false),
          "If this flag is set, variables in initial state clauses will be moved to the front of the variable order")  //
         // layer building
-        ("bidirectional",
-         po::bool_switch(&m_values.bidirectional)->default_value(false),
+        ("bidirectional", po::bool_switch(&m_values.bidirectional)->default_value(false),
          "If this flag is set, the the bdd layer construction will work in a bidriectional manner")  //
-        ("exponential",
-         po::bool_switch(&m_values.reverse_layer_building)->default_value(false),
+        ("exponential", po::bool_switch(&m_values.exponential)->default_value(false),
          "If this flag is set, the layers will be constructed exponentially.")  //
-        ("share_foundations",
-         po::bool_switch(&m_values.share_foundations)->default_value(false),
-         "If this flag is set during bidirectional lyer construction, both start nodes of the bidirectional search will be the same")  //
-        ("reverse_layer_building",
-         po::bool_switch(&m_values.reverse_layer_building)->default_value(false),
-         "If this flag is set, the layer bdds will be constructed, beginning from the goal, from last timestep to first")  //
-        ("use_layer_permutation",
-         po::bool_switch(&m_values.use_layer_permutation)->default_value(false),
+        ("share_foundations", po::bool_switch(&m_values.share_foundations)->default_value(false),
+         "If this flag is set during bidirectional lyer construction, both start nodes of the bidirectional search "
+         "will be the same")  //
+        ("reverse_layer_building", po::bool_switch(&m_values.reverse_layer_building)->default_value(false),
+         "If this flag is set, the layer bdds will be constructed, beginning from the goal, from last timestep to "
+         "first")  //
+        ("use_layer_permutation", po::bool_switch(&m_values.use_layer_permutation)->default_value(false),
          "If this flag is set, the new layer bdd will be constructed using a variable permutation");  //
 
     po::store(po::parse_command_line(argc, argv, m_option_desc), m_argument_map);
@@ -76,8 +73,8 @@ void option_parser::parse_command_line(int argc, char *argv[]) {
 }
 
 bool option_parser::check_validity() {
-    if ((m_values.encode_cnf + m_values.build_bdd + m_values.build_bdd_by_layer + m_values.build_sdd + m_values.single_minisat +
-         m_values.count_minisat + m_values.hack_debug + m_values.cnf_to_bdd) != 1) {
+    if ((m_values.encode_cnf + m_values.build_bdd + m_values.build_bdd_by_layer + m_values.build_sdd +
+         m_values.single_minisat + m_values.count_minisat + m_values.hack_debug + m_values.cnf_to_bdd) != 1) {
         std::cout << "You have to choose exactly one mode." << std::endl;
         return false;
     }

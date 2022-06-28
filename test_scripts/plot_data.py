@@ -23,8 +23,10 @@ def scatter_plot_compare_two_configs(info_dics_config1, info_dics_config2, timeo
 
         points.append((time1, time2))
 
-    plt.scatter([x for x, y in points], [y for x, y in points])
-    plt.plot([0,timeout],[0,timeout], 'red', linewidth=1)
+    fig, ax = plt.subplots()
+    ax.set_aspect('equal', adjustable='box')
+    ax.scatter([x for x, y in points], [y for x, y in points])
+    ax.plot([0,timeout],[0,timeout], 'red', linewidth=1)
     plt.xlabel(name1)
     plt.ylabel(name2)
     plt.show()
@@ -195,6 +197,13 @@ def find_all_finished_orders(folder_path):
 # plot_num_clauses(planDD_dics)
 
 
-dics1 = data.read_all_information_from_file("../../test_output/best_17_5_big_test.pkl")
-dics2 = data.read_all_information_from_file("../../test_output/best_24_5_big_test.pkl")
-scatter_plot_compare_two_configs(dics1, dics2, 180, "old", "new")
+#dics1 = data.read_all_information_from_file("../../test_output/best_17_5_big_test.pkl")
+#dics2 = data.read_all_information_from_file("../../test_output/best_24_5_big_test.pkl")
+
+dic_best_triple_21_6_old = data.read_all_information_from_file("../../test_output/best_triple_21_6_old.pkl")
+dic_best_triple_21_6_uni = data.read_all_information_from_file("../../test_output/best_triple_21_6_uni.pkl")
+dic_best_triple_21_6_bi = data.read_all_information_from_file("../../test_output/best_triple_21_6_bi.pkl")
+
+scatter_plot_compare_two_configs(dic_best_triple_21_6_old, dic_best_triple_21_6_uni, 300, "old", "uni")
+scatter_plot_compare_two_configs(dic_best_triple_21_6_old, dic_best_triple_21_6_bi, 300, "old", "bi")
+scatter_plot_compare_two_configs(dic_best_triple_21_6_uni, dic_best_triple_21_6_bi, 300, "uni", "bi")

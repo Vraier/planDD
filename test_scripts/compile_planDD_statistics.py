@@ -1,3 +1,4 @@
+from xml.dom.expatbuilder import theDOMImplementation
 from extract_planDD_information import *
 import plot_data
 
@@ -138,7 +139,7 @@ variable_order_differences = [
 
     ]
 
-layer_buildinng_differences = [
+layer_building_differences = [
         "config_build_order", 
         "config_use_layer_permutation",
         "config_layer_on_the_fly",
@@ -155,9 +156,19 @@ layer_buildinng_differences = [
 
 
 #write_whole_set_of_tests_to_file("../../test_output/layer_unidirectional")
-dics_unidirectional = read_whole_set_of_tests_from_file("../../test_output/layer_unidirectional")
-print_information_for_multiple_dicts(dics_unidirectional, layer_buildinng_differences)
+#dics_unidirectional = read_whole_set_of_tests_from_file("../../test_output/layer_unidirectional")
+#print_information_for_multiple_dicts(dics_unidirectional, layer_building_differences)
 
 #write_whole_set_of_tests_to_file("../../test_output/layer_bidirectional")
-dics_bidirectional = read_whole_set_of_tests_from_file("../../test_output/layer_bidirectional")
-print_information_for_multiple_dicts(dics_bidirectional, layer_buildinng_differences)
+#dics_bidirectional = read_whole_set_of_tests_from_file("../../test_output/layer_bidirectional")
+#print_information_for_multiple_dicts(dics_bidirectional, layer_building_differences)
+
+#write_all_information_to_file("../../test_output/best_triple_21_6/best_triple_21_6_big_test_bi", "../../test_output/best_triple_21_6_bi.pkl")
+#write_all_information_to_file("../../test_output/best_triple_21_6/best_triple_21_6_big_test_old", "../../test_output/best_triple_21_6_old.pkl")
+#write_all_information_to_file("../../test_output/best_triple_21_6/best_triple_21_6_big_test_uni", "../../test_output/best_triple_21_6_uni.pkl")
+dic_best_triple_21_6_bi = read_all_information_from_file("../../test_output/best_triple_21_6_bi.pkl")
+dic_best_triple_21_6_old = read_all_information_from_file("../../test_output/best_triple_21_6_old.pkl")
+dic_best_triple_21_6_uni = read_all_information_from_file("../../test_output/best_triple_21_6_uni.pkl")
+print_big_information_from_dicts(dic_best_triple_21_6_old)
+print_big_information_from_dicts(dic_best_triple_21_6_uni)
+print_big_information_from_dicts(dic_best_triple_21_6_bi)

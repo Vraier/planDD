@@ -14,7 +14,6 @@
 #include "dd_builder_conjoin_order.h"
 #include "bdd_container.h"
 
-
 int main(int argc, char *argv[]) {
     // start logging
     initialize_logging();
@@ -73,21 +72,21 @@ int planDD::hack_debug(option_values opt_values) {
     bdd_container main_builder(1, num_variables);
 
     std::vector<int> exact_one;
-    for(int i = 0; i < 4; i++){
-        exact_one.push_back(i+1);
+    for (int i = 0; i < 4; i++) {
+        exact_one.push_back(i + 1);
     }
 
     copy_from.add_exactly_one_constraint(exact_one);
 
-    for(int t = 0; t < opt_values.timesteps; t++){
+    for (int t = 0; t < opt_values.timesteps; t++) {
         std::vector<int> indx_to;
-        for(int i = 0; i < 4; i++){
-            indx_to.push_back((t*4)+i+1);
+        for (int i = 0; i < 4; i++) {
+            indx_to.push_back((t * 4) + i + 1);
         }
 
-        //copy_from.swap_variables(exact_one, indx_to);
+        // copy_from.swap_variables(exact_one, indx_to);
         main_builder.copy_and_conjoin_bdd_from_another_container(copy_from);
-        //copy_from.swap_variables(indx_to, exact_one);
+        // copy_from.swap_variables(indx_to, exact_one);
 
         main_builder.write_bdd_to_dot_file("after_step_" + std::to_string(t) + ".dot");
         main_builder.print_bdd_info();
@@ -116,7 +115,7 @@ int planDD::build_bdd(option_values opt_values) {
     builder.reduce_heap();
 
     builder.print_bdd_info();
-    //builder.write_bdd_to_dot_file("normal_bdd.dot");
+    // builder.write_bdd_to_dot_file("normal_bdd.dot");
     return 0;
 }
 
@@ -133,14 +132,16 @@ int planDD::build_bdd_by_layer(option_values opt_values) {
     std::vector<int> var_order = variable_order::order_variables(clauses, opt_values);
     bdd_container main_builder(opt_values.timesteps + 2, clauses.get_num_variables());
     // TODO think about variable order here
-    //main_builder.set_variable_order(var_order);
+    // main_builder.set_variable_order(var_order);
 
-    if(opt_values.bidirectional) {
+    if (opt_values.bidirectional) {
         dd_builder::construct_bdd_by_layer_bidirectional(main_builder, clauses, opt_values);
+    } else if (opt_values.exponential) {
+        dd_builder::construct_dd_by_layer_exponentially(main_builder, clauses, opt_values);
     } else {
         dd_builder::construct_bdd_by_layer_unidirectional(main_builder, clauses, opt_values);
     }
-    
+
     main_builder.print_bdd_info();
 
     return 0;

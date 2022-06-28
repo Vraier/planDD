@@ -38,6 +38,8 @@ void construct_dd_clause_linear(dd_buildable &dd, std::vector<conjoin_order::tag
 
 void construct_bdd_by_layer_unidirectional(bdd_container &bdd, formula &cnf, option_values &options) {
 
+    LOG_MESSAGE(log_level::error) << "Building bdd by layers unidirectional";
+
     std::string build_order = options.build_order;
     if(!conjoin_order::is_valid_layer_order_string(build_order)){
         LOG_MESSAGE(log_level::error) << "Build order string is not compatible with layer building";
@@ -60,7 +62,7 @@ void construct_bdd_by_layer_unidirectional(bdd_container &bdd, formula &cnf, opt
         permutation_direction = -1;
         first_layer = options.timesteps -1;
     } else {
-        permutation_direction = -1;
+        permutation_direction = 1;
         first_layer = 0;
     }
     // permute variables by one timestep
@@ -103,7 +105,7 @@ void construct_bdd_by_layer_unidirectional(bdd_container &bdd, formula &cnf, opt
                 // build from scratch
                 bdd.clear_bdd(layer_bdd_idx);
                 std::vector<conjoin_order::tagged_logic_primitiv> layer_primitives =
-                conjoin_order::order_clauses_for_layer(cnf, curr_layer, layer_seed);
+                conjoin_order::order_clauses_for_layer(cnf, curr_layer + permutation_direction, layer_seed);
                 construct_dd_clause_linear(bdd, layer_primitives, layer_bdd_idx, true);
             }
         }
@@ -115,6 +117,8 @@ void construct_bdd_by_layer_unidirectional(bdd_container &bdd, formula &cnf, opt
 }
 
 void construct_bdd_by_layer_bidirectional(bdd_container &bdd, formula &cnf, option_values &options) {
+
+    LOG_MESSAGE(log_level::info) << "Building bdd by layers bidirectional";
 
     std::string build_order = options.build_order;
     if(!conjoin_order::is_valid_layer_order_string(build_order)){
@@ -236,6 +240,8 @@ int ipow(int base, int exponent){
 
 void construct_dd_by_layer_exponentially(bdd_container &bdd, formula &cnf, option_values &options){
 
+    LOG_MESSAGE(log_level::info) << "Building bdd by layers exponentially";
+
     // TODO two ways: construct 2^ceil(log(t)) layers or construct the exact amount. See if first one is faster
     std::string build_order = options.build_order;
     if(!conjoin_order::is_valid_layer_order_string(build_order)){
@@ -284,7 +290,7 @@ void construct_dd_by_layer_exponentially(bdd_container &bdd, formula &cnf, optio
 
     LOG_MESSAGE(log_level::info) << "Finished exponential construction. Putting everything together";
     int total_size = 0;
-    for(int i = curr_block_idx; i >= 0; i--){
+    for(; curr_block_idx >= 0; curr_block_idx--){
         int curr_block_size = ipow(2, curr_block_idx);
 
         if(total_size + curr_block_size <= options.timesteps){
