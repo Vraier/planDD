@@ -22,7 +22,7 @@ bool is_valid_variable_order_string(std::string build_order);
 categorized_variables categorize_variables(planning_logic::formula &cnf);
 // Moves all the variables to the front that are in a clause with the given front_tag
 // current_order[i] = what variable is at layer i?
-std::vector<int> put_variables_of_tag_first(planning_logic::formula &cnf, std::vector<int> &current_order, planning_logic::clause_tag front_tag);
+std::vector<int> put_variables_of_tag_first(planning_logic::formula &cnf, std::vector<int> &current_order, planning_logic::primitive_tag front_tag);
 // returns a vector V that represents a permutation of the variables of the cnf problem
 // The i-th entry of the permutation array contains the index of the variable that should be brought to the i-th level
 std::vector<int> order_variables(planning_logic::formula &cnf, option_values &options);

@@ -10,10 +10,8 @@
 // TODO: maybe make tagged var, clause, etc to struct
 namespace planning_logic {
 
-// clause tag, timestep
-typedef std::tuple<clause_tag, int> tagged_clause;
-// exactly one constraint tag, timestep
-typedef std::tuple<eo_constraint_tag, int> tagged_constraint;
+// primitive tag, timestep
+typedef std::tuple<primitive_tag, int> tagged_primitive;
 
 class formula {
    private:
@@ -26,11 +24,10 @@ class formula {
 
    public:
     // maps tag and timestep to all clauses that belong to this pair
-    std::map<tagged_clause, std::vector<logic_primitive>> m_clause_map;
-    std::map<tagged_constraint, std::vector<logic_primitive>> m_eo_constraint_map;
+    std::map<tagged_primitive, std::vector<logic_primitive>> m_primitive_map;
 
     formula(plan_to_cnf_map &symbol_map, int num_timesteps)
-        : m_symbol_map(symbol_map), m_num_timesteps(num_timesteps), m_num_clauses(0), m_num_eo_constraints(0){};
+        : m_num_timesteps(num_timesteps), m_num_clauses(0), m_num_eo_constraints(0), m_symbol_map(symbol_map){};
     formula(std::string file_path);
 
     // adds a clause to the cnf. the tag indicates which type of clause this is

@@ -78,7 +78,7 @@ std::tuple<int, int, std::vector<std::vector<int>>> formula::parse_cnf_file_to_c
 void print_info_about_number_of_logic_primitives() {
     // print info about how many clauses each tag has
     for (int tag_int = clause_ini_state; tag_int <= clause_none; tag_int++) {
-        clause_tag tag = static_cast<clause_tag>(tag_int);
+        primitive_tag tag = static_cast<primitive_tag>(tag_int);
 
         int total_clauses = 0;
         for (int t = 0; t <= cnf.get_num_timesteps(); t++) {

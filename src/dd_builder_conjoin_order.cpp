@@ -9,7 +9,7 @@ using namespace planning_logic;
 namespace conjoin_order {
 
 // used to interpret the order of clauses from the command line options
-std::map<char, clause_tag> char_clause_tag_map = {
+std::map<char, primitive_tag> char_clause_tag_map = {
     {'i', clause_ini_state}, {'g', clause_goal},  {'r', clause_al_var}, {'t', clause_am_var}, {'y', clause_al_op},
     {'u', clause_am_op},     {'m', clause_mutex}, {'p', clause_precon}, {'e', clause_effect}, {'c', clause_frame},
 };
@@ -159,7 +159,7 @@ std::vector<tagged_logic_primitiv> order_clauses_for_foundation(planning_logic::
 
 std::vector<logic_primitive> collect_primitives_for_all_timesteps(cnf_encoder &encoder, char primitive_type, int timesteps) {
     std::vector<logic_primitive> result_primitives;
-    clause_tag clause_order_tag = char_clause_tag_map[primitive_type];
+    primitive_tag clause_order_tag = char_clause_tag_map[primitive_type];
     eo_constraint_tag constraint_order_tag = char_constraint_tag_map[primitive_type];
 
     for (int t = 0; t <= cnf.get_num_timesteps(); t++) {
@@ -182,7 +182,7 @@ std::vector<logic_primitive> collect_primitives_for_all_timesteps(cnf_encoder &e
 std::vector<logic_primitive> collect_primitives_for_single_timestep(cnf_encoder &encoder, char primitive_type,
                                                                     int timestep) {
     std::vector<logic_primitive> result_primitives;
-    clause_tag clause_order_tag = char_clause_tag_map[primitive_type];
+    primitive_tag clause_order_tag = char_clause_tag_map[primitive_type];
     eo_constraint_tag constraint_order_tag = char_constraint_tag_map[primitive_type];
 
     tagged_clause curr_clause_category = std::make_tuple(clause_order_tag, timestep);

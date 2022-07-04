@@ -68,7 +68,7 @@ categorized_variables categorize_variables(planning_logic::formula &cnf) {
 }
 
 // current_order[i] = what variable is at layer i?
-std::vector<int> put_variables_of_tag_first(formula &cnf, std::vector<int> &current_order, clause_tag front_tag) {
+std::vector<int> put_variables_of_tag_first(formula &cnf, std::vector<int> &current_order, primitive_tag front_tag) {
     // find all variables that are affected by the given tag
     std::set<int> front_variables;
     for(int t = 0; t <= cnf.get_num_timesteps(); t++){
