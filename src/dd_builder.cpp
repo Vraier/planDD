@@ -38,7 +38,7 @@ void construct_dd_clause_linear(dd_buildable &dd, std::vector<conjoin_order::tag
 
 void construct_bdd_by_layer_unidirectional(bdd_container &bdd, formula &cnf, option_values &options) {
 
-    LOG_MESSAGE(log_level::error) << "Building bdd by layers unidirectional";
+    LOG_MESSAGE(log_level::info) << "Building bdd by layers unidirectional";
 
     std::string build_order = options.build_order;
     if(!conjoin_order::is_valid_layer_order_string(build_order)){

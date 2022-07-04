@@ -154,6 +154,7 @@ def layer_bidirectional_building_test():
     return comms
 
 
+#137?
 def best_triple_21_6_big_test():
     probs = problems.list_all_downward_solved_problems()
     planDD_argument_map_old_best =  {
@@ -183,6 +184,7 @@ def best_triple_21_6_big_test():
     print("Num commands:",len(comms))
     return comms
 
+#137
 def best_triple_28_6_big_test():
     probs = problems.list_all_downward_solved_problems()
     planDD_argument_map_old_best =  {

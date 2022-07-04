@@ -13,9 +13,10 @@ def print_big_information_from_dicts(all_dics):
 
     time_for_solved = [(d["finish_time"], d["domain_desc"]) for d in solved_dics]
     time_for_solved = sorted(time_for_solved)
+    print("Compiling Solved Testcases: ############################################################################################")
     print(time_for_solved)
 
-    print("Compiling Information: ########################################################")
+    print("Compiling Information: #################################################################################################")
     print("Conjoin Order", all_dics[0]["config_build_order"])
 
     print("#Total", len(all_dics))
@@ -77,6 +78,21 @@ def print_information_for_multiple_dicts(suites, config_differences):
     print("Printing", num_best_candidates, "best candidates")
     for i in range(num_best_candidates):
         print(str(i+1), sorted_infos[::-1][i][1])
+
+def print_portfolio_information(suites):
+    curr_solved = set()
+    prev_solved = set()
+
+    for suite in suites:
+        solved_dics = [d for d in suite if not d["error_while_encoding"] and d["has_finished_cnf"] and d["has_finished"]]
+        for d in solved_dics:
+            curr_solved.add(d["domain_desc"])
+        print("##################################################################################")
+        print("Solved a total of", len(curr_solved), "problems")
+        print("Solved", len(curr_solved) - len(prev_solved), "more problems than before")
+        prev_solved = set(curr_solved)
+
+    print(curr_solved)
 
 
 
@@ -169,6 +185,32 @@ layer_building_differences = [
 dic_best_triple_21_6_bi = read_all_information_from_file("../../test_output/best_triple_21_6_bi.pkl")
 dic_best_triple_21_6_old = read_all_information_from_file("../../test_output/best_triple_21_6_old.pkl")
 dic_best_triple_21_6_uni = read_all_information_from_file("../../test_output/best_triple_21_6_uni.pkl")
-print_big_information_from_dicts(dic_best_triple_21_6_old)
-print_big_information_from_dicts(dic_best_triple_21_6_uni)
-print_big_information_from_dicts(dic_best_triple_21_6_bi)
+#print_big_information_from_dicts(dic_best_triple_21_6_old)
+#print_big_information_from_dicts(dic_best_triple_21_6_uni)
+#print_big_information_from_dicts(dic_best_triple_21_6_bi)
+
+
+#write_all_information_to_file("../../test_output/best_28_6_big_test/best_triple_28_6_big_test_old",                "../../test_output/best_28_6_old.pkl")
+#write_all_information_to_file("../../test_output/best_28_6_big_test/best_triple_28_6_big_test_expo",               "../../test_output/best_28_6_expo.pkl")
+#write_all_information_to_file("../../test_output/best_28_6_big_test/best_triple_28_6_big_test_reverse_no_perm",    "../../test_output/best_28_6_reverse_no_perm.pkl")
+#write_all_information_to_file("../../test_output/best_28_6_big_test/best_triple_28_6_big_test_reverse_with_perm",  "../../test_output/best_28_6_reverse_with_perm.pkl")
+dic_best_28_6_old = read_all_information_from_file("../../test_output/best_28_6_old.pkl")
+dic_best_28_6_expo = read_all_information_from_file("../../test_output/best_28_6_expo.pkl")
+dic_best_28_6_reverse_no_perm = read_all_information_from_file("../../test_output/best_28_6_reverse_no_perm.pkl")
+dic_best_28_6_reverse_with_perm = read_all_information_from_file("../../test_output/best_28_6_reverse_with_perm.pkl")
+#print_big_information_from_dicts(dic_best_28_6_old)
+#print_big_information_from_dicts(dic_best_28_6_expo)
+#print_big_information_from_dicts(dic_best_28_6_reverse_no_perm)
+#print_big_information_from_dicts(dic_best_28_6_reverse_with_perm)
+
+portfolio_suites = [
+    dic_best_triple_21_6_old,
+    #dic_best_triple_21_6_uni,
+    #dic_best_triple_21_6_bi,
+    #dic_best_28_6_old,
+    #dic_best_28_6_expo,
+    dic_best_28_6_reverse_with_perm,
+    #dic_best_28_6_reverse_no_perm,
+]
+
+print_portfolio_information(portfolio_suites)

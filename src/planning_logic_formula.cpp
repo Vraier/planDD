@@ -9,57 +9,17 @@
 // TODO rename to something like planning logic formula
 using namespace planning_logic;
 
-formula::formula(int num_timestpes) {
-    m_num_timesteps = num_timestpes;
-    m_num_clauses = 0;
-    m_num_eo_constraints = 0;
-}
+void formula::add_primitive(logic_primitive primitive) {
 
-formula::~formula() {}
-
-void formula::add_clause(std::vector<int> clause, clause_tag tag, int timestep) {
-    m_clause_map[std::make_tuple(tag, timestep)].push_back(clause);
-    m_num_clauses++;
-}
-
-void formula::add_exact_one_constraint(eo_constraint constraint, eo_constraint_tag tag, int timestep) {
-    m_eo_constraint_map[std::make_tuple(tag, timestep)].push_back(constraint);
+    if(primitive.m_type == logic_clause){
+        m_clause_map[std::make_tuple(primitive.m_clause_tag, primitive.m_timestep)].push_back(primitive);
+        m_num_clauses++;
+    } else if(primitive.m_type == logic_eo){
+        m_eo_constraint_map[std::make_tuple(primitive.m_eo_constraint_tag, primitive.m_timestep)].push_back(primitive);
     m_num_eo_constraints++;
-}
-
-int formula::get_variable_index(variable_tag tag, int timestep, int var_index, int value) {
-    tagged_variable var = std::make_tuple(tag, timestep, var_index, value);
-    if (m_variable_map.find(var) == m_variable_map.end()) {
-        int size = m_variable_map.size();
-        m_variable_map[var] = size + 1;
+    } else {
+        LOG_MESSAGE(log_level::error) << "Unknown primitive type";
     }
-
-    // also add information to the inverted variable map
-    m_inverse_variable_map[m_variable_map[var]] = var;
-    return m_variable_map[var];
-}
-
-int formula::get_variable_index_without_adding(variable_tag tag, int timestep, int var_index, int value) {
-    tagged_variable var = std::make_tuple(tag, timestep, var_index, value);
-    if (m_variable_map.find(var) == m_variable_map.end()) {
-        return -1;
-    }
-    return m_variable_map[var];
-}
-
-int formula::get_variable_index(variable_tag tag, int timestep, int var_index) {
-    return get_variable_index(tag, timestep, var_index, 0);
-}
-
-int formula::get_variable_index_without_adding(variable_tag tag, int timestep, int var_index) {
-    return get_variable_index_without_adding(tag, timestep, var_index, 0);
-}
-
-tagged_variable formula::get_planning_info_for_variable(int index) {
-    if (m_inverse_variable_map.find(index) == m_inverse_variable_map.end()) {
-        return std::make_tuple(variable_none, -1, -1, -1);
-    }
-    return m_inverse_variable_map[index];
 }
 
 int formula::get_num_variables() { return m_variable_map.size(); }
