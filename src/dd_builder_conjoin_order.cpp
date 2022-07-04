@@ -20,7 +20,7 @@ std::map<char, eo_constraint_tag> char_constraint_tag_map = {
 
 bool is_valid_conjoin_order_string(std::string &build_order) {
     // check if string is permutation
-    std::string standart_permutation = "grtyumix:pec";
+    std::string standart_permutation = "grtyumix:pec:";
     if (!std::is_permutation(build_order.begin(), build_order.end(), standart_permutation.begin(),
                              standart_permutation.end())) {
         LOG_MESSAGE(log_level::error) << "Build order has to be a permutation of " + standart_permutation + " but is "
@@ -30,9 +30,10 @@ bool is_valid_conjoin_order_string(std::string &build_order) {
 
     // split the order into first and second part (in a really complicated manner)
     std::stringstream ss(build_order);
-    std::string disjoin_order, interleaved_order;
+    std::string disjoin_order, interleaved_order, tail_part;
     std::getline(ss, disjoin_order, ':');
     std::getline(ss, interleaved_order, ':');
+    std::getline(ss, tail_part, ':');
 
     // check if first part contains x, i and g
     if (disjoin_order.find("x") == std::string::npos || disjoin_order.find("i") == std::string::npos ||
@@ -44,9 +45,9 @@ bool is_valid_conjoin_order_string(std::string &build_order) {
     return true;
 }
 
-int count_char(std::string str, char c){
+int count_char(std::string str, char c) {
     int count = 0;
-    for(char a: str){
+    for (char a : str) {
         if (a == c) {
             count++;
         }
@@ -57,50 +58,24 @@ int count_char(std::string str, char c){
 bool is_valid_layer_order_string(std::string &build_order) {
     // check if string is permutation
     int num_colons = count_char(build_order, ':');
-    if(num_colons != 2){
+    if (num_colons != 2) {
         LOG_MESSAGE(log_level::error) << "Build contains wrong number of colons (must be 2)";
         return false;
     }
     return true;
 }
 
-void print_info_about_number_of_logic_primitives(formula &cnf) {
-    // print info about how many clauses each tag has
-    for (int tag_int = clause_ini_state; tag_int <= clause_none; tag_int++) {
-        clause_tag tag = static_cast<clause_tag>(tag_int);
-
-        int total_clauses = 0;
-        for (int t = 0; t <= cnf.get_num_timesteps(); t++) {
-            total_clauses += cnf.m_clause_map[std::make_tuple(tag, t)].size();
-        }
-        LOG_MESSAGE(log_level::info) << "Categorized " << total_clauses << " clauses of tag " << tag;
-    }
-
-    // print info about how many constraints each tag has
-    for (int tag_int = eo_var; tag_int <= eo_none; tag_int++) {
-        eo_constraint_tag tag = static_cast<eo_constraint_tag>(tag_int);
-
-        int total_constraints = 0;
-        for (int t = 0; t <= cnf.get_num_timesteps(); t++) {
-            total_constraints += cnf.m_eo_constraint_map[std::make_tuple(tag, t)].size();
-        }
-        LOG_MESSAGE(log_level::info) << "Categorized " << total_constraints << " constraints of tag " << tag;
-    }
-}
-
-std::vector<tagged_logic_primitiv> order_all_clauses(formula &cnf, option_values &options) {
+std::vector<logic_primitive> order_all_clauses(cnf_encoder &encoder, option_values &options) {
     std::string build_order = options.build_order;
 
     if (!is_valid_conjoin_order_string(build_order)) {
         LOG_MESSAGE(log_level::error) << "Can't build the following conjoin order " << build_order;
-        return std::vector<tagged_logic_primitiv>();
+        return std::vector<logic_primitive>();
     }
 
-    print_info_about_number_of_logic_primitives(cnf);
-
     // contains the result at the end
-    std::vector<tagged_logic_primitiv> interleved_clauses;
-    std::vector<tagged_logic_primitiv> total_clauses;
+    std::vector<logic_primitive> interleved_clauses;
+    std::vector<logic_primitive> total_clauses;
 
     // split the order into first and second part (in a really complicated manner)
     std::stringstream ss(build_order);
@@ -109,12 +84,12 @@ std::vector<tagged_logic_primitiv> order_all_clauses(formula &cnf, option_values
     std::getline(ss, interleaved_order, ':');
 
     // sort the interleaved part
-    for (int t = 0; t <= cnf.get_num_timesteps(); t++) {
+    for (int t = 0; t <= options.timesteps; t++) {
         for (int i = 0; i < interleaved_order.size(); i++) {
             char current_char = interleaved_order[i];
 
-            std::vector<tagged_logic_primitiv> temp_clauses =
-                collect_primitives_for_single_timestep(cnf, current_char, t);
+            std::vector<logic_primitive> temp_clauses =
+                collect_primitives_for_single_timestep(encoder, current_char, t);
             interleved_clauses.insert(interleved_clauses.end(), temp_clauses.begin(), temp_clauses.end());
         }
     }
@@ -127,7 +102,7 @@ std::vector<tagged_logic_primitiv> order_all_clauses(formula &cnf, option_values
             continue;
         }
 
-        std::vector<tagged_logic_primitiv> temp_clauses = collect_primitives_for_all_timesteps(cnf, current_char);
+        std::vector<logic_primitive> temp_clauses = collect_primitives_for_all_timesteps(encoder, current_char);
         total_clauses.insert(total_clauses.end(), temp_clauses.begin(), temp_clauses.end());
     }
 
@@ -141,7 +116,8 @@ std::vector<tagged_logic_primitiv> order_all_clauses(formula &cnf, option_values
     return total_clauses;
 }
 
-std::vector<tagged_logic_primitiv> order_clauses_for_layer(planning_logic::formula &cnf, int layer, std::string &order_string) {
+std::vector<tagged_logic_primitiv> order_clauses_for_layer(planning_logic::formula &cnf, int layer,
+                                                           std::string &order_string) {
     LOG_MESSAGE(log_level::info) << "Ordering clauses for single layer " << layer;
 
     // contains the result at the end
@@ -151,7 +127,7 @@ std::vector<tagged_logic_primitiv> order_clauses_for_layer(planning_logic::formu
     for (char c : order_string) {
         temp_clauses = collect_primitives_for_single_timestep(cnf, c, layer);
         // if we add at least or at most one var clauses, also do it for the second timestep
-        if (c == 'r' || c == 't' || c == 'y' || c == 'u'|| c == 'm') {
+        if (c == 'r' || c == 't' || c == 'y' || c == 'u' || c == 'm') {
             // does NOT conatin pec
             std::vector<tagged_logic_primitiv> second_layer = collect_primitives_for_single_timestep(cnf, c, layer + 1);
             temp_clauses.insert(temp_clauses.end(), second_layer.begin(), second_layer.end());
@@ -164,7 +140,8 @@ std::vector<tagged_logic_primitiv> order_clauses_for_layer(planning_logic::formu
     return result_clauses;
 }
 
-std::vector<tagged_logic_primitiv> order_clauses_for_foundation(planning_logic::formula &cnf, std::string &order_string) {
+std::vector<tagged_logic_primitiv> order_clauses_for_foundation(planning_logic::formula &cnf,
+                                                                std::string &order_string) {
     LOG_MESSAGE(log_level::info) << "Ordering clauses for foundation";
 
     // contains the result at the end
@@ -180,8 +157,8 @@ std::vector<tagged_logic_primitiv> order_clauses_for_foundation(planning_logic::
     return result_clauses;
 }
 
-std::vector<tagged_logic_primitiv> collect_primitives_for_all_timesteps(formula &cnf, char primitive_type) {
-    std::vector<tagged_logic_primitiv> result_primitives;
+std::vector<logic_primitive> collect_primitives_for_all_timesteps(cnf_encoder &encoder, char primitive_type, int timesteps) {
+    std::vector<logic_primitive> result_primitives;
     clause_tag clause_order_tag = char_clause_tag_map[primitive_type];
     eo_constraint_tag constraint_order_tag = char_constraint_tag_map[primitive_type];
 
@@ -202,9 +179,9 @@ std::vector<tagged_logic_primitiv> collect_primitives_for_all_timesteps(formula 
     return result_primitives;
 }
 
-std::vector<tagged_logic_primitiv> collect_primitives_for_single_timestep(formula &cnf, char primitive_type,
-                                                                          int timestep) {
-    std::vector<tagged_logic_primitiv> result_primitives;
+std::vector<logic_primitive> collect_primitives_for_single_timestep(cnf_encoder &encoder, char primitive_type,
+                                                                    int timestep) {
+    std::vector<logic_primitive> result_primitives;
     clause_tag clause_order_tag = char_clause_tag_map[primitive_type];
     eo_constraint_tag constraint_order_tag = char_constraint_tag_map[primitive_type];
 

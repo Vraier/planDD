@@ -46,6 +46,10 @@ class formula {
     // calculate a mapping that advances the timestep of every variable bt t_diff
     std::vector<int> calculate_permutation_by_timesteps(int t_diff);
 
+    // catgeorizes the clauses of a planning cnf into buckets.
+    // each tag gets a bucket. Each buckets is hase one subbucket for each timestep
+    void print_info_about_number_of_logic_primitives(planning_logic::formula &cnf);
+
     // writes the cnf to file in standart format
     void write_to_file(std::string filepath);
     // take a cnf file and tries to parse it into a set of clauses (kind of inverse for above)
