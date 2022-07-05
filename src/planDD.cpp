@@ -13,6 +13,7 @@
 #include "dd_builder_variable_order.h"
 #include "dd_builder_conjoin_order.h"
 #include "bdd_container.h"
+#include "plan_to_cnf_map.h"
 
 int main(int argc, char *argv[]) {
     // start logging
@@ -102,8 +103,8 @@ int planDD::build_bdd(option_values opt_values) {
         return 0;
     }
 
-    cnf_encoder encoder(opt_values, parser.m_sas_problem);
-    planning_logic::formula clauses = encoder.encode_cnf(opt_values.timesteps);
+    planning_logic::plan_to_cnf_map symbol_map;
+    cnf_encoder encoder(opt_values, parser.m_sas_problem, symbol_map);
 
     std::vector<int> var_order = variable_order::order_variables(clauses, opt_values);
     bdd_container builder(1, clauses.get_num_variables());

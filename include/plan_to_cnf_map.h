@@ -18,15 +18,11 @@ enum variable_tag {
 typedef std::tuple<variable_tag, int, int, int> tagged_variable;
 
 class plan_to_cnf_map {
-   private:
+   public:
     // maps information about planning variable to variable index of cnf formula
     // are used by the variable ordering algorithm
     std::map<tagged_variable, int> m_variable_map;
     std::map<int, tagged_variable> m_inverse_variable_map;
-
-   public:
-    plan_to_cnf_map();
-    ~plan_to_cnf_map();
 
     // These methos get the information about a variable/action from a planning problem and return
     // the variable index into the cnf formula
