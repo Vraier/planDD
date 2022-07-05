@@ -13,8 +13,11 @@
 
 class cnf_encoder {
    public:
-    cnf_encoder(option_values &options, sas_problem &problem, planning_logic::plan_to_cnf_map &symbol_map)
-        : m_options(options), m_sas_problem(problem), m_symbol_map(symbol_map) {}
+    cnf_encoder(option_values &options, sas_problem &problem)
+        : m_options(options), m_sas_problem(problem) {}
+
+    // maps planning variables to cnf variables.
+    planning_logic::plan_to_cnf_map m_symbol_map;
 
     // makes it easier to debug everything ith the variables have a fixed mapping each times
     void initialize_symbol_map(int timesteps);
@@ -51,9 +54,6 @@ class cnf_encoder {
 
     // represents the planning problem
     sas_problem m_sas_problem;
-
-    // maps planning variables to cnf variables.
-    planning_logic::plan_to_cnf_map m_symbol_map;
 
     // TODO
     // All three: sas_problem, symbol map and cnf are needed to produce human readable output.

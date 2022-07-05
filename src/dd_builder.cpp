@@ -16,6 +16,7 @@ void construct_dd_clause_linear(dd_buildable &dd, std::vector<logic_primitive> &
         planning_logic::logic_primitive primitive = logic_primitives[i];
 
         if (primitive.m_type == logic_clause) {
+            //std::cout << primitive.to_string() << std::endl;
             dd.conjoin_clause(primitive.m_data, dd_index);
         } else if (primitive.m_type == logic_eo) {
             dd.add_exactly_one_constraint(primitive.m_data, dd_index);

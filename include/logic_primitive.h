@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <string>
 
 namespace planning_logic {
 
@@ -31,5 +32,7 @@ class logic_primitive {
 
     logic_primitive(logic_primitive_type type, primitive_tag c_tag, int timesteps, std::vector<int> data)
         : m_type(type), m_clause_tag(c_tag), m_timestep(timesteps), m_data(data) {}
+
+    std::string to_string();
 };
 }  // namespace planning_logic
