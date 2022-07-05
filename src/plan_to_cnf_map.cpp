@@ -71,4 +71,9 @@ std::vector<int> plan_to_cnf_map::calculate_permutation_by_timesteps(int t_diff,
 
     return from_to_index;
 }
+
+int plan_to_cnf_map::get_num_variables(){
+    return m_variable_map.size();
+}
+
 }  // namespace planning_logic

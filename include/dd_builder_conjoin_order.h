@@ -18,12 +18,12 @@ bool is_valid_layer_order_string(std::string &layer_order);
 std::vector<planning_logic::logic_primitive> order_all_clauses(cnf_encoder &encoder, option_values &options);
 
 // same as order clauses but only orders the precondition, effect and frame clauses for timeset 0
-std::vector<planning_logic::logic_primitive> order_clauses_for_layer(cnf_encoder &encoder, int layer,
-                                                                     std::string &order_string);
+std::vector<planning_logic::logic_primitive> order_clauses_for_layer(cnf_encoder &encoder, std::string &order_string,
+                                                                     int layer);
 
 // same as order clauses but only orders the initial state, goal and mutex
 std::vector<planning_logic::logic_primitive> order_clauses_for_foundation(cnf_encoder &encoder,
-                                                                          std::string &order_string);
+                                                                          std::string &order_string, int timesteps);
 
 // helper methods:
 // find the primitives of all timesteps for a given primitive type. ordered by timesteps ascending

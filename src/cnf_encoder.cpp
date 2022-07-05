@@ -52,7 +52,7 @@ void cnf_encoder::initialize_symbol_map(int timesteps) {
         }
     }
     LOG_MESSAGE(log_level::info) << "Constructed " << m_symbol_map.get_num_variables()
-                                 << " during symbol map initialization";
+                                 << " variables during symbol map initialization";
 }
 
 // The initial state must hold at t = 0.
@@ -270,7 +270,7 @@ std::vector<logic_primitive> cnf_encoder::construct_frame(int timestep) {
 
 // at every timestep it is not allowed for two values in a mutex to be true at the same time
 std::vector<logic_primitive> cnf_encoder::construct_mutex(int timestep) {
-    if(!m_options.include_mutex){
+    if (!m_options.include_mutex) {
         return std::vector<logic_primitive>();
     }
     std::vector<logic_primitive> result;

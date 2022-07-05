@@ -72,7 +72,7 @@ void construct_bdd_by_layer_unidirectional(bdd_container &bdd, cnf_encoder &enco
     // constructs the first layer
     LOG_MESSAGE(log_level::info) << "Building first layer";
     std::vector<logic_primitive> layer_primitives =
-        conjoin_order::order_clauses_for_layer(encoder, first_layer, layer_seed);
+        conjoin_order::order_clauses_for_layer(encoder, layer_seed, first_layer);
     construct_dd_clause_linear(bdd, layer_primitives, layer_bdd_idx, true);
     bdd.reduce_heap();
 
@@ -83,7 +83,8 @@ void construct_bdd_by_layer_unidirectional(bdd_container &bdd, cnf_encoder &enco
 
     // build the bdd for the foundation bdd
     LOG_MESSAGE(log_level::info) << "Start building initial state foundation BDD";
-    std::vector<logic_primitive> foundation_primitives = conjoin_order::order_clauses_for_foundation(encoder, ini_seed);
+    std::vector<logic_primitive> foundation_primitives =
+        conjoin_order::order_clauses_for_foundation(encoder, ini_seed, options.timesteps);
     construct_dd_clause_linear(bdd, foundation_primitives, main_bdd_idx, true);
 
     // build the main bdd layer by layer
@@ -102,7 +103,7 @@ void construct_bdd_by_layer_unidirectional(bdd_container &bdd, cnf_encoder &enco
                 // build from scratch
                 bdd.clear_bdd(layer_bdd_idx);
                 std::vector<logic_primitive> layer_primitives =
-                    conjoin_order::order_clauses_for_layer(encoder, curr_layer + permutation_direction, layer_seed);
+                    conjoin_order::order_clauses_for_layer(encoder, layer_seed, curr_layer + permutation_direction);
                 construct_dd_clause_linear(bdd, layer_primitives, layer_bdd_idx, true);
             }
         }
@@ -143,7 +144,7 @@ void construct_bdd_by_layer_bidirectional(bdd_container &bdd, cnf_encoder &encod
     const int first_layer = 0;
     LOG_MESSAGE(log_level::info) << "Building first layer";
     std::vector<logic_primitive> layer_primitives =
-        conjoin_order::order_clauses_for_layer(encoder, first_layer, layer_seed);
+        conjoin_order::order_clauses_for_layer(encoder, layer_seed, first_layer);
     construct_dd_clause_linear(bdd, layer_primitives, layer_bdd_idx, true);
     bdd.reduce_heap();
 
@@ -154,11 +155,11 @@ void construct_bdd_by_layer_bidirectional(bdd_container &bdd, cnf_encoder &encod
     // build the bdd for the foundations
     LOG_MESSAGE(log_level::info) << "Start building initial state foundation BDD";
     std::vector<logic_primitive> init_foundation_primitives =
-        conjoin_order::order_clauses_for_foundation(encoder, ini_seed);
+        conjoin_order::order_clauses_for_foundation(encoder, ini_seed, options.timesteps);
     construct_dd_clause_linear(bdd, init_foundation_primitives, main_begin_idx, true);
     LOG_MESSAGE(log_level::info) << "Start building goal foundation BDD";
     std::vector<logic_primitive> goal_foundation_primitives =
-        conjoin_order::order_clauses_for_foundation(encoder, goal_seed);
+        conjoin_order::order_clauses_for_foundation(encoder, goal_seed, options.timesteps);
     construct_dd_clause_linear(bdd, goal_foundation_primitives, main_end_idx, true);
 
     int t_begin = 0;
@@ -182,7 +183,7 @@ void construct_bdd_by_layer_bidirectional(bdd_container &bdd, cnf_encoder &encod
                 } else {
                     bdd.clear_bdd(layer_bdd_idx);
                     std::vector<logic_primitive> layer_primitives =
-                        conjoin_order::order_clauses_for_layer(encoder, t_begin, layer_seed);
+                        conjoin_order::order_clauses_for_layer(encoder, layer_seed, t_begin);
                     construct_dd_clause_linear(bdd, layer_primitives, layer_bdd_idx, true);
                 }
             }
@@ -204,7 +205,7 @@ void construct_bdd_by_layer_bidirectional(bdd_container &bdd, cnf_encoder &encod
                 } else {
                     bdd.clear_bdd(layer_bdd_idx);
                     std::vector<logic_primitive> layer_primitives =
-                        conjoin_order::order_clauses_for_layer(encoder, t_end, layer_seed);
+                        conjoin_order::order_clauses_for_layer(encoder, layer_seed, t_end);
                     construct_dd_clause_linear(bdd, layer_primitives, layer_bdd_idx, true);
                 }
             }
@@ -258,7 +259,8 @@ void construct_dd_by_layer_exponentially(bdd_container &bdd, cnf_encoder &encode
 
     // build the bdd for the foundation bdd
     LOG_MESSAGE(log_level::info) << "Start building initial state foundation BDD";
-    std::vector<logic_primitive> foundation_primitives = conjoin_order::order_clauses_for_foundation(encoder, ini_seed);
+    std::vector<logic_primitive> foundation_primitives =
+        conjoin_order::order_clauses_for_foundation(encoder, ini_seed, options.timesteps);
     construct_dd_clause_linear(bdd, foundation_primitives, main_bdd_idx, true);
 
     // information about the block we want to build next
@@ -267,7 +269,7 @@ void construct_dd_by_layer_exponentially(bdd_container &bdd, cnf_encoder &encode
 
     LOG_MESSAGE(log_level::info) << "Building first layer";
     std::vector<logic_primitive> layer_primitives =
-        conjoin_order::order_clauses_for_layer(encoder, curr_block_idx, layer_seed);
+        conjoin_order::order_clauses_for_layer(encoder, layer_seed, curr_block_idx);
     construct_dd_clause_linear(bdd, layer_primitives, curr_block_idx + 2, true);
     bdd.reduce_heap();
     curr_block_size *= 2;

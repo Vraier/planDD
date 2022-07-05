@@ -70,8 +70,8 @@ std::vector<logic_primitive> order_all_clauses(cnf_encoder &encoder, option_valu
     }
 
     // contains the result at the end
-    std::vector<logic_primitive> interleved_clauses;
-    std::vector<logic_primitive> total_clauses;
+    std::vector<logic_primitive> interleaved_primitives;
+    std::vector<logic_primitive> total_primitives;
 
     // split the order into first and second part (in a really complicated manner)
     std::stringstream ss(build_order);
@@ -87,7 +87,7 @@ std::vector<logic_primitive> order_all_clauses(cnf_encoder &encoder, option_valu
 
             std::vector<logic_primitive> temp_clauses =
                 collect_primitives_for_single_timestep(encoder, current_char, t);
-            interleved_clauses.insert(interleved_clauses.end(), temp_clauses.begin(), temp_clauses.end());
+            interleaved_primitives.insert(interleaved_primitives.end(), temp_clauses.begin(), temp_clauses.end());
         }
     }
 
@@ -95,23 +95,23 @@ std::vector<logic_primitive> order_all_clauses(cnf_encoder &encoder, option_valu
         char current_char = disjoin_order[i];
         // add the interleved part
         if (current_char == 'x') {
-            total_clauses.insert(total_clauses.end(), interleved_clauses.begin(), interleved_clauses.end());
+            total_primitives.insert(total_primitives.end(), interleaved_primitives.begin(), interleaved_primitives.end());
             continue;
         }
 
         std::vector<logic_primitive> temp_clauses =
             collect_primitives_for_all_timesteps(encoder, current_char, options.timesteps);
-        total_clauses.insert(total_clauses.end(), temp_clauses.begin(), temp_clauses.end());
+        total_primitives.insert(total_primitives.end(), temp_clauses.begin(), temp_clauses.end());
     }
 
     // this reverses the order of the clauses. It allows the variables with the highes timesteps to be conjoined first
     if (options.reverse_order) {
         LOG_MESSAGE(log_level::info) << "Reversing order of the logic primitives";
-        std::reverse(total_clauses.begin(), total_clauses.end());
+        std::reverse(total_primitives.begin(), total_primitives.end());
     }
 
-    LOG_MESSAGE(log_level::info) << "Ordered a total of " << total_clauses.size() << " clauses";
-    return total_clauses;
+    LOG_MESSAGE(log_level::info) << "Ordered a total of " << total_primitives.size() << " primitives";
+    return total_primitives;
 }
 
 std::vector<logic_primitive> order_clauses_for_layer(cnf_encoder &encoder, std::string &order_string, int layer) {
