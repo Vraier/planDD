@@ -16,7 +16,7 @@ std::map<char, primitive_tag> char_tag_map = {
 
 bool is_valid_conjoin_order_string(std::string &build_order) {
     // check if string is permutation
-    std::string standart_permutation = "grtyumix:pec:";
+    std::string standart_permutation = "igrymx:pec:";
     if (!std::is_permutation(build_order.begin(), build_order.end(), standart_permutation.begin(),
                              standart_permutation.end())) {
         LOG_MESSAGE(log_level::error) << "Build order has to be a permutation of " + standart_permutation + " but is "
@@ -75,9 +75,10 @@ std::vector<logic_primitive> order_all_clauses(cnf_encoder &encoder, option_valu
 
     // split the order into first and second part (in a really complicated manner)
     std::stringstream ss(build_order);
-    std::string disjoin_order, interleaved_order;
+    std::string disjoin_order, interleaved_order, tail_part;
     std::getline(ss, disjoin_order, ':');
     std::getline(ss, interleaved_order, ':');
+    std::getline(ss, tail_part, ':');
 
     // sort the interleaved part
     for (int t = 0; t <= options.timesteps; t++) {
@@ -98,7 +99,8 @@ std::vector<logic_primitive> order_all_clauses(cnf_encoder &encoder, option_valu
             continue;
         }
 
-        std::vector<logic_primitive> temp_clauses = collect_primitives_for_all_timesteps(encoder, current_char);
+        std::vector<logic_primitive> temp_clauses =
+            collect_primitives_for_all_timesteps(encoder, current_char, options.timesteps);
         total_clauses.insert(total_clauses.end(), temp_clauses.begin(), temp_clauses.end());
     }
 
@@ -112,20 +114,19 @@ std::vector<logic_primitive> order_all_clauses(cnf_encoder &encoder, option_valu
     return total_clauses;
 }
 
-std::vector<tagged_logic_primitiv> order_clauses_for_layer(planning_logic::formula &cnf, int layer,
-                                                           std::string &order_string) {
+std::vector<logic_primitive> order_clauses_for_layer(cnf_encoder &encoder, std::string &order_string, int layer) {
     LOG_MESSAGE(log_level::info) << "Ordering clauses for single layer " << layer;
 
     // contains the result at the end
-    std::vector<tagged_logic_primitiv> result_clauses;
-    std::vector<tagged_logic_primitiv> temp_clauses;
+    std::vector<logic_primitive> result_clauses;
+    std::vector<logic_primitive> temp_clauses;
 
     for (char c : order_string) {
-        temp_clauses = collect_primitives_for_single_timestep(cnf, c, layer);
+        temp_clauses = collect_primitives_for_single_timestep(encoder, c, layer);
         // if we add at least or at most one var clauses, also do it for the second timestep
-        if (c == 'r' || c == 't' || c == 'y' || c == 'u' || c == 'm') {
+        if (c == 'r' || c == 'y' || c == 'm') {
             // does NOT conatin pec
-            std::vector<tagged_logic_primitiv> second_layer = collect_primitives_for_single_timestep(cnf, c, layer + 1);
+            std::vector<logic_primitive> second_layer = collect_primitives_for_single_timestep(encoder, c, layer + 1);
             temp_clauses.insert(temp_clauses.end(), second_layer.begin(), second_layer.end());
         }
         result_clauses.insert(result_clauses.end(), temp_clauses.begin(), temp_clauses.end());
@@ -136,16 +137,16 @@ std::vector<tagged_logic_primitiv> order_clauses_for_layer(planning_logic::formu
     return result_clauses;
 }
 
-std::vector<tagged_logic_primitiv> order_clauses_for_foundation(planning_logic::formula &cnf,
-                                                                std::string &order_string) {
+std::vector<logic_primitive> order_clauses_for_foundation(cnf_encoder &encoder, std::string &order_string,
+                                                          int timesteps) {
     LOG_MESSAGE(log_level::info) << "Ordering clauses for foundation";
 
     // contains the result at the end
-    std::vector<tagged_logic_primitiv> result_clauses;
-    std::vector<tagged_logic_primitiv> temp_clauses;
+    std::vector<logic_primitive> result_clauses;
+    std::vector<logic_primitive> temp_clauses;
 
     for (char c : order_string) {
-        temp_clauses = collect_primitives_for_all_timesteps(cnf, c);
+        temp_clauses = collect_primitives_for_all_timesteps(encoder, c, timesteps);
         result_clauses.insert(result_clauses.end(), temp_clauses.begin(), temp_clauses.end());
     }
 

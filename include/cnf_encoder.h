@@ -15,7 +15,6 @@ class cnf_encoder {
    public:
     cnf_encoder(option_values &options, sas_problem &problem, plan_to_cnf_map &symbol_map)
         : m_options(options), m_sas_problem(problem), m_symbol_map(symbol_map) {}
-    planning_logic::formula encode_cnf(int timesteps);
 
     std::vector<planning_logic::logic_primitive> get_logic_primitives(planning_logic::primitive_tag tag, int timestep);
 

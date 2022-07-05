@@ -8,51 +8,6 @@
 
 using namespace planning_logic;
 
-formula cnf_encoder::encode_cnf(int timesteps) {
-    LOG_MESSAGE(log_level::info) << "Start encoding SAS problem into CNF problem";
-    LOG_MESSAGE(log_level::info) << "Starting to generate all clauses for the CNF problem";
-
-    m_cnf = formula(timesteps);
-
-    initialize_symbol_map(timesteps);
-
-    construct_initial_state_clauses();
-
-    construct_goal_holds_clauses(timesteps);
-
-    // either use encoding as cnf or directly into dd
-    if (!m_options.exact_one_constraint) {
-        construct_at_least_one_value_clause(timesteps);
-
-        construct_at_most_one_value_clause(timesteps);
-
-        construct_at_least_one_action_clauses(timesteps);
-
-        construct_at_most_one_action_clauses(timesteps);
-    } else {
-        construct_exact_one_value_constraint(timesteps);
-
-        construct_exact_one_action_constraint(timesteps);
-    }
-
-    if (m_options.include_mutex) {
-        construct_mutex_clauses(timesteps);
-    }
-
-    construct_precondition_clauses(timesteps);
-
-    construct_effect_clauses(timesteps);
-
-    construct_frame_clauses(timesteps);
-
-    LOG_MESSAGE(log_level::info) << "Constructed a total of " << m_cnf.get_num_clauses() << " clauses";
-    LOG_MESSAGE(log_level::info) << "Constructed a total of " << m_cnf.get_num_constraints() << " constraints";
-    LOG_MESSAGE(log_level::info) << "Constructed a total of " << m_cnf.get_num_variables()
-                                 << " variables (with helper)";
-
-    return m_cnf;
-}
-
 std::vector<logic_primitive> cnf_encoder::get_logic_primitives(planning_logic::primitive_tag tag, int timestep) {
     switch (tag) {
         case ini_state:
@@ -315,6 +270,9 @@ std::vector<logic_primitive> cnf_encoder::construct_frame(int timestep) {
 
 // at every timestep it is not allowed for two values in a mutex to be true at the same time
 std::vector<logic_primitive> cnf_encoder::construct_mutex(int timestep) {
+    if(!m_options.include_mutex){
+        return std::vector<logic_primitive>();
+    }
     std::vector<logic_primitive> result;
 
     for (int m = 0; m < m_sas_problem.m_mutex_groups.size(); m++) {
@@ -412,9 +370,9 @@ std::vector<bool> cnf_encoder::parse_cnf_solution(std::string filepath) {
 
     while (int_val != 0) {
         int index = std::abs(int_val);
-        if (index > m_cnf.get_num_variables()) {
+        if (index > m_symbol_map.get_num_variables()) {
             LOG_MESSAGE(log_level::error) << "The assignment values are too big. Symbol map has size "
-                                          << m_cnf.get_num_variables() << " the assignment has value" << int_val;
+                                          << m_symbol_map.get_num_variables() << " the assignment has value" << int_val;
         }
         bool bool_val = (int_val > 0) ? true : false;
         assignment[index] = bool_val;
