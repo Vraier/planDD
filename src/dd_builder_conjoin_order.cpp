@@ -9,13 +9,9 @@ using namespace planning_logic;
 namespace conjoin_order {
 
 // used to interpret the order of clauses from the command line options
-std::map<char, primitive_tag> char_clause_tag_map = {
-    {'i', clause_ini_state}, {'g', clause_goal},  {'r', clause_al_var}, {'t', clause_am_var}, {'y', clause_al_op},
-    {'u', clause_am_op},     {'m', clause_mutex}, {'p', clause_precon}, {'e', clause_effect}, {'c', clause_frame},
-};
-std::map<char, eo_constraint_tag> char_constraint_tag_map = {
-    {'i', eo_none}, {'g', eo_none}, {'r', eo_var},  {'t', eo_none}, {'y', eo_op},
-    {'u', eo_none}, {'m', eo_none}, {'p', eo_none}, {'e', eo_none}, {'c', eo_none},
+std::map<char, primitive_tag> char_tag_map = {
+    {'i', ini_state}, {'g', goal},   {'r', eo_var}, {'y', eo_op},
+    {'m', mutex},     {'p', precon}, {'e', effect}, {'c', frame},
 };
 
 bool is_valid_conjoin_order_string(std::string &build_order) {
@@ -157,47 +153,22 @@ std::vector<tagged_logic_primitiv> order_clauses_for_foundation(planning_logic::
     return result_clauses;
 }
 
-std::vector<logic_primitive> collect_primitives_for_all_timesteps(cnf_encoder &encoder, char primitive_type, int timesteps) {
+std::vector<logic_primitive> collect_primitives_for_all_timesteps(cnf_encoder &encoder, char primitive_type,
+                                                                  int timesteps) {
     std::vector<logic_primitive> result_primitives;
-    primitive_tag clause_order_tag = char_clause_tag_map[primitive_type];
-    eo_constraint_tag constraint_order_tag = char_constraint_tag_map[primitive_type];
+    primitive_tag order_tag = char_tag_map[primitive_type];
 
-    for (int t = 0; t <= cnf.get_num_timesteps(); t++) {
-        tagged_clause curr_clause_category = std::make_tuple(clause_order_tag, t);
-        tagged_constraint curr_constraint_category = std::make_tuple(constraint_order_tag, t);
-
-        // add all the clauses for timestep t and tag order_tag
-        for (clause c : cnf.m_clause_map[curr_clause_category]) {
-            result_primitives.push_back(std::make_pair(c, logic_clause));
-        }
-        //  add the exactly one constraints for the at_least_var or at_leat_op
-        for (eo_constraint c : cnf.m_eo_constraint_map[curr_constraint_category]) {
-            result_primitives.push_back(std::make_pair(c, logic_eo));
-        }
+    for (int t = 0; t <= timesteps; t++) {
+        std::vector<logic_primitive> single_timestep = encoder.get_logic_primitives(order_tag, t);
+        result_primitives.insert(result_primitives.end(), single_timestep.begin(), single_timestep.end());
     }
-
     return result_primitives;
 }
 
 std::vector<logic_primitive> collect_primitives_for_single_timestep(cnf_encoder &encoder, char primitive_type,
                                                                     int timestep) {
-    std::vector<logic_primitive> result_primitives;
-    primitive_tag clause_order_tag = char_clause_tag_map[primitive_type];
-    eo_constraint_tag constraint_order_tag = char_constraint_tag_map[primitive_type];
-
-    tagged_clause curr_clause_category = std::make_tuple(clause_order_tag, timestep);
-    tagged_constraint curr_constraint_category = std::make_tuple(constraint_order_tag, timestep);
-
-    // add all the clauses for timestep t and tag order_tag
-    for (clause c : cnf.m_clause_map[curr_clause_category]) {
-        result_primitives.push_back(std::make_pair(c, logic_clause));
-    }
-    //  add the exactly one constraints for the at_least_var or at_leat_op
-    for (eo_constraint c : cnf.m_eo_constraint_map[curr_constraint_category]) {
-        result_primitives.push_back(std::make_pair(c, logic_eo));
-    }
-
-    return result_primitives;
+    primitive_tag order_tag = char_tag_map[primitive_type];
+    return encoder.get_logic_primitives(order_tag, timestep);
 }
 
 };  // namespace conjoin_order

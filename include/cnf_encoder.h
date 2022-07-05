@@ -17,15 +17,17 @@ class cnf_encoder {
         : m_options(options), m_sas_problem(problem), m_symbol_map(symbol_map) {}
     planning_logic::formula encode_cnf(int timesteps);
 
+    std::vector<planning_logic::logic_primitive> get_logic_primitives(planning_logic::primitive_tag tag, int timestep);
+
     // These methods generate all the logic primitives that represent the planning problem
-    std::vector<logic_primitive> construct_initial_state();
-    std::vector<logic_primitive> construct_goal(int timestep);
-    std::vector<logic_primitive> construct_exact_one_value(int timestep);
-    std::vector<logic_primitive> construct_exact_one_action(int timestep);
-    std::vector<logic_primitive> construct_mutex(int timestep);
-    std::vector<logic_primitive> construct_precondition(int timestep);
-    std::vector<logic_primitive> construct_effect(int timestep);
-    std::vector<logic_primitive> construct_frame(int timestep);
+    std::vector<planning_logic::logic_primitive> construct_initial_state();
+    std::vector<planning_logic::logic_primitive> construct_goal(int timestep);
+    std::vector<planning_logic::logic_primitive> construct_exact_one_value(int timestep);
+    std::vector<planning_logic::logic_primitive> construct_exact_one_action(int timestep);
+    std::vector<planning_logic::logic_primitive> construct_mutex(int timestep);
+    std::vector<planning_logic::logic_primitive> construct_precondition(int timestep);
+    std::vector<planning_logic::logic_primitive> construct_effect(int timestep);
+    std::vector<planning_logic::logic_primitive> construct_frame(int timestep);
 
     // parses a cnf solution from minisat into a bool vector
     // assignemnt gives the truth value for the ith variable (index 0 of assignment has no meaningful value)

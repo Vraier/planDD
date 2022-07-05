@@ -11,10 +11,8 @@ enum logic_primitive_type {
 enum primitive_tag {
     ini_state,
     goal,
-    al_var,  // at least one var is true
-    am_var,  // at most one var is true
-    al_op,
-    am_op,
+    eo_var,  // exact one var is true
+    eo_op,
     mutex,
     precon,
     effect,

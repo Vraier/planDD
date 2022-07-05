@@ -53,6 +53,289 @@ formula cnf_encoder::encode_cnf(int timesteps) {
     return m_cnf;
 }
 
+std::vector<logic_primitive> cnf_encoder::get_logic_primitives(planning_logic::primitive_tag tag, int timestep) {
+    switch (tag) {
+        case ini_state:
+            if (timestep == 0) {
+                return construct_initial_state();
+            } else {
+                return std::vector<logic_primitive>();
+            }
+        case goal:
+            return construct_goal(timestep);
+        case eo_var:
+            return construct_exact_one_value(timestep);
+        case eo_op:
+            return construct_exact_one_action(timestep);
+        case mutex:
+            return construct_mutex(timestep);
+        case precon:
+            return construct_precondition(timestep);
+        case effect:
+            return construct_effect(timestep);
+        case frame:
+            return construct_frame(timestep);
+        case none:
+        default:
+            return std::vector<logic_primitive>();
+    }
+}
+
+void cnf_encoder::initialize_symbol_map(int timesteps) {
+    for (int t = 0; t <= timesteps; t++) {
+        // construct all variables indizes
+        for (int var = 0; var < m_sas_problem.m_variabels.size(); var++) {
+            for (int val = 0; val < m_sas_problem.m_variabels[var].m_range; val++) {
+                m_symbol_map.get_variable_index(variable_plan_var, t, var, val);
+            }
+        }
+        // construct action indizes
+        if (t != timesteps) {
+            for (int op = 0; op < m_sas_problem.m_operators.size(); op++) {
+                m_symbol_map.get_variable_index(variable_plan_op, t, op);
+            }
+        }
+    }
+    LOG_MESSAGE(log_level::info) << "Constructed " << m_symbol_map.get_num_variables()
+                                 << " during symbol map initialization";
+}
+
+// The initial state must hold at t = 0.
+std::vector<logic_primitive> cnf_encoder::construct_initial_state() {
+    std::vector<logic_primitive> result;
+
+    for (int var = 0; var < m_sas_problem.m_variabels.size(); var++) {
+        for (int val = 0; val < m_sas_problem.m_variabels[var].m_range; val++) {
+            std::vector<int> new_clause;
+            int sym_index = m_symbol_map.get_variable_index(variable_plan_var, 0, var, val);
+            if (m_sas_problem.m_initial_state[var] == val) {
+                new_clause.push_back(sym_index);
+            } else {
+                new_clause.push_back(-sym_index);
+            }
+
+            result.push_back(logic_primitive(logic_clause, ini_state, 0, new_clause));
+        }
+    }
+
+    return result;
+}
+
+// The goal g holds at step n
+std::vector<logic_primitive> cnf_encoder::construct_goal(int timestep) {
+    std::vector<logic_primitive> result;
+
+    for (int g = 0; g < m_sas_problem.m_goal.size(); g++) {
+        std::vector<int> new_clause;
+        std::pair<int, int> goal_value = m_sas_problem.m_goal[g];
+        int index_var =
+            m_symbol_map.get_variable_index(variable_plan_var, timestep, goal_value.first, goal_value.second);
+
+        new_clause.push_back(index_var);
+        result.push_back(logic_primitive(logic_clause, goal, timestep, new_clause));
+    }
+
+    return result;
+}
+
+// At every timestep a sas variable has at least one value
+std::vector<logic_primitive> cnf_encoder::construct_exact_one_value(int timestep) {
+    std::vector<logic_primitive> result;
+
+    if (m_options.exact_one_constraint) {
+        for (int v = 0; v < m_sas_problem.m_variabels.size(); v++) {
+            std::vector<int> exact_one_should_be_true;
+            for (int val = 0; val < m_sas_problem.m_variabels[v].m_range; val++) {
+                int index = m_symbol_map.get_variable_index(variable_plan_var, timestep, v, val);
+                exact_one_should_be_true.push_back(index);
+            }
+
+            result.push_back(logic_primitive(logic_eo, eo_var, timestep, exact_one_should_be_true));
+        }
+    } else {
+        for (int v = 0; v < m_sas_problem.m_variabels.size(); v++) {
+            std::vector<int> exact_one_should_be_true;
+            for (int val = 0; val < m_sas_problem.m_variabels[v].m_range; val++) {
+                int index = m_symbol_map.get_variable_index(variable_plan_var, timestep, v, val);
+                exact_one_should_be_true.push_back(index);
+            }
+
+            // at least one true
+            result.push_back(logic_primitive(logic_clause, eo_var, timestep, exact_one_should_be_true));
+
+            // at most one true
+            std::vector<std::vector<int>> constrain_clauses =
+                generate_at_most_one_constraint(exact_one_should_be_true, variable_h_amost_variable, timestep);
+            for (std::vector<int> constraint : constrain_clauses) {
+                result.push_back(logic_primitive(logic_clause, eo_var, timestep, constraint));
+            }
+        }
+    }
+
+    return result;
+}
+
+// At every step, at least one action is applied
+std::vector<logic_primitive> cnf_encoder::construct_exact_one_action(int timestep) {
+    std::vector<logic_primitive> result;
+
+    if (m_options.exact_one_constraint) {
+        std::vector<int> exact_one_should_be_true;
+        for (int op = 0; op < m_sas_problem.m_operators.size(); op++) {
+            int index = m_symbol_map.get_variable_index(variable_plan_op, timestep, op);
+            exact_one_should_be_true.push_back(index);
+        }
+        result.push_back(logic_primitive(logic_eo, eo_op, timestep, exact_one_should_be_true));
+    } else {
+        std::vector<int> exact_one_should_be_true;
+        for (int op = 0; op < m_sas_problem.m_operators.size(); op++) {
+            int sym_index = m_symbol_map.get_variable_index(variable_plan_op, timestep, op);
+            exact_one_should_be_true.push_back(sym_index);
+        }
+
+        // at least one true
+        result.push_back(logic_primitive(logic_clause, eo_op, timestep, exact_one_should_be_true));
+
+        // at most one true
+        std::vector<std::vector<int>> constrain_clauses =
+            generate_at_most_one_constraint(exact_one_should_be_true, variable_h_amost_operator, timestep);
+        for (std::vector<int> constraint : constrain_clauses) {
+            result.push_back(logic_primitive(logic_clause, eo_op, timestep, constraint));
+        }
+    }
+
+    return result;
+}
+
+// If action a is applied at step t, then pre(a) holds at step t.
+std::vector<logic_primitive> cnf_encoder::construct_precondition(int timestep) {
+    std::vector<logic_primitive> result;
+
+    for (int op = 0; op < m_sas_problem.m_operators.size(); op++) {
+        for (int eff = 0; eff < m_sas_problem.m_operators[op].m_effects.size(); eff++) {
+            int effected_var, effected_old_val;
+            effected_var = std::get<0>(m_sas_problem.m_operators[op].m_effects[eff]);
+            effected_old_val = std::get<1>(m_sas_problem.m_operators[op].m_effects[eff]);
+            if (effected_old_val == -1) {
+                // a value of -1 the value of the variable is irrelevant,
+                // when determining if it is applicable
+                continue;
+            }
+
+            int index_op, index_precondition;
+            index_op = m_symbol_map.get_variable_index(variable_plan_op, timestep, op);
+            index_precondition =
+                m_symbol_map.get_variable_index(variable_plan_var, timestep, effected_var, effected_old_val);
+
+            std::vector<int> new_clause;
+            new_clause.push_back(-index_op);
+            new_clause.push_back(index_precondition);
+
+            result.push_back(logic_primitive(logic_clause, precon, timestep, new_clause));
+        }
+    }
+    return result;
+}
+
+// If action a is applied at step t, then eff(a) hold at step t + 1.
+std::vector<logic_primitive> cnf_encoder::construct_effect(int timestep) {
+    std::vector<logic_primitive> result;
+
+    for (int op = 0; op < m_sas_problem.m_operators.size(); op++) {
+        for (int eff = 0; eff < m_sas_problem.m_operators[op].m_effects.size(); eff++) {
+            int effected_var, effected_new_val;
+            effected_var = std::get<0>(m_sas_problem.m_operators[op].m_effects[eff]);
+            effected_new_val = std::get<2>(m_sas_problem.m_operators[op].m_effects[eff]);
+
+            int index_op, index_effect;
+            index_op = m_symbol_map.get_variable_index(variable_plan_op, timestep, op);
+            index_effect =
+                m_symbol_map.get_variable_index(variable_plan_var, timestep + 1, effected_var, effected_new_val);
+
+            std::vector<int> new_clause;
+            new_clause.push_back(-index_op);
+            new_clause.push_back(index_effect);
+
+            result.push_back(logic_primitive(logic_clause, effect, timestep, new_clause));
+        }
+    }
+    return result;
+}
+
+// TODO: make clauses less "restrictive", only chek if var changes from true to false
+// If atom p changes between steps t and t + 1, an action which supports this
+// change must be applied at t:
+std::vector<logic_primitive> cnf_encoder::construct_frame(int timestep) {
+    std::vector<logic_primitive> result;
+
+    for (int v = 0; v < m_sas_problem.m_variabels.size(); v++) {  // for every variable
+
+        // find all possible value changes of a variable
+        int domain_size = m_sas_problem.m_variabels[v].m_range;
+        for (int val1 = 0; val1 < domain_size; val1++) {
+            for (int val2 = 0; val2 < domain_size; val2++) {
+                if (val1 == val2) continue;  // skip if no value has changes
+
+                std::vector<int> new_clause;
+                int index_val1, index_val2;
+                index_val1 = m_symbol_map.get_variable_index(variable_plan_var, timestep, v, val1);
+                index_val2 = m_symbol_map.get_variable_index(variable_plan_var, timestep + 1, v, val2);
+                new_clause.push_back(-index_val1);
+                new_clause.push_back(-index_val2);
+
+                // find the actions that support this transition.
+                for (int op = 0; op < m_sas_problem.m_operators.size(); op++) {
+                    for (int i = 0; i < m_sas_problem.m_operators[op].m_effects.size(); i++) {
+                        std::tuple<int, int, int> op_eff = m_sas_problem.m_operators[op].m_effects[i];
+                        int effected_var, val_pre, val_post;
+                        effected_var = std::get<0>(op_eff);
+                        val_pre = std::get<1>(op_eff);
+                        val_post = std::get<2>(op_eff);
+
+                        // check if corrected variable is affected, it
+                        // changes to the right value, and it changes from
+                        // the right value if everything is met, add it to
+                        // the clause
+                        if ((effected_var == v) && (val_post == val2) && ((val_pre == val1) || (val_pre == -1))) {
+                            int index_possible_op = m_symbol_map.get_variable_index(variable_plan_op, timestep, op);
+                            new_clause.push_back(index_possible_op);
+                            // break; // this is a fishy break :D, therfore
+                            // i comment it out. Be we dont have to check
+                            // this operator anymore because it is already a
+                            // candidate
+                        }
+                    }
+                }
+                result.push_back(logic_primitive(logic_clause, frame, timestep, new_clause));
+            }
+        }
+    }
+    return result;
+}
+
+// at every timestep it is not allowed for two values in a mutex to be true at the same time
+std::vector<logic_primitive> cnf_encoder::construct_mutex(int timestep) {
+    std::vector<logic_primitive> result;
+
+    for (int m = 0; m < m_sas_problem.m_mutex_groups.size(); m++) {
+        std::vector<int> at_most_one_should_be_true;
+        for (int i = 0; i < m_sas_problem.m_mutex_groups[m].size(); i++) {
+            std::pair<int, int> var_val_pair = m_sas_problem.m_mutex_groups[m][i];
+            int index =
+                m_symbol_map.get_variable_index(variable_plan_var, timestep, var_val_pair.first, var_val_pair.second);
+            at_most_one_should_be_true.push_back(index);
+        }
+
+        std::vector<std::vector<int>> constrain_clauses =
+            generate_at_most_one_constraint(at_most_one_should_be_true, variable_h_amost_mutex, timestep);
+        for (std::vector<int> constraint : constrain_clauses) {
+            result.push_back(logic_primitive(logic_clause, mutex, timestep, constraint));
+        }
+    }
+
+    return result;
+}
+
 std::vector<std::vector<int>> cnf_encoder::generate_at_most_one_constraint(std::vector<int> &variables,
                                                                            variable_tag constraint_type, int timestep) {
     if (!m_options.use_ladder_encoding) {
@@ -104,261 +387,6 @@ std::vector<std::vector<int>> cnf_encoder::generate_at_most_one_constraint_pairw
         }
     }
     return all_new_clauses;
-}
-
-void cnf_encoder::initialize_symbol_map(int timesteps) {
-    for (int t = 0; t <= timesteps; t++) {
-        // construct all variables indizes
-        for (int var = 0; var < m_sas_problem.m_variabels.size(); var++) {
-            for (int val = 0; val < m_sas_problem.m_variabels[var].m_range; val++) {
-                m_symbol_map.get_variable_index(variable_plan_var, t, var, val);
-            }
-        }
-        // construct action indizes
-        if (t != timesteps) {
-            for (int op = 0; op < m_sas_problem.m_operators.size(); op++) {
-                m_symbol_map.get_variable_index(variable_plan_op, t, op);
-            }
-        }
-    }
-    LOG_MESSAGE(log_level::info) << "Constructed " << m_symbol_map.get_num_variables()
-                                 << " during symbol map initialization";
-}
-
-// The initial state must hold at t = 0.
-std::vector<logic_primitive> cnf_encoder::construct_initial_state() {
-    std::vector<logic_primitive> result;
-
-    for (int var = 0; var < m_sas_problem.m_variabels.size(); var++) {
-        for (int val = 0; val < m_sas_problem.m_variabels[var].m_range; val++) {
-            std::vector<int> new_clause;
-            int sym_index = m_symbol_map.get_variable_index(variable_plan_var, 0, var, val);
-            if (m_sas_problem.m_initial_state[var] == val) {
-                new_clause.push_back(sym_index);
-            } else {
-                new_clause.push_back(-sym_index);
-            }
-
-            result.push_back(logic_primitive(logic_clause, clause_ini_state, eo_none, 0, new_clause));
-        }
-    }
-
-    return result;
-}
-
-// The goal g holds at step n
-std::vector<logic_primitive> cnf_encoder::construct_goal(int timestep) {
-    std::vector<logic_primitive> result;
-
-    for (int g = 0; g < m_sas_problem.m_goal.size(); g++) {
-        std::vector<int> new_clause;
-        std::pair<int, int> goal_value = m_sas_problem.m_goal[g];
-        int index_var =
-            m_symbol_map.get_variable_index(variable_plan_var, timestep, goal_value.first, goal_value.second);
-
-        new_clause.push_back(index_var);
-        result.push_back(logic_primitive(logic_clause, clause_goal, eo_none, timestep, new_clause));
-    }
-
-    return result;
-}
-
-// At every timestep a sas variable has at least one value
-std::vector<logic_primitive> cnf_encoder::construct_exact_one_value(int timestep) {
-    std::vector<logic_primitive> result;
-
-    if (m_options.exact_one_constraint) {
-        for (int v = 0; v < m_sas_problem.m_variabels.size(); v++) {
-            std::vector<int> exact_one_should_be_true;
-            for (int val = 0; val < m_sas_problem.m_variabels[v].m_range; val++) {
-                int index = m_symbol_map.get_variable_index(variable_plan_var, timestep, v, val);
-                exact_one_should_be_true.push_back(index);
-            }
-
-            result.push_back(logic_primitive(logic_eo, clause_none, eo_var, timestep, exact_one_should_be_true));
-        }
-    } else {
-        for (int v = 0; v < m_sas_problem.m_variabels.size(); v++) {
-            std::vector<int> exact_one_should_be_true;
-            for (int val = 0; val < m_sas_problem.m_variabels[v].m_range; val++) {
-                int index = m_symbol_map.get_variable_index(variable_plan_var, timestep, v, val);
-                exact_one_should_be_true.push_back(index);
-            }
-
-            // at least one true
-            result.push_back(logic_primitive(logic_clause, clause_al_var, eo_none, timestep, exact_one_should_be_true));
-
-            // at most one true
-            std::vector<std::vector<int>> constrain_clauses =
-                generate_at_most_one_constraint(exact_one_should_be_true, variable_h_amost_variable, timestep);
-            for (std::vector<int> constraint : constrain_clauses) {
-                result.push_back(logic_primitive(logic_clause, clause_am_var, eo_none, timestep, constraint));
-            }
-        }
-    }
-
-    return result;
-}
-
-// At every step, at least one action is applied
-std::vector<logic_primitive> cnf_encoder::construct_exact_one_action(int timestep) {
-    std::vector<logic_primitive> result;
-
-    if (m_options.exact_one_constraint) {
-        std::vector<int> exact_one_should_be_true;
-        for (int op = 0; op < m_sas_problem.m_operators.size(); op++) {
-            int index = m_symbol_map.get_variable_index(variable_plan_op, timestep, op);
-            exact_one_should_be_true.push_back(index);
-        }
-        result.push_back(logic_primitive(logic_eo, clause_none, eo_op, timestep, exact_one_should_be_true));
-    } else {
-        std::vector<int> exact_one_should_be_true;
-        for (int op = 0; op < m_sas_problem.m_operators.size(); op++) {
-            int sym_index = m_symbol_map.get_variable_index(variable_plan_op, timestep, op);
-            exact_one_should_be_true.push_back(sym_index);
-        }
-
-        // at least one true
-        result.push_back(logic_primitive(logic_clause, clause_al_op, eo_none, timestep, exact_one_should_be_true));
-
-        // at most one true
-        std::vector<std::vector<int>> constrain_clauses =
-            generate_at_most_one_constraint(exact_one_should_be_true, variable_h_amost_operator, timestep);
-        for (std::vector<int> constraint : constrain_clauses) {
-            result.push_back(logic_primitive(logic_clause, clause_am_op, eo_none, timestep, constraint));
-        }
-    }
-
-    return result;
-}
-
-// If action a is applied at step t, then pre(a) holds at step t.
-std::vector<logic_primitive> cnf_encoder::construct_precondition(int timestep) {
-    std::vector<logic_primitive> result;
-
-    for (int op = 0; op < m_sas_problem.m_operators.size(); op++) {
-        for (int eff = 0; eff < m_sas_problem.m_operators[op].m_effects.size(); eff++) {
-            int effected_var, effected_old_val;
-            effected_var = std::get<0>(m_sas_problem.m_operators[op].m_effects[eff]);
-            effected_old_val = std::get<1>(m_sas_problem.m_operators[op].m_effects[eff]);
-            if (effected_old_val == -1) {
-                // a value of -1 the value of the variable is irrelevant,
-                // when determining if it is applicable
-                continue;
-            }
-
-            int index_op, index_precondition;
-            index_op = m_symbol_map.get_variable_index(variable_plan_op, timestep, op);
-            index_precondition =
-                m_symbol_map.get_variable_index(variable_plan_var, timestep, effected_var, effected_old_val);
-
-            std::vector<int> new_clause;
-            new_clause.push_back(-index_op);
-            new_clause.push_back(index_precondition);
-
-            result.push_back(logic_primitive(logic_clause, clause_precon, eo_none, timestep, new_clause));
-        }
-    }
-    return result;
-}
-
-// If action a is applied at step t, then eff(a) hold at step t + 1.
-std::vector<logic_primitive> cnf_encoder::construct_effect(int timestep) {
-    std::vector<logic_primitive> result;
-
-    for (int op = 0; op < m_sas_problem.m_operators.size(); op++) {
-        for (int eff = 0; eff < m_sas_problem.m_operators[op].m_effects.size(); eff++) {
-            int effected_var, effected_new_val;
-            effected_var = std::get<0>(m_sas_problem.m_operators[op].m_effects[eff]);
-            effected_new_val = std::get<2>(m_sas_problem.m_operators[op].m_effects[eff]);
-
-            int index_op, index_effect;
-            index_op = m_symbol_map.get_variable_index(variable_plan_op, timestep, op);
-            index_effect =
-                m_symbol_map.get_variable_index(variable_plan_var, timestep + 1, effected_var, effected_new_val);
-
-            std::vector<int> new_clause;
-            new_clause.push_back(-index_op);
-            new_clause.push_back(index_effect);
-
-            result.push_back(logic_primitive(logic_clause, clause_effect, eo_none, timestep, new_clause));
-        }
-    }
-    return result;
-}
-
-// TODO: make clauses less "restrictive", only chek if var changes from true to false
-// If atom p changes between steps t and t + 1, an action which supports this
-// change must be applied at t:
-std::vector<logic_primitive> cnf_encoder::construct_frame(int timestep) {
-    std::vector<logic_primitive> result;
-
-    for (int v = 0; v < m_sas_problem.m_variabels.size(); v++) {  // for every variable
-
-        // find all possible value changes of a variable
-        int domain_size = m_sas_problem.m_variabels[v].m_range;
-        for (int val1 = 0; val1 < domain_size; val1++) {
-            for (int val2 = 0; val2 < domain_size; val2++) {
-                if (val1 == val2) continue;  // skip if no value has changes
-
-                std::vector<int> new_clause;
-                int index_val1, index_val2;
-                index_val1 = m_symbol_map.get_variable_index(variable_plan_var, timestep, v, val1);
-                index_val2 = m_symbol_map.get_variable_index(variable_plan_var, timestep + 1, v, val2);
-                new_clause.push_back(-index_val1);
-                new_clause.push_back(-index_val2);
-
-                // find the actions that support this transition.
-                for (int op = 0; op < m_sas_problem.m_operators.size(); op++) {
-                    for (int i = 0; i < m_sas_problem.m_operators[op].m_effects.size(); i++) {
-                        std::tuple<int, int, int> op_eff = m_sas_problem.m_operators[op].m_effects[i];
-                        int effected_var, val_pre, val_post;
-                        effected_var = std::get<0>(op_eff);
-                        val_pre = std::get<1>(op_eff);
-                        val_post = std::get<2>(op_eff);
-
-                        // check if corrected variable is affected, it
-                        // changes to the right value, and it changes from
-                        // the right value if everything is met, add it to
-                        // the clause
-                        if ((effected_var == v) && (val_post == val2) && ((val_pre == val1) || (val_pre == -1))) {
-                            int index_possible_op = m_symbol_map.get_variable_index(variable_plan_op, timestep, op);
-                            new_clause.push_back(index_possible_op);
-                            // break; // this is a fishy break :D, therfore
-                            // i comment it out. Be we dont have to check
-                            // this operator anymore because it is already a
-                            // candidate
-                        }
-                    }
-                }
-                result.push_back(logic_primitive(logic_clause, clause_frame, eo_none, timestep, new_clause));
-            }
-        }
-    }
-    return result;
-}
-
-// at every timestep it is not allowed for two values in a mutex to be true at the same time
-std::vector<logic_primitive> cnf_encoder::construct_mutex(int timestep) {
-    std::vector<logic_primitive> result;
-
-    for (int m = 0; m < m_sas_problem.m_mutex_groups.size(); m++) {
-        std::vector<int> at_most_one_should_be_true;
-        for (int i = 0; i < m_sas_problem.m_mutex_groups[m].size(); i++) {
-            std::pair<int, int> var_val_pair = m_sas_problem.m_mutex_groups[m][i];
-            int index =
-                m_symbol_map.get_variable_index(variable_plan_var, timestep, var_val_pair.first, var_val_pair.second);
-            at_most_one_should_be_true.push_back(index);
-        }
-
-        std::vector<std::vector<int>> constrain_clauses =
-            generate_at_most_one_constraint(at_most_one_should_be_true, variable_h_amost_mutex, timestep);
-        for (std::vector<int> constraint : constrain_clauses) {
-            result.push_back(logic_primitive(logic_clause, clause_mutex, eo_none, timestep, constraint));
-        }
-    }
-
-    return result;
 }
 
 // This call depends on the correct symbol map.
@@ -470,8 +498,7 @@ void cnf_encoder::decode_cnf_solution(std::vector<bool> &assignment, int num_tim
         int goal_var, goal_val, goal_idx;
         goal_var = m_sas_problem.m_goal[g].first;
         goal_val = m_sas_problem.m_goal[g].second;
-        goal_idx =
-            m_symbol_map.get_variable_index_without_adding(variable_plan_var, num_timesteps, goal_var, goal_val);
+        goal_idx = m_symbol_map.get_variable_index_without_adding(variable_plan_var, num_timesteps, goal_var, goal_val);
         std::cout << "Variable " << m_sas_problem.m_variabels[goal_var].m_name << " has value "
                   << m_sas_problem.m_variabels[goal_var].m_symbolic_names[goal_val];
         if (assignment[goal_idx]) {
@@ -484,7 +511,8 @@ void cnf_encoder::decode_cnf_solution(std::vector<bool> &assignment, int num_tim
 
 void cnf_encoder::compare_assignments(std::vector<bool> &assignment1, std::vector<bool> &assignment2) {
     LOG_MESSAGE(log_level::info) << "Comparing two assignments. Size of cnf variables and assignment one and two is: "
-                                 << m_symbol_map.get_num_variables() << " " << assignment1.size() << " " << assignment2.size();
+                                 << m_symbol_map.get_num_variables() << " " << assignment1.size() << " "
+                                 << assignment2.size();
 
     // TODO this will be fixed when i am finished with variable tagging.
     // At this point i hopelfully have a way to output variables uniformly
