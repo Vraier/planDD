@@ -105,13 +105,13 @@ int planDD::build_bdd(option_values opt_values) {
 
     planning_logic::plan_to_cnf_map symbol_map;
     cnf_encoder encoder(opt_values, parser.m_sas_problem, symbol_map);
+    encoder.initialize_symbol_map(opt_values.timesteps);
 
-    std::vector<int> var_order = variable_order::order_variables(clauses, opt_values);
-    bdd_container builder(1, clauses.get_num_variables());
+    std::vector<int> var_order = variable_order::order_variables(encoder, symbol_map, opt_values);
+    bdd_container builder(1, symbol_map.get_num_variables());
     builder.set_variable_order(var_order);
 
-    std::vector<conjoin_order::tagged_logic_primitiv> all_primitives =
-        conjoin_order::order_all_clauses(clauses, opt_values);
+    std::vector<planning_logic::logic_primitive> all_primitives = conjoin_order::order_all_clauses(encoder, opt_values);
     dd_builder::construct_dd_clause_linear(builder, all_primitives);
     builder.reduce_heap();
 
@@ -127,20 +127,21 @@ int planDD::build_bdd_by_layer(option_values opt_values) {
         return 0;
     }
 
-    cnf_encoder encoder(opt_values, parser.m_sas_problem);
-    planning_logic::formula clauses = encoder.encode_cnf(opt_values.timesteps);
+    planning_logic::plan_to_cnf_map symbol_map;
+    cnf_encoder encoder(opt_values, parser.m_sas_problem, symbol_map);
+    encoder.initialize_symbol_map(opt_values.timesteps);
 
-    std::vector<int> var_order = variable_order::order_variables(clauses, opt_values);
-    bdd_container main_builder(opt_values.timesteps + 2, clauses.get_num_variables());
+    std::vector<int> var_order = variable_order::order_variables(encoder, symbol_map, opt_values);
+    bdd_container main_builder(opt_values.timesteps + 2, symbol_map.get_num_variables());
     // TODO think about variable order here
     // main_builder.set_variable_order(var_order);
 
     if (opt_values.bidirectional) {
-        dd_builder::construct_bdd_by_layer_bidirectional(main_builder, clauses, opt_values);
+        dd_builder::construct_bdd_by_layer_bidirectional(main_builder, encoder, symbol_map, opt_values);
     } else if (opt_values.exponential) {
-        dd_builder::construct_dd_by_layer_exponentially(main_builder, clauses, opt_values);
+        dd_builder::construct_dd_by_layer_exponentially(main_builder, encoder, symbol_map, opt_values);
     } else {
-        dd_builder::construct_bdd_by_layer_unidirectional(main_builder, clauses, opt_values);
+        dd_builder::construct_bdd_by_layer_unidirectional(main_builder, encoder, symbol_map, opt_values);
     }
 
     main_builder.print_bdd_info();
@@ -155,21 +156,22 @@ int planDD::build_sdd(option_values opt_values) {
         return 0;
     }
 
-    cnf_encoder encoder(opt_values, parser.m_sas_problem);
-    planning_logic::formula clauses = encoder.encode_cnf(opt_values.timesteps);
+    planning_logic::plan_to_cnf_map symbol_map;
+    cnf_encoder encoder(opt_values, parser.m_sas_problem, symbol_map);
+    encoder.initialize_symbol_map(opt_values.timesteps);
 
     // encoder.write_cnf_to_file(opt_values.m_values.cnf_file, clauses);
-    sdd_manager builder(clauses.get_num_variables());
+    sdd_manager builder(symbol_map.get_num_variables());
     LOG_MESSAGE(log_level::info) << "Start building sdd";
 
-    std::vector<conjoin_order::tagged_logic_primitiv> all_primitives =
-        conjoin_order::order_all_clauses(clauses, opt_values);
+    std::vector<planning_logic::logic_primitive> all_primitives = conjoin_order::order_all_clauses(encoder, opt_values);
     dd_builder::construct_dd_clause_linear(builder, all_primitives);
     builder.print_sdd();
 
     return 0;
 }
 
+// TODO fix this
 int planDD::encode_cnf(option_values opt_values) {
     sas_parser parser(opt_values.sas_file);
     if (parser.start_parsing() == -1) {
@@ -177,22 +179,22 @@ int planDD::encode_cnf(option_values opt_values) {
         return 0;
     }
 
-    cnf_encoder encoder(opt_values, parser.m_sas_problem);
-    planning_logic::formula clauses = encoder.encode_cnf(opt_values.timesteps);
-    clauses.write_to_file(opt_values.cnf_file);
+    planning_logic::plan_to_cnf_map symbol_map;
+    cnf_encoder encoder(opt_values, parser.m_sas_problem, symbol_map);
+    encoder.initialize_symbol_map(opt_values.timesteps);
 
     return 0;
 }
 
 int planDD::cnf_to_bdd(option_values opt_values) {
-    std::tuple<int, int, std::vector<planning_logic::clause>> cnf_data =
+    std::tuple<int, int, std::vector<std::vector<int>>> cnf_data =
         planning_logic::formula::parse_cnf_file_to_clauses(opt_values.cnf_file);
     int num_variables = std::get<0>(cnf_data);
     // int num_clauses = std::get<1>(cnf_data);
-    std::vector<planning_logic::clause> clauses = std::get<2>(cnf_data);
+    std::vector<std::vector<int>> clauses = std::get<2>(cnf_data);
     bdd_container builder(1, num_variables);
 
-    for (planning_logic::clause c : clauses) {
+    for (std::vector<int> c : clauses) {
         builder.conjoin_clause(c);
     }
 
@@ -219,8 +221,9 @@ int planDD::cnf_to_bdd(option_values opt_values) {
     return 0;
 }
 
+// TODO fix?
 int planDD::single_minisat(option_values opt_values) {
-    sas_parser parser(opt_values.sas_file);
+    /*sas_parser parser(opt_values.sas_file);
     if (parser.start_parsing() == -1) {
         LOG_MESSAGE(log_level::error) << "Error while parsing sas_file";
         return 0;
@@ -236,11 +239,14 @@ int planDD::single_minisat(option_values opt_values) {
 
     std::vector<bool> assignment = encoder.parse_cnf_solution(opt_values.ass_file);
     encoder.decode_cnf_solution(assignment);
+    */
     return 0;
 }
 
+// TODO fix?
 int planDD::count_minisat(option_values opt_values) {
     // parse sas file
+    /*
     sas_parser parser(opt_values.sas_file);
     if (parser.start_parsing() == -1) {
         LOG_MESSAGE(log_level::error) << "Error while parsing sas_file";
@@ -287,6 +293,6 @@ int planDD::count_minisat(option_values opt_values) {
     }
 
     LOG_MESSAGE(log_level::debug) << "Found a total of " << num_solutions << " solutions";
-
+*/
     return 0;
 }

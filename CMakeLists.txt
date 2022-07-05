@@ -41,6 +41,7 @@ target_sources(planDD
 		"src/dd_builder.cpp" "src/logging.cpp" 
 		"src/options.cpp" "src/planDD.cpp"
 		"src/planning_logic_formula.cpp" "src/sas_parser.cpp" 
+		"src/plan_to_cnf_map.cpp" "src/logic_primitive.cpp" 
 		"src/sdd_container.cpp"
 		"src/fnf/compiler.c" "src/fnf/fnf.c" "src/fnf/io.c" "src/fnf/utils.c")
 

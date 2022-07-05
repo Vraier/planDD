@@ -8,17 +8,7 @@
 
 namespace planning_logic {
 
-void formula::add_primitive(logic_primitive primitive) {
-    if (primitive.m_type == logic_clause) {
-        m_clause_map[std::make_tuple(primitive.m_clause_tag, primitive.m_timestep)].push_back(primitive);
-        m_num_clauses++;
-    } else if (primitive.m_type == logic_eo) {
-        m_eo_constraint_map[std::make_tuple(primitive.m_eo_constraint_tag, primitive.m_timestep)].push_back(primitive);
-        m_num_eo_constraints++;
-    } else {
-        LOG_MESSAGE(log_level::error) << "Unknown primitive type";
-    }
-}
+
 
 int formula::get_num_variables() { return m_symbol_map.get_num_variables(); }
 int formula::get_num_clauses() { return m_num_clauses; }
@@ -75,27 +65,4 @@ std::tuple<int, int, std::vector<std::vector<int>>> formula::parse_cnf_file_to_c
     return std::make_tuple(num_variables, num_clauses, all_clauses);
 }
 
-void print_info_about_number_of_logic_primitives() {
-    // print info about how many clauses each tag has
-    for (int tag_int = clause_ini_state; tag_int <= clause_none; tag_int++) {
-        primitive_tag tag = static_cast<primitive_tag>(tag_int);
-
-        int total_clauses = 0;
-        for (int t = 0; t <= cnf.get_num_timesteps(); t++) {
-            total_clauses += cnf.m_clause_map[std::make_tuple(tag, t)].size();
-        }
-        LOG_MESSAGE(log_level::info) << "Categorized " << total_clauses << " clauses of tag " << tag;
-    }
-
-    // print info about how many constraints each tag has
-    for (int tag_int = eo_var; tag_int <= eo_none; tag_int++) {
-        eo_constraint_tag tag = static_cast<eo_constraint_tag>(tag_int);
-
-        int total_constraints = 0;
-        for (int t = 0; t <= cnf.get_num_timesteps(); t++) {
-            total_constraints += cnf.m_eo_constraint_map[std::make_tuple(tag, t)].size();
-        }
-        LOG_MESSAGE(log_level::info) << "Categorized " << total_constraints << " constraints of tag " << tag;
-    }
-}
 }  // namespace planning_logic
