@@ -32,6 +32,9 @@ class bdd_container : public virtual dd_buildable {
     bdd_container(int num_bdds, int num_variables);
     virtual ~bdd_container();
 
+    // check if the bdd is the zero node
+    bool is_constant_false(int bdd_index);
+
     // frees all the nodes under this bdd
     void clear_bdd(int bdd_index = 0);
     // adds a clause to the root node

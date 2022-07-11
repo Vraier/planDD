@@ -118,6 +118,10 @@ void bdd_container::clear_bdd(int bdd_index){
     Cudd_Ref(m_root_nodes[bdd_index]);
 }
 
+bool bdd_container::is_constant_false(int bdd_index){
+    return m_root_nodes[bdd_index] == Cudd_ReadLogicZero(m_bdd_manager);
+}
+
 void bdd_container::conjoin_clause(std::vector<int> &clause, int bdd_index) {
     // build the disjunction of the literals in the clause
     DdNode *var, *tmp;

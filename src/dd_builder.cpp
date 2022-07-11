@@ -16,7 +16,7 @@ void construct_dd_clause_linear(dd_buildable &dd, std::vector<logic_primitive> &
         planning_logic::logic_primitive primitive = logic_primitives[i];
 
         if (primitive.m_type == logic_clause) {
-            //std::cout << primitive.to_string() << std::endl;
+            // std::cout << primitive.to_string() << std::endl;
             dd.conjoin_clause(primitive.m_data, dd_index);
         } else if (primitive.m_type == logic_eo) {
             dd.add_exactly_one_constraint(primitive.m_data, dd_index);
@@ -310,6 +310,20 @@ void construct_dd_by_layer_exponentially(bdd_container &bdd, cnf_encoder &encode
     }
 
     LOG_MESSAGE(log_level::info) << "Finished constructing final DD";
+}
+
+bool check_if_goal_is_fullfilled(bdd_container &bdd, cnf_encoder &encoder, int main_idx, int temp_idx, int timestep) {
+    LOG_MESSAGE(log_level::info) << "Checking if goal is fulfilled in timestep " << timestep;
+    std::vector<logic_primitive> goal_primitives = encoder.get_logic_primitives(goal, timestep);
+    bdd.clear_bdd(temp_idx);
+    bdd.conjoin_two_bdds(main_idx, temp_idx, temp_idx);
+    construct_dd_clause_linear(bdd, goal_primitives, temp_idx, true);
+
+    bool is_fulfilled = bdd.is_constant_false(temp_idx) ? false : true;
+    bdd.clear_bdd(temp_idx);
+
+    LOG_MESSAGE(log_level::info) << "Goal is " << (is_fulfilled ? "" : "not") << " fulfilled";
+    return is_fulfilled;
 }
 
 }  // namespace dd_builder

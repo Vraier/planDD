@@ -11,11 +11,7 @@ using namespace planning_logic;
 std::vector<logic_primitive> cnf_encoder::get_logic_primitives(primitive_tag tag, int timestep) {
     switch (tag) {
         case ini_state:
-            if (timestep == 0) {
-                return construct_initial_state();
-            } else {
-                return std::vector<logic_primitive>();
-            }
+            return construct_initial_state();
         case goal:
             return construct_goal(timestep);
         case eo_var:
