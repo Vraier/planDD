@@ -139,7 +139,7 @@ std::vector<logic_primitive> order_clauses_for_layer(cnf_encoder &encoder, std::
 
         temp_clauses = collect_primitives_for_single_timestep(encoder, order_tag, layer);
         // if we add at least or at most one var clauses, also do it for the second timestep
-        if (c == 'r' || c == 'y' || c == 'm') {
+        if (c == 'r' || c == 'm') {
             // does NOT conatin pec
             std::vector<logic_primitive> second_layer =
                 collect_primitives_for_single_timestep(encoder, order_tag, layer + 1);
@@ -171,6 +171,7 @@ std::vector<logic_primitive> order_clauses_for_foundation(cnf_encoder &encoder, 
     return result_clauses;
 }
 
+// TODO fix this so it does only return t=0 for initial state
 std::vector<logic_primitive> collect_primitives_for_all_timesteps(cnf_encoder &encoder, primitive_tag primitive_type,
                                                                   int timesteps) {
     std::vector<logic_primitive> result_primitives;

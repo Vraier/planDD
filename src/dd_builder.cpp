@@ -6,9 +6,10 @@ using namespace planning_logic;
 
 namespace dd_builder {
 
+// TODO make the dd_buildable a return value and not an input
 void construct_dd_clause_linear(dd_buildable &dd, std::vector<logic_primitive> &logic_primitives, int dd_index,
                                 bool silent) {
-    LOG_MESSAGE(log_level::info) << "Start constructing DD";
+    LOG_MESSAGE(log_level::info) << "Start constructing DD by lineary adding logic primitives";
 
     // conjoin the clauses in the correct order
     int percent = 0;
@@ -312,7 +313,7 @@ void construct_dd_by_layer_exponentially(bdd_container &bdd, cnf_encoder &encode
     LOG_MESSAGE(log_level::info) << "Finished constructing final DD";
 }
 
-bool check_if_goal_is_fullfilled(bdd_container &bdd, cnf_encoder &encoder, int main_idx, int temp_idx, int timestep) {
+bool goal_is_fullfilled(bdd_container &bdd, cnf_encoder &encoder, int main_idx, int temp_idx, int timestep) {
     LOG_MESSAGE(log_level::info) << "Checking if goal is fulfilled in timestep " << timestep;
     std::vector<logic_primitive> goal_primitives = encoder.get_logic_primitives(goal, timestep);
     bdd.clear_bdd(temp_idx);
@@ -324,6 +325,41 @@ bool check_if_goal_is_fullfilled(bdd_container &bdd, cnf_encoder &encoder, int m
 
     LOG_MESSAGE(log_level::info) << "Goal is " << (is_fulfilled ? "" : "not") << " fulfilled";
     return is_fulfilled;
+}
+
+void construct_bdd_without_timesteps(bdd_container &bdd, cnf_encoder &encoder, plan_to_cnf_map &symbol_map,
+                                     option_values &options) {
+    LOG_MESSAGE(log_level::info) << "Building BDD without knowing the correct amount of timesteps";
+
+    // split the order into parts (in a really complicated manner)
+    std::stringstream ss(options.build_order);
+    std::string order;
+    std::getline(ss, order, ':');
+
+    // construct seed
+    std::vector<logic_primitive> temp = encoder.construct_initial_state();
+    construct_dd_clause_linear(bdd, temp, 0, true);
+    //temp = encoder.construct_exact_one_value(0);
+    //construct_dd_clause_linear(bdd, temp, 0, true);
+
+    int t = 0;
+    while(true){
+        if(goal_is_fullfilled(bdd, encoder, 0, 1, t)){
+            // add the goal to the main bdd
+            LOG_MESSAGE(log_level::info) << "Goal is fulfilled in layer " << t;
+            temp = encoder.construct_goal(t);
+            construct_dd_clause_linear(bdd, temp, 0, true);
+            bdd.m_num_variables = encoder.m_symbol_map.get_num_variables();
+            return;
+        } else {
+            // construct new bdd layer
+            LOG_MESSAGE(log_level::info) << "Extending layer " << t;
+            temp = conjoin_order::order_clauses_for_layer(encoder, order, t);
+            construct_dd_clause_linear(bdd, temp, 0, true);
+            t++;
+        }
+    }
+    LOG_MESSAGE(log_level::info) << "Finished constructing final DD";
 }
 
 }  // namespace dd_builder

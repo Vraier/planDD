@@ -106,16 +106,22 @@ int planDD::build_bdd(option_values opt_values) {
     cnf_encoder encoder(opt_values, parser.m_sas_problem);
     encoder.initialize_symbol_map(opt_values.timesteps);
 
-    //std::vector<int> var_order = variable_order::order_variables(encoder, encoder.m_symbol_map, opt_values);
-    bdd_container builder(1, encoder.m_symbol_map.get_num_variables());
-    //builder.set_variable_order(var_order);
+    // std::vector<int> var_order = variable_order::order_variables(encoder, encoder.m_symbol_map, opt_values);
+    bdd_container builder(2, encoder.m_symbol_map.get_num_variables());
+    // builder.set_variable_order(var_order);
 
-    std::vector<planning_logic::logic_primitive> all_primitives = conjoin_order::order_all_clauses(encoder, opt_values);
-    for(auto p: all_primitives){
-        std::cout << p.m_data.size() << " ";
+    if (opt_values.timesteps >= 0) {
+        std::vector<planning_logic::logic_primitive> all_primitives =
+            conjoin_order::order_all_clauses(encoder, opt_values);
+        for (auto p : all_primitives) {
+            std::cout << p.m_data.size() << " ";
+        }
+        dd_builder::construct_dd_clause_linear(builder, all_primitives, 0);
+        builder.reduce_heap();
+    } else {
+        dd_builder::construct_bdd_without_timesteps(builder, encoder, encoder.m_symbol_map, opt_values);
+        builder.reduce_heap();
     }
-    dd_builder::construct_dd_clause_linear(builder, all_primitives, 0);
-    builder.reduce_heap();
 
     builder.print_bdd_info();
     // builder.write_bdd_to_dot_file("normal_bdd.dot");

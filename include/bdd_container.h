@@ -17,6 +17,7 @@ extern "C" {
 
 // code wont compile if i #include <iostream> after util.h
 
+// TODO remove m_num_variables
 class bdd_container : public virtual dd_buildable {
    private:
     /* data */
@@ -24,9 +25,9 @@ class bdd_container : public virtual dd_buildable {
     // maps bdd index to the root nodes of the bdd
     // the oth entry is always the main bdd
     std::vector<DdNode *> m_root_nodes;
-    int m_num_variables;
 
    public:
+    int m_num_variables;
     // constructor for bdd manager. The number of used variables should be clear from the start
     // this is important for counting the number of solutions and variable ordering
     bdd_container(int num_bdds, int num_variables);
