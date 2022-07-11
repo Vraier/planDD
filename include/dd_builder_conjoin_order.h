@@ -27,9 +27,9 @@ std::vector<planning_logic::logic_primitive> order_clauses_for_foundation(cnf_en
 
 // helper methods:
 // find the primitives of all timesteps for a given primitive type. ordered by timesteps ascending
-std::vector<planning_logic::logic_primitive> collect_primitives_for_all_timesteps(cnf_encoder &encoder,
-                                                                                  char primitive_type, int timesteps);
+std::vector<planning_logic::logic_primitive> collect_primitives_for_all_timesteps(
+    cnf_encoder &encoder, planning_logic::primitive_tag primitive_type, int timesteps);
 // find the primitives of a specifiv timestep
-std::vector<planning_logic::logic_primitive> collect_primitives_for_single_timestep(cnf_encoder &encoder,
-                                                                                    char primitive_type, int timestep);
+std::vector<planning_logic::logic_primitive> collect_primitives_for_single_timestep(
+    cnf_encoder &encoder, planning_logic::primitive_tag primitive_type, int timestep);
 };  // namespace conjoin_order

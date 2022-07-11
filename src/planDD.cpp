@@ -111,9 +111,9 @@ int planDD::build_bdd(option_values opt_values) {
     //builder.set_variable_order(var_order);
 
     std::vector<planning_logic::logic_primitive> all_primitives = conjoin_order::order_all_clauses(encoder, opt_values);
-    //for(auto p: all_primitives){
-    //    std::cout << p.to_string() << std::endl;
-    //}
+    for(auto p: all_primitives){
+        std::cout << p.m_data.size() << " ";
+    }
     dd_builder::construct_dd_clause_linear(builder, all_primitives, 0);
     builder.reduce_heap();
 

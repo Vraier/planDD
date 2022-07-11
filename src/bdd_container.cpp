@@ -126,7 +126,6 @@ void bdd_container::conjoin_clause(std::vector<int> &clause, int bdd_index) {
 
     for (int j = 0; j < clause.size(); j++) {
         var = Cudd_bddIthVar(m_bdd_manager, std::abs(clause[j]));
-
         if (clause[j] > 0) {
             tmp = Cudd_bddOr(m_bdd_manager, var, disjunction);
         } else {

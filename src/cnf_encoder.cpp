@@ -8,7 +8,7 @@
 
 using namespace planning_logic;
 
-std::vector<logic_primitive> cnf_encoder::get_logic_primitives(planning_logic::primitive_tag tag, int timestep) {
+std::vector<logic_primitive> cnf_encoder::get_logic_primitives(primitive_tag tag, int timestep) {
     switch (tag) {
         case ini_state:
             if (timestep == 0) {

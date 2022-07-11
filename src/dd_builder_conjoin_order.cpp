@@ -84,10 +84,14 @@ std::vector<logic_primitive> order_all_clauses(cnf_encoder &encoder, option_valu
     for (int t = 0; t <= options.timesteps; t++) {
         for (int i = 0; i < interleaved_order.size(); i++) {
             char current_char = interleaved_order[i];
+            primitive_tag order_tag = char_tag_map[current_char];
 
-            std::vector<logic_primitive> temp_clauses =
-                collect_primitives_for_single_timestep(encoder, current_char, t);
-            interleaved_primitives.insert(interleaved_primitives.end(), temp_clauses.begin(), temp_clauses.end());
+            // only add last timestep for exact one var clauses
+            if (t != options.timesteps || current_char == 'r') {
+                std::vector<logic_primitive> temp_clauses =
+                    collect_primitives_for_single_timestep(encoder, order_tag, t);
+                interleaved_primitives.insert(interleaved_primitives.end(), temp_clauses.begin(), temp_clauses.end());
+            }
         }
     }
 
@@ -95,13 +99,22 @@ std::vector<logic_primitive> order_all_clauses(cnf_encoder &encoder, option_valu
         char current_char = disjoin_order[i];
         // add the interleved part
         if (current_char == 'x') {
-            total_primitives.insert(total_primitives.end(), interleaved_primitives.begin(), interleaved_primitives.end());
-            continue;
+            total_primitives.insert(total_primitives.end(), interleaved_primitives.begin(),
+                                    interleaved_primitives.end());
+        } else {
+            primitive_tag order_tag = char_tag_map[current_char];
+            std::vector<logic_primitive> temp_clauses;
+            if (order_tag == ini_state) {
+                temp_clauses = collect_primitives_for_single_timestep(encoder, order_tag, 0);
+            } else if (order_tag == goal) {
+                temp_clauses = collect_primitives_for_single_timestep(encoder, order_tag, options.timesteps);
+            } else if (order_tag == eo_var) {
+                temp_clauses = collect_primitives_for_all_timesteps(encoder, order_tag, options.timesteps);
+            } else {
+                temp_clauses = collect_primitives_for_all_timesteps(encoder, order_tag, options.timesteps - 1);
+            }
+            total_primitives.insert(total_primitives.end(), temp_clauses.begin(), temp_clauses.end());
         }
-
-        std::vector<logic_primitive> temp_clauses =
-            collect_primitives_for_all_timesteps(encoder, current_char, options.timesteps);
-        total_primitives.insert(total_primitives.end(), temp_clauses.begin(), temp_clauses.end());
     }
 
     // this reverses the order of the clauses. It allows the variables with the highes timesteps to be conjoined first
@@ -122,11 +135,14 @@ std::vector<logic_primitive> order_clauses_for_layer(cnf_encoder &encoder, std::
     std::vector<logic_primitive> temp_clauses;
 
     for (char c : order_string) {
-        temp_clauses = collect_primitives_for_single_timestep(encoder, c, layer);
+        primitive_tag order_tag = char_tag_map[c];
+
+        temp_clauses = collect_primitives_for_single_timestep(encoder, order_tag, layer);
         // if we add at least or at most one var clauses, also do it for the second timestep
         if (c == 'r' || c == 'y' || c == 'm') {
             // does NOT conatin pec
-            std::vector<logic_primitive> second_layer = collect_primitives_for_single_timestep(encoder, c, layer + 1);
+            std::vector<logic_primitive> second_layer =
+                collect_primitives_for_single_timestep(encoder, order_tag, layer + 1);
             temp_clauses.insert(temp_clauses.end(), second_layer.begin(), second_layer.end());
         }
         result_clauses.insert(result_clauses.end(), temp_clauses.begin(), temp_clauses.end());
@@ -146,7 +162,8 @@ std::vector<logic_primitive> order_clauses_for_foundation(cnf_encoder &encoder, 
     std::vector<logic_primitive> temp_clauses;
 
     for (char c : order_string) {
-        temp_clauses = collect_primitives_for_all_timesteps(encoder, c, timesteps);
+        primitive_tag order_tag = char_tag_map[c];
+        temp_clauses = collect_primitives_for_all_timesteps(encoder, order_tag, timesteps);
         result_clauses.insert(result_clauses.end(), temp_clauses.begin(), temp_clauses.end());
     }
 
@@ -154,22 +171,20 @@ std::vector<logic_primitive> order_clauses_for_foundation(cnf_encoder &encoder, 
     return result_clauses;
 }
 
-std::vector<logic_primitive> collect_primitives_for_all_timesteps(cnf_encoder &encoder, char primitive_type,
+std::vector<logic_primitive> collect_primitives_for_all_timesteps(cnf_encoder &encoder, primitive_tag primitive_type,
                                                                   int timesteps) {
     std::vector<logic_primitive> result_primitives;
-    primitive_tag order_tag = char_tag_map[primitive_type];
 
     for (int t = 0; t <= timesteps; t++) {
-        std::vector<logic_primitive> single_timestep = encoder.get_logic_primitives(order_tag, t);
+        std::vector<logic_primitive> single_timestep = encoder.get_logic_primitives(primitive_type, t);
         result_primitives.insert(result_primitives.end(), single_timestep.begin(), single_timestep.end());
     }
     return result_primitives;
 }
 
-std::vector<logic_primitive> collect_primitives_for_single_timestep(cnf_encoder &encoder, char primitive_type,
+std::vector<logic_primitive> collect_primitives_for_single_timestep(cnf_encoder &encoder, primitive_tag primitive_type,
                                                                     int timestep) {
-    primitive_tag order_tag = char_tag_map[primitive_type];
-    return encoder.get_logic_primitives(order_tag, timestep);
+    return encoder.get_logic_primitives(primitive_type, timestep);
 }
 
 };  // namespace conjoin_order
