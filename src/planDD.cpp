@@ -113,15 +113,16 @@ int planDD::build_bdd(option_values opt_values) {
     if (opt_values.timesteps >= 0) {
         std::vector<planning_logic::logic_primitive> all_primitives =
             conjoin_order::order_all_clauses(encoder, opt_values);
-        for (auto p : all_primitives) {
-            std::cout << p.m_data.size() << " ";
-        }
-        dd_builder::construct_dd_clause_linear(builder, all_primitives, 0);
+        dd_builder::construct_dd_clause_linear(builder, all_primitives, 0, false);
         builder.reduce_heap();
     } else {
         dd_builder::construct_bdd_without_timesteps(builder, encoder, encoder.m_symbol_map, opt_values);
         builder.reduce_heap();
     }
+
+    //for(auto a: builder.list_minterms(10)){
+    //    encoder.decode_cnf_solution(a, 5);
+    //}
 
     builder.print_bdd_info();
     // builder.write_bdd_to_dot_file("normal_bdd.dot");

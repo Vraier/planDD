@@ -41,6 +41,8 @@ public:
 
     std::vector<int> m_initial_state;
     std::vector<std::pair<int, int>> m_goal;
+
+    bool are_operators_conflicting(int op_idx_1, int op_idx_2);
 };
 
 class sas_parser

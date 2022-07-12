@@ -5,7 +5,7 @@
 
 bdd_container::bdd_container(int num_bdds, int num_variables) {
     // add one more variable to account for variable with index 0
-    m_num_variables = num_variables + 1;
+    m_num_variables = num_variables;
 
     m_bdd_manager = Cudd_Init(m_num_variables, 0, CUDD_UNIQUE_SLOTS, CUDD_CACHE_SLOTS, 0);
     Cudd_AutodynEnable(m_bdd_manager, CUDD_REORDER_SIFT);
@@ -43,8 +43,9 @@ void bdd_container::reduce_heap() {
 
 void bdd_container::print_bdd_info() {
     LOG_MESSAGE(log_level::info) << "Printing CUDD statistics...";
-    LOG_MESSAGE(log_level::info) << "Number of nodes: " << Cudd_DagSize(m_root_nodes[0]) << ", Number of solutions: "
-                                 << Cudd_CountMinterm(m_bdd_manager, m_root_nodes[0], m_num_variables);
+    LOG_MESSAGE(log_level::info) << "Number of nodes: " << Cudd_DagSize(m_root_nodes[0])
+                                 << ", Num Variables: " << m_num_variables << ", Number of solutions: "
+                                 << Cudd_CountMinterm(m_bdd_manager, m_root_nodes[0], m_num_variables+1);
     FILE **fout = &stdout;
     Cudd_PrintInfo(m_bdd_manager, *fout);
 }
@@ -112,13 +113,13 @@ void bdd_container::write_bdd_to_dot_file(std::string filename) {
     fclose(outfile);
 }
 
-void bdd_container::clear_bdd(int bdd_index){
+void bdd_container::clear_bdd(int bdd_index) {
     Cudd_RecursiveDeref(m_bdd_manager, m_root_nodes[bdd_index]);
     m_root_nodes[bdd_index] = Cudd_bddIthVar(m_bdd_manager, 0);
     Cudd_Ref(m_root_nodes[bdd_index]);
 }
 
-bool bdd_container::is_constant_false(int bdd_index){
+bool bdd_container::is_constant_false(int bdd_index) {
     return m_root_nodes[bdd_index] == Cudd_ReadLogicZero(m_bdd_manager);
 }
 
@@ -244,7 +245,6 @@ void bdd_container::copy_and_conjoin_bdd_from_another_container(bdd_container &c
 }
 
 void bdd_container::permute_variables(std::vector<int> &permutation, int source_bdd, int destination_bdd) {
-    
     int num_variables = permutation.size();
     if (num_variables != Cudd_ReadSize(m_bdd_manager)) {
         LOG_MESSAGE(log_level::error) << "Cant permutate variables. Permutation size: " << num_variables
@@ -260,15 +260,13 @@ void bdd_container::permute_variables(std::vector<int> &permutation, int source_
     m_root_nodes[destination_bdd] = temp_node;
 }
 
-void bdd_container::conjoin_two_bdds(int bbd_a, int bdd_b, int bdd_result){
+void bdd_container::conjoin_two_bdds(int bbd_a, int bdd_b, int bdd_result) {
     LOG_MESSAGE(log_level::info) << "Conjoining two bdds";
     DdNode *tmp = Cudd_bddAnd(m_bdd_manager, m_root_nodes[bbd_a], m_root_nodes[bdd_b]);
     Cudd_Ref(tmp);
     Cudd_RecursiveDeref(m_bdd_manager, m_root_nodes[bdd_result]);
     m_root_nodes[bdd_result] = tmp;
 }
-
-
 
 std::map<int, int> bdd_container::get_variable_order_for_single_step(
     std::map<planning_logic::tagged_variable, int> &variable_map) {
@@ -293,7 +291,7 @@ std::map<int, int> bdd_container::get_variable_order_for_single_step(
 
     int new_layer = 0;
     for (std::map<int, int>::iterator iter = layer_to_index.begin(); iter != layer_to_index.end(); ++iter) {
-        //int layer = iter->first;
+        // int layer = iter->first;
         int index = iter->second;
         consolidated_index_to_layer[index] = new_layer;
         new_layer++;
@@ -334,7 +332,7 @@ std::vector<int> bdd_container::extend_variable_order_to_all_steps(
     result_index_to_layer_map[0] = 0;
     int new_layer = 1;
     for (std::map<int, int>::iterator iter = layer_to_index.begin(); iter != layer_to_index.end(); ++iter) {
-        //int layer = iter->first;
+        // int layer = iter->first;
         int index = iter->second;
         result_index_to_layer_map[index] = new_layer;
         new_layer++;

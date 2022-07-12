@@ -354,6 +354,7 @@ void construct_bdd_without_timesteps(bdd_container &bdd, cnf_encoder &encoder, p
         } else {
             // construct new bdd layer
             LOG_MESSAGE(log_level::info) << "Extending layer " << t;
+            // TODO optimize this (i include mutex for variable twice)
             temp = conjoin_order::order_clauses_for_layer(encoder, order, t);
             construct_dd_clause_linear(bdd, temp, 0, true);
             t++;
