@@ -175,8 +175,8 @@ std::vector<logic_primitive> cnf_encoder::construct_no_conflicting_operators(int
 
                 result.push_back(logic_primitive(logic_clause, eo_op, timestep, clause));
             } else {
-                std::cout << "Found nonconflicting operators: " << m_sas_problem.m_operators[op1].to_string() << " "
-                          << m_sas_problem.m_operators[op2].to_string() << std::endl;
+                //std::cout << "Found nonconflicting operators: " << m_sas_problem.m_operators[op1].to_string() << " "
+                //          << m_sas_problem.m_operators[op2].to_string() << std::endl;
             }
         }
     }

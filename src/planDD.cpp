@@ -120,11 +120,11 @@ int planDD::build_bdd(option_values opt_values) {
         builder.reduce_heap();
     }
 
-    //for(auto a: builder.list_minterms(10)){
-    //    encoder.decode_cnf_solution(a, 5);
-    //}
-
     builder.print_bdd_info();
+
+    for(auto a: builder.list_minterms(10)){
+        encoder.decode_cnf_solution(a, 5);
+    }
     // builder.write_bdd_to_dot_file("normal_bdd.dot");
     return 0;
 }

@@ -63,9 +63,9 @@ bool sas_problem::are_operators_conflicting(int op_idx_1, int op_idx_2) {
             e2.push_back(std::make_pair(id, eff));
         }
     }
-
-    return are_variables_consistent(p1, p2) && are_variables_consistent(e1, e2) && are_variables_consistent(e1, p2) &&
-           are_variables_consistent(e2, p1);
+    bool are_nonconflicting = are_variables_consistent(p1, p2) && are_variables_consistent(e1, e2) &&
+                              are_variables_consistent(e1, p2) && are_variables_consistent(p1, e2);
+    return !are_nonconflicting;
 }
 
 int sas_parser::start_parsing() {
