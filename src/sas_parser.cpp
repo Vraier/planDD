@@ -10,6 +10,63 @@
 
 #include "logging.h"
 
+bool are_variables_consistent(std::vector<std::pair<int, int>> &set1, std::vector<std::pair<int, int>> &set2) {
+    for (std::pair<int, int> var1 : set1) {
+        for (std::pair<int, int> var2 : set2) {
+            int id1, val1, id2, val2;
+            id1 = var1.first;
+            val1 = var1.second;
+            id2 = var2.first;
+            val2 = var2.second;
+
+            if (id1 == id2 && val1 != val2) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+bool sas_problem::are_operators_conflicting(int op_idx_1, int op_idx_2) {
+    operator_info op1 = m_operators[op_idx_1];
+    operator_info op2 = m_operators[op_idx_2];
+    std::vector<std::pair<int, int>> p1, e1, p2, e2;
+
+    // fill sets p1, e1
+    for (std::tuple<int, int, int> effect1 : op1.m_effects) {
+        int id, pre, eff;
+        id = std::get<0>(effect1);
+        pre = std::get<1>(effect1);
+        eff = std::get<2>(effect1);
+
+        if (pre != -1) {
+            p1.push_back(std::make_pair(id, pre));
+        }
+        if (eff != -1) {
+            // this case probably does not exists (but its no harm to check here)
+            e1.push_back(std::make_pair(id, eff));
+        }
+    }
+    // fill stes p2, e2
+    for (std::tuple<int, int, int> effect2 : op2.m_effects) {
+        int id, pre, eff;
+        id = std::get<0>(effect2);
+        pre = std::get<1>(effect2);
+        eff = std::get<2>(effect2);
+
+        if (pre != -1) {
+            p2.push_back(std::make_pair(id, pre));
+        }
+        if (eff != -1) {
+            // this case probably does not exists (but its no harm to check here)
+            e2.push_back(std::make_pair(id, eff));
+        }
+    }
+
+    return are_variables_consistent(p1, p2) && are_variables_consistent(e1, e2) && are_variables_consistent(e1, p2) &&
+           are_variables_consistent(e2, p1);
+}
+
 int sas_parser::start_parsing() {
     LOG_MESSAGE(log_level::info) << "Start Parsing SAS Problem";
 
