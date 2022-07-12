@@ -14,7 +14,7 @@ struct option_values {
     // DD building parameters
     std::string build_order, variable_order;
     bool reverse_order;
-    bool include_mutex, use_ladder_encoding, exact_one_constraint, goal_variables_first, initial_state_variables_first;
+    bool include_mutex, use_ladder_encoding, exact_one_constraint, parallel_plan, goal_variables_first, initial_state_variables_first;
     // DD layer building
     bool bidirectional, exponential, share_foundations, use_layer_permutation, reverse_layer_building;
 };

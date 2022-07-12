@@ -38,6 +38,9 @@ void option_parser::parse_command_line(int argc, char *argv[]) {
          "Uses the ladder encoding for at most one constraints")  //
         ("exact_one_constraint", po::bool_switch(&m_values.exact_one_constraint)->default_value(false),
          "Builds the exactly one variable is true constraints directly into the DD")  //
+        ("parallel_plan", po::bool_switch(&m_values.parallel_plan)->default_value(false),
+         "Only prohibits conflicting operators in one timestep. Does not work with exact one encoding or binary "
+         "encoding.")  //
         ("build_order", po::value<std::string>(&m_values.build_order)->default_value("igrymx:pec:"),
          "Determins the order of conjoins when building a dd linearily and not interleaved. Must be a permutation of "
          "the string impgc; i: initial_state, rtyum: mutex, pe: precondition/effect, g: goal, c: changing atoms "

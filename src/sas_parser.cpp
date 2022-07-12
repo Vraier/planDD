@@ -10,7 +10,8 @@
 
 #include "logging.h"
 
-bool are_variables_consistent(std::vector<std::pair<int, int>> &set1, std::vector<std::pair<int, int>> &set2) {
+bool sas_problem::are_variables_consistent(std::vector<std::pair<int, int>> &set1,
+                                           std::vector<std::pair<int, int>> &set2) {
     for (std::pair<int, int> var1 : set1) {
         for (std::pair<int, int> var2 : set2) {
             int id1, val1, id2, val2;

@@ -55,10 +55,6 @@ class cnf_encoder {
     // represents the planning problem
     sas_problem m_sas_problem;
 
-    // TODO
-    // All three: sas_problem, symbol map and cnf are needed to produce human readable output.
-    // They depend on each other. I have to make sure that no inconsistencies occur between them in this class
-
     // generates a set of clauses that gurarantee that at most on of the variables is true
     // can insert helper variables in the symbol map, depending wich at most one type is chosen
     std::vector<std::vector<int>> generate_at_most_one_constraint(std::vector<int> &variables,
@@ -71,4 +67,6 @@ class cnf_encoder {
                                                                          int timestep);
     // pairwise generates no additional helper variables
     std::vector<std::vector<int>> generate_at_most_one_constraint_pairwise(std::vector<int> &variables);
+
+    std::vector<planning_logic::logic_primitive> construct_no_conflicting_operators(int timestep);
 };

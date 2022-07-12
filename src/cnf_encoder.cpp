@@ -127,10 +127,14 @@ std::vector<logic_primitive> cnf_encoder::construct_exact_one_value(int timestep
 }
 
 // At every step, at least one action is applied
+// in the case of parallel plans this is relaxed to only nonconflicting actions can be applied.
 std::vector<logic_primitive> cnf_encoder::construct_exact_one_action(int timestep) {
     std::vector<logic_primitive> result;
 
-    if (m_options.exact_one_constraint) {
+    if (m_options.parallel_plan) {
+        result = construct_no_conflicting_operators(timestep);
+    } else if (m_options.exact_one_constraint) {
+        // smarter exact one encoding for dds
         std::vector<int> exact_one_should_be_true;
         for (int op = 0; op < m_sas_problem.m_operators.size(); op++) {
             int index = m_symbol_map.get_variable_index(variable_plan_op, timestep, op);
@@ -138,6 +142,7 @@ std::vector<logic_primitive> cnf_encoder::construct_exact_one_action(int timeste
         }
         result.push_back(logic_primitive(logic_eo, eo_op, timestep, exact_one_should_be_true));
     } else {
+        // standart exact one encoding
         std::vector<int> exact_one_should_be_true;
         for (int op = 0; op < m_sas_problem.m_operators.size(); op++) {
             int sym_index = m_symbol_map.get_variable_index(variable_plan_op, timestep, op);
@@ -155,6 +160,26 @@ std::vector<logic_primitive> cnf_encoder::construct_exact_one_action(int timeste
         }
     }
 
+    return result;
+}
+
+std::vector<logic_primitive> cnf_encoder::construct_no_conflicting_operators(int timestep) {
+    std::vector<logic_primitive> result;
+
+    for (int op1 = 0; op1 < m_sas_problem.m_operators.size(); op1++) {
+        for (int op2 = op1 + 1; op2 < m_sas_problem.m_operators.size(); op2++) {
+            if (m_sas_problem.are_operators_conflicting(op1, op2)) {
+                std::vector<int> clause;
+                clause.push_back(-m_symbol_map.get_variable_index(variable_plan_op, timestep, op1));
+                clause.push_back(-m_symbol_map.get_variable_index(variable_plan_op, timestep, op2));
+
+                result.push_back(logic_primitive(logic_clause, eo_op, timestep, clause));
+            } else {
+                std::cout << "Found nonconflicting operators: " << m_sas_problem.m_operators[op1].to_string() << " "
+                          << m_sas_problem.m_operators[op2].to_string() << std::endl;
+            }
+        }
+    }
     return result;
 }
 
