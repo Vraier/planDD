@@ -3,6 +3,12 @@
 #include "logging.h"
 namespace planning_logic {
 
+int plan_to_cnf_map::set_num_operator(int num_operators){
+    m_num_operators = num_operators;
+    // i have no idea how save this is, but i am too lazy to check for highest bit
+    m_num_op_variables = (int) std::ceil(std::log2(num_operators));
+}
+
 int plan_to_cnf_map::get_variable_index(variable_tag tag, int timestep, int var_index, int value) {
     tagged_variable var = std::make_tuple(tag, timestep, var_index, value);
     if (m_variable_map.find(var) == m_variable_map.end()) {
@@ -29,6 +35,25 @@ int plan_to_cnf_map::get_variable_index(variable_tag tag, int timestep, int var_
 
 int plan_to_cnf_map::get_variable_index_without_adding(variable_tag tag, int timestep, int var_index) {
     return get_variable_index_without_adding(tag, timestep, var_index, 0);
+}
+
+std::vector<int> plan_to_cnf_map::get_variable_index_for_op_binary(int timestep, int op_index){
+    std::vector<int> result;
+    // get log many variables for the operator
+    for(int i = 0; i < m_num_op_variables; i++){
+        result.push_back(get_variable_index(variable_plan_binary_op, timestep, i));
+    }
+    for(int i = 0; i < m_num_op_variables; i++){
+        if(op_index & (1 << i)){
+            // if ith bit is set in op_index
+            continue;
+        }
+        else{
+            // if ith bit is not set, invert the variable
+            result[i] *= -1;
+        }
+    }
+    return result;
 }
 
 tagged_variable plan_to_cnf_map::get_planning_info_for_variable(int index) {
