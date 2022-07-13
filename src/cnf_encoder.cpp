@@ -8,6 +8,8 @@
 
 using namespace planning_logic;
 
+// TODO maybe write multiple encoders for different encodings?
+// have to see how advanced binary encoding goes
 std::vector<logic_primitive> cnf_encoder::get_logic_primitives(primitive_tag tag, int timestep) {
     switch (tag) {
         case ini_state:
@@ -42,8 +44,12 @@ void cnf_encoder::initialize_symbol_map(int timesteps) {
         }
         // construct action indizes
         if (t != timesteps) {
-            for (int op = 0; op < m_sas_problem.m_operators.size(); op++) {
-                m_symbol_map.get_variable_index(variable_plan_op, t, op);
+            if (m_options.binary_encoding) {
+                m_symbol_map.get_variable_index_for_op_binary(t, 0);
+            } else {
+                for (int op = 0; op < m_sas_problem.m_operators.size(); op++) {
+                    m_symbol_map.get_variable_index(variable_plan_op, t, op);
+                }
             }
         }
     }
@@ -128,10 +134,13 @@ std::vector<logic_primitive> cnf_encoder::construct_exact_one_value(int timestep
 
 // At every step, at least one action is applied
 // in the case of parallel plans this is relaxed to only nonconflicting actions can be applied.
+// in the binary case this is not needed
 std::vector<logic_primitive> cnf_encoder::construct_exact_one_action(int timestep) {
     std::vector<logic_primitive> result;
 
-    if (m_options.parallel_plan) {
+    if (m_options.binary_encoding) {
+        // nothing to do, binary encoding implicit guarantees only one action
+    } else if (m_options.parallel_plan) {
         result = construct_no_conflicting_operators(timestep);
     } else if (m_options.exact_one_constraint) {
         // smarter exact one encoding for dds
@@ -175,8 +184,8 @@ std::vector<logic_primitive> cnf_encoder::construct_no_conflicting_operators(int
 
                 result.push_back(logic_primitive(logic_clause, eo_op, timestep, clause));
             } else {
-                //std::cout << "Found nonconflicting operators: " << m_sas_problem.m_operators[op1].to_string() << " "
-                //          << m_sas_problem.m_operators[op2].to_string() << std::endl;
+                // std::cout << "Found nonconflicting operators: " << m_sas_problem.m_operators[op1].to_string() << " "
+                //           << m_sas_problem.m_operators[op2].to_string() << std::endl;
             }
         }
     }
@@ -198,16 +207,31 @@ std::vector<logic_primitive> cnf_encoder::construct_precondition(int timestep) {
                 continue;
             }
 
-            int index_op, index_precondition;
-            index_op = m_symbol_map.get_variable_index(variable_plan_op, timestep, op);
-            index_precondition =
-                m_symbol_map.get_variable_index(variable_plan_var, timestep, effected_var, effected_old_val);
+            if (m_options.binary_encoding) {
+                int index_precondition =
+                    m_symbol_map.get_variable_index(variable_plan_var, timestep, effected_var, effected_old_val);
+                std::vector<int> op_indizes = m_symbol_map.get_variable_index_for_op_binary(timestep, op);
 
-            std::vector<int> new_clause;
-            new_clause.push_back(-index_op);
-            new_clause.push_back(index_precondition);
+                std::vector<int> new_clause;
+                for (int idx : op_indizes) {
+                    new_clause.push_back(-idx);
+                }
+                new_clause.push_back(index_precondition);
 
-            result.push_back(logic_primitive(logic_clause, precon, timestep, new_clause));
+                result.push_back(logic_primitive(logic_clause, precon, timestep, new_clause));
+
+            } else {
+                int index_op, index_precondition;
+                index_op = m_symbol_map.get_variable_index(variable_plan_op, timestep, op);
+                index_precondition =
+                    m_symbol_map.get_variable_index(variable_plan_var, timestep, effected_var, effected_old_val);
+
+                std::vector<int> new_clause;
+                new_clause.push_back(-index_op);
+                new_clause.push_back(index_precondition);
+
+                result.push_back(logic_primitive(logic_clause, precon, timestep, new_clause));
+            }
         }
     }
     return result;
@@ -223,16 +247,31 @@ std::vector<logic_primitive> cnf_encoder::construct_effect(int timestep) {
             effected_var = std::get<0>(m_sas_problem.m_operators[op].m_effects[eff]);
             effected_new_val = std::get<2>(m_sas_problem.m_operators[op].m_effects[eff]);
 
-            int index_op, index_effect;
-            index_op = m_symbol_map.get_variable_index(variable_plan_op, timestep, op);
-            index_effect =
-                m_symbol_map.get_variable_index(variable_plan_var, timestep + 1, effected_var, effected_new_val);
+            if (m_options.binary_encoding) {
+                int index_effect =
+                    m_symbol_map.get_variable_index(variable_plan_var, timestep + 1, effected_var, effected_new_val);
+                std::vector<int> op_indizes = m_symbol_map.get_variable_index_for_op_binary(timestep, op);
 
-            std::vector<int> new_clause;
-            new_clause.push_back(-index_op);
-            new_clause.push_back(index_effect);
+                std::vector<int> new_clause;
+                for (int idx : op_indizes) {
+                    new_clause.push_back(-idx);
+                }
+                new_clause.push_back(index_effect);
 
-            result.push_back(logic_primitive(logic_clause, effect, timestep, new_clause));
+                result.push_back(logic_primitive(logic_clause, effect, timestep, new_clause));
+
+            } else {
+                int index_op, index_effect;
+                index_op = m_symbol_map.get_variable_index(variable_plan_op, timestep, op);
+                index_effect =
+                    m_symbol_map.get_variable_index(variable_plan_var, timestep + 1, effected_var, effected_new_val);
+
+                std::vector<int> new_clause;
+                new_clause.push_back(-index_op);
+                new_clause.push_back(index_effect);
+
+                result.push_back(logic_primitive(logic_clause, effect, timestep, new_clause));
+            }
         }
     }
     return result;
@@ -252,37 +291,70 @@ std::vector<logic_primitive> cnf_encoder::construct_frame(int timestep) {
             for (int val2 = 0; val2 < domain_size; val2++) {
                 if (val1 == val2) continue;  // skip if no value has changes
 
-                std::vector<int> new_clause;
-                int index_val1, index_val2;
-                index_val1 = m_symbol_map.get_variable_index(variable_plan_var, timestep, v, val1);
-                index_val2 = m_symbol_map.get_variable_index(variable_plan_var, timestep + 1, v, val2);
-                new_clause.push_back(-index_val1);
-                new_clause.push_back(-index_val2);
+                if (m_options.binary_encoding) {
+                    std::vector<std::vector<int>> new_dnf;
+                    int index_val1, index_val2;
+                    index_val1 = m_symbol_map.get_variable_index(variable_plan_var, timestep, v, val1);
+                    index_val2 = m_symbol_map.get_variable_index(variable_plan_var, timestep + 1, v, val2);
 
-                // find the actions that support this transition.
-                for (int op = 0; op < m_sas_problem.m_operators.size(); op++) {
-                    for (int i = 0; i < m_sas_problem.m_operators[op].m_effects.size(); i++) {
-                        std::tuple<int, int, int> op_eff = m_sas_problem.m_operators[op].m_effects[i];
-                        int effected_var, val_pre, val_post;
-                        effected_var = std::get<0>(op_eff);
-                        val_pre = std::get<1>(op_eff);
-                        val_post = std::get<2>(op_eff);
+                    std::vector<int> temp1, temp2;
+                    temp1.push_back(-index_val1); new_dnf.push_back(temp1);
+                    temp2.push_back(-index_val2); new_dnf.push_back(temp2);
 
-                        // check if corrected variable is affected, it
-                        // changes to the right value, and it changes from
-                        // the right value if everything is met, add it to
-                        // the clause
-                        if ((effected_var == v) && (val_post == val2) && ((val_pre == val1) || (val_pre == -1))) {
-                            int index_possible_op = m_symbol_map.get_variable_index(variable_plan_op, timestep, op);
-                            new_clause.push_back(index_possible_op);
-                            // break; // this is a fishy break :D, therfore
-                            // i comment it out. Be we dont have to check
-                            // this operator anymore because it is already a
-                            // candidate
+                    // find the actions that support this transition.
+                    for (int op = 0; op < m_sas_problem.m_operators.size(); op++) {
+                        for (int i = 0; i < m_sas_problem.m_operators[op].m_effects.size(); i++) {
+                            std::tuple<int, int, int> op_eff = m_sas_problem.m_operators[op].m_effects[i];
+                            int effected_var, val_pre, val_post;
+                            effected_var = std::get<0>(op_eff);
+                            val_pre = std::get<1>(op_eff);
+                            val_post = std::get<2>(op_eff);
+
+                            // check if corrected variable is affected, it
+                            // changes to the right value, and it changes from
+                            // the right value. if everything is met, add it to
+                            // the clause
+                            if ((effected_var == v) && (val_post == val2) && ((val_pre == val1) || (val_pre == -1))) {
+                                std::vector<int> op_indizes = m_symbol_map.get_variable_index_for_op_binary(timestep, op);
+                                new_dnf.push_back(op_indizes);
+                            }
                         }
                     }
+                    result.push_back(logic_primitive(logic_dnf, frame, timestep, new_dnf));
+
+                } else {
+                    std::vector<int> new_clause;
+                    int index_val1, index_val2;
+                    index_val1 = m_symbol_map.get_variable_index(variable_plan_var, timestep, v, val1);
+                    index_val2 = m_symbol_map.get_variable_index(variable_plan_var, timestep + 1, v, val2);
+                    new_clause.push_back(-index_val1);
+                    new_clause.push_back(-index_val2);
+
+                    // find the actions that support this transition.
+                    for (int op = 0; op < m_sas_problem.m_operators.size(); op++) {
+                        for (int i = 0; i < m_sas_problem.m_operators[op].m_effects.size(); i++) {
+                            std::tuple<int, int, int> op_eff = m_sas_problem.m_operators[op].m_effects[i];
+                            int effected_var, val_pre, val_post;
+                            effected_var = std::get<0>(op_eff);
+                            val_pre = std::get<1>(op_eff);
+                            val_post = std::get<2>(op_eff);
+
+                            // check if corrected variable is affected, it
+                            // changes to the right value, and it changes from
+                            // the right value if everything is met, add it to
+                            // the clause
+                            if ((effected_var == v) && (val_post == val2) && ((val_pre == val1) || (val_pre == -1))) {
+                                int index_possible_op = m_symbol_map.get_variable_index(variable_plan_op, timestep, op);
+                                new_clause.push_back(index_possible_op);
+                                // break; // this is a fishy break :D, therfore
+                                // i comment it out. Be we dont have to check
+                                // this operator anymore because it is already a
+                                // candidate
+                            }
+                        }
+                    }
+                    result.push_back(logic_primitive(logic_clause, frame, timestep, new_clause));
                 }
-                result.push_back(logic_primitive(logic_clause, frame, timestep, new_clause));
             }
         }
     }
@@ -440,6 +512,7 @@ std::string cnf_encoder::decode_cnf_variable(int index) {
     return type + " t=" + std::to_string(v_timestep) + " " + name;
 }
 
+// TODO make this work with binary encoding
 // interprets a solution from minisat. It translates the sat solution to a
 // planning problem solution (with some addional debugg information)
 // This call depends on the correct symbol map.
