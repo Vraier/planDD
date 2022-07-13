@@ -206,7 +206,7 @@ void bdd_container::add_exactly_one_constraint(std::vector<int> &variables, int 
     m_root_nodes[bdd_index] = tmp;
 }
 
-void bdd_container::add_dnf_primitive(std::vector<std::vector<int>> &dnf, int bdd_index = 0) {
+void bdd_container::add_dnf_primitive(std::vector<std::vector<int>> &dnf, int bdd_index) {
     // build the disjunction of the literals in the clause
     DdNode *var, *tmp;
     DdNode *disjunction = Cudd_ReadLogicZero(m_bdd_manager);

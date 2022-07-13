@@ -8,10 +8,10 @@
 
 extern "C" {
 #include "sddapi.h"
-#include "compiler.h" // compiler has to be included after sdd api... cool
+#include "compiler.h"  // compiler has to be included after sdd api... cool
 }
 
-class sdd_manager : public virtual dd_buildable  {
+class sdd_manager : public virtual dd_buildable {
    private:
     /* data */
     SddManager *m_sdd_manager;
@@ -26,6 +26,7 @@ class sdd_manager : public virtual dd_buildable  {
 
     virtual void conjoin_clause(std::vector<int> &clause, int sdd_index = 0);
     virtual void add_exactly_one_constraint(std::vector<int> &variables, int sdd_index = 0);
+    virtual void add_dnf_primitive(std::vector<std::vector<int>> &dnf, int bdd_index = 0);
 };
 
 /*
