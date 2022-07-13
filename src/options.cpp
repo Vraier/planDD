@@ -41,6 +41,8 @@ void option_parser::parse_command_line(int argc, char *argv[]) {
         ("parallel_plan", po::bool_switch(&m_values.parallel_plan)->default_value(false),
          "Only prohibits conflicting operators in one timestep. Does not work with exact one encoding or binary "
          "encoding.")  //
+        ("binary_encoding", po::bool_switch(&m_values.binary_encoding)->default_value(false),
+         "Encodes the actions in a binary and not a unary way. Resulting in only log(|action|) variables.")  //
         ("build_order", po::value<std::string>(&m_values.build_order)->default_value("igrymx:pec:"),
          "Determins the order of conjoins when building a dd linearily and not interleaved. Must be a permutation of "
          "the string impgc; i: initial_state, rtyum: mutex, pe: precondition/effect, g: goal, c: changing atoms "

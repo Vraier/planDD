@@ -16,13 +16,19 @@ void construct_dd_clause_linear(dd_buildable &dd, std::vector<logic_primitive> &
     for (int i = 0; i < logic_primitives.size(); i++) {
         planning_logic::logic_primitive primitive = logic_primitives[i];
 
-        if (primitive.m_type == logic_clause) {
-            // std::cout << primitive.to_string() << std::endl;
-            dd.conjoin_clause(primitive.m_data, dd_index);
-        } else if (primitive.m_type == logic_eo) {
-            dd.add_exactly_one_constraint(primitive.m_data, dd_index);
-        } else {
-            LOG_MESSAGE(log_level::warning) << "Unknown logic primitive type during DD construction";
+        switch (primitive.m_type) {
+            case logic_clause:
+                dd.conjoin_clause(primitive.m_data, dd_index);
+                break;
+            case logic_dnf:
+                dd.add_dnf_primitive(primitive.m_dnf_data, dd_index);
+                break;
+            case logic_eo:
+                dd.add_exactly_one_constraint(primitive.m_data, dd_index);
+                break;
+            default:
+                LOG_MESSAGE(log_level::warning) << "Unknown logic primitive type during DD construction";
+                break;
         }
         int new_percent = (100 * (i + 1)) / logic_primitives.size();
         if (new_percent > percent) {
@@ -339,12 +345,12 @@ void construct_bdd_without_timesteps(bdd_container &bdd, cnf_encoder &encoder, p
     // construct seed
     std::vector<logic_primitive> temp = encoder.construct_initial_state();
     construct_dd_clause_linear(bdd, temp, 0, true);
-    //temp = encoder.construct_exact_one_value(0);
-    //construct_dd_clause_linear(bdd, temp, 0, true);
+    // temp = encoder.construct_exact_one_value(0);
+    // construct_dd_clause_linear(bdd, temp, 0, true);
 
     int t = 0;
-    while(true){
-        if(goal_is_fullfilled(bdd, encoder, 0, 1, t)){
+    while (true) {
+        if (goal_is_fullfilled(bdd, encoder, 0, 1, t)) {
             // add the goal to the main bdd
             LOG_MESSAGE(log_level::info) << "Goal is fulfilled in layer " << t;
             temp = encoder.construct_goal(t);

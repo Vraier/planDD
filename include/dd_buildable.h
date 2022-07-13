@@ -13,5 +13,6 @@ public:
     // conjoins the bdd with the root node
     // should contain at least one variable
     virtual void add_exactly_one_constraint(std::vector<int> &variables, int dd_index = 0) = 0;
+    virtual void add_dnf_primitive(std::vector<std::vector<int>> &dnf, int bdd_index = 0) = 0;
     virtual std::string get_short_statistics(int dd_index = 0) = 0;
 };

@@ -6,6 +6,7 @@ namespace planning_logic {
 
 enum logic_primitive_type {
     logic_clause,
+    logic_dnf,
     logic_eo,
 };
 
@@ -29,9 +30,13 @@ class logic_primitive {
 
     int m_timestep;
     std::vector<int> m_data;
+    std::vector<std::vector<int>> m_dnf_data;
 
     logic_primitive(logic_primitive_type type, primitive_tag c_tag, int timesteps, std::vector<int> data)
         : m_type(type), m_clause_tag(c_tag), m_timestep(timesteps), m_data(data) {}
+    logic_primitive(logic_primitive_type type, primitive_tag c_tag, int timesteps,
+                    std::vector<std::vector<int>> dnf_data)
+        : m_type(type), m_clause_tag(c_tag), m_timestep(timesteps), m_dnf_data(dnf_data) {}
 
     std::string to_string();
 };

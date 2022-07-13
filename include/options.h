@@ -9,12 +9,15 @@ struct option_values {
     std::string sas_file, ass_file, cnf_file;
     // Program modes
     bool encode_cnf, cnf_to_bdd, build_bdd, build_bdd_by_layer, build_sdd, single_minisat, count_minisat, hack_debug;
-    
+
     int timesteps;
     // DD building parameters
     std::string build_order, variable_order;
     bool reverse_order;
-    bool include_mutex, use_ladder_encoding, exact_one_constraint, parallel_plan, goal_variables_first, initial_state_variables_first;
+    // affects the encoding
+    bool include_mutex, use_ladder_encoding, exact_one_constraint, parallel_plan, binary_encoding;
+    // affects the variable ordering
+    bool goal_variables_first, initial_state_variables_first;
     // DD layer building
     bool bidirectional, exponential, share_foundations, use_layer_permutation, reverse_layer_building;
 };
