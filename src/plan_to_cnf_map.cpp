@@ -3,7 +3,7 @@
 #include "logging.h"
 namespace planning_logic {
 
-void plan_to_cnf_map::set_num_operator(int num_operators){
+void plan_to_cnf_map::set_num_operators(int num_operators){
     m_num_operators = num_operators;
     // i have no idea how save this is, but i am too lazy to check for highest bit
     m_num_op_variables = (int) std::ceil(std::log2(num_operators));

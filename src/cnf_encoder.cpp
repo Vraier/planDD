@@ -35,6 +35,7 @@ std::vector<logic_primitive> cnf_encoder::get_logic_primitives(primitive_tag tag
 }
 
 void cnf_encoder::initialize_symbol_map(int timesteps) {
+    m_symbol_map.set_num_operators(m_sas_problem.m_operators.size());
     for (int t = 0; t <= timesteps; t++) {
         // construct all variables indizes
         for (int var = 0; var < m_sas_problem.m_variabels.size(); var++) {

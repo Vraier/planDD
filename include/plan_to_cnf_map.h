@@ -30,7 +30,7 @@ class plan_to_cnf_map {
     std::map<int, tagged_variable> m_inverse_variable_map;
 
     // needed for binary encoding
-    void set_num_operator(int num_operators);
+    void set_num_operators(int num_operators);
 
     // These methos get the information about a variable/action from a planning problem and return
     // the variable index into the cnf formula
