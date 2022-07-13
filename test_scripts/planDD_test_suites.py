@@ -221,12 +221,53 @@ def best_triple_28_6_big_test():
     return comms
 
 
+#137
+def best_13_7_big_test():
+    probs = problems.list_all_downward_solved_problems()
+    planDD_argument_map_old_best =  {
+        "$timeout" : "300s",
+        "$mode" : "build_bdd",
+        "$addition_flags" : " --build_order igx:rympec: --exact_one_constraint ",
+    }
+    planDD_argument_map_no_timesteps =  {
+        "$timeout" : "300s",
+        "$timesteps" : -1,
+        "$mode" : "build_bdd",
+        "$addition_flags" : " --build_order rympec:: --exact_one_constraint ",
+    }
+    planDD_argument_map_no_timesteps_parallel =  {
+        "$timeout" : "300s",
+        "$timesteps" : -1,
+        "$mode" : "build_bdd",
+        "$addition_flags" : " --build_order rympec:: --exact_one_constraint --parallel_plan ",
+    }
+    #TODO: this seems to be very sensitive to conjoin order. thurther testing needed
+    # I dodged a bullet here. nealry threw this approach away
+    planDD_argument_map_binary_encoding =  {
+        "$timeout" : "300s",
+        "$mode" : "build_bdd",
+        "$addition_flags" : " --build_order igx:rympec: --exact_one_constraint --binary_encoding ",
+    }
+    downward_argument_map = dict(arguments.standart_downward_argument_map)
+    arg1 = ("best_13_7_big_test_old", planDD_argument_map_old_best, downward_argument_map)
+    arg2 = ("best_13_7_big_test_no_timesteps", planDD_argument_map_no_timesteps, downward_argument_map)
+    arg3 = ("best_13_7_big_test_no_timesteps_parallel", planDD_argument_map_no_timesteps_parallel, downward_argument_map)
+    arg4 = ("best_13_7_big_test_binary_encoding", planDD_argument_map_binary_encoding, downward_argument_map)
+    args = [arg1, arg2, arg3, arg4]
+
+    comms = commandfile.generate_command_calls(probs, args)
+    print("Num problems:",len(probs))
+    print("Num configs:",len(args))
+    print("Num commands:",len(comms))
+    return comms
+
+
 
 # TODO test all var orders with all conjoin orders
 
 
 comms = []
-comms += best_triple_28_6_big_test()
+comms += best_13_7_big_test()
 
 commandfile.generate_parallel_file_from_calls(comms)
 

@@ -114,6 +114,7 @@ int planDD::build_bdd(option_values opt_values) {
         std::vector<planning_logic::logic_primitive> all_primitives =
             conjoin_order::order_all_clauses(encoder, opt_values);
         dd_builder::construct_dd_clause_linear(builder, all_primitives, 0, false);
+        LOG_MESSAGE(log_level::info) << "Finished constructing final DD";
         builder.reduce_heap();
     } else {
         dd_builder::construct_bdd_without_timesteps(builder, encoder, encoder.m_symbol_map, opt_values);

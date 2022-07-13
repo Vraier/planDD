@@ -74,7 +74,8 @@ def construct_complete_call(output_folder, problem, planDD_argument_map, downwar
     new_downward_dic = dict(downward_argument_map)
     new_downward_dic["$problem_path"] = os.path.join("../", problem["path"])
     new_planDD_dic = dict(planDD_argument_map)
-    new_planDD_dic["$timesteps"] = problem["plan_length"]
+    if not "$timesteps" in new_planDD_dic:
+        new_planDD_dic["$timesteps"] = problem["plan_length"]
     downward_translate_command = apply_argument_map_to_commandline_string(STANDART_DOWNWARD_COMMANDLINE_STRING, new_downward_dic)
     planDD_command = apply_argument_map_to_commandline_string(STANDART_PLANDD_COMMANDLINE_STRING, new_planDD_dic)
     whole_command = mkdir_command + " && " + chdir_command + " && " + downward_translate_command + " && " + planDD_command
