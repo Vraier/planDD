@@ -45,7 +45,7 @@ void bdd_container::print_bdd_info() {
     LOG_MESSAGE(log_level::info) << "Printing CUDD statistics...";
     LOG_MESSAGE(log_level::info) << "Number of nodes: " << Cudd_DagSize(m_root_nodes[0])
                                  << ", Num Variables: " << m_num_variables << ", Number of solutions: "
-                                 << Cudd_CountMinterm(m_bdd_manager, m_root_nodes[0], m_num_variables+1);
+                                 << Cudd_CountMinterm(m_bdd_manager, m_root_nodes[0], m_num_variables + 1);
     FILE **fout = &stdout;
     Cudd_PrintInfo(m_bdd_manager, *fout);
 }
@@ -203,6 +203,43 @@ void bdd_container::add_exactly_one_constraint(std::vector<int> &variables, int 
     Cudd_Ref(tmp);
     Cudd_RecursiveDeref(m_bdd_manager, m_root_nodes[bdd_index]);
     Cudd_RecursiveDeref(m_bdd_manager, constraint_root_node);
+    m_root_nodes[bdd_index] = tmp;
+}
+
+void bdd_container::add_dnf_primitive(std::vector<std::vector<int>> &dnf, int bdd_index = 0) {
+    // build the disjunction of the literals in the clause
+    DdNode *var, *tmp;
+    DdNode *disjunction = Cudd_ReadLogicZero(m_bdd_manager);
+    Cudd_Ref(disjunction);
+
+    for (int i = 0; i < dnf.size(); i++) {
+        DdNode *conjunction = Cudd_ReadOne(m_bdd_manager);
+        Cudd_Ref(conjunction);
+
+        for (int j = 0; j < dnf[i].size(); j++) {
+            var = Cudd_bddIthVar(m_bdd_manager, std::abs(dnf[i][j]));
+            if (dnf[i][j] > 0) {
+                tmp = Cudd_bddAnd(m_bdd_manager, var, conjunction);
+            } else {
+                tmp = Cudd_bddAnd(m_bdd_manager, Cudd_Not(var), conjunction);
+            }
+            Cudd_Ref(tmp);
+            Cudd_RecursiveDeref(m_bdd_manager, conjunction);
+            conjunction = tmp;
+        }
+
+        tmp = Cudd_bddOr(m_bdd_manager, disjunction, conjunction);
+        Cudd_Ref(tmp);
+        Cudd_RecursiveDeref(m_bdd_manager, disjunction);
+        Cudd_RecursiveDeref(m_bdd_manager, conjunction);
+        disjunction = tmp;
+    }
+
+    // conjoin the clause with the root node
+    tmp = Cudd_bddAnd(m_bdd_manager, m_root_nodes[bdd_index], disjunction);
+    Cudd_Ref(tmp);
+    Cudd_RecursiveDeref(m_bdd_manager, m_root_nodes[bdd_index]);
+    Cudd_RecursiveDeref(m_bdd_manager, disjunction);
     m_root_nodes[bdd_index] = tmp;
 }
 

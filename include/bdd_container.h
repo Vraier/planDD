@@ -42,6 +42,8 @@ class bdd_container : public virtual dd_buildable {
     void conjoin_clause(std::vector<int> &clause, int bdd_index = 0);
     // adds an exact one constraint to the root node
     void add_exactly_one_constraint(std::vector<int> &variables, int bdd_index = 0);
+    // adds a dnf to the bdd. it has the form 'g or (a^b^c) or (x^y)'
+    void add_dnf_primitive(std::vector<std::vector<int>> &dnf, int bdd_index = 0);
 
     // Functions for building the bdd timestep by timestep
     // permutes the variables in source bdd according to the given permutation

@@ -11,6 +11,8 @@
 #include "logic_primitive.h"
 #include "plan_to_cnf_map.h"
 
+
+// TODO encoder should keep track of maximum amount of timesteps
 class cnf_encoder {
    public:
     cnf_encoder(option_values &options, sas_problem &problem)
