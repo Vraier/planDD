@@ -128,7 +128,7 @@ def extract_CUDD_config(file_path):
 def extract_has_finished_constructing_cnf(file_path):
     with open(file_path, "r") as f:
         for line in f:
-            p = re.compile("\[.*\]\[info\] Constructed a total of .* clauses.*")
+            p = re.compile("\[.*\]\[info\] Start constructing DD by lineary adding logic primitives.*")
             if p.match(line):
                 return True
     return False
@@ -139,7 +139,7 @@ def extract_has_finished(file_path):
             p1 = re.compile("\[(.*)\]\[info\] Finished constructing DD.*")
             p2 = re.compile("\[(.*)\]\[info\] Finished constructing final DD.*")
             p3 = re.compile("\[(.*)\]\[info\] Printing CUDD statistics\.\.\..*")
-            if p3.match(line):
+            if p2.match(line) or p3.match(line):
                 return True
     return False
 
@@ -157,7 +157,7 @@ def extract_finish_time(file_path):
 def extract_total_constructed_clauses(file_path):
     with open(file_path, "r") as f:
         for line in f:
-            p = re.compile("\[.*\]\[info\] Constructed a total of (.*) clauses.*")
+            p = re.compile("\[.*\]\[info\] Ordered a total of (.*) primitives.*")
             if p.match(line):
                 return int(p.search(line).group(1))
     return -1
@@ -165,7 +165,7 @@ def extract_total_constructed_clauses(file_path):
 def extract_constructed_variables(file_path):
     with open(file_path, "r") as f:
         for line in f:
-            p = re.compile("\[.*\]\[info\] Constructed a total of (.*) variables \(with helper\).*")
+            p = re.compile("\[.*\]\[info\] Constructed (.*) variables during symbol map initialization.*")
             if p.match(line):
                 return int(p.search(line).group(1))
     return -1
@@ -250,7 +250,7 @@ def get_peak_number_of_live_nodes_from_info(info):
 def get_number_of_nodes_from_bdd_from_info(info):
     cudd_config = info["cudd_config"]
     for line in cudd_config:
-        p = re.compile(".*Number of nodes: (.*), Number of solutions: .*")
+        p = re.compile(".*Number of nodes: (.*), Num Variables: .*, Number of solutions: .*")
         if p.match(line):
             return int(p.search(line).group(1))
     return -1

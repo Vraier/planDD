@@ -1,15 +1,14 @@
 from xml.dom.expatbuilder import theDOMImplementation
 from extract_planDD_information import *
-import plot_data
 
 import statistics
 
 # print information if only a single run is of interest
 def print_big_information_from_dicts(all_dics):
-    non_unit_length_dics = [d for d in all_dics if d["error_while_encoding"]]
+    error_while_encoding = [d for d in all_dics if d["error_while_encoding"]]
     not_finished_cnf_dics = [d for d in all_dics if not d["error_while_encoding"] and not d["has_finished_cnf"]]
     not_finished_dd_dics = [d for d in all_dics if not d["error_while_encoding"] and d["has_finished_cnf"] and not d["has_finished"]]
-    solved_dics = [d for d in all_dics if not d["error_while_encoding"] and d["has_finished_cnf"] and d["has_finished"]]
+    solved_dics = [d for d in all_dics if not d["error_while_encoding"] and d["has_finished"]]
 
     time_for_solved = [(d["finish_time"], d["domain_desc"]) for d in solved_dics]
     time_for_solved = sorted(time_for_solved)
@@ -20,19 +19,19 @@ def print_big_information_from_dicts(all_dics):
     print("Conjoin Order", all_dics[0]["config_build_order"])
 
     print("#Total", len(all_dics))
-    print("#Non unit cost", len(non_unit_length_dics))
+    print("#Error encoding", len(error_while_encoding))
     print("#Not finished building CNF", len(not_finished_cnf_dics))
     print("#Not finished building DD", len(not_finished_dd_dics))
     print("#Solved", len(solved_dics))
 
-    print("%Solved {:0.3f}".format(100*len(solved_dics)/(len(all_dics)-len(non_unit_length_dics))))
+    print("%Solved {:0.3f}".format(100*len(solved_dics)/(len(all_dics)-len(error_while_encoding))))
 
     average_time_spent_reordering_on_solved = statistics.mean([get_percentage_spent_reordering_from_info(i) for i in solved_dics])
     print("Average % of time spent reordering on solved test cases {:0.3f}".format(average_time_spent_reordering_on_solved))
 
     average_number_clauses_all = statistics.mean([i["constructed_clauses"] for i in solved_dics+not_finished_dd_dics])
     average_number_variables_all = statistics.mean([i["constructed_variables"] for i in solved_dics+not_finished_dd_dics])
-    print("Average number of total clauses {:0.0f}, variables {:0.0f}".format(average_number_clauses_all, average_number_variables_all))
+    print("Average number of total clauses/variables {:0.0f}/{:0.0f}".format(average_number_clauses_all, average_number_variables_all))
     average_number_clauses_solved = statistics.mean([i["constructed_clauses"] for i in solved_dics])
     average_number_variables_solved = statistics.mean([i["constructed_variables"] for i in solved_dics])
     print("Average number of total clauses/variables on solved test cases {:0.0f}/{:0.0f}".format(average_number_clauses_solved, average_number_variables_solved))
@@ -54,7 +53,7 @@ def get_small_information_from_dicts(all_dics, key_arguments):
         config_discription += a[7:] + ": " + all_dics[0][a] + " "
 
     example_filepath = all_dics[0]["file_path"]
-    solved_dics = [d for d in all_dics if not d["error_while_encoding"] and d["has_finished_cnf"] and d["has_finished"]]
+    solved_dics = [d for d in all_dics if not d["error_while_encoding"] and d["has_finished"]]
 
     average_peak_of_nodes = statistics.mean([get_peak_number_of_nodes_from_info(i) for i in solved_dics])
     average_peak_of_live_nodes = statistics.mean([get_peak_number_of_live_nodes_from_info(i) for i in solved_dics])
@@ -78,13 +77,25 @@ def print_information_for_multiple_dicts(suites, config_differences):
     print("Printing", num_best_candidates, "best candidates")
     for i in range(num_best_candidates):
         print(str(i+1), sorted_infos[::-1][i][1])
+     
+# prints which problems where only solved by the one config and not the other   
+def print_solving_difference_between_two_congigs(dics1, name1, dics2, name2):
+    solved1 = set([d["domain_desc"] for d in dics1 if not d["error_while_encoding"] and d["has_finished"]])
+    solved2 = set([d["domain_desc"] for d in dics2 if not d["error_while_encoding"] and d["has_finished"]])
+    print("Only solved by", name1, ": ")
+    print(solved1 - solved2)
+    print("Only solved by", name2, ": ")
+    print(solved2 - solved1)
+    
+
+    
 
 def print_portfolio_information(suites):
     curr_solved = set()
     prev_solved = set()
 
     for suite in suites:
-        solved_dics = [d for d in suite if not d["error_while_encoding"] and d["has_finished_cnf"] and d["has_finished"]]
+        solved_dics = [d for d in suite if not d["error_while_encoding"] and d["has_finished"]]
         for d in solved_dics:
             curr_solved.add(d["domain_desc"])
         print("##################################################################################")
@@ -182,9 +193,9 @@ layer_building_differences = [
 #write_all_information_to_file("../../test_output/best_triple_21_6/best_triple_21_6_big_test_bi", "../../test_output/best_triple_21_6_bi.pkl")
 #write_all_information_to_file("../../test_output/best_triple_21_6/best_triple_21_6_big_test_old", "../../test_output/best_triple_21_6_old.pkl")
 #write_all_information_to_file("../../test_output/best_triple_21_6/best_triple_21_6_big_test_uni", "../../test_output/best_triple_21_6_uni.pkl")
-dic_best_triple_21_6_bi = read_all_information_from_file("../../test_output/best_triple_21_6_bi.pkl")
-dic_best_triple_21_6_old = read_all_information_from_file("../../test_output/best_triple_21_6_old.pkl")
-dic_best_triple_21_6_uni = read_all_information_from_file("../../test_output/best_triple_21_6_uni.pkl")
+#dic_best_triple_21_6_bi = read_all_information_from_file("../../test_output/best_triple_21_6_bi.pkl")
+#dic_best_triple_21_6_old = read_all_information_from_file("../../test_output/best_triple_21_6_old.pkl")
+#dic_best_triple_21_6_uni = read_all_information_from_file("../../test_output/best_triple_21_6_uni.pkl")
 #print_big_information_from_dicts(dic_best_triple_21_6_old)
 #print_big_information_from_dicts(dic_best_triple_21_6_uni)
 #print_big_information_from_dicts(dic_best_triple_21_6_bi)
@@ -194,23 +205,46 @@ dic_best_triple_21_6_uni = read_all_information_from_file("../../test_output/bes
 #write_all_information_to_file("../../test_output/best_28_6_big_test/best_triple_28_6_big_test_expo",               "../../test_output/best_28_6_expo.pkl")
 #write_all_information_to_file("../../test_output/best_28_6_big_test/best_triple_28_6_big_test_reverse_no_perm",    "../../test_output/best_28_6_reverse_no_perm.pkl")
 #write_all_information_to_file("../../test_output/best_28_6_big_test/best_triple_28_6_big_test_reverse_with_perm",  "../../test_output/best_28_6_reverse_with_perm.pkl")
-dic_best_28_6_old = read_all_information_from_file("../../test_output/best_28_6_old.pkl")
-dic_best_28_6_expo = read_all_information_from_file("../../test_output/best_28_6_expo.pkl")
-dic_best_28_6_reverse_no_perm = read_all_information_from_file("../../test_output/best_28_6_reverse_no_perm.pkl")
-dic_best_28_6_reverse_with_perm = read_all_information_from_file("../../test_output/best_28_6_reverse_with_perm.pkl")
+#dic_best_28_6_old = read_all_information_from_file("../../test_output/best_28_6_old.pkl")
+#dic_best_28_6_expo = read_all_information_from_file("../../test_output/best_28_6_expo.pkl")
+#dic_best_28_6_reverse_no_perm = read_all_information_from_file("../../test_output/best_28_6_reverse_no_perm.pkl")
+#dic_best_28_6_reverse_with_perm = read_all_information_from_file("../../test_output/best_28_6_reverse_with_perm.pkl")
 #print_big_information_from_dicts(dic_best_28_6_old)
 #print_big_information_from_dicts(dic_best_28_6_expo)
 #print_big_information_from_dicts(dic_best_28_6_reverse_no_perm)
 #print_big_information_from_dicts(dic_best_28_6_reverse_with_perm)
 
+
+#write_all_information_to_file("../../test_output/best_13_7_big_test/best_13_7_big_test_old",                        "../../test_output/best_13_7_big_test_old.pkl")
+#write_all_information_to_file("../../test_output/best_13_7_big_test/best_13_7_big_test_no_timesteps",               "../../test_output/best_13_7_big_test_no_timesteps.pkl")
+#write_all_information_to_file("../../test_output/best_13_7_big_test/best_13_7_big_test_no_timesteps_parallel",      "../../test_output/best_13_7_big_test_no_timesteps_parallel.pkl")
+#write_all_information_to_file("../../test_output/best_13_7_big_test/best_13_7_big_test_binary_encoding",            "../../test_output/best_13_7_big_test_binary_encoding.pkl")
+best_13_7_big_test_old = read_all_information_from_file("../../test_output/best_13_7_big_test_old.pkl")
+best_13_7_big_test_no_timesteps = read_all_information_from_file("../../test_output/best_13_7_big_test_no_timesteps.pkl")
+best_13_7_big_test_no_timesteps_parallel = read_all_information_from_file("../../test_output/best_13_7_big_test_no_timesteps_parallel.pkl")
+best_13_7_big_test_binary_encoding = read_all_information_from_file("../../test_output/best_13_7_big_test_binary_encoding.pkl")
+print_big_information_from_dicts(best_13_7_big_test_old)
+print_big_information_from_dicts(best_13_7_big_test_no_timesteps)
+print_big_information_from_dicts(best_13_7_big_test_no_timesteps_parallel)
+print_big_information_from_dicts(best_13_7_big_test_binary_encoding)
+
+#print_solving_difference_between_two_congigs(best_13_7_big_test_no_timesteps, "No timestep", best_13_7_big_test_no_timesteps_parallel, "parallel")
+
+
+
 portfolio_suites = [
-    dic_best_triple_21_6_old,
+    ##dic_best_triple_21_6_old,
     #dic_best_triple_21_6_uni,
     #dic_best_triple_21_6_bi,
     #dic_best_28_6_old,
     #dic_best_28_6_expo,
-    dic_best_28_6_reverse_with_perm,
+    ##dic_best_28_6_reverse_with_perm,
     #dic_best_28_6_reverse_no_perm,
+    ##best_13_7_big_test_binary_encoding,
+    best_13_7_big_test_old,
+    best_13_7_big_test_binary_encoding,
+    best_13_7_big_test_no_timesteps,
+    best_13_7_big_test_no_timesteps_parallel,
 ]
 
 print_portfolio_information(portfolio_suites)
