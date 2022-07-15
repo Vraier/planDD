@@ -10,6 +10,7 @@ target_include_directories(cudd SYSTEM
 	INTERFACE
 		"contrib/cudd-3.0.0/cudd"
 		"contrib/cudd-3.0.0/util"
+		"contrib/cudd-3.0.0/mtr"
 		"contrib/cudd-3.0.0")
 
 

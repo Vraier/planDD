@@ -215,6 +215,8 @@ layer_building_differences = [
 #print_big_information_from_dicts(dic_best_28_6_reverse_with_perm)
 
 
+# TODO, why has airport a negative amount of solutions????
+# TODO, why was no timestep aproach better?, i am doing no variable ordering at the moment. is that the reason?
 #write_all_information_to_file("../../test_output/best_13_7_big_test/best_13_7_big_test_old",                        "../../test_output/best_13_7_big_test_old.pkl")
 #write_all_information_to_file("../../test_output/best_13_7_big_test/best_13_7_big_test_no_timesteps",               "../../test_output/best_13_7_big_test_no_timesteps.pkl")
 #write_all_information_to_file("../../test_output/best_13_7_big_test/best_13_7_big_test_no_timesteps_parallel",      "../../test_output/best_13_7_big_test_no_timesteps_parallel.pkl")
@@ -229,6 +231,7 @@ print_big_information_from_dicts(best_13_7_big_test_no_timesteps_parallel)
 print_big_information_from_dicts(best_13_7_big_test_binary_encoding)
 
 #print_solving_difference_between_two_congigs(best_13_7_big_test_no_timesteps, "No timestep", best_13_7_big_test_no_timesteps_parallel, "parallel")
+print_solving_difference_between_two_congigs(best_13_7_big_test_no_timesteps, "No timestep", best_13_7_big_test_old, "timestep")
 
 
 

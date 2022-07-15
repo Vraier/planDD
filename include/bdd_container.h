@@ -11,8 +11,9 @@
 #include "logging.h"
 
 extern "C" {
-#include "cudd.h"
+#include "mtr.h"
 #include "util.h"
+#include "cudd.h"
 }
 
 // code wont compile if i #include <iostream> after util.h
@@ -54,6 +55,15 @@ class bdd_container : public virtual dd_buildable {
     //  returns a node for the main bdd_manager that represents the bdd for a single timestep
     void copy_and_conjoin_bdd_from_another_container(bdd_container &copy_from);
 
+    // stops automatic reordering and reactivates it
+    void disable_reordering();
+    void enable_reordering();
+    // groups a set of variables.
+    // the group has to be consecutive in the current variable order.
+    // the lower range end of the group starts at the variable with index low (not position low)
+    // from this index on the next size variables are added to the group
+    // they will stay consecutive in the variable order from now on
+    void set_variable_group(int low, int size);
     // The i-th entry of the permutation array contains the index of the variable that should be brought to the i-th
     // level indx -> layer
     void set_variable_order(std::vector<int> &variable_order);
