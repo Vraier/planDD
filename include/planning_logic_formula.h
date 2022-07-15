@@ -7,7 +7,7 @@
 #include "logic_primitive.h"
 #include "plan_to_cnf_map.h"
 
-// TODO: maybe make tagged var, clause, etc to struct
+//TODO think about removing this. What is the purpose? encoder can do everything
 namespace planning_logic {
 
 // primitive tag, timestep

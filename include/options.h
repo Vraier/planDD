@@ -8,18 +8,21 @@ struct option_values {
     // Files
     std::string sas_file, ass_file, cnf_file;
     // Program modes
-    bool encode_cnf, cnf_to_bdd, build_bdd, build_bdd_by_layer, build_sdd, single_minisat, count_minisat, hack_debug;
+    bool encode_cnf, cnf_to_bdd, build_bdd, build_sdd, single_minisat, count_minisat, hack_debug;
 
     int timesteps;
     // DD building parameters
     std::string build_order, variable_order;
+    // effects the building algorithm
+    bool layer, layer_bi, layer_expo, linear;
+    // reverses the order of primitives (only for linear non incremental)
     bool reverse_order;
-    // affects the encoding
+    // effects the encoding
     bool include_mutex, use_ladder_encoding, exact_one_constraint, parallel_plan, binary_encoding;
-    // affects the variable ordering
+    // effects the variable ordering
     bool goal_variables_first, initial_state_variables_first;
     // DD layer building
-    bool bidirectional, exponential, share_foundations, use_layer_permutation, reverse_layer_building;
+    bool share_foundations, use_layer_permutation, reverse_layer_building;
 };
 
 /**

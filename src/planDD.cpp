@@ -117,7 +117,7 @@ int planDD::build_bdd(option_values opt_values) {
         LOG_MESSAGE(log_level::info) << "Finished constructing final DD";
         builder.reduce_heap();
     } else {
-        dd_builder::construct_bdd_without_timesteps(builder, encoder, encoder.m_symbol_map, opt_values);
+        dd_builder::construct_bdd_without_timesteps(builder, encoder, opt_values);
         builder.reduce_heap();
     }
 
@@ -146,11 +146,11 @@ int planDD::build_bdd_by_layer(option_values opt_values) {
     // main_builder.set_variable_order(var_order);
 
     if (opt_values.bidirectional) {
-        dd_builder::construct_bdd_by_layer_bidirectional(main_builder, encoder, encoder.m_symbol_map, opt_values);
+        dd_builder::construct_bdd_by_layer_bidirectional(main_builder, encoder, opt_values);
     } else if (opt_values.exponential) {
-        dd_builder::construct_dd_by_layer_exponentially(main_builder, encoder, encoder.m_symbol_map, opt_values);
+        dd_builder::construct_dd_by_layer_exponentially(main_builder, encoder, opt_values);
     } else {
-        dd_builder::construct_bdd_by_layer_unidirectional(main_builder, encoder, encoder.m_symbol_map, opt_values);
+        dd_builder::construct_bdd_by_layer_unidirectional(main_builder, encoder, opt_values);
     }
 
     main_builder.print_bdd_info();

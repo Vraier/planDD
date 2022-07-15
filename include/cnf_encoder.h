@@ -11,8 +11,6 @@
 #include "logic_primitive.h"
 #include "plan_to_cnf_map.h"
 
-
-// TODO encoder should keep track of maximum amount of timesteps
 class cnf_encoder {
    public:
     cnf_encoder(option_values &options, sas_problem &problem)
@@ -21,20 +19,12 @@ class cnf_encoder {
     // maps planning variables to cnf variables.
     planning_logic::plan_to_cnf_map m_symbol_map;
 
-    // makes it easier to debug everything ith the variables have a fixed mapping each times
+    // makes it easier to debug everything if the variables have a fixed mapping each times
     void initialize_symbol_map(int timesteps);
 
+    // constructs the logic primitives according to the tag and timestep
+    // will change the symbol map if new variables are created
     std::vector<planning_logic::logic_primitive> get_logic_primitives(planning_logic::primitive_tag tag, int timestep);
-
-    // These methods generate all the logic primitives that represent the planning problem
-    std::vector<planning_logic::logic_primitive> construct_initial_state();
-    std::vector<planning_logic::logic_primitive> construct_goal(int timestep);
-    std::vector<planning_logic::logic_primitive> construct_exact_one_value(int timestep);
-    std::vector<planning_logic::logic_primitive> construct_exact_one_action(int timestep);
-    std::vector<planning_logic::logic_primitive> construct_mutex(int timestep);
-    std::vector<planning_logic::logic_primitive> construct_precondition(int timestep);
-    std::vector<planning_logic::logic_primitive> construct_effect(int timestep);
-    std::vector<planning_logic::logic_primitive> construct_frame(int timestep);
 
     // parses a cnf solution from minisat into a bool vector
     // assignemnt gives the truth value for the ith variable (index 0 of assignment has no meaningful value)
@@ -51,11 +41,26 @@ class cnf_encoder {
     void compare_assignments(std::vector<bool> &assignment1, std::vector<bool> &assignment2);
 
    private:
+    // keeps track of the maximum timestep that was encoded
+    int m_num_timesteps;
+    // increases num_timesteps to the new maximum
+    void update_timesteps(int timestep);
+
     // holds options for the whole programm. Some are important for the cnf_encoder
     option_values m_options;
 
     // represents the planning problem
     sas_problem m_sas_problem;
+
+    // These methods generate all the logic primitives that represent the planning problem
+    std::vector<planning_logic::logic_primitive> construct_initial_state();
+    std::vector<planning_logic::logic_primitive> construct_goal(int timestep);
+    std::vector<planning_logic::logic_primitive> construct_exact_one_value(int timestep);
+    std::vector<planning_logic::logic_primitive> construct_exact_one_action(int timestep);
+    std::vector<planning_logic::logic_primitive> construct_mutex(int timestep);
+    std::vector<planning_logic::logic_primitive> construct_precondition(int timestep);
+    std::vector<planning_logic::logic_primitive> construct_effect(int timestep);
+    std::vector<planning_logic::logic_primitive> construct_frame(int timestep);
 
     // generates a set of clauses that gurarantee that at most on of the variables is true
     // can insert helper variables in the symbol map, depending wich at most one type is chosen

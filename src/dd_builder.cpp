@@ -6,44 +6,26 @@ using namespace planning_logic;
 
 namespace dd_builder {
 
-// TODO make the dd_buildable a return value and not an input
-void construct_dd_clause_linear(dd_buildable &dd, std::vector<logic_primitive> &logic_primitives, int dd_index,
-                                bool silent) {
-    LOG_MESSAGE(log_level::info) << "Start constructing DD by lineary adding logic primitives";
-
-    // conjoin the clauses in the correct order
-    int percent = 0;
-    for (int i = 0; i < logic_primitives.size(); i++) {
-        planning_logic::logic_primitive primitive = logic_primitives[i];
-
-        switch (primitive.m_type) {
-            case logic_clause:
-                dd.conjoin_clause(primitive.m_data, dd_index);
-                break;
-            case logic_dnf:
-                dd.add_dnf_primitive(primitive.m_dnf_data, dd_index);
-                break;
-            case logic_eo:
-                dd.add_exactly_one_constraint(primitive.m_data, dd_index);
-                break;
-            default:
-                LOG_MESSAGE(log_level::warning) << "Unknown logic primitive type during DD construction";
-                break;
+dd_buildable construct_dd(cnf_encoder &encoder, option_values &options){
+    if(options.layer){
+        if(options.timesteps >= 0) {
+            return construct_dd_linear(encoder, options);
+        } else {
+            return construct_bdd_without_timesteps(encoder, options);
         }
-        int new_percent = (100 * (i + 1)) / logic_primitives.size();
-        if (new_percent > percent) {
-            percent = new_percent;
-            if (!silent) {
-                LOG_MESSAGE(log_level::info)
-                    << "Conjoined " << percent << "% of all clauses. " + dd.get_short_statistics(dd_index);
-            }
-        }
+    } else if(options.layer) {
+        return construct_bdd_by_layer_unidirectional(encoder, options);
+    } else if(options.layer_bi) {
+        return construct_bdd_by_layer_bidirectional(encoder, options);
+    } else if(options.layer_expo) {
+        construct_dd_by_layer_exponentially(encoder, options);
     }
-    LOG_MESSAGE(log_level::info) << "Finished constructing DD";
+
+    LOG_MESSAGE(log_level::error) << "No known dd building algorithm was choosen";
+    return bdd_container(1, 0);
 }
 
-void construct_bdd_by_layer_unidirectional(bdd_container &bdd, cnf_encoder &encoder, plan_to_cnf_map &symbol_map,
-                                           option_values &options) {
+void construct_bdd_by_layer_unidirectional(bdd_container &bdd, cnf_encoder &encoder, option_values &options) {
     LOG_MESSAGE(log_level::info) << "Building bdd by layers unidirectional";
 
     std::string build_order = options.build_order;
@@ -73,7 +55,7 @@ void construct_bdd_by_layer_unidirectional(bdd_container &bdd, cnf_encoder &enco
     }
     // permute variables by one timestep
     std::vector<int> permutation =
-        symbol_map.calculate_permutation_by_timesteps(permutation_direction, options.timesteps);
+        encoder.m_symbol_map.calculate_permutation_by_timesteps(permutation_direction, options.timesteps);
 
     // build the initial layer bdds
     LOG_MESSAGE(log_level::info) << "Start building layer BDDs";
@@ -122,8 +104,7 @@ void construct_bdd_by_layer_unidirectional(bdd_container &bdd, cnf_encoder &enco
     LOG_MESSAGE(log_level::info) << "Finished constructing final DD";
 }
 
-void construct_bdd_by_layer_bidirectional(bdd_container &bdd, cnf_encoder &encoder, plan_to_cnf_map &symbol_map,
-                                          option_values &options) {
+void construct_bdd_by_layer_bidirectional(bdd_container &bdd, cnf_encoder &encoder, option_values &options) {
     LOG_MESSAGE(log_level::info) << "Building bdd by layers bidirectional";
 
     std::string build_order = options.build_order;
@@ -144,7 +125,7 @@ void construct_bdd_by_layer_bidirectional(bdd_container &bdd, cnf_encoder &encod
     const int layer_bdd_idx = 2;
 
     // permute variables by one timestep
-    std::vector<int> forward_permutation = symbol_map.calculate_permutation_by_timesteps(1, options.timesteps);
+    std::vector<int> forward_permutation = encoder.m_symbol_map.calculate_permutation_by_timesteps(1, options.timesteps);
 
     // build the initial layer bdds
     LOG_MESSAGE(log_level::info) << "Start building layer BDDs";
@@ -186,7 +167,7 @@ void construct_bdd_by_layer_bidirectional(bdd_container &bdd, cnf_encoder &encod
                 // construct new needed bdd
                 if (options.use_layer_permutation) {
                     auto forward_perm =
-                        symbol_map.calculate_permutation_by_timesteps(t_end - t_begin, options.timesteps);
+                        encoder.m_symbol_map.calculate_permutation_by_timesteps(t_end - t_begin, options.timesteps);
                     bdd.permute_variables(forward_perm, layer_bdd_idx, layer_bdd_idx);
                 } else {
                     bdd.clear_bdd(layer_bdd_idx);
@@ -208,7 +189,7 @@ void construct_bdd_by_layer_bidirectional(bdd_container &bdd, cnf_encoder &encod
                 // construct new needed bdd
                 if (options.use_layer_permutation) {
                     auto backward_perm =
-                        symbol_map.calculate_permutation_by_timesteps(t_begin - t_end, options.timesteps);
+                        encoder.m_symbol_map.calculate_permutation_by_timesteps(t_begin - t_end, options.timesteps);
                     bdd.permute_variables(backward_perm, layer_bdd_idx, layer_bdd_idx);
                 } else {
                     bdd.clear_bdd(layer_bdd_idx);
@@ -245,8 +226,7 @@ int ipow(int base, int exponent) {
     return result;
 }
 
-void construct_dd_by_layer_exponentially(bdd_container &bdd, cnf_encoder &encoder, plan_to_cnf_map &symbol_map,
-                                         option_values &options) {
+void construct_dd_by_layer_exponentially(bdd_container &bdd, cnf_encoder &encoder, option_values &options) {
     LOG_MESSAGE(log_level::info) << "Building bdd by layers exponentially";
 
     // TODO two ways: construct 2^ceil(log(t)) layers or construct the exact amount. See if first one is faster
@@ -285,7 +265,7 @@ void construct_dd_by_layer_exponentially(bdd_container &bdd, cnf_encoder &encode
 
     while (curr_block_size < options.timesteps) {
         LOG_MESSAGE(log_level::info) << "Constructing " << curr_block_size << " layers";
-        auto perm = symbol_map.calculate_permutation_by_timesteps(curr_block_size / 2, options.timesteps);
+        auto perm = encoder.m_symbol_map.calculate_permutation_by_timesteps(curr_block_size / 2, options.timesteps);
         bdd.permute_variables(perm, curr_block_idx + 1, curr_block_idx + 2);
         bdd.conjoin_two_bdds(curr_block_idx + 1, curr_block_idx + 2, curr_block_idx + 2);
 
@@ -303,7 +283,7 @@ void construct_dd_by_layer_exponentially(bdd_container &bdd, cnf_encoder &encode
             LOG_MESSAGE(log_level::info) << "Adding block of size " << curr_block_size << " bdd has size "
                                          << total_size;
 
-            auto perm = symbol_map.calculate_permutation_by_timesteps(total_size, options.timesteps);
+            auto perm = encoder.m_symbol_map.calculate_permutation_by_timesteps(total_size, options.timesteps);
             bdd.permute_variables(perm, curr_block_idx + 2, curr_block_idx + 2);
             bdd.conjoin_two_bdds(main_bdd_idx, curr_block_idx + 2, main_bdd_idx);
 
@@ -333,8 +313,7 @@ bool goal_is_fullfilled(bdd_container &bdd, cnf_encoder &encoder, int main_idx, 
     return is_fulfilled;
 }
 
-void construct_bdd_without_timesteps(bdd_container &bdd, cnf_encoder &encoder, plan_to_cnf_map &symbol_map,
-                                     option_values &options) {
+void construct_bdd_without_timesteps(bdd_container &bdd, cnf_encoder &encoder, option_values &options) {
     LOG_MESSAGE(log_level::info) << "Building BDD without knowing the correct amount of timesteps";
 
     // split the order into parts (in a really complicated manner)
@@ -343,7 +322,7 @@ void construct_bdd_without_timesteps(bdd_container &bdd, cnf_encoder &encoder, p
     std::getline(ss, order, ':');
 
     // construct seed
-    std::vector<logic_primitive> temp = encoder.construct_initial_state();
+    std::vector<logic_primitive> temp = encoder.get_logic_primitives(ini_state, 0);
     construct_dd_clause_linear(bdd, temp, 0, true);
     // temp = encoder.construct_exact_one_value(0);
     // construct_dd_clause_linear(bdd, temp, 0, true);
@@ -353,7 +332,7 @@ void construct_bdd_without_timesteps(bdd_container &bdd, cnf_encoder &encoder, p
         if (goal_is_fullfilled(bdd, encoder, 0, 1, t)) {
             // add the goal to the main bdd
             LOG_MESSAGE(log_level::info) << "Goal is fulfilled in layer " << t;
-            temp = encoder.construct_goal(t);
+            temp = encoder.get_logic_primitives(goal, t);
             construct_dd_clause_linear(bdd, temp, 0, true);
             bdd.m_num_variables = encoder.m_symbol_map.get_num_variables();
             return;
@@ -367,6 +346,41 @@ void construct_bdd_without_timesteps(bdd_container &bdd, cnf_encoder &encoder, p
         }
     }
     LOG_MESSAGE(log_level::info) << "Finished constructing final DD";
+}
+
+void construct_dd_clause_linear(dd_buildable &dd, std::vector<logic_primitive> &logic_primitives, int dd_index,
+                                bool silent) {
+    LOG_MESSAGE(log_level::info) << "Start constructing DD by lineary adding logic primitives";
+
+    // conjoin the clauses in the correct order
+    int percent = 0;
+    for (int i = 0; i < logic_primitives.size(); i++) {
+        planning_logic::logic_primitive primitive = logic_primitives[i];
+
+        switch (primitive.m_type) {
+            case logic_clause:
+                dd.conjoin_clause(primitive.m_data, dd_index);
+                break;
+            case logic_dnf:
+                dd.add_dnf_primitive(primitive.m_dnf_data, dd_index);
+                break;
+            case logic_eo:
+                dd.add_exactly_one_constraint(primitive.m_data, dd_index);
+                break;
+            default:
+                LOG_MESSAGE(log_level::warning) << "Unknown logic primitive type during DD construction";
+                break;
+        }
+        int new_percent = (100 * (i + 1)) / logic_primitives.size();
+        if (new_percent > percent) {
+            percent = new_percent;
+            if (!silent) {
+                LOG_MESSAGE(log_level::info)
+                    << "Conjoined " << percent << "% of all clauses. " + dd.get_short_statistics(dd_index);
+            }
+        }
+    }
+    LOG_MESSAGE(log_level::info) << "Finished constructing DD";
 }
 
 }  // namespace dd_builder

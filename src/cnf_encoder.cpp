@@ -11,6 +11,7 @@ using namespace planning_logic;
 // TODO maybe write multiple encoders for different encodings?
 // have to see how advanced binary encoding goes
 std::vector<logic_primitive> cnf_encoder::get_logic_primitives(primitive_tag tag, int timestep) {
+    update_timesteps(timestep);
     switch (tag) {
         case ini_state:
             return construct_initial_state();
@@ -34,6 +35,7 @@ std::vector<logic_primitive> cnf_encoder::get_logic_primitives(primitive_tag tag
     }
 }
 
+// TODO: make it work with binary encoding
 void cnf_encoder::initialize_symbol_map(int timesteps) {
     m_symbol_map.set_num_operators(m_sas_problem.m_operators.size());
     for (int t = 0; t <= timesteps; t++) {
@@ -441,6 +443,10 @@ std::vector<std::vector<int>> cnf_encoder::generate_at_most_one_constraint_pairw
     return all_new_clauses;
 }
 
+void cnf_encoder::update_timesteps(int timestep){
+    m_num_timesteps = timestep > m_num_timesteps ? timestep : m_num_timesteps;
+}
+
 // This call depends on the correct symbol map.
 std::vector<bool> cnf_encoder::parse_cnf_solution(std::string filepath) {
     LOG_MESSAGE(log_level::info) << "Start parsing assignment file";
@@ -568,6 +574,7 @@ void cnf_encoder::compare_assignments(std::vector<bool> &assignment1, std::vecto
                                  << assignment2.size();
 
     // TODO this will be fixed when i am finished with variable tagging.
+    // TODO maybe this will never be fixed?
     // At this point i hopelfully have a way to output variables uniformly
     /*
     for (int i = 0; i < m_cnf.get_num_variables(); i++) {

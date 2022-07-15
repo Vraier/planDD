@@ -8,19 +8,22 @@
 #include "logic_primitive.h"
 
 namespace dd_builder {
-// TODO remove symbol map from beeing necessary
-// orders the clauses acording to the given order and conjoins one clause per time
-// does no variable ordering
+
+// chooses the correct construction algorithm according to options
+dd_buildable construct_dd(cnf_encoder &encoder, option_values &options);
+
+// conjoins one logic primitive at the time to the bdd
+dd_buildable construct_dd_linear(cnf_encoder &encoder, option_values &options);
+// incremental, when the timesteps are not known
+bdd_container construct_bdd_without_timesteps(cnf_encoder &encoder, option_values &options);
+// builds a bdd for a single step and then copies it to the opter container for each timestep
+bdd_container construct_bdd_by_layer_unidirectional(cnf_encoder &encoder, option_values &options);
+bdd_container construct_bdd_by_layer_bidirectional(cnf_encoder &encoder, option_values &options);
+bdd_container construct_dd_by_layer_exponentially(cnf_encoder &encoder, option_values &options);
+
+// helper method
+// conjoins all the logic primitives to the given bdd.
+// can be turned silent
 void construct_dd_clause_linear(dd_buildable &dd, std::vector<planning_logic::logic_primitive> &logic_primitives,
                                 int dd_index = 0, bool silent = false);
-
-// builds a bdd for a single step and then copies it to the opter container for each timestep
-void construct_bdd_by_layer_unidirectional(bdd_container &bdd, cnf_encoder &encoder,
-                                           planning_logic::plan_to_cnf_map &symbol_map, option_values &options);
-void construct_bdd_by_layer_bidirectional(bdd_container &bdd, cnf_encoder &encoder,
-                                          planning_logic::plan_to_cnf_map &symbol_map, option_values &options);
-void construct_dd_by_layer_exponentially(bdd_container &bdd, cnf_encoder &encoder,
-                                         planning_logic::plan_to_cnf_map &symbol_map, option_values &options);
-void construct_bdd_without_timesteps(bdd_container &bdd, cnf_encoder &encoder,
-                                     planning_logic::plan_to_cnf_map &symbol_map, option_values &options);
 }  // namespace dd_builder
