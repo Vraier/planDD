@@ -30,7 +30,7 @@ class bdd_container : public virtual dd_buildable {
     // constructor for bdd manager. The number of used variables should be clear from the start
     // this is important for counting the number of solutions and variable ordering
     bdd_container(int num_bdds, int num_variables);
-    virtual ~bdd_container();
+    ~bdd_container();
     void set_num_dds(int num_dds);
 
     // check if the bdd is the zero node

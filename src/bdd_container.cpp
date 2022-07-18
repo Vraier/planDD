@@ -35,6 +35,21 @@ bdd_container::~bdd_container() {
     Cudd_Quit(m_bdd_manager);
 }
 
+void bdd_container::set_num_dds(int num_dds) {
+    // clear old dds
+    for (int i = 0; i < m_root_nodes.size(); i++) {
+        Cudd_RecursiveDeref(m_bdd_manager, m_root_nodes[i]);
+    }
+
+    // create new dds
+    m_root_nodes = std::vector<DdNode *>(num_dds);
+    for (int i = 0; i < num_dds; i++) {
+        // force var with index 0 to be true
+        m_root_nodes[i] = Cudd_bddIthVar(m_bdd_manager, 0);
+        Cudd_Ref(m_root_nodes[i]);
+    }
+}
+
 void bdd_container::reduce_heap() {
     LOG_MESSAGE(log_level::info) << "Start reducing heap manually";
     Cudd_ReduceHeap(m_bdd_manager, CUDD_REORDER_SIFT_CONVERGE, 1);
@@ -245,16 +260,10 @@ void bdd_container::add_dnf_primitive(std::vector<std::vector<int>> &dnf, int bd
 
 void bdd_container::hack_back_rocket_method() { return; }
 
-void bdd_container::disable_reordering(){
-    Cudd_AutodynDisable(m_bdd_manager);
-}
-void bdd_container::enable_reordering(){
-    Cudd_AutodynEnable(m_bdd_manager, CUDD_REORDER_SIFT);
-}
+void bdd_container::disable_reordering() { Cudd_AutodynDisable(m_bdd_manager); }
+void bdd_container::enable_reordering() { Cudd_AutodynEnable(m_bdd_manager, CUDD_REORDER_SIFT); }
 
-void bdd_container::set_variable_group(int low, int size){
-    Cudd_MakeTreeNode(m_bdd_manager, low, size, MTR_DEFAULT);
-}
+void bdd_container::set_variable_group(int low, int size) { Cudd_MakeTreeNode(m_bdd_manager, low, size, MTR_DEFAULT); }
 
 void bdd_container::set_variable_order(std::vector<int> &variable_order) {
     LOG_MESSAGE(log_level::info) << "Setting variable order. manager size: " << Cudd_ReadSize(m_bdd_manager)

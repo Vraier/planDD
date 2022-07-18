@@ -2,6 +2,7 @@
 
 #include "logging.h"
 
+// TODO implement all these things
 sdd_manager::sdd_manager(int num_variables) {
     int auto_gc_and_minimize = 1;  // will automatically do reordering if not zero
     m_sdd_manager = sdd_manager_create(num_variables, auto_gc_and_minimize);
@@ -11,6 +12,12 @@ sdd_manager::sdd_manager(int num_variables) {
 }
 
 sdd_manager::~sdd_manager() { sdd_manager_free(m_sdd_manager); }
+
+void sdd_manager::set_num_dds(int num_dds) { return; }
+
+bool sdd_manager::is_constant_false(int dd_index) { return true; }
+
+void sdd_manager::clear_dd(int dd_index) { return; }
 
 void sdd_manager::add_clause_primitive(std::vector<int> &clause, int sdd_index) {
     // build the disjunction of the literals in the clause
@@ -41,15 +48,15 @@ void sdd_manager::add_clause_primitive(std::vector<int> &clause, int sdd_index) 
     m_root_node = tmp;
 }
 
-void sdd_manager::add_exactly_one_primitive(std::vector<int> &variables, int sdd_index){
-    // TODO implement
-    return;
-} 
+void sdd_manager::add_exactly_one_primitive(std::vector<int> &variables, int sdd_index) { return; }
+void sdd_manager::add_dnf_primitive(std::vector<std::vector<int>> &dnf, int sdd_index) { return; }
 
-void sdd_manager::add_dnf_primitive(std::vector<std::vector<int>> &dnf, int sdd_index){
-    // TODO implement
-    return;
-} 
+void sdd_manager::permute_variables(std::vector<int> &permutation, int source_bdd, int destination_bdd) { return; }
+void sdd_manager::conjoin_two_dds(int dd_a, int dd_b, int dd_result) { return; }
+
+void sdd_manager::disable_reordering() { return; }
+void sdd_manager::enable_reordering() { return; }
+void sdd_manager::reduce_heap() { return; }
 
 void sdd_manager::print_sdd() {
     LOG_MESSAGE(log_level::info) << "Printing LibSDD statistics...";

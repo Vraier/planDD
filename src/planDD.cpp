@@ -37,10 +37,6 @@ int main(int argc, char *argv[]) {
         return planDD::build_bdd(options.m_values);
     }
 
-    if (options.m_values.build_bdd_by_layer) {
-        return planDD::build_bdd_by_layer(options.m_values);
-    }
-
     if (options.m_values.build_sdd) {
         return planDD::build_sdd(options.m_values);
     }
@@ -106,20 +102,12 @@ int planDD::build_bdd(option_values opt_values) {
     cnf_encoder encoder(opt_values, parser.m_sas_problem);
     encoder.initialize_symbol_map(opt_values.timesteps);
 
+
     // std::vector<int> var_order = variable_order::order_variables(encoder, encoder.m_symbol_map, opt_values);
     bdd_container builder(2, encoder.m_symbol_map.get_num_variables());
     // builder.set_variable_order(var_order);
 
-    if (opt_values.timesteps >= 0) {
-        std::vector<planning_logic::logic_primitive> all_primitives =
-            conjoin_order::order_all_clauses(encoder, opt_values);
-        dd_builder::construct_dd_clause_linear(builder, all_primitives, 0, false);
-        LOG_MESSAGE(log_level::info) << "Finished constructing final DD";
-        builder.reduce_heap();
-    } else {
-        dd_builder::construct_bdd_without_timesteps(builder, encoder, opt_values);
-        builder.reduce_heap();
-    }
+    dd_builder::construct_dd(builder, encoder, opt_values);
 
     builder.print_bdd_info();
 
@@ -127,34 +115,6 @@ int planDD::build_bdd(option_values opt_values) {
         //encoder.decode_cnf_solution(a, 5);
     //}
     // builder.write_bdd_to_dot_file("normal_bdd.dot");
-    return 0;
-}
-
-int planDD::build_bdd_by_layer(option_values opt_values) {
-    sas_parser parser(opt_values.sas_file);
-    if (parser.start_parsing() == -1) {
-        LOG_MESSAGE(log_level::error) << "Error while parsing sas_file";
-        return 0;
-    }
-
-    cnf_encoder encoder(opt_values, parser.m_sas_problem);
-    encoder.initialize_symbol_map(opt_values.timesteps);
-
-    std::vector<int> var_order = variable_order::order_variables(encoder, encoder.m_symbol_map, opt_values);
-    bdd_container main_builder(opt_values.timesteps + 2, encoder.m_symbol_map.get_num_variables());
-    // TODO think about variable order here
-    // main_builder.set_variable_order(var_order);
-
-    if (opt_values.bidirectional) {
-        dd_builder::construct_bdd_by_layer_bidirectional(main_builder, encoder, opt_values);
-    } else if (opt_values.exponential) {
-        dd_builder::construct_dd_by_layer_exponentially(main_builder, encoder, opt_values);
-    } else {
-        dd_builder::construct_bdd_by_layer_unidirectional(main_builder, encoder, opt_values);
-    }
-
-    main_builder.print_bdd_info();
-
     return 0;
 }
 
@@ -173,7 +133,7 @@ int planDD::build_sdd(option_values opt_values) {
     LOG_MESSAGE(log_level::info) << "Start building sdd";
 
     std::vector<planning_logic::logic_primitive> all_primitives = conjoin_order::order_all_clauses(encoder, opt_values);
-    dd_builder::construct_dd_clause_linear(builder, all_primitives);
+    dd_builder::conjoin_primitives_linear(builder, all_primitives);
     builder.print_sdd();
 
     return 0;

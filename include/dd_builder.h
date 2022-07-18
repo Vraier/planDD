@@ -16,7 +16,7 @@ void construct_dd(dd_buildable &container, cnf_encoder &encoder, option_values &
 // conjoins one logic primitive at the time to the bdd
 void construct_dd_linear(dd_buildable &container, cnf_encoder &encoder, option_values &options);
 // incremental, when the timesteps are not known
-void construct_bdd_without_timesteps(dd_buildable &container, cnf_encoder &encoder, option_values &options);
+void construct_dd_without_timesteps(dd_buildable &container, cnf_encoder &encoder, option_values &options);
 // builds a bdd for a single step and then copies it to the opter container for each timestep
 void construct_dd_by_layer_unidirectional(dd_buildable &container, cnf_encoder &encoder, option_values &options);
 void construct_dd_by_layer_bidirectional(dd_buildable &container, cnf_encoder &encoder, option_values &options);
@@ -25,6 +25,6 @@ void construct_dd_by_layer_exponentially(dd_buildable &container, cnf_encoder &e
 // helper method
 // conjoins all the logic primitives to the given bdd.
 // can be turned silent
-void construct_dd_clause_linear(dd_buildable &dd, std::vector<planning_logic::logic_primitive> &logic_primitives,
+void conjoin_primitives_linear(dd_buildable &dd, std::vector<planning_logic::logic_primitive> &logic_primitives,
                                 int dd_index = 0, bool silent = false);
 }  // namespace dd_builder

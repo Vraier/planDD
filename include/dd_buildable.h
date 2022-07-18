@@ -8,7 +8,7 @@ class dd_buildable {
     virtual ~dd_buildable(){};
 
     // clears all old dds and initialalizes num new dds
-    virtual void set_num_dds(int num_dds);
+    virtual void set_num_dds(int num_dds) = 0;
 
     // check if the bdd is the zero node
     virtual bool is_constant_false(int dd_index) = 0;

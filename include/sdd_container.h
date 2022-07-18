@@ -20,13 +20,25 @@ class sdd_manager : public virtual dd_buildable {
    public:
     sdd_manager(int num_variables);
     ~sdd_manager();
+    void set_num_dds(int num_dds);
+
+    bool is_constant_false(int dd_index);
+
+    void clear_dd(int dd_index = 0);
+
+    void add_clause_primitive(std::vector<int> &clause, int sdd_index = 0);
+    void add_exactly_one_primitive(std::vector<int> &variables, int sdd_index = 0);
+    void add_dnf_primitive(std::vector<std::vector<int>> &dnf, int bdd_index = 0);
+
+    void permute_variables(std::vector<int> &permutation, int source_bdd, int destination_bdd);
+    void conjoin_two_dds(int dd_a, int dd_b, int dd_result);
+
+    void disable_reordering();
+    void enable_reordering();
+    void reduce_heap();
 
     void print_sdd();
-    virtual std::string get_short_statistics(int sdd_index = 0);
-
-    virtual void add_clause_primitive(std::vector<int> &clause, int sdd_index = 0);
-    virtual void add_exactly_one_primitive(std::vector<int> &variables, int sdd_index = 0);
-    virtual void add_dnf_primitive(std::vector<std::vector<int>> &dnf, int bdd_index = 0);
+    std::string get_short_statistics(int dd_index = 0);
 };
 
 /*
