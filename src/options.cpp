@@ -18,8 +18,6 @@ void option_parser::parse_command_line(int argc, char *argv[]) {
          "Builds a bdd from a cnf file")  //
         ("build_bdd", po::bool_switch(&m_values.build_bdd)->default_value(false),
          "tries to build the bdd for the given planning problem")  //
-        ("build_bdd_by_layer", po::bool_switch(&m_values.build_bdd_by_layer)->default_value(false),
-         "tries to build the bdd for the given planning problem layer by layer")  //
         ("build_sdd", po::bool_switch(&m_values.build_sdd)->default_value(false),
          "tries to build the sdd for the given planning problem")  //
         ("single_minisat", po::bool_switch(&m_values.single_minisat)->default_value(false),
@@ -59,10 +57,14 @@ void option_parser::parse_command_line(int argc, char *argv[]) {
         ("initial_state_variables_first",
          po::bool_switch(&m_values.initial_state_variables_first)->default_value(false),
          "If this flag is set, variables in initial state clauses will be moved to the front of the variable order")  //
-        // layer building
-        ("bidirectional", po::bool_switch(&m_values.bidirectional)->default_value(false),
+        // building algorithm
+        ("linear", po::bool_switch(&m_values.linear)->default_value(false),
+         "Builds the dd clause by clause")  //
+        ("layer", po::bool_switch(&m_values.layer)->default_value(false),
+         "tries to build the bdd for the given planning problem layer by layer")  //
+        ("layer_bi", po::bool_switch(&m_values.layer_bi)->default_value(false),
          "If this flag is set, the the bdd layer construction will work in a bidriectional manner")  //
-        ("exponential", po::bool_switch(&m_values.exponential)->default_value(false),
+        ("layer_expo", po::bool_switch(&m_values.layer_expo)->default_value(false),
          "If this flag is set, the layers will be constructed exponentially.")  //
         ("share_foundations", po::bool_switch(&m_values.share_foundations)->default_value(false),
          "If this flag is set during bidirectional lyer construction, both start nodes of the bidirectional search "
@@ -78,8 +80,8 @@ void option_parser::parse_command_line(int argc, char *argv[]) {
 }
 
 bool option_parser::check_validity() {
-    if ((m_values.encode_cnf + m_values.build_bdd + m_values.build_bdd_by_layer + m_values.build_sdd +
-         m_values.single_minisat + m_values.count_minisat + m_values.hack_debug + m_values.cnf_to_bdd) != 1) {
+    if ((m_values.encode_cnf + m_values.build_bdd + m_values.build_sdd + m_values.single_minisat +
+         m_values.count_minisat + m_values.hack_debug + m_values.cnf_to_bdd) != 1) {
         std::cout << "You have to choose exactly one mode." << std::endl;
         return false;
     }

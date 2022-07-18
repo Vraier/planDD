@@ -3,16 +3,38 @@
 #include <vector>
 #include <string>
 
-class dd_buildable
-{
-public:
-    virtual ~dd_buildable() {};
+class dd_buildable {
+   public:
+    virtual ~dd_buildable(){};
 
-    virtual void conjoin_clause(std::vector<int> &clause, int dd_index = 0) = 0;
-    // builds a bdd that is true iff exactly one of the variables is true
-    // conjoins the bdd with the root node
-    // should contain at least one variable
-    virtual void add_exactly_one_constraint(std::vector<int> &variables, int dd_index = 0) = 0;
-    virtual void add_dnf_primitive(std::vector<std::vector<int>> &dnf, int bdd_index = 0) = 0;
+    // clears all old dds and initialalizes num new dds
+    virtual void set_num_dds(int num_dds);
+
+    // check if the bdd is the zero node
+    virtual bool is_constant_false(int dd_index) = 0;
+
+    // frees all the nodes under this dd
+    virtual void clear_dd(int dd_index = 0) = 0;
+    // adds a clause to the root node
+    virtual void add_clause_primitive(std::vector<int> &clause, int dd_index = 0) = 0;
+    // adds an exact one constraint to the root node
+    virtual void add_exactly_one_primitive(std::vector<int> &variables, int dd_index = 0) = 0;
+    // adds a dnf to the bdd. it has the form 'g or (a^b^c) or (x^y)'
+    virtual void add_dnf_primitive(std::vector<std::vector<int>> &dnf, int dd_index = 0) = 0;
+
+    // Functions for building the dd timestep by timestep
+    // permutes the variables in source bdd according to the given permutation
+    // write the result into destionation bdd. the old bdd in destination gets freed and is lost
+    virtual void permute_variables(std::vector<int> &permutation, int source_bdd, int destination_bdd) = 0;
+    // conjoins bdd a and b and stores the result. the old destination bdd get freed and is lost
+    virtual void conjoin_two_dds(int dd_a, int dd_b, int dd_result) = 0;
+
+    // regarding variable order
+    // stops automatic reordering and reactivates it
+    virtual void disable_reordering() = 0;
+    virtual void enable_reordering() = 0;
+    // reorders the variables with the reorder_shift_converge method
+    virtual void reduce_heap() = 0;
+
     virtual std::string get_short_statistics(int dd_index = 0) = 0;
 };

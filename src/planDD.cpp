@@ -77,7 +77,7 @@ int planDD::hack_debug(option_values opt_values) {
         exact_one.push_back(i + 1);
     }
 
-    copy_from.add_exactly_one_constraint(exact_one);
+    copy_from.add_exactly_one_primitive(exact_one);
 
     for (int t = 0; t < opt_values.timesteps; t++) {
         std::vector<int> indx_to;
@@ -202,7 +202,7 @@ int planDD::cnf_to_bdd(option_values opt_values) {
     bdd_container builder(1, num_variables);
 
     for (std::vector<int> c : clauses) {
-        builder.conjoin_clause(c);
+        builder.add_clause_primitive(c);
     }
 
     std::vector<int> var_order = builder.get_variable_order();

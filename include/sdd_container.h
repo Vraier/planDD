@@ -24,8 +24,8 @@ class sdd_manager : public virtual dd_buildable {
     void print_sdd();
     virtual std::string get_short_statistics(int sdd_index = 0);
 
-    virtual void conjoin_clause(std::vector<int> &clause, int sdd_index = 0);
-    virtual void add_exactly_one_constraint(std::vector<int> &variables, int sdd_index = 0);
+    virtual void add_clause_primitive(std::vector<int> &clause, int sdd_index = 0);
+    virtual void add_exactly_one_primitive(std::vector<int> &variables, int sdd_index = 0);
     virtual void add_dnf_primitive(std::vector<std::vector<int>> &dnf, int bdd_index = 0);
 };
 

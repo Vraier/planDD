@@ -31,25 +31,26 @@ class bdd_container : public virtual dd_buildable {
     // this is important for counting the number of solutions and variable ordering
     bdd_container(int num_bdds, int num_variables);
     virtual ~bdd_container();
+    void set_num_dds(int num_dds);
 
     // check if the bdd is the zero node
     bool is_constant_false(int bdd_index);
 
     // frees all the nodes under this bdd
-    void clear_bdd(int bdd_index = 0);
+    void clear_dd(int dd_index = 0);
     // adds a clause to the root node
-    void conjoin_clause(std::vector<int> &clause, int bdd_index = 0);
+    void add_clause_primitive(std::vector<int> &clause, int dd_index = 0);
     // adds an exact one constraint to the root node
-    void add_exactly_one_constraint(std::vector<int> &variables, int bdd_index = 0);
+    void add_exactly_one_primitive(std::vector<int> &variables, int dd_index = 0);
     // adds a dnf to the bdd. it has the form 'g or (a^b^c) or (x^y)'
-    void add_dnf_primitive(std::vector<std::vector<int>> &dnf, int bdd_index = 0);
+    void add_dnf_primitive(std::vector<std::vector<int>> &dnf, int dd_index = 0);
 
     // Functions for building the bdd timestep by timestep
     // permutes the variables in source bdd according to the given permutation
     // write the result into destionation bdd. the old bdd in destination gets freed and is lost
     void permute_variables(std::vector<int> &permutation, int source_bdd, int destination_bdd);
     // conjoins bdd a and b and stores the result. the old destination bdd get freed and is lost
-    void conjoin_two_bdds(int bbd_a, int bdd_b, int bdd_result);
+    void conjoin_two_dds(int dd_a, int dd_b, int dd_result);
     //  returns a node for the main bdd_manager that represents the bdd for a single timestep
     void copy_and_conjoin_bdd_from_another_container(bdd_container &copy_from);
 

@@ -113,7 +113,7 @@ void bdd_container::write_bdd_to_dot_file(std::string filename) {
     fclose(outfile);
 }
 
-void bdd_container::clear_bdd(int bdd_index) {
+void bdd_container::clear_dd(int bdd_index) {
     Cudd_RecursiveDeref(m_bdd_manager, m_root_nodes[bdd_index]);
     m_root_nodes[bdd_index] = Cudd_bddIthVar(m_bdd_manager, 0);
     Cudd_Ref(m_root_nodes[bdd_index]);
@@ -123,7 +123,7 @@ bool bdd_container::is_constant_false(int bdd_index) {
     return m_root_nodes[bdd_index] == Cudd_ReadLogicZero(m_bdd_manager);
 }
 
-void bdd_container::conjoin_clause(std::vector<int> &clause, int bdd_index) {
+void bdd_container::add_clause_primitive(std::vector<int> &clause, int bdd_index) {
     // build the disjunction of the literals in the clause
     DdNode *var, *tmp;
     DdNode *disjunction = Cudd_ReadLogicZero(m_bdd_manager);
@@ -149,7 +149,7 @@ void bdd_container::conjoin_clause(std::vector<int> &clause, int bdd_index) {
     m_root_nodes[bdd_index] = tmp;
 }
 
-void bdd_container::add_exactly_one_constraint(std::vector<int> &variables, int bdd_index) {
+void bdd_container::add_exactly_one_primitive(std::vector<int> &variables, int bdd_index) {
     // order variables by the variable order
     // variable in the lowest layer comes first
     // variable in the highest layer comes last
@@ -308,7 +308,7 @@ void bdd_container::permute_variables(std::vector<int> &permutation, int source_
     m_root_nodes[destination_bdd] = temp_node;
 }
 
-void bdd_container::conjoin_two_bdds(int bbd_a, int bdd_b, int bdd_result) {
+void bdd_container::conjoin_two_dds(int bbd_a, int bdd_b, int bdd_result) {
     LOG_MESSAGE(log_level::info) << "Conjoining two bdds";
     DdNode *tmp = Cudd_bddAnd(m_bdd_manager, m_root_nodes[bbd_a], m_root_nodes[bdd_b]);
     Cudd_Ref(tmp);

@@ -12,7 +12,7 @@ sdd_manager::sdd_manager(int num_variables) {
 
 sdd_manager::~sdd_manager() { sdd_manager_free(m_sdd_manager); }
 
-void sdd_manager::conjoin_clause(std::vector<int> &clause, int sdd_index) {
+void sdd_manager::add_clause_primitive(std::vector<int> &clause, int sdd_index) {
     // build the disjunction of the literals in the clause
 
     SddNode *var, *tmp;
@@ -41,7 +41,7 @@ void sdd_manager::conjoin_clause(std::vector<int> &clause, int sdd_index) {
     m_root_node = tmp;
 }
 
-void sdd_manager::add_exactly_one_constraint(std::vector<int> &variables, int sdd_index){
+void sdd_manager::add_exactly_one_primitive(std::vector<int> &variables, int sdd_index){
     // TODO implement
     return;
 } 
