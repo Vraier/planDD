@@ -49,6 +49,8 @@ void option_parser::parse_command_line(int argc, char *argv[]) {
          "Reverses the order of the conjoin operations. This has the effect that the conjoin order gets reversed but "
          "also clauses with higher timesteps get conjoined first.")  //
         // variable ordering
+        ("no_reordering", po::bool_switch(&m_values.no_reordering)->default_value(false),
+         "Disables automatic reordering during dd construction.")  //
         ("variable_order", po::value<std::string>(&m_values.variable_order)->default_value("x:vohjk"),
          "Determins the initial variable order for the dd building. "
          "v: variables, o: operators, h: helper amost variable, j: helper amost operator, k: helper amost mutex")  //
@@ -57,12 +59,13 @@ void option_parser::parse_command_line(int argc, char *argv[]) {
         ("initial_state_variables_first",
          po::bool_switch(&m_values.initial_state_variables_first)->default_value(false),
          "If this flag is set, variables in initial state clauses will be moved to the front of the variable order")  //
-         // variable grouping
-         ("group_variables",
-         po::bool_switch(&m_values.group_variables)->default_value(false),
+        // variable grouping
+        ("group_variables", po::bool_switch(&m_values.group_variables)->default_value(false),
          "Groups the variables for one timestep together")  //
-         ("group_actions",
-         po::bool_switch(&m_values.group_actions)->default_value(false),
+        ("group_variables_small", po::bool_switch(&m_values.group_variables_small)->default_value(false),
+         "Groups the variables for one timestep together. It only groups the variables for a singel planning variables "
+         "(and not all planning variables of a timestep)")  //
+        ("group_actions", po::bool_switch(&m_values.group_actions)->default_value(false),
          "Groups the actions for one timestep together. Works with unary and binary encoding")  //
         // building algorithm
         ("linear", po::bool_switch(&m_values.linear)->default_value(false),
