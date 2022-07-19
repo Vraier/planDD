@@ -23,10 +23,8 @@ void create_all_variables(cnf_encoder &encoder, bdd_container &container, option
                 container.set_variable_group(var_group_small_start, var_group_small_size);
             }
         }
-        // var_group_size = encoder.m_symbol_map.next_used_index() - var_group_start;
+        var_group_size = encoder.m_symbol_map.next_used_index() - var_group_start;
         if (options.group_variables) {
-            // TODO: why does this work?
-            // container.set_variable_group(var_group_start, 1000000);
             container.set_variable_group(var_group_start, var_group_size);
         }
 
