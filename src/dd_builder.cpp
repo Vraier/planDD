@@ -27,13 +27,12 @@ void construct_dd(dd_buildable &container, cnf_encoder &encoder, option_values &
     LOG_MESSAGE(log_level::info) << "Finished constructing final DD";
 }
 
-void construct_dd_linear(dd_buildable &container, cnf_encoder &encoder, option_values &options){
-        LOG_MESSAGE(log_level::info) << "Building dd linear";
-        LOG_MESSAGE(log_level::info) << "Ordering all clauses";
-        std::vector<logic_primitive> all_primitives = conjoin_order::order_all_clauses(encoder, options);
-        conjoin_primitives_linear(container, all_primitives, 0, false);
+void construct_dd_linear(dd_buildable &container, cnf_encoder &encoder, option_values &options) {
+    LOG_MESSAGE(log_level::info) << "Building dd linear";
+    LOG_MESSAGE(log_level::info) << "Ordering all clauses";
+    std::vector<logic_primitive> all_primitives = conjoin_order::order_all_clauses(encoder, options);
+    conjoin_primitives_linear(container, all_primitives, 0, false);
 }
-
 
 void construct_dd_by_layer_unidirectional(dd_buildable &container, cnf_encoder &encoder, option_values &options) {
     LOG_MESSAGE(log_level::info) << "Building bdd by layers unidirectional";
@@ -321,8 +320,10 @@ bool goal_is_fullfilled(dd_buildable &container, cnf_encoder &encoder, int main_
     return is_fulfilled;
 }
 
-void construct_dd_without_timesteps(dd_buildable &conatiner, cnf_encoder &encoder, option_values &options) {
+void construct_dd_without_timesteps(dd_buildable &container, cnf_encoder &encoder, option_values &options) {
     LOG_MESSAGE(log_level::info) << "Building BDD without knowing the correct amount of timesteps";
+
+    container.set_num_dds(2);
 
     // split the order into parts (in a really complicated manner)
     // default rympec::
@@ -332,30 +333,30 @@ void construct_dd_without_timesteps(dd_buildable &conatiner, cnf_encoder &encode
 
     // construct initial state
     std::vector<logic_primitive> temp = encoder.get_logic_primitives(ini_state, 0);
-    conjoin_primitives_linear(conatiner, temp, 0, true);
+    conjoin_primitives_linear(container, temp, 0, true);
 
     int t = 0;
     while (true) {
-        if (goal_is_fullfilled(conatiner, encoder, 0, 1, t)) {
+        if (goal_is_fullfilled(container, encoder, 0, 1, t)) {
             // add the goal to the main bdd
             LOG_MESSAGE(log_level::info) << "Goal is fulfilled in layer " << t;
             temp = encoder.get_logic_primitives(goal, t);
-            conjoin_primitives_linear(conatiner, temp, 0, true);
-            //conatiner.m_num_variables = encoder.m_symbol_map.get_num_variables();
+            conjoin_primitives_linear(container, temp, 0, true);
+            // conatiner.m_num_variables = encoder.m_symbol_map.get_num_variables();
             return;
         } else {
             // construct new bdd layer
             LOG_MESSAGE(log_level::info) << "Extending layer " << t;
             // TODO optimize this (i include mutex for variable twice)
             temp = conjoin_order::order_clauses_for_layer(encoder, order, t);
-            conjoin_primitives_linear(conatiner, temp, 0, true);
+            conjoin_primitives_linear(container, temp, 0, true);
             t++;
         }
     }
 }
 
 void conjoin_primitives_linear(dd_buildable &dd, std::vector<logic_primitive> &logic_primitives, int dd_index,
-                                bool silent) {
+                               bool silent) {
     if (!silent) {
         LOG_MESSAGE(log_level::info) << "Start constructing DD by lineary adding logic primitives";
     }
