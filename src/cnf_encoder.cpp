@@ -35,7 +35,6 @@ std::vector<logic_primitive> cnf_encoder::get_logic_primitives(primitive_tag tag
     }
 }
 
-// TODO: make it work with binary encoding
 void cnf_encoder::initialize_symbol_map(int timesteps) {
     m_symbol_map.set_num_operators(m_sas_problem.m_operators.size());
     for (int t = 0; t <= timesteps; t++) {

@@ -7,9 +7,9 @@ using namespace planning_logic;
 namespace dd_builder {
 
 void construct_dd(dd_buildable &container, cnf_encoder &encoder, option_values &options) {
-    LOG_MESSAGE(log_level::error) << "Choosing correct dd building algorithm";
+    LOG_MESSAGE(log_level::info) << "Choosing correct dd building algorithm";
 
-    if (options.layer) {
+    if (options.linear) {
         if (options.timesteps >= 0) {
             construct_dd_linear(container, encoder, options);
         } else {
@@ -24,7 +24,7 @@ void construct_dd(dd_buildable &container, cnf_encoder &encoder, option_values &
     } else {
         LOG_MESSAGE(log_level::error) << "No known dd building algorithm was choosen";
     }
-    LOG_MESSAGE(log_level::error) << "Finished constructing final DD";
+    LOG_MESSAGE(log_level::info) << "Finished constructing final DD";
 }
 
 void construct_dd_linear(dd_buildable &container, cnf_encoder &encoder, option_values &options){
@@ -325,15 +325,14 @@ void construct_dd_without_timesteps(dd_buildable &conatiner, cnf_encoder &encode
     LOG_MESSAGE(log_level::info) << "Building BDD without knowing the correct amount of timesteps";
 
     // split the order into parts (in a really complicated manner)
+    // default rympec::
     std::stringstream ss(options.build_order);
     std::string order;
     std::getline(ss, order, ':');
 
-    // construct seed
+    // construct initial state
     std::vector<logic_primitive> temp = encoder.get_logic_primitives(ini_state, 0);
     conjoin_primitives_linear(conatiner, temp, 0, true);
-    // temp = encoder.construct_exact_one_value(0);
-    // construct_dd_clause_linear(bdd, temp, 0, true);
 
     int t = 0;
     while (true) {

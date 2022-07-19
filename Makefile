@@ -15,11 +15,11 @@ variable_order:
 
 easygripper:
 	../downward/fast-downward.py --sas-file easygripper.sas --translate ../downward-benchmarks/gripper-easy/prob01.pddl
-	./$(TARGET) --sas_file easygripper.sas --build_bdd --timesteps 5
+	./$(TARGET) --sas_file easygripper.sas --build_bdd --linear --timesteps 5
 
 gripper:
 	../downward/fast-downward.py --sas-file gripper.sas --translate ../downward-benchmarks/gripper/prob01.pddl 
-	./$(TARGET) --sas_file gripper.sas --build_bdd --timesteps 11
+	./$(TARGET) --sas_file gripper.sas --build_bdd --linear --timesteps 11
 
 blocks:
 	../downward/fast-downward.py --sas-file blocks.sas --translate ../downward-benchmarks/blocks/probBLOCKS-4-0.pddl

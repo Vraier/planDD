@@ -14,6 +14,7 @@
 #include "dd_builder_conjoin_order.h"
 #include "bdd_container.h"
 #include "plan_to_cnf_map.h"
+#include "variable_grouping.h"
 
 int main(int argc, char *argv[]) {
     // start logging
@@ -63,32 +64,18 @@ int main(int argc, char *argv[]) {
 int planDD::hack_debug(option_values opt_values) {
     LOG_MESSAGE(log_level::info) << "You unlocked full control. good luck modifying the source code";
 
-    int num_variables = (opt_values.timesteps * 4) + 1;
+    int num_variables = opt_values.timesteps;
 
-    bdd_container copy_from(1, num_variables);
-    bdd_container main_builder(1, num_variables);
+    bdd_container main_builder(1, 0);
 
-    std::vector<int> exact_one;
-    for (int i = 0; i < 4; i++) {
-        exact_one.push_back(i + 1);
-    }
+    main_builder.print_bdd_info();
 
-    copy_from.add_exactly_one_primitive(exact_one);
-
-    for (int t = 0; t < opt_values.timesteps; t++) {
-        std::vector<int> indx_to;
-        for (int i = 0; i < 4; i++) {
-            indx_to.push_back((t * 4) + i + 1);
-        }
-
-        // copy_from.swap_variables(exact_one, indx_to);
-        main_builder.copy_and_conjoin_bdd_from_another_container(copy_from);
-        // copy_from.swap_variables(indx_to, exact_one);
-
-        main_builder.write_bdd_to_dot_file("after_step_" + std::to_string(t) + ".dot");
+    for(int i = 0; i < opt_values.timesteps; i++){
+        std::vector<int> clause;
+        clause.push_back(i*7+1);
+        main_builder.add_clause_primitive(clause);
         main_builder.print_bdd_info();
     }
-
     return 0;
 }
 
@@ -100,11 +87,13 @@ int planDD::build_bdd(option_values opt_values) {
     }
 
     cnf_encoder encoder(opt_values, parser.m_sas_problem);
-    encoder.initialize_symbol_map(opt_values.timesteps);
+    //encoder.initialize_symbol_map(opt_values.timesteps);
+    bdd_container builder(1, 0);
+
+    variable_grouping::create_all_variables(encoder, builder, opt_values);
 
 
     // std::vector<int> var_order = variable_order::order_variables(encoder, encoder.m_symbol_map, opt_values);
-    bdd_container builder(2, encoder.m_symbol_map.get_num_variables());
     // builder.set_variable_order(var_order);
 
     dd_builder::construct_dd(builder, encoder, opt_values);

@@ -59,8 +59,10 @@ void bdd_container::reduce_heap() {
 void bdd_container::print_bdd_info() {
     LOG_MESSAGE(log_level::info) << "Printing CUDD statistics...";
     LOG_MESSAGE(log_level::info) << "Number of nodes: " << Cudd_DagSize(m_root_nodes[0])
-                                 << ", Num Variables: " << m_num_variables << ", Number of solutions: "
-                                 << Cudd_CountMinterm(m_bdd_manager, m_root_nodes[0], m_num_variables + 1);
+                                 << ", Num Variables: " << Cudd_SupportSize(m_bdd_manager, m_root_nodes[0])
+                                 << ", Number of solutions: "
+                                 << Cudd_CountMinterm(m_bdd_manager, m_root_nodes[0],
+                                                      Cudd_SupportSize(m_bdd_manager, m_root_nodes[0]));
     FILE **fout = &stdout;
     Cudd_PrintInfo(m_bdd_manager, *fout);
 }

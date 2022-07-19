@@ -57,6 +57,13 @@ void option_parser::parse_command_line(int argc, char *argv[]) {
         ("initial_state_variables_first",
          po::bool_switch(&m_values.initial_state_variables_first)->default_value(false),
          "If this flag is set, variables in initial state clauses will be moved to the front of the variable order")  //
+         // variable grouping
+         ("group_variables",
+         po::bool_switch(&m_values.group_variables)->default_value(false),
+         "Groups the variables for one timestep together")  //
+         ("group_actions",
+         po::bool_switch(&m_values.group_actions)->default_value(false),
+         "Groups the actions for one timestep together. Works with unary and binary encoding")  //
         // building algorithm
         ("linear", po::bool_switch(&m_values.linear)->default_value(false),
          "Builds the dd clause by clause")  //

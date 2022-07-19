@@ -3,10 +3,12 @@
 #include "logging.h"
 namespace planning_logic {
 
-void plan_to_cnf_map::set_num_operators(int num_operators){
+int plan_to_cnf_map::next_used_index() { return m_variable_map.size() + 1; }
+
+void plan_to_cnf_map::set_num_operators(int num_operators) {
     m_num_operators = num_operators;
     // i have no idea how save this is, but i am too lazy to check for highest bit
-    m_num_op_variables = (int) std::ceil(std::log2(num_operators));
+    m_num_op_variables = (int)std::ceil(std::log2(num_operators));
 }
 
 int plan_to_cnf_map::get_variable_index(variable_tag tag, int timestep, int var_index, int value) {
@@ -37,18 +39,17 @@ int plan_to_cnf_map::get_variable_index_without_adding(variable_tag tag, int tim
     return get_variable_index_without_adding(tag, timestep, var_index, 0);
 }
 
-std::vector<int> plan_to_cnf_map::get_variable_index_for_op_binary(int timestep, int op_index){
+std::vector<int> plan_to_cnf_map::get_variable_index_for_op_binary(int timestep, int op_index) {
     std::vector<int> result;
     // get log many variables for the operator
-    for(int i = 0; i < m_num_op_variables; i++){
+    for (int i = 0; i < m_num_op_variables; i++) {
         result.push_back(get_variable_index(variable_plan_binary_op, timestep, i));
     }
-    for(int i = 0; i < m_num_op_variables; i++){
-        if(op_index & (1 << i)){
+    for (int i = 0; i < m_num_op_variables; i++) {
+        if (op_index & (1 << i)) {
             // if ith bit is set in op_index
             continue;
-        }
-        else{
+        } else {
             // if ith bit is not set, invert the variable
             result[i] *= -1;
         }
@@ -97,8 +98,6 @@ std::vector<int> plan_to_cnf_map::calculate_permutation_by_timesteps(int t_diff,
     return from_to_index;
 }
 
-int plan_to_cnf_map::get_num_variables(){
-    return m_variable_map.size();
-}
+int plan_to_cnf_map::get_num_variables() { return m_variable_map.size(); }
 
 }  // namespace planning_logic

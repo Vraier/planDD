@@ -21,6 +21,8 @@ struct option_values {
     bool include_mutex, use_ladder_encoding, exact_one_constraint, parallel_plan, binary_encoding;
     // effects the variable ordering
     bool goal_variables_first, initial_state_variables_first;
+    // effects variable_grouping
+    bool group_variables, group_actions;
     // DD layer building
     bool share_foundations, use_layer_permutation, reverse_layer_building;
 };

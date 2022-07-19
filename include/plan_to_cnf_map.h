@@ -32,6 +32,10 @@ class plan_to_cnf_map {
     // needed for binary encoding
     void set_num_operators(int num_operators);
 
+    // this would be the next index that is used
+    // it is not added to the symbol map
+    int next_used_index();
+
     // These methos get the information about a variable/action from a planning problem and return
     // the variable index into the cnf formula
     // They also add is to the pool of variables

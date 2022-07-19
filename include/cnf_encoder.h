@@ -13,11 +13,12 @@
 
 class cnf_encoder {
    public:
-    cnf_encoder(option_values &options, sas_problem &problem)
-        : m_options(options), m_sas_problem(problem) {}
+    cnf_encoder(option_values &options, sas_problem &problem) : m_sas_problem(problem), m_options(options) {}
 
     // maps planning variables to cnf variables.
     planning_logic::plan_to_cnf_map m_symbol_map;
+    // represents the planning problem
+    sas_problem m_sas_problem;
 
     // makes it easier to debug everything if the variables have a fixed mapping each times
     void initialize_symbol_map(int timesteps);
@@ -48,9 +49,6 @@ class cnf_encoder {
 
     // holds options for the whole programm. Some are important for the cnf_encoder
     option_values m_options;
-
-    // represents the planning problem
-    sas_problem m_sas_problem;
 
     // These methods generate all the logic primitives that represent the planning problem
     std::vector<planning_logic::logic_primitive> construct_initial_state();
