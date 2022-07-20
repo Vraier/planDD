@@ -388,13 +388,149 @@ def best_19_7_big_test():
     print("Num commands:",len(comms))
     return comms
 
+def best_20_7_big_test():
+    probs = problems.list_all_downward_solved_problems()
+    map_old_best =  {
+        "$timeout" : "300s",
+        "$mode" : "build_bdd",
+        "$addition_flags" : " --linear --build_order igx:rympec: --exact_one_constraint ",
+    }
+
+    map_no_t =  {
+        "$timeout" : "300s",
+        "$timesteps" : -1,
+        "$mode" : "build_bdd",
+        "$addition_flags" : " --linear --build_order rympec:: --exact_one_constraint ",
+    }
+    map_no_t_binary =  {
+        "$timeout" : "300s",
+        "$timesteps" : -1,
+        "$mode" : "build_bdd",
+        "$addition_flags" : " --linear --build_order rympec:: --binary_encoding ",
+    }
+    map_no_t_no_reorder =  {
+        "$timeout" : "300s",
+        "$timesteps" : -1,
+        "$mode" : "build_bdd",
+        "$addition_flags" : " --linear --build_order rympec:: --exact_one_constraint --no_reordering ",
+    }
+    map_no_t_no_reorder_binary =  {
+        "$timeout" : "300s",
+        "$timesteps" : -1,
+        "$mode" : "build_bdd",
+        "$addition_flags" : " --linear --build_order rympec::  --no_reordering --binary_encoding ",
+    }
+
+    map_group_action =  {
+        "$timeout" : "300s",
+        "$mode" : "build_bdd",
+        "$addition_flags" : " --linear --build_order igx:rympec: --exact_one_constraint --group_actions ",
+    }
+    map_group_var =  {
+        "$timeout" : "300s",
+        "$mode" : "build_bdd",
+        "$addition_flags" : " --linear --build_order igx:rympec: --exact_one_constraint --group_variables ",
+    }
+    map_group_varsmall =  {
+        "$timeout" : "300s",
+        "$mode" : "build_bdd",
+        "$addition_flags" : " --linear --build_order igx:rympec: --exact_one_constraint --group_variables_small ",
+    }
+    map_group_var_action =  {
+        "$timeout" : "300s",
+        "$mode" : "build_bdd",
+        "$addition_flags" : " --linear --build_order igx:rympec: --exact_one_constraint --group_actions --group_variables ",
+    }
+    map_group_varsmall_action =  {
+        "$timeout" : "300s",
+        "$mode" : "build_bdd",
+        "$addition_flags" : " --linear --build_order igx:rympec: --exact_one_constraint --group_actions --group_variables_small ",
+    }
+
+    map_group_action_binary =  {
+        "$timeout" : "300s",
+        "$mode" : "build_bdd",
+        "$addition_flags" : " --linear --build_order igx:rympec: --group_actions --binary_encoding ",
+    }
+    map_group_var_binary =  {
+        "$timeout" : "300s",
+        "$mode" : "build_bdd",
+        "$addition_flags" : " --linear --build_order igx:rympec: --group_variables --binary_encoding ",
+    }
+    map_group_varsmall_binary =  {
+        "$timeout" : "300s",
+        "$mode" : "build_bdd",
+        "$addition_flags" : " --linear --build_order igx:rympec: --group_variables_small --binary_encoding ",
+    }
+    map_group_var_action_binary =  {
+        "$timeout" : "300s",
+        "$mode" : "build_bdd",
+        "$addition_flags" : " --linear --build_order igx:rympec: --group_actions --group_variables --binary_encoding ",
+    }
+    map_group_varsmall_action_binary =  {
+        "$timeout" : "300s",
+        "$mode" : "build_bdd",
+        "$addition_flags" : " --linear --build_order igx:rympec: --group_actions --group_variables_small --binary_encoding ",
+    }
+
+    map_binary_no_reorder =  {
+        "$timeout" : "300s",
+        "$mode" : "build_bdd",
+        "$addition_flags" : " --linear --build_order igx:rympec: --binary_encoding --no_reordering ",
+    }
+
+    downward_argument_map = dict(arguments.standart_downward_argument_map)
+
+    arg1 = ("best_19_7_old_best", map_old_best, downward_argument_map)
+    arg2 = ("best_19_7_no_t", map_no_t, downward_argument_map)
+    arg3 = ("best_19_7_no_t_binary", map_no_t_binary, downward_argument_map)
+    arg4 = ("best_19_7_no_t_no_reorder", map_no_t_no_reorder, downward_argument_map)
+    arg5 = ("best_19_7_no_t_no_reorder_binary", map_no_t_no_reorder_binary, downward_argument_map)
+    arg6 = ("best_19_7_group_action", map_group_action, downward_argument_map)
+    arg7 = ("best_19_7_group_var", map_group_var, downward_argument_map)
+    arg8 = ("best_19_7_group_varsmall", map_group_varsmall, downward_argument_map)
+    arg9 = ("best_19_7_group_var_action", map_group_var_action, downward_argument_map)
+    arg10 = ("best_19_7_group_varsmall_action", map_group_varsmall_action, downward_argument_map)
+    arg11 = ("best_19_7_group_action_binary", map_group_action_binary, downward_argument_map)
+    arg12 = ("best_19_7_group_var_binary", map_group_var_binary, downward_argument_map)
+    arg13 = ("best_19_7_group_varsmall_binary", map_group_varsmall_binary, downward_argument_map)
+    arg14 = ("best_19_7_group_var_action_binary", map_group_var_action_binary, downward_argument_map)
+    arg15 = ("best_19_7_group_varsmall_action_binary", map_group_varsmall_action_binary, downward_argument_map)
+    arg16 = ("best_19_7_binary_no_reorder", map_binary_no_reorder, downward_argument_map)
+    args = [
+        arg1, 
+        arg3, 
+        arg16,
+        arg5, 
+
+        arg11,
+        arg12,
+        arg13,
+        arg14,
+        arg15,
+
+        arg2, 
+        arg4,
+
+        arg6, 
+        arg7, 
+        arg8, 
+        arg9, 
+        arg10,
+    ]
+
+    comms = commandfile.generate_command_calls(probs, args)
+    print("Num problems:",len(probs))
+    print("Num configs:",len(args))
+    print("Num commands:",len(comms))
+    return comms
 
 
 # TODO test all var orders with all conjoin orders
 
 
 comms = []
-comms += best_19_7_big_test()
+comms += best_20_7_big_test()
 
 commandfile.generate_parallel_file_from_calls(comms)
 
