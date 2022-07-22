@@ -279,7 +279,6 @@ std::vector<logic_primitive> cnf_encoder::construct_effect(int timestep) {
     return result;
 }
 
-// TODO: make clauses less "restrictive", only chek if var changes from true to false
 // If atom p changes between steps t and t + 1, an action which supports this
 // change must be applied at t:
 std::vector<logic_primitive> cnf_encoder::construct_frame(int timestep) {
@@ -289,75 +288,71 @@ std::vector<logic_primitive> cnf_encoder::construct_frame(int timestep) {
 
         // find all possible value changes of a variable
         int domain_size = m_sas_problem.m_variabels[v].m_range;
-        for (int val1 = 0; val1 < domain_size; val1++) {
-            for (int val2 = 0; val2 < domain_size; val2++) {
-                if (val1 == val2) continue;  // skip if no value has changes
+        for (int val = 0; val < domain_size; val++) {
 
-                if (m_options.binary_encoding) {
-                    std::vector<std::vector<int>> new_dnf;
-                    int index_val1, index_val2;
-                    index_val1 = m_symbol_map.get_variable_index(variable_plan_var, timestep, v, val1);
-                    index_val2 = m_symbol_map.get_variable_index(variable_plan_var, timestep + 1, v, val2);
+            // indize of the sat variable of the planning variable
+            int index_val_t1, index_val_t2;
+            index_val_t1 = m_symbol_map.get_variable_index(variable_plan_var, timestep, v, val);
+            index_val_t2 = m_symbol_map.get_variable_index(variable_plan_var, timestep + 1, v, val);
 
-                    std::vector<int> temp1, temp2;
-                    temp1.push_back(-index_val1); new_dnf.push_back(temp1);
-                    temp2.push_back(-index_val2); new_dnf.push_back(temp2);
+            // find the actions that support this transition.
+            // (planning) indizes of the actions that support the change of the variable 
+            // to become true or false in the next timestep
+            std::vector<int> support_become_false, support_become_true;
+            for (int op = 0; op < m_sas_problem.m_operators.size(); op++) {
+                for (int i = 0; i < m_sas_problem.m_operators[op].m_effects.size(); i++) {
+                    std::tuple<int, int, int> op_eff = m_sas_problem.m_operators[op].m_effects[i];
+                    int effected_var, val_pre, val_post;
+                    effected_var = std::get<0>(op_eff);
+                    val_pre = std::get<1>(op_eff);
+                    val_post = std::get<2>(op_eff);
 
-                    // find the actions that support this transition.
-                    for (int op = 0; op < m_sas_problem.m_operators.size(); op++) {
-                        for (int i = 0; i < m_sas_problem.m_operators[op].m_effects.size(); i++) {
-                            std::tuple<int, int, int> op_eff = m_sas_problem.m_operators[op].m_effects[i];
-                            int effected_var, val_pre, val_post;
-                            effected_var = std::get<0>(op_eff);
-                            val_pre = std::get<1>(op_eff);
-                            val_post = std::get<2>(op_eff);
-
-                            // check if corrected variable is affected, it
-                            // changes to the right value, and it changes from
-                            // the right value. if everything is met, add it to
-                            // the clause
-                            if ((effected_var == v) && (val_post == val2) && ((val_pre == val1) || (val_pre == -1))) {
-                                std::vector<int> op_indizes = m_symbol_map.get_variable_index_for_op_binary(timestep, op);
-                                new_dnf.push_back(op_indizes);
-                            }
-                        }
+                    // check if corrected variable is affected, and it changes to ture or false
+                    if ((effected_var == v) && (val_post != val)) {
+                        support_become_false.push_back(op);
                     }
-                    result.push_back(logic_primitive(logic_dnf, frame, timestep, new_dnf));
-
-                } else {
-                    std::vector<int> new_clause;
-                    int index_val1, index_val2;
-                    index_val1 = m_symbol_map.get_variable_index(variable_plan_var, timestep, v, val1);
-                    index_val2 = m_symbol_map.get_variable_index(variable_plan_var, timestep + 1, v, val2);
-                    new_clause.push_back(-index_val1);
-                    new_clause.push_back(-index_val2);
-
-                    // find the actions that support this transition.
-                    for (int op = 0; op < m_sas_problem.m_operators.size(); op++) {
-                        for (int i = 0; i < m_sas_problem.m_operators[op].m_effects.size(); i++) {
-                            std::tuple<int, int, int> op_eff = m_sas_problem.m_operators[op].m_effects[i];
-                            int effected_var, val_pre, val_post;
-                            effected_var = std::get<0>(op_eff);
-                            val_pre = std::get<1>(op_eff);
-                            val_post = std::get<2>(op_eff);
-
-                            // check if corrected variable is affected, it
-                            // changes to the right value, and it changes from
-                            // the right value if everything is met, add it to
-                            // the clause
-                            if ((effected_var == v) && (val_post == val2) && ((val_pre == val1) || (val_pre == -1))) {
-                                int index_possible_op = m_symbol_map.get_variable_index(variable_plan_op, timestep, op);
-                                new_clause.push_back(index_possible_op);
-                                // break; // this is a fishy break :D, therfore
-                                // i comment it out. Be we dont have to check
-                                // this operator anymore because it is already a
-                                // candidate
-                            }
-                        }
+                    if ((effected_var == v) && (val_post == val)) {
+                        support_become_true.push_back(op);
                     }
-                    result.push_back(logic_primitive(logic_clause, frame, timestep, new_clause));
                 }
             }
+
+            if (m_options.binary_encoding) {
+                std::vector<std::vector<int>> dnf_change_to_true, dnf_change_to_false;
+
+                std::vector<int> temp1, temp2, temp3, temp4;
+                temp1.push_back(index_val_t1); dnf_change_to_true.push_back(temp1);
+                temp2.push_back(-index_val_t2); dnf_change_to_true.push_back(temp2);
+                temp3.push_back(-index_val_t1); dnf_change_to_false.push_back(temp3);
+                temp4.push_back(index_val_t2); dnf_change_to_false.push_back(temp4);
+
+                for(int op: support_become_true){
+                    dnf_change_to_true.push_back(m_symbol_map.get_variable_index_for_op_binary(timestep, op));
+                }
+                for(int op: support_become_false){
+                    dnf_change_to_false.push_back(m_symbol_map.get_variable_index_for_op_binary(timestep, op));
+                }
+
+                result.push_back(logic_primitive(logic_dnf, frame, timestep, dnf_change_to_true));
+                result.push_back(logic_primitive(logic_dnf, frame, timestep, dnf_change_to_false));
+
+            } else {
+                std::vector<int> change_to_true, change_to_false;
+                change_to_true.push_back(index_val_t1);
+                change_to_true.push_back(-index_val_t2);
+                change_to_false.push_back(-index_val_t1);
+                change_to_false.push_back(index_val_t2);
+
+                for(int op: support_become_true){
+                    change_to_true.push_back(m_symbol_map.get_variable_index(variable_plan_op, timestep, op));
+                }
+                for(int op: support_become_false){
+                    change_to_false.push_back(m_symbol_map.get_variable_index(variable_plan_op, timestep, op));
+                }
+
+                result.push_back(logic_primitive(logic_clause, frame, timestep, change_to_true));
+                result.push_back(logic_primitive(logic_clause, frame, timestep, change_to_false));
+            }   
         }
     }
     return result;
