@@ -89,15 +89,15 @@ int planDD::build_bdd(option_values opt_values) {
     cnf_encoder encoder(opt_values, parser.m_sas_problem);
     bdd_container builder(1, 0);
 
-    variable_grouping::create_all_variables(encoder, builder, opt_values);
+    if(opt_values.timesteps >= 0){
+        variable_grouping::create_all_variables(encoder, builder, opt_values);
+        std::vector<int> var_order = variable_order::order_variables(encoder, encoder.m_symbol_map, opt_values);
+        builder.set_variable_order(var_order);
+    }
 
     if(!opt_values.no_reordering){
         builder.enable_reordering();
     }
-
-
-    // std::vector<int> var_order = variable_order::order_variables(encoder, encoder.m_symbol_map, opt_values);
-    // builder.set_variable_order(var_order);
 
     dd_builder::construct_dd(builder, encoder, opt_values);
 
