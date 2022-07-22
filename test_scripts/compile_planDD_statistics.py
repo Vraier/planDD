@@ -221,19 +221,47 @@ layer_building_differences = [
 #write_all_information_to_file("../../test_output/best_13_7_big_test/best_13_7_big_test_no_timesteps",               "../../test_output/best_13_7_big_test_no_timesteps.pkl")
 #write_all_information_to_file("../../test_output/best_13_7_big_test/best_13_7_big_test_no_timesteps_parallel",      "../../test_output/best_13_7_big_test_no_timesteps_parallel.pkl")
 #write_all_information_to_file("../../test_output/best_13_7_big_test/best_13_7_big_test_binary_encoding",            "../../test_output/best_13_7_big_test_binary_encoding.pkl")
-best_13_7_big_test_old = read_all_information_from_file("../../test_output/best_13_7_big_test_old.pkl")
-best_13_7_big_test_no_timesteps = read_all_information_from_file("../../test_output/best_13_7_big_test_no_timesteps.pkl")
-best_13_7_big_test_no_timesteps_parallel = read_all_information_from_file("../../test_output/best_13_7_big_test_no_timesteps_parallel.pkl")
-best_13_7_big_test_binary_encoding = read_all_information_from_file("../../test_output/best_13_7_big_test_binary_encoding.pkl")
-print_big_information_from_dicts(best_13_7_big_test_old)
-print_big_information_from_dicts(best_13_7_big_test_no_timesteps)
-print_big_information_from_dicts(best_13_7_big_test_no_timesteps_parallel)
-print_big_information_from_dicts(best_13_7_big_test_binary_encoding)
+#best_13_7_big_test_old = read_all_information_from_file("../../test_output/best_13_7_big_test_old.pkl")
+#best_13_7_big_test_no_timesteps = read_all_information_from_file("../../test_output/best_13_7_big_test_no_timesteps.pkl")
+#best_13_7_big_test_no_timesteps_parallel = read_all_information_from_file("../../test_output/best_13_7_big_test_no_timesteps_parallel.pkl")
+#best_13_7_big_test_binary_encoding = read_all_information_from_file("../../test_output/best_13_7_big_test_binary_encoding.pkl")
+#print_big_information_from_dicts(best_13_7_big_test_old)
+#print_big_information_from_dicts(best_13_7_big_test_no_timesteps)
+#print_big_information_from_dicts(best_13_7_big_test_no_timesteps_parallel)
+#print_big_information_from_dicts(best_13_7_big_test_binary_encoding)
 
 #print_solving_difference_between_two_congigs(best_13_7_big_test_no_timesteps, "No timestep", best_13_7_big_test_no_timesteps_parallel, "parallel")
-print_solving_difference_between_two_congigs(best_13_7_big_test_no_timesteps, "No timestep", best_13_7_big_test_old, "timestep")
+#print_solving_difference_between_two_congigs(best_13_7_big_test_no_timesteps, "No timestep", best_13_7_big_test_old, "timestep")
 
+best_20_7_suites = [
+    "best_20_7_old_best",
+    #"best_20_7_no_t", 
+    #"best_20_7_no_t_binary", 
+    #"best_20_7_no_t_no_reorder", 
+    #"best_20_7_no_t_no_reorder_binary", 
+    "best_20_7_binary_no_reorder",
+    #"best_20_7_group_action", 
+    #"best_20_7_group_var", 
+    #"best_20_7_group_varsmall", 
+    #"best_20_7_group_var_action", 
+    #"best_20_7_group_varsmall_action",
+    #"best_20_7_group_action_binary",
+    #"best_20_7_group_var_binary",
+    #"best_20_7_group_varsmall_binary",
+    #"best_20_7_group_var_action_binary",
+    #"best_20_7_group_varsmall_action_binary",
+]
+best_20_7_dics = []
 
+for x in best_20_7_suites:
+    #write_all_information_to_file("../../test_output/best_20_7/" + x, "../../test_output/" + x + ".pkl")
+    pass
+
+for x in best_20_7_suites:
+    best_20_7_dics.append(read_all_information_from_file("../../test_output/" + x + ".pkl"))
+    
+for x in best_20_7_dics:
+    print_big_information_from_dicts(x)
 
 portfolio_suites = [
     ##dic_best_triple_21_6_old,
@@ -244,10 +272,10 @@ portfolio_suites = [
     ##dic_best_28_6_reverse_with_perm,
     #dic_best_28_6_reverse_no_perm,
     ##best_13_7_big_test_binary_encoding,
-    best_13_7_big_test_old,
-    best_13_7_big_test_binary_encoding,
-    best_13_7_big_test_no_timesteps,
-    best_13_7_big_test_no_timesteps_parallel,
+    #best_13_7_big_test_old,
+    #best_13_7_big_test_binary_encoding,
+    #best_13_7_big_test_no_timesteps,
+    #best_13_7_big_test_no_timesteps_parallel,
 ]
 
-print_portfolio_information(portfolio_suites)
+print_portfolio_information(best_20_7_dics)
