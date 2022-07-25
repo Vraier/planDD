@@ -40,16 +40,29 @@ std::vector<logic_primitive> cnf_encoder::construct_initial_state() {
     std::vector<logic_primitive> result;
 
     for (int var = 0; var < m_sas_problem.m_variabels.size(); var++) {
-        for (int val = 0; val < m_sas_problem.m_variabels[var].m_range; val++) {
-            std::vector<int> new_clause;
-            int sym_index = m_symbol_map.get_variable_index(variable_plan_var, 0, var, val);
-            if (m_sas_problem.m_initial_state[var] == val) {
-                new_clause.push_back(sym_index);
-            } else {
-                new_clause.push_back(-sym_index);
-            }
 
-            result.push_back(logic_primitive(logic_clause, ini_state, 0, new_clause));
+        if(m_options.binary_variables){
+            int var_size = m_sas_problem.m_variabels[var].m_range;
+            int var_val = m_sas_problem.m_initial_state[var];
+            std::vector<int> var_encoding = m_symbol_map.get_variable_index_for_var_binary(0, var, var_val, var_size);
+            for(int v: var_encoding){
+                std::vector<int> new_clause; new_clause.push_back(v);
+                result.push_back(logic_primitive(logic_clause, ini_state, 0, new_clause));
+            }
+        }
+        else {
+            // unary case
+            for (int val = 0; val < m_sas_problem.m_variabels[var].m_range; val++) {
+                std::vector<int> new_clause;
+                int sym_index = m_symbol_map.get_variable_index(variable_plan_var, 0, var, val);
+                if (m_sas_problem.m_initial_state[var] == val) {
+                    new_clause.push_back(sym_index);
+                } else {
+                    new_clause.push_back(-sym_index);
+                }
+
+                result.push_back(logic_primitive(logic_clause, ini_state, 0, new_clause));
+            }
         }
     }
 
