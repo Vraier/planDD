@@ -61,6 +61,25 @@ std::vector<int> plan_to_cnf_map::get_variable_index_for_op_binary(int timestep,
     return result;
 }
 
+std::vector<int> plan_to_cnf_map::get_variable_index_for_var_binary(int timestep, int var_index, int var_value, int var_size) {
+    std::vector<int> result;
+    int binary_size = num_bits_for_binary_var(var_size);
+    // get log many variables for the operator
+    for (int i = 0; i < binary_size; i++) {
+        result.push_back(get_variable_index(variable_plan_binary_var, timestep, var_index, i));
+    }
+    for (int i = 0; i < binary_size; i++) {
+        if (var_value & (1 << i)) {
+            // if ith bit is set in op_index
+            continue;
+        } else {
+            // if ith bit is not set, invert the variable
+            result[i] *= -1;
+        }
+    }
+    return result;
+}
+
 tagged_variable plan_to_cnf_map::get_planning_info_for_variable(int index) {
     if (m_inverse_variable_map.find(index) == m_inverse_variable_map.end()) {
         return std::make_tuple(variable_none, -1, -1, -1);
