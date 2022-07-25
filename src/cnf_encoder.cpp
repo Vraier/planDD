@@ -74,13 +74,26 @@ std::vector<logic_primitive> cnf_encoder::construct_goal(int timestep) {
     std::vector<logic_primitive> result;
 
     for (int g = 0; g < m_sas_problem.m_goal.size(); g++) {
-        std::vector<int> new_clause;
-        std::pair<int, int> goal_value = m_sas_problem.m_goal[g];
-        int index_var =
-            m_symbol_map.get_variable_index(variable_plan_var, timestep, goal_value.first, goal_value.second);
+        std::pair<int, int> goal_pair = m_sas_problem.m_goal[g];
+        int goal_var = goal_pair.first;
+        int goal_val = goal_pair.second;
+        int goal_var_size =  m_sas_problem.m_variabels[goal_var].m_range;
 
-        new_clause.push_back(index_var);
-        result.push_back(logic_primitive(logic_clause, goal, timestep, new_clause));
+        if(m_options.binary_variables){
+            std::vector<int> goal_encoding = m_symbol_map.get_variable_index_for_var_binary(timestep, goal_var, goal_val, goal_var_size);
+            for(int v: goal_encoding){
+                std::vector<int> new_clause; new_clause.push_back(v);
+                result.push_back(logic_primitive(logic_clause, goal, timestep, new_clause));
+            }
+
+        } else {
+            std::vector<int> new_clause;
+            int index_var =
+                m_symbol_map.get_variable_index(variable_plan_var, timestep, goal_var, goal_val);
+
+            new_clause.push_back(index_var);
+            result.push_back(logic_primitive(logic_clause, goal, timestep, new_clause));
+        }
     }
 
     return result;
