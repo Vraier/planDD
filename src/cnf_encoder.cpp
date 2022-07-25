@@ -103,7 +103,26 @@ std::vector<logic_primitive> cnf_encoder::construct_goal(int timestep) {
 std::vector<logic_primitive> cnf_encoder::construct_exact_one_value(int timestep) {
     std::vector<logic_primitive> result;
 
-    if (m_options.exact_one_constraint) {
+    if(m_options.binary_variables){
+        // noting to do here, variables are implicitly exclusive
+        if (m_options.binary_exclude_impossible) {
+
+            for(int v = 0; v < m_sas_problem.m_variabels.size(); v++){
+                // iterate over the indizes that represent imposssible variable values
+                int var_size = m_sas_problem.m_variabels[v].m_range;
+                int num_imp_vars = (1 << m_symbol_map.num_bits_for_binary_var(var_size));
+                for(int imp_var = var_size; imp_var < num_imp_vars; imp_var++){
+                    std::vector<int> var_indizes = m_symbol_map.get_variable_index_for_var_binary(timestep, v, imp_var, var_size);
+                    std::vector<int> new_clause;
+                    for(int i: var_indizes){
+                        new_clause.push_back(-i);
+                    }
+                    result.push_back(logic_primitive(logic_clause, eo_var, timestep, new_clause));
+                }
+            }
+        }
+    } 
+    else if (m_options.exact_one_constraint) {
         for (int v = 0; v < m_sas_problem.m_variabels.size(); v++) {
             std::vector<int> exact_one_should_be_true;
             for (int val = 0; val < m_sas_problem.m_variabels[v].m_range; val++) {
