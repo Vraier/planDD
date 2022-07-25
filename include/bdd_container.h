@@ -26,11 +26,11 @@ class bdd_container : public virtual dd_buildable {
     std::vector<DdNode *> m_root_nodes;
 
    public:
-    int m_num_variables;
     // constructor for bdd manager. The number of used variables should be clear from the start
     // this is important for counting the number of solutions and variable ordering
-    bdd_container(int num_bdds, int num_variables);
+    bdd_container(int num_bdds);
     ~bdd_container();
+    // deletes all previous dds and creates num_dds new dds
     void set_num_dds(int num_dds);
 
     // check if the bdd is the zero node
