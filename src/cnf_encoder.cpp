@@ -35,30 +35,6 @@ std::vector<logic_primitive> cnf_encoder::get_logic_primitives(primitive_tag tag
     }
 }
 
-void cnf_encoder::initialize_symbol_map(int timesteps) {
-    m_symbol_map.set_num_operators(m_sas_problem.m_operators.size());
-    for (int t = 0; t <= timesteps; t++) {
-        // construct all variables indizes
-        for (int var = 0; var < m_sas_problem.m_variabels.size(); var++) {
-            for (int val = 0; val < m_sas_problem.m_variabels[var].m_range; val++) {
-                m_symbol_map.get_variable_index(variable_plan_var, t, var, val);
-            }
-        }
-        // construct action indizes
-        if (t != timesteps) {
-            if (m_options.binary_encoding) {
-                m_symbol_map.get_variable_index_for_op_binary(t, 0);
-            } else {
-                for (int op = 0; op < m_sas_problem.m_operators.size(); op++) {
-                    m_symbol_map.get_variable_index(variable_plan_op, t, op);
-                }
-            }
-        }
-    }
-    LOG_MESSAGE(log_level::info) << "Constructed " << m_symbol_map.get_num_variables()
-                                 << " variables during symbol map initialization";
-}
-
 // The initial state must hold at t = 0.
 std::vector<logic_primitive> cnf_encoder::construct_initial_state() {
     std::vector<logic_primitive> result;
@@ -142,6 +118,19 @@ std::vector<logic_primitive> cnf_encoder::construct_exact_one_action(int timeste
 
     if (m_options.binary_encoding) {
         // nothing to do, binary encoding implicit guarantees only one action
+        if (m_options.binary_exclude_impossible) {
+
+            // iterate over the indizes that represent imposssible operators
+            int num_imp_ops = (1 << m_symbol_map.num_bits_for_binary_var(m_sas_problem.m_operators.size()));
+            for(int imp_op = m_sas_problem.m_operators.size(); imp_op < num_imp_ops; imp_op++){
+                std::vector<int> op_indizes = m_symbol_map.get_variable_index_for_op_binary(timestep, imp_op);
+                std::vector<int> new_clause;
+                for(int i: op_indizes){
+                    new_clause.push_back(-i);
+                }
+                result.push_back(logic_primitive(logic_clause, eo_op, timestep, new_clause));
+            }
+        }
     } else if (m_options.parallel_plan) {
         result = construct_no_conflicting_operators(timestep);
     } else if (m_options.exact_one_constraint) {
@@ -174,6 +163,7 @@ std::vector<logic_primitive> cnf_encoder::construct_exact_one_action(int timeste
     return result;
 }
 
+// used for parallel plans
 std::vector<logic_primitive> cnf_encoder::construct_no_conflicting_operators(int timestep) {
     std::vector<logic_primitive> result;
 

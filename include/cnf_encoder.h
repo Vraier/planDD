@@ -20,9 +20,6 @@ class cnf_encoder {
     // represents the planning problem
     sas_problem m_sas_problem;
 
-    // makes it easier to debug everything if the variables have a fixed mapping each times
-    void initialize_symbol_map(int timesteps);
-
     // constructs the logic primitives according to the tag and timestep
     // will change the symbol map if new variables are created
     std::vector<planning_logic::logic_primitive> get_logic_primitives(planning_logic::primitive_tag tag, int timestep);

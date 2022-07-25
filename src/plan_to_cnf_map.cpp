@@ -5,10 +5,14 @@ namespace planning_logic {
 
 int plan_to_cnf_map::next_used_index() { return m_variable_map.size() + 1; }
 
+int plan_to_cnf_map::num_bits_for_binary_var(int num_variables){
+    return (int)std::ceil(std::log2(num_variables));
+}
+
 void plan_to_cnf_map::set_num_operators(int num_operators) {
     m_num_operators = num_operators;
-    // i have no idea how save this is, but i am too lazy to check for highest bit
-    m_num_op_variables = (int)std::ceil(std::log2(num_operators));
+    // TODO: i have no idea how save this is, but i am too lazy to check for highest bit
+    m_num_op_variables = num_bits_for_binary_var(num_operators);
 }
 
 int plan_to_cnf_map::get_variable_index(variable_tag tag, int timestep, int var_index, int value) {

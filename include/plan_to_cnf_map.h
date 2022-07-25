@@ -29,6 +29,10 @@ class plan_to_cnf_map {
     std::map<tagged_variable, int> m_variable_map;
     std::map<int, tagged_variable> m_inverse_variable_map;
 
+    // calculates the number of bits that is needed to represent this amount of variables in a binary encoding
+    // more specifically: calculate the highest bit position or ceil(log2(num_variables))
+    int num_bits_for_binary_var(int num_variables);
+
     // needed for binary encoding
     void set_num_operators(int num_operators);
 
