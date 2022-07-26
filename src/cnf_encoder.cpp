@@ -405,24 +405,44 @@ std::vector<logic_primitive> cnf_encoder::construct_frame(int timestep) {
 
 // at every timestep it is not allowed for two values in a mutex to be true at the same time
 std::vector<logic_primitive> cnf_encoder::construct_mutex(int timestep) {
-    if (!m_options.include_mutex) {
-        return std::vector<logic_primitive>();
-    }
     std::vector<logic_primitive> result;
 
-    for (int m = 0; m < m_sas_problem.m_mutex_groups.size(); m++) {
-        std::vector<int> at_most_one_should_be_true;
-        for (int i = 0; i < m_sas_problem.m_mutex_groups[m].size(); i++) {
-            std::pair<int, int> var_val_pair = m_sas_problem.m_mutex_groups[m][i];
-            int index =
-                m_symbol_map.get_variable_index(variable_plan_var, timestep, var_val_pair.first, var_val_pair.second);
-            at_most_one_should_be_true.push_back(index);
-        }
+    if (!m_options.include_mutex) {
+        return result;
+    }
 
-        std::vector<std::vector<int>> constrain_clauses =
-            generate_at_most_one_constraint(at_most_one_should_be_true, variable_h_amost_mutex, timestep);
-        for (std::vector<int> constraint : constrain_clauses) {
-            result.push_back(logic_primitive(logic_clause, mutex, timestep, constraint));
+    for (int m = 0; m < m_sas_problem.m_mutex_groups.size(); m++) {
+        std::vector<std::pair<int, int>> at_most_one_should_be_true = m_sas_problem.m_mutex_groups[m];
+
+        for(int i = 0; i < at_most_one_should_be_true.size(); i++){
+            for(int j = i+1; j < at_most_one_should_be_true.size(); j++){
+
+                std::vector<int> new_clause;
+                int var1, val1, size1, var2, val2, size2;
+                var1 = at_most_one_should_be_true[i].first;
+                val1 = at_most_one_should_be_true[i].second;
+                size1 = m_sas_problem.m_variabels[var1].m_range;
+                var2 = at_most_one_should_be_true[j].first;
+                val2 = at_most_one_should_be_true[j].second;
+                size2 = m_sas_problem.m_variabels[var2].m_range;
+
+                if(m_options.binary_variables){
+                    // binary planning variables
+                    for(int v: m_symbol_map.get_variable_index_for_var_binary(timestep, var1, val1, size1)){
+                        new_clause.push_back(-v);
+                    }
+                    for(int v: m_symbol_map.get_variable_index_for_var_binary(timestep, var2, val2, size2)){
+                        new_clause.push_back(-v);
+                    }
+                }
+                else {
+                    // unary planning variables
+                    new_clause.push_back(-m_symbol_map.get_variable_index(variable_plan_var, timestep, var1, val1));
+                    new_clause.push_back(-m_symbol_map.get_variable_index(variable_plan_var, timestep, var1, val1));
+                }
+
+                result.push_back(logic_primitive(logic_clause, mutex, timestep, new_clause));
+            }
         }
     }
 
