@@ -235,40 +235,48 @@ std::vector<logic_primitive> cnf_encoder::construct_precondition(int timestep) {
 
     for (int op = 0; op < m_sas_problem.m_operators.size(); op++) {
         for (int eff = 0; eff < m_sas_problem.m_operators[op].m_effects.size(); eff++) {
-            int effected_var, effected_old_val;
+            int effected_var, effected_old_val, effected_var_size;
             effected_var = std::get<0>(m_sas_problem.m_operators[op].m_effects[eff]);
             effected_old_val = std::get<1>(m_sas_problem.m_operators[op].m_effects[eff]);
+            effected_var_size = m_sas_problem.m_variabels[effected_var].m_range;
             if (effected_old_val == -1) {
                 // a value of -1 the value of the variable is irrelevant,
                 // when determining if it is applicable
                 continue;
             }
 
+            std::vector<std::vector<int>> new_dnf;
+
             if (m_options.binary_encoding) {
+                std::vector<int> op_indizes = m_symbol_map.get_variable_index_for_op_binary(timestep, op);
+                for(int o: op_indizes){
+                    std::vector<int> tmp;
+                    tmp.push_back(-o);
+                    new_dnf.push_back(tmp);
+                }
+            } else {
+                // unary action encoding
+                int index_op;
+                index_op = m_symbol_map.get_variable_index(variable_plan_op, timestep, op);
+                std::vector<int> tmp;
+                tmp.push_back(-index_op);
+                new_dnf.push_back(tmp);
+            }
+
+            if(m_options.binary_variables){
+                std::vector<int> var_indizes = m_symbol_map.get_variable_index_for_var_binary(timestep, effected_var, effected_old_val, effected_var_size);
+                new_dnf.push_back(var_indizes);
+            }
+            else {
+                // variable unary
                 int index_precondition =
                     m_symbol_map.get_variable_index(variable_plan_var, timestep, effected_var, effected_old_val);
-                std::vector<int> op_indizes = m_symbol_map.get_variable_index_for_op_binary(timestep, op);
-
-                std::vector<int> new_clause;
-                for (int idx : op_indizes) {
-                    new_clause.push_back(-idx);
-                }
-                new_clause.push_back(index_precondition);
-
-                result.push_back(logic_primitive(logic_clause, precon, timestep, new_clause));
-
-            } else {
-                int index_op, index_precondition;
-                index_op = m_symbol_map.get_variable_index(variable_plan_op, timestep, op);
-                index_precondition =
-                    m_symbol_map.get_variable_index(variable_plan_var, timestep, effected_var, effected_old_val);
-
-                std::vector<int> new_clause;
-                new_clause.push_back(-index_op);
-                new_clause.push_back(index_precondition);
-
-                result.push_back(logic_primitive(logic_clause, precon, timestep, new_clause));
+                std::vector<int> tmp;
+                tmp.push_back(index_precondition);
+                new_dnf.push_back(tmp);
             }
+
+            result.push_back(logic_primitive(logic_dnf, precon, timestep, new_dnf));
         }
     }
     return result;

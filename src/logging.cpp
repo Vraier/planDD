@@ -21,7 +21,7 @@ void initialize_logging() {
                  //<< boost::log::expressions::attr<std::string>("Function") << "()]"
                  << " " << boost::log::expressions::smessage));
 
-    // TODO, this is supposed to decrease performance significantly (i measured ~1-2sec) but i need it to dont loose
+    // TODO, this is supposed to decrease performance significantly (i measured ~1-2sec) but i need it to not loose
     // output on log files
     console_sink->locked_backend()->auto_flush(true);
 
