@@ -55,7 +55,7 @@ void option_parser::parse_command_line(int argc, char *argv[]) {
         // variable ordering
         ("no_reordering", po::bool_switch(&m_values.no_reordering)->default_value(false),
          "Disables automatic reordering during dd construction.")  //
-        ("variable_order", po::value<std::string>(&m_values.variable_order)->default_value("x:vobhjk"),
+        ("variable_order", po::value<std::string>(&m_values.variable_order)->default_value("x:voh"),
          "Determins the initial variable order for the dd building. "
          "v: variables, o: operators, h: helper amost variable, j: helper amost operator, k: helper amost mutex")  //
         ("goal_variables_first", po::bool_switch(&m_values.goal_variables_first)->default_value(false),
