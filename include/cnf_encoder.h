@@ -13,7 +13,7 @@
 
 class cnf_encoder {
    public:
-    cnf_encoder(option_values &options, sas_problem &problem) : m_sas_problem(problem), m_options(options) {}
+    cnf_encoder(option_values &options, sas_problem &problem) : m_symbol_map(problem.m_operators.size()), m_sas_problem(problem), m_options(options) {}
 
     // maps planning variables to cnf variables.
     planning_logic::plan_to_cnf_map m_symbol_map;

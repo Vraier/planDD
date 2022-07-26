@@ -25,6 +25,8 @@ class plan_to_cnf_map {
     int m_num_operators, m_num_op_variables;
 
    public:
+    plan_to_cnf_map(int num_operators);
+
     // maps information about planning variable to variable index of cnf formula
     // are used by the variable ordering algorithm
     std::map<tagged_variable, int> m_variable_map;
@@ -33,9 +35,6 @@ class plan_to_cnf_map {
     // calculates the number of bits that is needed to represent this amount of variables in a binary encoding
     // more specifically: calculate the highest bit position or ceil(log2(num_variables))
     int num_bits_for_binary_var(int num_variables);
-
-    // needed for binary encoding
-    void set_num_operators(int num_operators);
 
     // this would be the next index that is used
     // it is not added to the symbol map

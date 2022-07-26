@@ -6,7 +6,6 @@ namespace variable_grouping {
 
 void create_all_variables(cnf_encoder &encoder, bdd_container &container, option_values &options) {
     container.disable_reordering();
-    encoder.m_symbol_map.set_num_operators(encoder.m_sas_problem.m_operators.size());
 
     for (int t = 0; t <= options.timesteps; t++) {
         // construct all variables indizes
