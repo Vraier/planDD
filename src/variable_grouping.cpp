@@ -13,10 +13,15 @@ void create_all_variables(cnf_encoder &encoder, bdd_container &container, option
         int var_group_start = encoder.m_symbol_map.next_used_index();
         int var_group_size;
         for (int var = 0; var < encoder.m_sas_problem.m_variabels.size(); var++) {
+            int var_domain_size = encoder.m_sas_problem.m_variabels[var].m_range;
             int var_group_small_start = encoder.m_symbol_map.next_used_index();
             int var_group_small_size;
-            for (int val = 0; val < encoder.m_sas_problem.m_variabels[var].m_range; val++) {
-                encoder.m_symbol_map.get_variable_index(variable_plan_var, t, var, val);
+            if(options.binary_variables){
+                encoder.m_symbol_map.get_variable_index_for_var_binary(t, var, 0, var_domain_size);
+            } else {
+                for (int val = 0; val < encoder.m_sas_problem.m_variabels[var].m_range; val++) {
+                    encoder.m_symbol_map.get_variable_index(variable_plan_var, t, var, val);
+                }
             }
             var_group_small_size = encoder.m_symbol_map.next_used_index() - var_group_small_start;
             if (options.group_variables_small) {

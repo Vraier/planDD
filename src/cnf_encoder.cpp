@@ -12,6 +12,9 @@ using namespace planning_logic;
 // have to see how advanced binary encoding goes
 std::vector<logic_primitive> cnf_encoder::get_logic_primitives(primitive_tag tag, int timestep) {
     update_timesteps(timestep);
+
+    //std::cout << "Num Vars: " << m_symbol_map.get_num_variables() << " timestep: " << timestep << std::endl;
+
     switch (tag) {
         case ini_state:
             return construct_initial_state();

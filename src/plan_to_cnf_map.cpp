@@ -18,6 +18,7 @@ void plan_to_cnf_map::set_num_operators(int num_operators) {
 int plan_to_cnf_map::get_variable_index(variable_tag tag, int timestep, int var_index, int value) {
     tagged_variable var = std::make_tuple(tag, timestep, var_index, value);
     if (m_variable_map.find(var) == m_variable_map.end()) {
+        //LOG_MESSAGE(log_level::debug) << "Created new var tag=" << tag << ", t=" << timestep << ", id=" << var_index << ", val=" << value;  
         int size = m_variable_map.size();
         m_variable_map[var] = size + 1;
     }
