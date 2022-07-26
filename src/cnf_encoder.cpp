@@ -441,7 +441,7 @@ std::vector<logic_primitive> cnf_encoder::construct_mutex(int timestep) {
                 else {
                     // unary planning variables
                     new_clause.push_back(-m_symbol_map.get_variable_index(variable_plan_var, timestep, var1, val1));
-                    new_clause.push_back(-m_symbol_map.get_variable_index(variable_plan_var, timestep, var1, val1));
+                    new_clause.push_back(-m_symbol_map.get_variable_index(variable_plan_var, timestep, var2, val2));
                 }
 
                 result.push_back(logic_primitive(logic_clause, mutex, timestep, new_clause));
