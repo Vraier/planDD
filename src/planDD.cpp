@@ -66,7 +66,7 @@ int planDD::hack_debug(option_values opt_values) {
 
     int num_variables = opt_values.timesteps;
 
-    bdd_container main_builder(1, 0);
+    bdd_container main_builder(1);
 
     main_builder.print_bdd_info();
 
@@ -87,17 +87,17 @@ int planDD::build_bdd(option_values opt_values) {
     }
 
     cnf_encoder encoder(opt_values, parser.m_sas_problem);
-    bdd_container builder(1, 0);
+    bdd_container builder(1);
 
-    variable_grouping::create_all_variables(encoder, builder, opt_values);
+    if(opt_values.timesteps >= 0){
+        variable_grouping::create_all_variables(encoder, builder, opt_values);
+        std::vector<int> var_order = variable_order::order_variables(encoder, encoder.m_symbol_map, opt_values);
+        builder.set_variable_order(var_order);
+    }
 
     if(!opt_values.no_reordering){
         builder.enable_reordering();
     }
-
-
-    // std::vector<int> var_order = variable_order::order_variables(encoder, encoder.m_symbol_map, opt_values);
-    // builder.set_variable_order(var_order);
 
     dd_builder::construct_dd(builder, encoder, opt_values);
 
@@ -118,7 +118,7 @@ int planDD::build_sdd(option_values opt_values) {
     }
 
     cnf_encoder encoder(opt_values, parser.m_sas_problem);
-    encoder.initialize_symbol_map(opt_values.timesteps);
+    //encoder.initialize_symbol_map(opt_values.timesteps);
 
     // encoder.write_cnf_to_file(opt_values.m_values.cnf_file, clauses);
     sdd_manager builder(encoder.m_symbol_map.get_num_variables());
@@ -139,8 +139,8 @@ int planDD::encode_cnf(option_values opt_values) {
         return 0;
     }
 
-    cnf_encoder encoder(opt_values, parser.m_sas_problem);
-    encoder.initialize_symbol_map(opt_values.timesteps);
+    //cnf_encoder encoder(opt_values, parser.m_sas_problem);
+    //encoder.initialize_symbol_map(opt_values.timesteps);
 
     return 0;
 }
@@ -151,7 +151,7 @@ int planDD::cnf_to_bdd(option_values opt_values) {
     int num_variables = std::get<0>(cnf_data);
     // int num_clauses = std::get<1>(cnf_data);
     std::vector<std::vector<int>> clauses = std::get<2>(cnf_data);
-    bdd_container builder(1, num_variables);
+    bdd_container builder(1);
 
     for (std::vector<int> c : clauses) {
         builder.add_clause_primitive(c);

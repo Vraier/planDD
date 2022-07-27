@@ -23,7 +23,7 @@ gripper:
 
 blocks:
 	../downward/fast-downward.py --sas-file blocks.sas --translate ../downward-benchmarks/blocks/probBLOCKS-4-0.pddl
-	./$(TARGET) --sas_file blocks.sas --build_bdd --timesteps 6
+	./$(TARGET) --sas_file blocks.sas --build_bdd --linear --timesteps 6
 
 childsnack:
 	../downward/fast-downward.py --sas-file childsnack.sas --translate ../downward-benchmarks/childsnack-sat14-strips/child-snack_pfile05.pddl

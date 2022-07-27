@@ -3,11 +3,9 @@
 
 #include "bdd_container.h"
 
-bdd_container::bdd_container(int num_bdds, int num_variables) {
-    // add one more variable to account for variable with index 0
-    m_num_variables = num_variables;
+bdd_container::bdd_container(int num_bdds) {
 
-    m_bdd_manager = Cudd_Init(m_num_variables, 0, CUDD_UNIQUE_SLOTS, CUDD_CACHE_SLOTS, 0);
+    m_bdd_manager = Cudd_Init(0, 0, CUDD_UNIQUE_SLOTS, CUDD_CACHE_SLOTS, 0);
     Cudd_AutodynEnable(m_bdd_manager, CUDD_REORDER_SIFT);
 
     // Cudd_SetMaxCacheHard(m_bdd_manager, 62500000);
@@ -59,10 +57,10 @@ void bdd_container::reduce_heap() {
 void bdd_container::print_bdd_info() {
     LOG_MESSAGE(log_level::info) << "Printing CUDD statistics...";
     LOG_MESSAGE(log_level::info) << "Number of nodes: " << Cudd_DagSize(m_root_nodes[0])
-                                 << ", Num Variables: " << Cudd_SupportSize(m_bdd_manager, m_root_nodes[0])
+                                 << ", Num Variables: " << Cudd_ReadSize(m_bdd_manager)
                                  << ", Number of solutions: "
                                  << Cudd_CountMinterm(m_bdd_manager, m_root_nodes[0],
-                                                      Cudd_SupportSize(m_bdd_manager, m_root_nodes[0]));
+                                                      Cudd_ReadSize(m_bdd_manager));
     FILE **fout = &stdout;
     Cudd_PrintInfo(m_bdd_manager, *fout);
 }
@@ -74,17 +72,17 @@ std::vector<std::vector<bool>> bdd_container::list_minterms(int max) {
     Cudd_Ref(curr_node);
     std::vector<std::vector<bool>> assignments;
 
-    DdNode **nodes = new DdNode *[m_num_variables];
-    for (int i = 0; i < m_num_variables; i++) {
+    DdNode **nodes = new DdNode *[Cudd_ReadSize(m_bdd_manager)];
+    for (int i = 0; i < Cudd_ReadSize(m_bdd_manager); i++) {
         nodes[i] = Cudd_bddIthVar(m_bdd_manager, i);
     }
 
     while (curr_node != Cudd_ReadLogicZero(m_bdd_manager) && assignments.size() < max) {
-        DdNode *minterm = Cudd_bddPickOneMinterm(m_bdd_manager, curr_node, nodes, m_num_variables);
+        DdNode *minterm = Cudd_bddPickOneMinterm(m_bdd_manager, curr_node, nodes, Cudd_ReadSize(m_bdd_manager));
         Cudd_Ref(minterm);
         // construct new assignment vector
         std::vector<bool> new_assignment;
-        for (int i = 0; i < m_num_variables; i++) {
+        for (int i = 0; i < Cudd_ReadSize(m_bdd_manager); i++) {
             new_assignment.push_back(Cudd_bddLeq(m_bdd_manager, minterm, nodes[i]) == 0 ? false : true);
         }
 
@@ -278,8 +276,8 @@ void bdd_container::set_variable_order(std::vector<int> &variable_order) {
 }
 
 std::vector<int> bdd_container::get_variable_order() {
-    std::vector<int> index_to_layer(m_num_variables, -1);
-    for (int i = 0; i <= m_num_variables; i++) {
+    std::vector<int> index_to_layer(Cudd_ReadSize(m_bdd_manager), -1);
+    for (int i = 0; i <= Cudd_ReadSize(m_bdd_manager); i++) {
         // tells us at what layer the var resides in
         int layer_of_variable_i = Cudd_ReadPerm(m_bdd_manager, i);
         if (layer_of_variable_i == -1) {  // variable does not exist

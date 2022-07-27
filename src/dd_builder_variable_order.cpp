@@ -9,14 +9,15 @@ using namespace planning_logic;
 namespace variable_order {
 
 // used to interpret the order of clauses from the command line options
-std::map<char, variable_tag> char_tag_map = {
-    {'v', variable_plan_var},         {'o', variable_plan_op},       {'h', variable_h_amost_variable},
-    {'j', variable_h_amost_operator}, {'k', variable_h_amost_mutex},
+std::map<char, std::vector<variable_tag>> char_tag_map = {
+    {'v', {variable_plan_var, variable_plan_binary_var}},        
+    {'o', {variable_plan_op, variable_plan_binary_op}},
+    {'h', {variable_h_amost_variable, variable_h_amost_operator, variable_h_amost_mutex}}, 
 };
 
 bool is_valid_variable_order_string(std::string build_order) {
     // check if string is permutation
-    std::string standart_permutation = "vox:hjk";
+    std::string standart_permutation = "vox:h";
     if (!std::is_permutation(build_order.begin(), build_order.end(), standart_permutation.begin(),
                              standart_permutation.end())) {
         LOG_MESSAGE(log_level::error) << "Variable order has to be a permutation of " + standart_permutation +
@@ -46,11 +47,6 @@ categorized_variables categorize_variables(planning_logic::plan_to_cnf_map &symb
         int cnf_index = iter->second;
         variable_tag tag = std::get<0>(tag_var);
         int timestep = std::get<1>(tag_var);
-        // int index = std::get<2>(tag_var);
-        // int value = std::get<3>(tag_var);
-        // LOG_MESSAGE(log_level::trace) << " Handeling variable idx:" << index << " tag:" << tag << " t:" << timestep
-        // << " val:" << value;
-
         tagged_variables[tag][timestep].push_back(cnf_index);
     }
 
@@ -97,8 +93,6 @@ std::vector<int> put_variables_of_tag_first(cnf_encoder &encoder, std::vector<in
 
 std::vector<int> order_variables(cnf_encoder &encoder, plan_to_cnf_map &symbol_map, option_values &options) {
     std::string build_order = options.variable_order;
-    bool goal_first = options.goal_variables_first;
-    bool init_state_first = options.initial_state_variables_first;
 
     if (!is_valid_variable_order_string(build_order)) {
         LOG_MESSAGE(log_level::error) << "Can't build the following variable order " << build_order;
@@ -125,11 +119,12 @@ std::vector<int> order_variables(cnf_encoder &encoder, plan_to_cnf_map &symbol_m
             // LOG_MESSAGE(log_level::trace) << "Sorting variable tag " << interleaved_order[i] << " for timestep " <<
             // t;
             char current_char = interleaved_order[i];
-            variable_tag order_tag = char_tag_map[current_char];
-
-            // add all the variables for timestep t and tag order_tag
-            interleved_variables.insert(interleved_variables.end(), tagged_variables[order_tag][t].begin(),
-                                        tagged_variables[order_tag][t].end());
+            for(int vt = 0; vt < char_tag_map[current_char].size(); vt++){
+                variable_tag order_tag = char_tag_map[current_char][vt];
+                // add all the variables for timestep t and tag order_tag
+                interleved_variables.insert(interleved_variables.end(), tagged_variables[order_tag][t].begin(),
+                                            tagged_variables[order_tag][t].end());
+            }
         }
     }
 
@@ -143,18 +138,20 @@ std::vector<int> order_variables(cnf_encoder &encoder, plan_to_cnf_map &symbol_m
             continue;
         }
         // add all timesteps for the corresponding var tag
-        variable_tag order_tag = char_tag_map[current_char];
-        for (int t = 0; t <= options.timesteps; t++) {
-            total_variables.insert(total_variables.end(), tagged_variables[order_tag][t].begin(),
-                                   tagged_variables[order_tag][t].end());
+        for(int vt = 0; vt < char_tag_map[current_char].size(); vt++){
+            variable_tag order_tag = char_tag_map[current_char][vt];
+            for (int t = 0; t <= options.timesteps; t++) {
+                total_variables.insert(total_variables.end(), tagged_variables[order_tag][t].begin(),
+                                    tagged_variables[order_tag][t].end());
+            }
         }
     }
 
     // move goal or initial_state variable first
-    if (goal_first) {
+    if (options.goal_variables_first) {
         total_variables = put_variables_of_tag_first(encoder, total_variables, goal, options.timesteps);
     }
-    if (init_state_first) {
+    if (options.initial_state_variables_first) {
         total_variables = put_variables_of_tag_first(encoder, total_variables, ini_state, options.timesteps);
     }
 

@@ -3,17 +3,22 @@
 #include "logging.h"
 namespace planning_logic {
 
+plan_to_cnf_map::plan_to_cnf_map(int num_operators){
+    m_num_operators = num_operators;
+    // TODO: i have no idea how save this is, but i am too lazy to check for highest bit
+    m_num_op_variables = num_bits_for_binary_var(num_operators);
+}
+
 int plan_to_cnf_map::next_used_index() { return m_variable_map.size() + 1; }
 
-void plan_to_cnf_map::set_num_operators(int num_operators) {
-    m_num_operators = num_operators;
-    // i have no idea how save this is, but i am too lazy to check for highest bit
-    m_num_op_variables = (int)std::ceil(std::log2(num_operators));
+int plan_to_cnf_map::num_bits_for_binary_var(int num_variables){
+    return (int)std::ceil(std::log2(num_variables));
 }
 
 int plan_to_cnf_map::get_variable_index(variable_tag tag, int timestep, int var_index, int value) {
     tagged_variable var = std::make_tuple(tag, timestep, var_index, value);
     if (m_variable_map.find(var) == m_variable_map.end()) {
+        //LOG_MESSAGE(log_level::debug) << "Created new var tag=" << tag << ", t=" << timestep << ", id=" << var_index << ", val=" << value;  
         int size = m_variable_map.size();
         m_variable_map[var] = size + 1;
     }
@@ -47,6 +52,25 @@ std::vector<int> plan_to_cnf_map::get_variable_index_for_op_binary(int timestep,
     }
     for (int i = 0; i < m_num_op_variables; i++) {
         if (op_index & (1 << i)) {
+            // if ith bit is set in op_index
+            continue;
+        } else {
+            // if ith bit is not set, invert the variable
+            result[i] *= -1;
+        }
+    }
+    return result;
+}
+
+std::vector<int> plan_to_cnf_map::get_variable_index_for_var_binary(int timestep, int var_index, int var_value, int var_size) {
+    std::vector<int> result;
+    int binary_size = num_bits_for_binary_var(var_size);
+    // get log many variables for the operator
+    for (int i = 0; i < binary_size; i++) {
+        result.push_back(get_variable_index(variable_plan_binary_var, timestep, var_index, i));
+    }
+    for (int i = 0; i < binary_size; i++) {
+        if (var_value & (1 << i)) {
             // if ith bit is set in op_index
             continue;
         } else {

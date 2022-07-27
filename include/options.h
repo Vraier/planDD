@@ -18,7 +18,7 @@ struct option_values {
     // reverses the order of primitives (only for linear non incremental)
     bool reverse_order;
     // effects the encoding
-    bool include_mutex, use_ladder_encoding, exact_one_constraint, parallel_plan, binary_encoding;
+    bool include_mutex, use_ladder_encoding, exact_one_constraint, parallel_plan, binary_encoding, binary_variables, binary_exclude_impossible;
     // effects the variable ordering
     bool no_reordering, goal_variables_first, initial_state_variables_first;
     // effects variable_grouping
