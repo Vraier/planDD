@@ -37,6 +37,10 @@ trucks:
 	../downward/fast-downward.py --sas-file trucks.sas --translate ../downward-benchmarks/trucks-strips/p01.pddl
 	./$(TARGET) --sas_file trucks.sas --build_bdd --timesteps 13
 
+movie:
+	../downward/fast-downward.py --sas-file movie.sas --translate ../downward-benchmarks/movie/prob27.pddl
+	./$(TARGET) --sas_file movie.sas --build_bdd --exact_one_constraint --linear --timesteps 7
+
 minisat:
 	../MiniSat_v1.14_linux problem.cnf minisat.ass
 
