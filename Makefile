@@ -27,15 +27,15 @@ blocks:
 
 childsnack:
 	../downward/fast-downward.py --sas-file childsnack.sas --translate ../downward-benchmarks/childsnack-sat14-strips/child-snack_pfile05.pddl
-	./$(TARGET) --sas_file childsnack.sas --build_bdd --timesteps 4
+	./$(TARGET) --sas_file childsnack.sas --build_bdd --linear --timesteps 4
 
 rovers:
 	../downward/fast-downward.py --sas-file rovers.sas --translate ../downward-benchmarks/rovers/p01.pddl
-	./$(TARGET) --sas_file rovers.sas --build_bdd --timesteps 10
+	./$(TARGET) --sas_file rovers.sas --build_bdd --linear --timesteps 10
 
 trucks:
 	../downward/fast-downward.py --sas-file trucks.sas --translate ../downward-benchmarks/trucks-strips/p01.pddl
-	./$(TARGET) --sas_file trucks.sas --build_bdd --timesteps 13
+	./$(TARGET) --sas_file trucks.sas --build_bdd --linear --timesteps 13
 
 movie:
 	../downward/fast-downward.py --sas-file movie.sas --translate ../downward-benchmarks/movie/prob27.pddl

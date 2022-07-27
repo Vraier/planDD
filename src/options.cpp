@@ -45,7 +45,7 @@ void option_parser::parse_command_line(int argc, char *argv[]) {
          "Encodes the mutiple values of a planning variable in a binary and not a unary way. Resulting in only log(|value|) variables.")  //
         ("binary_exclude_impossible", po::bool_switch(&m_values.binary_exclude_impossible)->default_value(false),
          "Excludes the impossible (dummy) actions from the logic formula, if binary encoding is used.")  //
-        ("build_order", po::value<std::string>(&m_values.build_order)->default_value("igrymx:pec:"),
+        ("build_order", po::value<std::string>(&m_values.build_order)->default_value("igx:rympec:"),
          "Determins the order of conjoins when building a dd linearily and not interleaved. Must be a permutation of "
          "the string impgc; i: initial_state, rtyum: mutex, pe: precondition/effect, g: goal, c: changing atoms "
          "implication.")  //

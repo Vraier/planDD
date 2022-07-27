@@ -10,6 +10,8 @@
 
 namespace conjoin_order {
 
+extern std::map<char, planning_logic::primitive_tag> char_tag_map;
+
 // checks if the string can be used as a build order
 bool is_valid_conjoin_order_string(std::string &build_order);
 bool is_valid_layer_order_string(std::string &layer_order);

@@ -348,6 +348,7 @@ void construct_dd_without_timesteps(dd_buildable &container, cnf_encoder &encode
             // construct new bdd layer
             LOG_MESSAGE(log_level::info) << "Extending layer " << t;
             // TODO optimize this (i include mutex for variable twice)
+            // TODO: this is buggy now. really have to fix it!~!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             for(int i = 0; i < order.size(); i++){
                 int curr_char = order[i];
                 primitive_tag curr_tag = conjoin_order::char_tag_map[curr_char];

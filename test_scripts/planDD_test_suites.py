@@ -401,11 +401,84 @@ def best_20_7_big_test():
     return comms
 
 
+
+def best_27_7_big_test():
+    probs = problems.list_all_downward_solved_problems()
+    downward_argument_map = dict(arguments.standart_downward_argument_map)
+
+    map_old_best =  {
+        "$timeout" : "300s",
+        "$mode" : "build_bdd",
+        "$addition_flags" : " --linear --build_order igx:rympec: --no_reordering --binary_encoding ",
+    }
+    map_binary_var =  {
+        "$timeout" : "300s",
+        "$mode" : "build_bdd",
+        "$addition_flags" : " --linear --build_order igx:rympec: --no_reordering --binary_encoding --binary_variables ",
+    }
+    map_binary_no_imp =  {
+        "$timeout" : "300s",
+        "$mode" : "build_bdd",
+        "$addition_flags" : " --linear --build_order igx:rympec: --no_reordering --binary_encoding --binary_exclude_impossible ",
+    }
+    map_binary_var_no_imp =  {
+        "$timeout" : "300s",
+        "$mode" : "build_bdd",
+        "$addition_flags" : " --linear --build_order igx:rympec: --no_reordering --binary_encoding --binary_variables --binary_exclude_impossible ",
+    }
+    map_binary_reorder =  {
+        "$timeout" : "300s",
+        "$mode" : "build_bdd",
+        "$addition_flags" : " --linear --build_order igx:rympec: --binary_encoding ",
+    }
+    map_binary_var_reorder =  {
+        "$timeout" : "300s",
+        "$mode" : "build_bdd",
+        "$addition_flags" : " --linear --build_order igx:rympec: --binary_encoding --binary_variables ",
+    }
+    map_binary_no_imp_reorder =  {
+        "$timeout" : "300s",
+        "$mode" : "build_bdd",
+        "$addition_flags" : " --linear --build_order igx:rympec: --binary_encoding --binary_exclude_impossible ",
+    }
+    map_binary_var_no_imp_reorder =  {
+        "$timeout" : "300s",
+        "$mode" : "build_bdd",
+        "$addition_flags" : " --linear --build_order igx:rympec: --binary_encoding --binary_variables --binary_exclude_impossible ",
+    }
+
+    arg1 = ("best_27_7_old_best", map_old_best, downward_argument_map)
+    arg2 = ("best_27_7_binary_var", map_binary_var, downward_argument_map)
+    arg3 = ("best_27_7_binary_no_imp", map_binary_no_imp, downward_argument_map)
+    arg4 = ("best_27_7_binary_var_no_imp", map_binary_var_no_imp, downward_argument_map)
+    arg5 = ("best_27_7_binary_reorder", map_binary_reorder, downward_argument_map)
+    arg6 = ("best_27_7_binary_var_reorder", map_binary_var_reorder, downward_argument_map)
+    arg7 = ("best_27_7_binary_no_imp_reorder", map_binary_no_imp_reorder, downward_argument_map)
+    arg8 = ("best_27_7_binary_var_no_imp_reorder", map_binary_var_no_imp_reorder, downward_argument_map)
+
+    args = [
+        arg1, 
+        arg2, 
+        arg3, 
+        arg4, 
+        arg5,
+        arg6, 
+        arg7, 
+        arg8,  
+    ]
+
+    comms = commandfile.generate_command_calls(probs, args)
+    print("Num problems:",len(probs))
+    print("Num configs:",len(args))
+    print("Num commands:",len(comms))
+    return comms
+
+
 # TODO test all var orders with all conjoin orders
 
 
 comms = []
-comms += best_20_7_big_test()
+comms += best_27_7_big_test()
 
 commandfile.generate_parallel_file_from_calls(comms)
 
