@@ -401,7 +401,7 @@ def best_20_7_big_test():
     return comms
 
 
-
+#137/138? had 240 cores!
 def best_27_7_big_test():
     probs = problems.list_all_downward_solved_problems()
     downward_argument_map = dict(arguments.standart_downward_argument_map)

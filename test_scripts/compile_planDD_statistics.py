@@ -12,8 +12,8 @@ def print_big_information_from_dicts(all_dics):
 
     time_for_solved = [(d["finish_time"], d["domain_desc"]) for d in solved_dics]
     time_for_solved = sorted(time_for_solved)
-    print("Compiling Solved Testcases: ############################################################################################")
-    print(time_for_solved)
+    #print("Compiling Solved Testcases: ############################################################################################")
+    #print(time_for_solved)
 
     print("Compiling Information: #################################################################################################")
     print("Conjoin Order", all_dics[0]["config_build_order"])
@@ -215,6 +215,8 @@ layer_building_differences = [
 #print_big_information_from_dicts(dic_best_28_6_reverse_with_perm)
 
 
+
+
 # TODO, why has airport a negative amount of solutions????
 # TODO, why was no timestep aproach better?, i am doing no variable ordering at the moment. is that the reason?
 #write_all_information_to_file("../../test_output/best_13_7_big_test/best_13_7_big_test_old",                        "../../test_output/best_13_7_big_test_old.pkl")
@@ -233,49 +235,90 @@ layer_building_differences = [
 #print_solving_difference_between_two_congigs(best_13_7_big_test_no_timesteps, "No timestep", best_13_7_big_test_no_timesteps_parallel, "parallel")
 #print_solving_difference_between_two_congigs(best_13_7_big_test_no_timesteps, "No timestep", best_13_7_big_test_old, "timestep")
 
-best_20_7_suites = [
-    "best_20_7_old_best",
-    #"best_20_7_no_t", 
-    #"best_20_7_no_t_binary", 
-    #"best_20_7_no_t_no_reorder", 
-    #"best_20_7_no_t_no_reorder_binary", 
-    "best_20_7_binary_no_reorder",
-    #"best_20_7_group_action", 
-    #"best_20_7_group_var", 
-    #"best_20_7_group_varsmall", 
-    #"best_20_7_group_var_action", 
-    #"best_20_7_group_varsmall_action",
-    #"best_20_7_group_action_binary",
-    #"best_20_7_group_var_binary",
-    #"best_20_7_group_varsmall_binary",
-    #"best_20_7_group_var_action_binary",
-    #"best_20_7_group_varsmall_action_binary",
-]
-best_20_7_dics = []
 
-for x in best_20_7_suites:
-    #write_all_information_to_file("../../test_output/best_20_7/" + x, "../../test_output/" + x + ".pkl")
+"""
+portfolio_suite_names = [
+    dic_best_triple_21_6_old,
+    dic_best_triple_21_6_uni,
+    dic_best_triple_21_6_bi,
+    dic_best_28_6_old,
+    dic_best_28_6_expo,
+    dic_best_28_6_reverse_with_perm,
+    dic_best_28_6_reverse_no_perm,
+    best_13_7_big_test_binary_encoding,
+    best_13_7_big_test_old,
+    best_13_7_big_test_binary_encoding,
+    best_13_7_big_test_no_timesteps,
+    best_13_7_big_test_no_timesteps_parallel,
+]
+"""
+
+
+suite_names = [
+    # compare to old results
+    #"best_13_7_big_test_old",
+    #"best_20_7_old_best",
+
+    # using incremental is better than all timesteps from beginning. 
+    # using no reordering is even better
+    #"best_20_7_old_best", # undary encodings with reordering
+    #"best_20_7_no_t",       
+    #"best_20_7_no_t_no_reorder", 
+    #"best_20_7_no_t_binary", 
+    #"best_20_7_no_t_no_reorder_binary",     # using binary encoding with reordering makes it slightly better than no binary
+    #"best_20_7_binary_no_reorder",          # binary without incremental is even better
+
+    # grouping variables (not incremental)
+    #"best_20_7_old_best",
+    #"best_20_7_group_action", # better
+    #"best_20_7_group_var",    # worse
+    #"best_20_7_group_varsmall", # same
+    #"best_20_7_group_var_action", # really bad
+    #"best_20_7_group_varsmall_action", # worse than grouping only actions
+    
+    # grouping variables whiile using a binary encoding
+    #"best_20_7_group_action_binary", # just grouping actions is the best (but not as good as using no reordering)
+    #"best_20_7_group_var_binary", # grouping variables is always bad
+    #"best_20_7_group_varsmall_binary",
+    #"best_20_7_group_var_action_binary", # dont group variables!
+    #"best_20_7_group_varsmall_action_binary",
+
+    # new one got better? is machine faster? I think i changed the frame clause encoding
+    #"best_20_7_binary_no_reorder",
+    #"best_27_7_old_best",
+
+    #"best_27_7_old_best", #binary and no reordering
+    #"best_27_7_binary_var", # also doing binary variables is even better
+    #"best_27_7_binary_no_imp", # excluding impossible actions also makes it better
+    #"best_27_7_binary_var_no_imp", # combining both is the best
+
+    # as soon as i use binary variables, enabeling the reordering makes it better again
+    #"best_27_7_binary_reorder", # worse
+    #"best_27_7_binary_var_reorder", #better
+    #"best_27_7_binary_no_imp_reorder", #worse
+    #"best_27_7_binary_var_no_imp_reorder", #better (best)
+
+]
+suite_dics = []
+
+for x in suite_names:
+    #write_all_information_to_file("../../test_output/best_27_7_big_test/" + x, "../../test_output/" + x + ".pkl")
     pass
 
-for x in best_20_7_suites:
-    best_20_7_dics.append(read_all_information_from_file("../../test_output/" + x + ".pkl"))
+for x in suite_names:
+    suite_dics.append(read_all_information_from_file("../../test_output/" + x + ".pkl"))
     
-for x in best_20_7_dics:
+for x in suite_dics:
     print_big_information_from_dicts(x)
 
-portfolio_suites = [
-    ##dic_best_triple_21_6_old,
-    #dic_best_triple_21_6_uni,
-    #dic_best_triple_21_6_bi,
-    #dic_best_28_6_old,
-    #dic_best_28_6_expo,
-    ##dic_best_28_6_reverse_with_perm,
-    #dic_best_28_6_reverse_no_perm,
-    ##best_13_7_big_test_binary_encoding,
-    #best_13_7_big_test_old,
-    #best_13_7_big_test_binary_encoding,
-    #best_13_7_big_test_no_timesteps,
-    #best_13_7_big_test_no_timesteps_parallel,
-]
 
-print_portfolio_information(best_20_7_dics)
+portfolio_suite_names = [
+    "best_27_7_binary_var_no_imp_reorder",
+    "best_27_7_binary_var_no_imp", 
+    "best_27_7_binary_var_reorder", 
+]
+portfolio_dics = []
+for x in portfolio_suite_names:
+    portfolio_dics.append(read_all_information_from_file("../../test_output/" + x + ".pkl"))
+
+#print_portfolio_information(portfolio_dics)
