@@ -4,6 +4,7 @@
 
 namespace planDD {
 int hack_debug(option_values opt_values);
+int conflict_graph(option_values opt_values);
 
 int build_bdd(option_values opt_values);
 int build_sdd(option_values opt_values);

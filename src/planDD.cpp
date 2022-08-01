@@ -15,6 +15,7 @@
 #include "bdd_container.h"
 #include "plan_to_cnf_map.h"
 #include "variable_grouping.h"
+#include "graph.h"
 
 int main(int argc, char *argv[]) {
     // start logging
@@ -32,6 +33,9 @@ int main(int argc, char *argv[]) {
     // branch into correct program mode
     if (options.m_values.hack_debug) {
         return planDD::hack_debug(options.m_values);
+    }
+    if (options.m_values.conflict_graph) {
+        return planDD::conflic_graph(options.m_values);
     }
 
     if (options.m_values.build_bdd) {
@@ -64,19 +68,39 @@ int main(int argc, char *argv[]) {
 int planDD::hack_debug(option_values opt_values) {
     LOG_MESSAGE(log_level::info) << "You unlocked full control. good luck modifying the source code";
 
-    int num_variables = opt_values.timesteps;
+    graph::undirected_graph g(12);
+    g.add_edge(0,1);
+    g.add_edge(1,2);
+    g.add_edge(2,3);
+    g.add_edge(3,4);
+    g.add_edge(4,0);
 
-    bdd_container main_builder(1);
+    g.add_edge(5,7);
+    g.add_edge(7,9);
+    g.add_edge(9,6);
+    g.add_edge(6,8);
+    g.add_edge(8,5);
 
-    main_builder.print_bdd_info();
+    g.add_edge(0,5);
+    g.add_edge(1,6);
+    g.add_edge(2,7);
+    g.add_edge(3,8);
+    g.add_edge(4,9);
 
-    for(int i = 0; i < opt_values.timesteps; i++){
-        std::vector<int> clause;
-        clause.push_back(i*7+1);
-        main_builder.add_clause_primitive(clause);
-        main_builder.print_bdd_info();
+    std::vector<int> c = graph::approximate_colouring(g);
+    for(int i = 0; i < c.size(); i++) {
+        std::cout << "id=" << i << " c=" << c[i] << std::endl;
     }
-    return 0;
+}
+
+int planDD::conflict_graph(option_values opt_values) {
+    sas_parser parser(opt_values.sas_file);
+    if (parser.start_parsing() == -1) {
+        LOG_MESSAGE(log_level::error) << "Error while parsing sas_file";
+        return 0;
+    }
+
+    graph::undirected_graph g = parser.m_sas_problem.construct_action_conflic_graph();
 }
 
 int planDD::build_bdd(option_values opt_values) {

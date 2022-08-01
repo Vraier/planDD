@@ -1,5 +1,7 @@
 #pragma once
 
+#include "graph.h"
+
 #include <string>
 #include <vector>
 #include <sstream>
@@ -47,6 +49,8 @@ class sas_problem {
     // checks if two operators are conflicting
     // the are conflicting if one of p1&p2, e1&e2, e1&p2, e2&p1 is not consistent
     bool are_operators_conflicting(int op_idx_1, int op_idx_2);
+
+    graph::undirected_graph construct_action_conflic_graph();
 };
 
 class sas_parser {

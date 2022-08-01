@@ -8,7 +8,7 @@ struct option_values {
     // Files
     std::string sas_file, ass_file, cnf_file;
     // Program modes
-    bool encode_cnf, cnf_to_bdd, build_bdd, build_sdd, single_minisat, count_minisat, hack_debug;
+    bool encode_cnf, cnf_to_bdd, conflict_graph, build_bdd, build_sdd, single_minisat, count_minisat, hack_debug;
 
     int timesteps;
     // DD building parameters
