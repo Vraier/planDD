@@ -287,16 +287,16 @@ suite_names = [
     #"best_20_7_binary_no_reorder",
     #"best_27_7_old_best",
 
-    #"best_27_7_old_best", #binary and no reordering
-    #"best_27_7_binary_var", # also doing binary variables is even better
-    #"best_27_7_binary_no_imp", # excluding impossible actions also makes it better
-    #"best_27_7_binary_var_no_imp", # combining both is the best
+    "best_27_7_old_best", #binary and no reordering
+    "best_27_7_binary_var", # also doing binary variables is even better
+    "best_27_7_binary_no_imp", # excluding impossible actions also makes it better
+    "best_27_7_binary_var_no_imp", # combining both is the best
 
     # as soon as i use binary variables, enabeling the reordering makes it better again
-    #"best_27_7_binary_reorder", # worse
-    #"best_27_7_binary_var_reorder", #better
-    #"best_27_7_binary_no_imp_reorder", #worse
-    #"best_27_7_binary_var_no_imp_reorder", #better (best)
+    "best_27_7_binary_reorder", # worse
+    "best_27_7_binary_var_reorder", #better
+    "best_27_7_binary_no_imp_reorder", #worse
+    "best_27_7_binary_var_no_imp_reorder", #better (best)
 
 ]
 suite_dics = []
