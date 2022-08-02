@@ -15,7 +15,10 @@ class undirected_graph {
     void add_edge(int nodeA, int nodeB);
 
     int get_num_nodes();
+    bool are_neighbours(int nodeA, int nodeB);
     std::vector<int> get_neighbours(int node);
+
+    undirected_graph construct_complement();
 };
 
 void write_to_file(std::string filepath, undirected_graph &graph);

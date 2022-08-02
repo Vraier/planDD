@@ -55,6 +55,8 @@ class plan_to_cnf_map {
     // needs the siye of variable values to function properly
     std::vector<int> get_variable_index_for_var_binary(int timestep, int var_index, int var_value, int var_size);
 
+    std::vector<int> get_variable_index_binary(variable_tag tag, int timestep, int group_index, int value, int size);
+
     // same as above but does not add if variable does not exists. Returns -1 in this case
     int get_variable_index_without_adding(variable_tag tag, int timestep, int var_index, int value);
     int get_variable_index_without_adding(variable_tag tag, int timestep, int var_index);
