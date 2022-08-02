@@ -51,6 +51,7 @@ class sas_problem {
     bool are_operators_conflicting(int op_idx_1, int op_idx_2);
 
     graph::undirected_graph construct_action_conflic_graph();
+    graph::undirected_graph construct_complement_action_conflic_graph();
 };
 
 class sas_parser {

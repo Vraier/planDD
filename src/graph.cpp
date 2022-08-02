@@ -1,7 +1,11 @@
 #include "graph.h"
 
+#include "logging.h"
+
 #include <unordered_set>
 #include <queue>
+#include <iostream>
+#include <fstream>
 
 namespace graph {
 
@@ -20,6 +24,30 @@ int undirected_graph::get_num_nodes(){
 
 std::vector<int> undirected_graph::get_neighbours(int node){
     return m_edge_list[node];
+}
+
+void undirected_graph::write_to_file(std::string filepath){
+    std::ofstream dot_file(filepath);
+    if (!dot_file.is_open())
+    {
+        LOG_MESSAGE(log_level::error) << "Unable to open file " << filepath;
+    }
+    dot_file << "graph {\n";
+    dot_file << "\toverlap=scale;\n";
+    dot_file << "\tsplines=true;\n";
+
+    for(int i = 0; i < m_edge_list.size(); i++){
+        for(int j = 0; j < m_edge_list[i].size(); j++){
+            int neighbour = m_edge_list[i][j];
+
+            if(neighbour > i) {
+                dot_file << "\t" << i << " -- " << neighbour << ";\n";
+            }
+        }
+    }
+
+    dot_file << "}";
+    dot_file.close();
 }
 
 // num_colours in neighbourhood, num uncolourd neighbours, node id
@@ -42,8 +70,7 @@ std::vector<int> approximate_colouring(undirected_graph &graph){
     // greedy colour nodes
     while(!queue.empty()){
         node_info curr_best = queue.top(); queue.pop();
-        int num_col, node_id, deg_i;
-        num_col = std::get<0>(curr_best); 
+        int node_id, deg_i;
         node_id = std::get<2>(curr_best); 
         std::vector<int> neighbours = graph.get_neighbours(node_id);
         deg_i = neighbours.size();

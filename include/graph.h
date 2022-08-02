@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <string>
 
 namespace graph
 {
@@ -16,6 +17,8 @@ class undirected_graph {
 
     int get_num_nodes();
     std::vector<int> get_neighbours(int node);
+
+    void write_to_file(std::string filepath);
 };
 
 // uses greedy colouring to colour graph

@@ -35,7 +35,7 @@ int main(int argc, char *argv[]) {
         return planDD::hack_debug(options.m_values);
     }
     if (options.m_values.conflict_graph) {
-        return planDD::conflic_graph(options.m_values);
+        return planDD::conflict_graph(options.m_values);
     }
 
     if (options.m_values.build_bdd) {
@@ -100,7 +100,24 @@ int planDD::conflict_graph(option_values opt_values) {
         return 0;
     }
 
-    graph::undirected_graph g = parser.m_sas_problem.construct_action_conflic_graph();
+    LOG_MESSAGE(log_level::info) << "Starting to construct conflict graph";
+
+    graph::undirected_graph complement_graph = parser.m_sas_problem.construct_complement_action_conflic_graph();
+    std::vector<int> colouring = graph::approximate_colouring(complement_graph);
+    int max = 0;
+    for(int i = 0; i < colouring.size(); i++){
+        if (colouring[i] > max){
+            max = colouring[i];
+        }
+    }
+
+    LOG_MESSAGE(log_level::info) << "Num colours: " << max+1;
+
+    complement_graph.write_to_file("graph.dot");
+
+    LOG_MESSAGE(log_level::info) << "Finished writing graph";
+
+    return 0;
 }
 
 int planDD::build_bdd(option_values opt_values) {

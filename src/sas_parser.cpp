@@ -29,6 +29,11 @@ bool sas_problem::are_variables_consistent(std::vector<std::pair<int, int>> &set
 }
 
 bool sas_problem::are_operators_conflicting(int op_idx_1, int op_idx_2) {
+    // operate should not clinflict with itself
+    if(op_idx_1 == op_idx_2){
+        return false;
+    }
+
     operator_info op1 = m_operators[op_idx_1];
     operator_info op2 = m_operators[op_idx_2];
     std::vector<std::pair<int, int>> p1, e1, p2, e2;
@@ -74,6 +79,22 @@ graph::undirected_graph sas_problem::construct_action_conflic_graph(){
     for(int i = 0; i < m_operators.size(); i++){
         for(int j = i+1; j < m_operators.size(); j++) {
             if(are_operators_conflicting(i, j)){
+                //std::cout << "Adding " << i << "  " << j << std::endl;
+                result.add_edge(i, j);
+            }
+        }
+    }
+
+    return result;
+}
+
+graph::undirected_graph sas_problem::construct_complement_action_conflic_graph(){
+    graph::undirected_graph result(m_operators.size());
+
+    for(int i = 0; i < m_operators.size(); i++){
+        for(int j = i+1; j < m_operators.size(); j++) {
+            if(!are_operators_conflicting(i, j)){
+                //std::cout << "Adding " << i << "  " << j << std::endl;
                 result.add_edge(i, j);
             }
         }
