@@ -7,19 +7,20 @@ namespace graph
 {
 
 class undirected_graph {
-   private:
-    std::vector<std::vector<int>> m_edge_list;
-
    public:
+    std::vector<std::vector<int>> m_edge_list;
+    
     undirected_graph(int num_nodes);
 
     void add_edge(int nodeA, int nodeB);
 
     int get_num_nodes();
     std::vector<int> get_neighbours(int node);
-
-    void write_to_file(std::string filepath);
 };
+
+void write_to_file(std::string filepath, undirected_graph &graph);
+// the colouring should use at most 12 colours
+void write_to_file_with_colouring(std::string filepath, undirected_graph &graph, std::vector<int> &colouring, bool cluster);
 
 // uses greedy colouring to colour graph
 // always colours the node with the most different colours in its neighbourhood

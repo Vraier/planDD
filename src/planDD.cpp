@@ -106,14 +106,12 @@ int planDD::conflict_graph(option_values opt_values) {
     std::vector<int> colouring = graph::approximate_colouring(complement_graph);
     int max = 0;
     for(int i = 0; i < colouring.size(); i++){
-        if (colouring[i] > max){
-            max = colouring[i];
-        }
+        max = colouring[i] > max ? colouring[i] : max;
     }
 
     LOG_MESSAGE(log_level::info) << "Num colours: " << max+1;
 
-    complement_graph.write_to_file("graph.dot");
+    graph::write_to_file_with_colouring("graph.dot", complement_graph, colouring, true);
 
     LOG_MESSAGE(log_level::info) << "Finished writing graph";
 

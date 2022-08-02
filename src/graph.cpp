@@ -26,19 +26,73 @@ std::vector<int> undirected_graph::get_neighbours(int node){
     return m_edge_list[node];
 }
 
-void undirected_graph::write_to_file(std::string filepath){
+void write_to_file(std::string filepath, undirected_graph &graph){
     std::ofstream dot_file(filepath);
-    if (!dot_file.is_open())
-    {
+    if (!dot_file.is_open()) {
         LOG_MESSAGE(log_level::error) << "Unable to open file " << filepath;
     }
     dot_file << "graph {\n";
     dot_file << "\toverlap=scale;\n";
     dot_file << "\tsplines=true;\n";
 
-    for(int i = 0; i < m_edge_list.size(); i++){
-        for(int j = 0; j < m_edge_list[i].size(); j++){
-            int neighbour = m_edge_list[i][j];
+    auto edges = graph.m_edge_list;
+
+    for(int i = 0; i < edges.size(); i++){
+        for(int j = 0; j < edges[i].size(); j++){
+            int neighbour = edges[i][j];
+
+            if(neighbour > i) {
+                dot_file << "\t" << i << " -- " << neighbour << ";\n";
+            }
+        }
+    }
+
+    dot_file << "}";
+    dot_file.close();
+}
+
+void write_to_file_with_colouring(std::string filepath, undirected_graph &graph, std::vector<int> &colouring, bool cluster){
+    int max_col = 0;
+    for(int i = 0; i < colouring.size(); i++){
+        max_col = colouring[i] > max_col ? colouring[i] : max_col;
+    }
+
+    if(max_col > 8) {
+        write_to_file(filepath, graph);
+        return;
+    }
+    
+    std::ofstream dot_file(filepath);
+    if (!dot_file.is_open()) {
+        LOG_MESSAGE(log_level::error) << "Unable to open file " << filepath;
+    }
+
+    dot_file << "graph {\n";
+    dot_file << "\toverlap=scale;\n";
+    dot_file << "\tsplines=true;\n";
+
+    dot_file << "\tnode [colorscheme=dark28, style=filled] # Apply colorscheme to all nodes\n";
+    if(!cluster){
+        for(int i = 0; i < colouring.size(); i++){
+            dot_file << "\t" << i << " [color=" << colouring[i]+1 << "]\n";
+        }
+    } else {
+        for(int i = 0; i <= max_col; i++){
+            dot_file << "\tsubgraph cluster_" << i << " {\n";
+            for(int j = 0; j < colouring.size(); j++){
+                if(colouring[j] == i){
+                    dot_file << "\t\t" << j << " [color=" << i+1 << "]\n";
+                }
+            }
+            dot_file << "\t}\n";
+        }
+
+    }
+
+    auto edges = graph.m_edge_list;
+    for(int i = 0; i < edges.size(); i++){
+        for(int j = 0; j < edges[i].size(); j++){
+            int neighbour = edges[i][j];
 
             if(neighbour > i) {
                 dot_file << "\t" << i << " -- " << neighbour << ";\n";
