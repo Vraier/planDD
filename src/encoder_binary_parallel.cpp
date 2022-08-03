@@ -150,8 +150,8 @@ std::vector<logic_primitive> binary_parallel::construct_mutex(int timestep) {
     for (int m = 0; m < m_sas_problem.m_mutex_groups.size(); m++) {
         std::vector<std::pair<int, int>> at_most_one_should_be_true = m_sas_problem.m_mutex_groups[m];
 
-        for(int i = 0; i < at_most_one_should_be_true.size(); i++){
-            for(int j = i+1; j < at_most_one_should_be_true.size(); j++){
+        for (int i = 0; i < at_most_one_should_be_true.size(); i++) {
+            for (int j = i + 1; j < at_most_one_should_be_true.size(); j++) {
                 int var1, val1, size1, var2, val2, size2;
                 var1 = at_most_one_should_be_true[i].first;
                 val1 = at_most_one_should_be_true[i].second;
@@ -162,10 +162,12 @@ std::vector<logic_primitive> binary_parallel::construct_mutex(int timestep) {
 
                 std::vector<int> new_clause;
                 // binary planning variables
-                for(int v: m_symbol_map.get_variable_index_binary(variable_plan_binary_var, timestep, var1, val1, size1)){
+                for (int v :
+                     m_symbol_map.get_variable_index_binary(variable_plan_binary_var, timestep, var1, val1, size1)) {
                     new_clause.push_back(-v);
                 }
-                for(int v: m_symbol_map.get_variable_index_binary(variable_plan_binary_var, timestep, var2, val2, size2)){
+                for (int v :
+                     m_symbol_map.get_variable_index_binary(variable_plan_binary_var, timestep, var2, val2, size2)) {
                     new_clause.push_back(-v);
                 }
                 result.push_back(logic_primitive(logic_clause, mutex, timestep, new_clause));
@@ -176,9 +178,73 @@ std::vector<logic_primitive> binary_parallel::construct_mutex(int timestep) {
     return result;
 }
 
-std::vector<logic_primitive> binary_parallel::construct_precondition(int timestep) {}
+std::vector<logic_primitive> binary_parallel::construct_precondition(int timestep) {
+    std::vector<logic_primitive> result;
 
-std::vector<logic_primitive> binary_parallel::construct_effect(int timestep) {}
+    for (int op = 0; op < m_sas_problem.m_operators.size(); op++) {
+        for (int eff = 0; eff < m_sas_problem.m_operators[op].m_effects.size(); eff++) {
+            int op_col, effected_var, effected_old_val, effected_var_size;
+            op_col = m_colouring[op];
+            effected_var = std::get<0>(m_sas_problem.m_operators[op].m_effects[eff]);
+            effected_old_val = std::get<1>(m_sas_problem.m_operators[op].m_effects[eff]);
+            effected_var_size = m_sas_problem.m_variabels[effected_var].m_range;
+
+            if (effected_old_val == -1) {
+                // a value of -1 the value of the variable is irrelevant,
+                // when determining if it is applicable
+                continue;
+            }
+
+            std::vector<std::vector<int>> new_dnf;
+
+            std::vector<int> op_indizes = m_symbol_map.get_variable_index_binary(
+                variable_plan_binary_op, timestep, op_col, m_group_id[op], m_colour_class_size[op_col]);
+            for (int o : op_indizes) {
+                std::vector<int> tmp;
+                tmp.push_back(-o);
+                new_dnf.push_back(tmp);
+            }
+
+            std::vector<int> var_indizes = m_symbol_map.get_variable_index_binary(
+                variable_plan_binary_var, timestep, effected_var, effected_old_val, effected_var_size);
+            new_dnf.push_back(var_indizes);
+
+            result.push_back(logic_primitive(logic_dnf, precon, timestep, new_dnf));
+        }
+    }
+    return result;
+}
+
+std::vector<logic_primitive> binary_parallel::construct_effect(int timestep) {
+    std::vector<logic_primitive> result;
+
+    for (int op = 0; op < m_sas_problem.m_operators.size(); op++) {
+        for (int eff = 0; eff < m_sas_problem.m_operators[op].m_effects.size(); eff++) {
+            int op_col, effected_var, effected_new_val, effected_var_size;
+            op_col = m_colouring[op];
+            effected_var = std::get<0>(m_sas_problem.m_operators[op].m_effects[eff]);
+            effected_new_val = std::get<2>(m_sas_problem.m_operators[op].m_effects[eff]);
+            effected_var_size = m_sas_problem.m_variabels[effected_var].m_range;
+
+            std::vector<std::vector<int>> new_dnf;
+
+            std::vector<int> op_indizes = m_symbol_map.get_variable_index_binary(
+                variable_plan_binary_op, timestep, op_col, m_group_id[op], m_colour_class_size[op_col]);
+            for (int o : op_indizes) {
+                std::vector<int> tmp;
+                tmp.push_back(-o);
+                new_dnf.push_back(tmp);
+            }
+
+            std::vector<int> var_indizes = m_symbol_map.get_variable_index_binary(
+                variable_plan_binary_var, timestep + 1, effected_var, effected_new_val, effected_var_size);
+            new_dnf.push_back(var_indizes);
+
+            result.push_back(logic_primitive(logic_dnf, precon, timestep, new_dnf));
+        }
+    }
+    return result;
+}
 
 std::vector<logic_primitive> binary_parallel::construct_frame(int timestep) {}
 
