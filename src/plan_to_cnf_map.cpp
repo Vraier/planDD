@@ -3,7 +3,7 @@
 #include "logging.h"
 namespace planning_logic {
 
-plan_to_cnf_map::plan_to_cnf_map(int num_operators){
+plan_to_cnf_map::plan_to_cnf_map(int num_operators) {
     m_num_operators = num_operators;
     // TODO: i have no idea how save this is, but i am too lazy to check for highest bit
     m_num_op_variables = num_bits_for_binary_var(num_operators);
@@ -11,14 +11,13 @@ plan_to_cnf_map::plan_to_cnf_map(int num_operators){
 
 int plan_to_cnf_map::next_used_index() { return m_variable_map.size() + 1; }
 
-int plan_to_cnf_map::num_bits_for_binary_var(int num_variables){
-    return (int)std::ceil(std::log2(num_variables));
-}
+int plan_to_cnf_map::num_bits_for_binary_var(int num_variables) { return (int)std::ceil(std::log2(num_variables)); }
 
 int plan_to_cnf_map::get_variable_index(variable_tag tag, int timestep, int var_index, int value) {
     tagged_variable var = std::make_tuple(tag, timestep, var_index, value);
     if (m_variable_map.find(var) == m_variable_map.end()) {
-        //LOG_MESSAGE(log_level::debug) << "Created new var tag=" << tag << ", t=" << timestep << ", id=" << var_index << ", val=" << value;  
+        // LOG_MESSAGE(log_level::debug) << "Created new var tag=" << tag << ", t=" << timestep << ", id=" << var_index
+        // << ", val=" << value;
         int size = m_variable_map.size();
         m_variable_map[var] = size + 1;
     }
@@ -62,7 +61,8 @@ std::vector<int> plan_to_cnf_map::get_variable_index_for_op_binary(int timestep,
     return result;
 }
 
-std::vector<int> plan_to_cnf_map::get_variable_index_for_var_binary(int timestep, int var_index, int var_value, int var_size) {
+std::vector<int> plan_to_cnf_map::get_variable_index_for_var_binary(int timestep, int var_index, int var_value,
+                                                                    int var_size) {
     std::vector<int> result;
     int binary_size = num_bits_for_binary_var(var_size);
     // get log many variables for the operator

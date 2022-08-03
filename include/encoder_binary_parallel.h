@@ -2,11 +2,11 @@
 
 #include <vector>
 
-#include "options.h"
-#include "sas_parser.h"
-#include "logic_primitive.h"
-#include "plan_to_cnf_map.h"
 #include "graph.h"
+#include "logic_primitive.h"
+#include "options.h"
+#include "plan_to_cnf_map.h"
+#include "sas_parser.h"
 
 namespace encoder {
 
@@ -66,4 +66,4 @@ class binary_parallel {
     std::vector<planning_logic::logic_primitive> construct_effect(int timestep);
     std::vector<planning_logic::logic_primitive> construct_frame(int timestep);
 };
-}
+}  // namespace encoder
