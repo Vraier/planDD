@@ -5,6 +5,7 @@
 #include <set>
 
 using namespace planning_logic;
+using namespace encoder;
 
 namespace variable_order {
 

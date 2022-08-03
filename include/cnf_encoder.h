@@ -5,13 +5,17 @@
 #include <unordered_map>
 #include <vector>
 
+#include "encoder.h"
 #include "planning_logic_formula.h"
 #include "options.h"
 #include "sas_parser.h"
 #include "logic_primitive.h"
 #include "plan_to_cnf_map.h"
 
-class cnf_encoder {
+namespace encoder {
+
+// TODO: rename to encoder basic
+class cnf_encoder : public virtual encoder {
    public:
     cnf_encoder(option_values &options, sas_problem &problem) : m_symbol_map(problem.m_operators.size()), m_sas_problem(problem), m_options(options) {}
 
@@ -72,3 +76,4 @@ class cnf_encoder {
 
     std::vector<planning_logic::logic_primitive> construct_no_conflicting_operators(int timestep);
 };
+}

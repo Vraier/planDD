@@ -8,6 +8,8 @@
 
 using namespace planning_logic;
 
+namespace encoder{
+
 // TODO maybe write multiple encoders for different encodings?
 // have to see how advanced binary encoding goes
 std::vector<logic_primitive> cnf_encoder::get_logic_primitives(primitive_tag tag, int timestep) {
@@ -662,4 +664,6 @@ void cnf_encoder::compare_assignments(std::vector<bool> &assignment1, std::vecto
             }
         }
     }*/
+}
+
 }

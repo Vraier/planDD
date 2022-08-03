@@ -5,6 +5,7 @@
 #include <algorithm>
 
 using namespace planning_logic;
+using namespace encoder;
 
 namespace conjoin_order {
 

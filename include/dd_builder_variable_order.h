@@ -23,11 +23,11 @@ bool is_valid_variable_order_string(std::string build_order);
 categorized_variables categorize_variables(planning_logic::plan_to_cnf_map &symbol_map, int timesteps);
 // Moves all the variables to the front that are in a clause with the given front_tag
 // current_order[i] = what variable is at layer i?
-std::vector<int> put_variables_of_tag_first(cnf_encoder &encoder, std::vector<int> &current_order,
+std::vector<int> put_variables_of_tag_first(encoder::cnf_encoder &encoder, std::vector<int> &current_order,
                                             planning_logic::primitive_tag front_tag, int timesteps);
 // returns a vector V that represents a permutation of the variables of the cnf problem
 // The i-th entry of the permutation array contains the index of the variable that should be brought to the i-th level
-std::vector<int> order_variables(cnf_encoder &encoder, planning_logic::plan_to_cnf_map &symbol_map,
+std::vector<int> order_variables(encoder::cnf_encoder &encoder, planning_logic::plan_to_cnf_map &symbol_map,
                                  option_values &options);
 
 };  // namespace variable_order
