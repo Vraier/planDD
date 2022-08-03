@@ -246,6 +246,54 @@ std::vector<logic_primitive> binary_parallel::construct_effect(int timestep) {
     return result;
 }
 
-std::vector<logic_primitive> binary_parallel::construct_frame(int timestep) {}
+std::vector<logic_primitive> binary_parallel::construct_frame(int timestep) {
+    std::vector<logic_primitive> result;
 
+    for (int v = 0; v < m_sas_problem.m_variabels.size(); v++) {  // for every variable
+        // find all possible value changes of a variable
+        int var_size = m_sas_problem.m_variabels[v].m_range;
+        for (int val = 0; val < var_size; val++) {
+            // find the actions that support this transition.
+            // (planning) indizes of the actions that support the change of the variable
+            // to become true in the next timestep
+            std::vector<int> support_become_true;
+            for (int op = 0; op < m_sas_problem.m_operators.size(); op++) {
+                for (int i = 0; i < m_sas_problem.m_operators[op].m_effects.size(); i++) {
+                    std::tuple<int, int, int> op_eff = m_sas_problem.m_operators[op].m_effects[i];
+                    int effected_var, val_pre, val_post;
+                    effected_var = std::get<0>(op_eff);
+                    val_pre = std::get<1>(op_eff);
+                    val_post = std::get<2>(op_eff);
+
+                    // check if corrected variable is affected, and it changes to ture
+                    if ((effected_var == v) && (val_post == val)) {
+                        support_become_true.push_back(op);
+                    }
+                }
+            }
+
+            std::vector<std::vector<int>> new_dnf;
+            std::vector<int> old_var_idzs =
+                m_symbol_map.get_variable_index_binary(variable_plan_binary_var, timestep, v, val, var_size);
+            std::vector<int> new_var_idzs =
+                m_symbol_map.get_variable_index_binary(variable_plan_binary_var, timestep + 1, v, val, var_size);
+
+            new_dnf.push_back(old_var_idzs);
+            for (int new_v : new_var_idzs) {
+                std::vector<int> temp;
+                temp.push_back(-new_v);
+                new_dnf.push_back(temp);
+            }
+
+            for (int op : support_become_true) {
+                int op_col = m_colouring[op];
+                new_dnf.push_back(m_symbol_map.get_variable_index_binary(variable_plan_binary_op, timestep, op_col,
+                                                                         m_group_id[op], m_colour_class_size[op_col]));
+            }
+
+            result.push_back(logic_primitive(logic_dnf, frame, timestep, new_dnf));
+        }
+    }
+    return result;
+}
 }  // namespace encoder
