@@ -62,7 +62,7 @@ bool is_valid_layer_order_string(std::string &build_order) {
     return true;
 }
 
-std::vector<logic_primitive> order_all_clauses(cnf_encoder &encoder, option_values &options) {
+std::vector<logic_primitive> order_all_clauses(encoder_abstract &encoder, option_values &options) {
     std::string build_order = options.build_order;
 
     if (!is_valid_conjoin_order_string(build_order)) {
@@ -128,7 +128,7 @@ std::vector<logic_primitive> order_all_clauses(cnf_encoder &encoder, option_valu
     return total_primitives;
 }
 
-std::vector<logic_primitive> order_clauses_for_layer(cnf_encoder &encoder, std::string &order_string, int layer) {
+std::vector<logic_primitive> order_clauses_for_layer(encoder_abstract &encoder, std::string &order_string, int layer) {
     LOG_MESSAGE(log_level::info) << "Ordering clauses for single layer " << layer;
 
     // contains the result at the end
@@ -154,7 +154,7 @@ std::vector<logic_primitive> order_clauses_for_layer(cnf_encoder &encoder, std::
     return result_clauses;
 }
 
-std::vector<logic_primitive> order_clauses_for_foundation(cnf_encoder &encoder, std::string &order_string,
+std::vector<logic_primitive> order_clauses_for_foundation(encoder_abstract &encoder, std::string &order_string,
                                                           int timesteps) {
     LOG_MESSAGE(log_level::info) << "Ordering clauses for foundation";
 
@@ -172,8 +172,7 @@ std::vector<logic_primitive> order_clauses_for_foundation(cnf_encoder &encoder, 
     return result_clauses;
 }
 
-// TODO fix this so it does only return t=0 for initial state
-std::vector<logic_primitive> collect_primitives_for_all_timesteps(cnf_encoder &encoder, primitive_tag primitive_type,
+std::vector<logic_primitive> collect_primitives_for_all_timesteps(encoder_abstract &encoder, primitive_tag primitive_type,
                                                                   int timesteps) {
     std::vector<logic_primitive> result_primitives;
 
@@ -184,7 +183,7 @@ std::vector<logic_primitive> collect_primitives_for_all_timesteps(cnf_encoder &e
     return result_primitives;
 }
 
-std::vector<logic_primitive> collect_primitives_for_single_timestep(cnf_encoder &encoder, primitive_tag primitive_type,
+std::vector<logic_primitive> collect_primitives_for_single_timestep(encoder_abstract &encoder, primitive_tag primitive_type,
                                                                     int timestep) {
     return encoder.get_logic_primitives(primitive_type, timestep);
 }

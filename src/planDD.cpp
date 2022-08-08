@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "logging.h"
-#include "cnf_encoder.h"
+#include "encoder_basic.h"
 #include "sas_parser.h"
 #include "sdd_container.h"
 #include "dd_builder.h"
@@ -125,7 +125,7 @@ int planDD::build_bdd(option_values opt_values) {
         return 0;
     }
 
-    cnf_encoder encoder(opt_values, parser.m_sas_problem);
+    encoder::encoder_basic encoder(opt_values, parser.m_sas_problem);
     bdd_container builder(1);
 
     if(opt_values.timesteps >= 0){
@@ -156,7 +156,7 @@ int planDD::build_sdd(option_values opt_values) {
         return 0;
     }
 
-    cnf_encoder encoder(opt_values, parser.m_sas_problem);
+    encoder::encoder_basic encoder(opt_values, parser.m_sas_problem);
     //encoder.initialize_symbol_map(opt_values.timesteps);
 
     // encoder.write_cnf_to_file(opt_values.m_values.cnf_file, clauses);

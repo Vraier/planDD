@@ -1,4 +1,4 @@
-#include "cnf_encoder.h"
+#include "encoder_basic.h"
 
 #include <fstream>
 #include <iostream>
@@ -12,14 +12,18 @@ namespace encoder {
 
 // TODO maybe write multiple encoders for different encodings?
 // have to see how advanced binary encoding goes
-std::vector<logic_primitive> cnf_encoder::get_logic_primitives(primitive_tag tag, int timestep) {
+std::vector<logic_primitive> encoder_basic::get_logic_primitives(primitive_tag tag, int timestep) {
     update_timesteps(timestep);
 
     // std::cout << "Num Vars: " << m_symbol_map.get_num_variables() << " timestep: " << timestep << std::endl;
 
     switch (tag) {
         case ini_state:
-            return construct_initial_state();
+            if (timestep != 0) {
+                return std::vector<logic_primitive>();
+            } else {
+                return construct_initial_state();
+            }
         case goal:
             return construct_goal(timestep);
         case eo_var:
@@ -41,7 +45,7 @@ std::vector<logic_primitive> cnf_encoder::get_logic_primitives(primitive_tag tag
 }
 
 // The initial state must hold at t = 0.
-std::vector<logic_primitive> cnf_encoder::construct_initial_state() {
+std::vector<logic_primitive> encoder_basic::construct_initial_state() {
     std::vector<logic_primitive> result;
 
     for (int var = 0; var < m_sas_problem.m_variabels.size(); var++) {
@@ -74,7 +78,7 @@ std::vector<logic_primitive> cnf_encoder::construct_initial_state() {
 }
 
 // The goal g holds at step n
-std::vector<logic_primitive> cnf_encoder::construct_goal(int timestep) {
+std::vector<logic_primitive> encoder_basic::construct_goal(int timestep) {
     std::vector<logic_primitive> result;
 
     for (int g = 0; g < m_sas_problem.m_goal.size(); g++) {
@@ -105,7 +109,7 @@ std::vector<logic_primitive> cnf_encoder::construct_goal(int timestep) {
 }
 
 // At every timestep a sas variable has at least one value
-std::vector<logic_primitive> cnf_encoder::construct_exact_one_value(int timestep) {
+std::vector<logic_primitive> encoder_basic::construct_exact_one_value(int timestep) {
     std::vector<logic_primitive> result;
 
     if (m_options.binary_variables) {
@@ -163,7 +167,7 @@ std::vector<logic_primitive> cnf_encoder::construct_exact_one_value(int timestep
 // At every step, at least one action is applied
 // in the case of parallel plans this is relaxed to only nonconflicting actions can be applied.
 // in the binary case this is not needed
-std::vector<logic_primitive> cnf_encoder::construct_exact_one_action(int timestep) {
+std::vector<logic_primitive> encoder_basic::construct_exact_one_action(int timestep) {
     std::vector<logic_primitive> result;
 
     if (m_options.binary_encoding) {
@@ -213,7 +217,7 @@ std::vector<logic_primitive> cnf_encoder::construct_exact_one_action(int timeste
 }
 
 // used for parallel plans
-std::vector<logic_primitive> cnf_encoder::construct_no_conflicting_operators(int timestep) {
+std::vector<logic_primitive> encoder_basic::construct_no_conflicting_operators(int timestep) {
     std::vector<logic_primitive> result;
 
     for (int op1 = 0; op1 < m_sas_problem.m_operators.size(); op1++) {
@@ -234,7 +238,7 @@ std::vector<logic_primitive> cnf_encoder::construct_no_conflicting_operators(int
 }
 
 // If action a is applied at step t, then pre(a) holds at step t.
-std::vector<logic_primitive> cnf_encoder::construct_precondition(int timestep) {
+std::vector<logic_primitive> encoder_basic::construct_precondition(int timestep) {
     std::vector<logic_primitive> result;
 
     for (int op = 0; op < m_sas_problem.m_operators.size(); op++) {
@@ -289,7 +293,7 @@ std::vector<logic_primitive> cnf_encoder::construct_precondition(int timestep) {
             }
         }
 
-        if(m_options.group_pre_eff){
+        if (m_options.group_pre_eff) {
             for (int eff = 0; eff < m_sas_problem.m_operators[op].m_effects.size(); eff++) {
                 int effected_var, effected_new_val, effected_var_size;
                 effected_var = std::get<0>(m_sas_problem.m_operators[op].m_effects[eff]);
@@ -318,8 +322,8 @@ std::vector<logic_primitive> cnf_encoder::construct_precondition(int timestep) {
                     op_grouped_dnf.push_back(var_indizes);
                 } else {
                     // variable unary
-                    int index_precondition =
-                        m_symbol_map.get_variable_index(variable_plan_var, timestep + 1, effected_var, effected_new_val);
+                    int index_precondition = m_symbol_map.get_variable_index(variable_plan_var, timestep + 1,
+                                                                             effected_var, effected_new_val);
                     std::vector<int> tmp;
                     tmp.push_back(index_precondition);
                     op_grouped_dnf.push_back(tmp);
@@ -332,7 +336,7 @@ std::vector<logic_primitive> cnf_encoder::construct_precondition(int timestep) {
 }
 
 // If action a is applied at step t, then eff(a) hold at step t + 1.
-std::vector<logic_primitive> cnf_encoder::construct_effect(int timestep) {
+std::vector<logic_primitive> encoder_basic::construct_effect(int timestep) {
     std::vector<logic_primitive> result;
 
     if (m_options.group_pre_eff) {
@@ -385,7 +389,7 @@ std::vector<logic_primitive> cnf_encoder::construct_effect(int timestep) {
 
 // If atom p changes between steps t and t + 1, an action which supports this
 // change must be applied at t:
-std::vector<logic_primitive> cnf_encoder::construct_frame(int timestep) {
+std::vector<logic_primitive> encoder_basic::construct_frame(int timestep) {
     std::vector<logic_primitive> result;
 
     for (int v = 0; v < m_sas_problem.m_variabels.size(); v++) {  // for every variable
@@ -457,7 +461,7 @@ std::vector<logic_primitive> cnf_encoder::construct_frame(int timestep) {
 }
 
 // at every timestep it is not allowed for two values in a mutex to be true at the same time
-std::vector<logic_primitive> cnf_encoder::construct_mutex(int timestep) {
+std::vector<logic_primitive> encoder_basic::construct_mutex(int timestep) {
     std::vector<logic_primitive> result;
 
     if (!m_options.include_mutex) {
@@ -500,8 +504,9 @@ std::vector<logic_primitive> cnf_encoder::construct_mutex(int timestep) {
     return result;
 }
 
-std::vector<std::vector<int>> cnf_encoder::generate_at_most_one_constraint(std::vector<int> &variables,
-                                                                           variable_tag constraint_type, int timestep) {
+std::vector<std::vector<int>> encoder_basic::generate_at_most_one_constraint(std::vector<int> &variables,
+                                                                             variable_tag constraint_type,
+                                                                             int timestep) {
     if (!m_options.use_ladder_encoding) {
         return generate_at_most_one_constraint_pairwise(variables);
     } else if (m_options.use_ladder_encoding && variables.size() <= 5) {
@@ -511,9 +516,9 @@ std::vector<std::vector<int>> cnf_encoder::generate_at_most_one_constraint(std::
     }
 }
 
-std::vector<std::vector<int>> cnf_encoder::generate_at_most_one_constraint_ladder(std::vector<int> &variables,
-                                                                                  variable_tag constraint_type,
-                                                                                  int timestep) {
+std::vector<std::vector<int>> encoder_basic::generate_at_most_one_constraint_ladder(std::vector<int> &variables,
+                                                                                    variable_tag constraint_type,
+                                                                                    int timestep) {
     std::vector<std::vector<int>> all_new_clauses;
 
     for (int i = 0; i < variables.size(); i++) {
@@ -540,7 +545,7 @@ std::vector<std::vector<int>> cnf_encoder::generate_at_most_one_constraint_ladde
     return all_new_clauses;
 }
 
-std::vector<std::vector<int>> cnf_encoder::generate_at_most_one_constraint_pairwise(std::vector<int> &variables) {
+std::vector<std::vector<int>> encoder_basic::generate_at_most_one_constraint_pairwise(std::vector<int> &variables) {
     std::vector<std::vector<int>> all_new_clauses;
     for (int i = 0; i < variables.size(); i++) {
         for (int j = i + 1; j < variables.size(); j++) {
@@ -553,12 +558,12 @@ std::vector<std::vector<int>> cnf_encoder::generate_at_most_one_constraint_pairw
     return all_new_clauses;
 }
 
-void cnf_encoder::update_timesteps(int timestep) {
+void encoder_basic::update_timesteps(int timestep) {
     m_num_timesteps = timestep > m_num_timesteps ? timestep : m_num_timesteps;
 }
 
 // This call depends on the correct symbol map.
-std::vector<bool> cnf_encoder::parse_cnf_solution(std::string filepath) {
+std::vector<bool> encoder_basic::parse_cnf_solution(std::string filepath) {
     LOG_MESSAGE(log_level::info) << "Start parsing assignment file";
 
     std::ifstream infile(filepath);
@@ -593,7 +598,7 @@ std::vector<bool> cnf_encoder::parse_cnf_solution(std::string filepath) {
     return assignment;
 }
 
-std::string cnf_encoder::decode_cnf_variable(int index) {
+std::string encoder_basic::decode_cnf_variable(int index) {
     tagged_variable info = m_symbol_map.get_planning_info_for_variable(index);
     variable_tag tag = std::get<0>(info);
     int v_timestep = std::get<1>(info);
@@ -633,7 +638,7 @@ std::string cnf_encoder::decode_cnf_variable(int index) {
 // interprets a solution from minisat. It translates the sat solution to a
 // planning problem solution (with some addional debugg information)
 // This call depends on the correct symbol map.
-void cnf_encoder::decode_cnf_solution(std::vector<bool> &assignment, int num_timesteps) {
+void encoder_basic::decode_cnf_solution(std::vector<bool> &assignment, int num_timesteps) {
     if (assignment.size() == 0) {
         LOG_MESSAGE(log_level::warning) << "Trying to decode an assignment of size 0";
         return;
@@ -678,7 +683,7 @@ void cnf_encoder::decode_cnf_solution(std::vector<bool> &assignment, int num_tim
     }
 }
 
-void cnf_encoder::compare_assignments(std::vector<bool> &assignment1, std::vector<bool> &assignment2) {
+void encoder_basic::compare_assignments(std::vector<bool> &assignment1, std::vector<bool> &assignment2) {
     LOG_MESSAGE(log_level::info) << "Comparing two assignments. Size of cnf variables and assignment one and two is: "
                                  << m_symbol_map.get_num_variables() << " " << assignment1.size() << " "
                                  << assignment2.size();

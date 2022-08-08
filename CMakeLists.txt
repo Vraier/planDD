@@ -37,7 +37,7 @@ find_package(Boost ${BOOST_VERSION} EXACT REQUIRED
 add_executable(planDD)
 target_sources(planDD
 	PRIVATE
-		"src/bdd_container.cpp"  "src/cnf_encoder.cpp" 
+		"src/bdd_container.cpp"  "src/encoder_basic.cpp" 
 		"src/dd_builder_conjoin_order.cpp" "src/dd_builder_variable_order.cpp"
 		"src/dd_builder.cpp" "src/logging.cpp" 
 		"src/options.cpp" "src/planDD.cpp"

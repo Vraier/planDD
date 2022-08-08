@@ -1,10 +1,11 @@
 #include "variable_grouping.h"
 
 using namespace planning_logic;
+using namespace encoder;
 
 namespace variable_grouping {
 
-void create_all_variables(cnf_encoder &encoder, bdd_container &container, option_values &options) {
+void create_all_variables(encoder_basic &encoder, bdd_container &container, option_values &options) {
     container.disable_reordering();
 
     for (int t = 0; t <= options.timesteps; t++) {

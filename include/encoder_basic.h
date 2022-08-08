@@ -5,24 +5,14 @@
 #include <unordered_map>
 #include <vector>
 
-#include "encoder.h"
-#include "planning_logic_formula.h"
-#include "options.h"
-#include "sas_parser.h"
-#include "logic_primitive.h"
-#include "plan_to_cnf_map.h"
+#include "encoder_abstract.h"
 
 namespace encoder {
 
-// TODO: rename to encoder basic
-class cnf_encoder : public virtual encoder {
+class encoder_basic : public encoder_abstract {
    public:
-    cnf_encoder(option_values &options, sas_problem &problem) : m_symbol_map(problem.m_operators.size()), m_sas_problem(problem), m_options(options) {}
-
-    // maps planning variables to cnf variables.
-    planning_logic::plan_to_cnf_map m_symbol_map;
-    // represents the planning problem
-    sas_problem m_sas_problem;
+    encoder_basic(option_values &options, sas_problem &problem)
+        : encoder_abstract(options, problem, problem.m_operators.size()) {}
 
     // constructs the logic primitives according to the tag and timestep
     // will change the symbol map if new variables are created
@@ -47,9 +37,6 @@ class cnf_encoder : public virtual encoder {
     int m_num_timesteps;
     // increases num_timesteps to the new maximum
     void update_timesteps(int timestep);
-
-    // holds options for the whole programm. Some are important for the cnf_encoder
-    option_values m_options;
 
     // These methods generate all the logic primitives that represent the planning problem
     std::vector<planning_logic::logic_primitive> construct_initial_state();
@@ -76,4 +63,4 @@ class cnf_encoder : public virtual encoder {
 
     std::vector<planning_logic::logic_primitive> construct_no_conflicting_operators(int timestep);
 };
-}
+}  // namespace encoder

@@ -66,7 +66,7 @@ categorized_variables categorize_variables(planning_logic::plan_to_cnf_map &symb
 }
 
 // current_order[i] = what variable is at layer i?
-std::vector<int> put_variables_of_tag_first(cnf_encoder &encoder, std::vector<int> &current_order,
+std::vector<int> put_variables_of_tag_first(encoder_basic &encoder, std::vector<int> &current_order,
                                             primitive_tag front_tag, int timesteps) {
     // find all variables that are affected by the given tag
     std::set<int> front_variables;
@@ -92,7 +92,7 @@ std::vector<int> put_variables_of_tag_first(cnf_encoder &encoder, std::vector<in
     return new_order;
 }
 
-std::vector<int> order_variables(cnf_encoder &encoder, plan_to_cnf_map &symbol_map, option_values &options) {
+std::vector<int> order_variables(encoder_basic &encoder, plan_to_cnf_map &symbol_map, option_values &options) {
     std::string build_order = options.variable_order;
 
     if (!is_valid_variable_order_string(build_order)) {

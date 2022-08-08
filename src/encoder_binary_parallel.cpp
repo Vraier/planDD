@@ -5,11 +5,7 @@ using namespace planning_logic;
 namespace encoder {
 
 binary_parallel::binary_parallel(option_values &options, sas_problem &problem, graph::undirected_graph &conflict_graph)
-    : m_symbol_map(problem.m_operators.size()),
-      m_sas_problem(problem),
-      m_options(options),
-      m_action_conflicts(conflict_graph) {
-    m_action_conflicts = conflict_graph;
+    : encoder_abstract(options, problem, problem.m_operators.size()), m_action_conflicts(conflict_graph) {
     graph::undirected_graph complement = m_action_conflicts.construct_complement();
     m_colouring = graph::approximate_colouring(complement);
 

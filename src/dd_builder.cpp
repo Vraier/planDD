@@ -3,10 +3,11 @@
 #include "logging.h"
 
 using namespace planning_logic;
+using namespace encoder;
 
 namespace dd_builder {
 
-void construct_dd(dd_buildable &container, cnf_encoder &encoder, option_values &options) {
+void construct_dd(dd_buildable &container, encoder_abstract &encoder, option_values &options) {
     LOG_MESSAGE(log_level::info) << "Choosing correct dd building algorithm";
 
     if (options.linear) {
@@ -27,14 +28,14 @@ void construct_dd(dd_buildable &container, cnf_encoder &encoder, option_values &
     LOG_MESSAGE(log_level::info) << "Finished constructing final DD";
 }
 
-void construct_dd_linear(dd_buildable &container, cnf_encoder &encoder, option_values &options) {
+void construct_dd_linear(dd_buildable &container, encoder_abstract &encoder, option_values &options) {
     LOG_MESSAGE(log_level::info) << "Building dd linear";
     LOG_MESSAGE(log_level::info) << "Ordering all clauses";
     std::vector<logic_primitive> all_primitives = conjoin_order::order_all_clauses(encoder, options);
     conjoin_primitives_linear(container, all_primitives, 0, false);
 }
 
-void construct_dd_by_layer_unidirectional(dd_buildable &container, cnf_encoder &encoder, option_values &options) {
+void construct_dd_by_layer_unidirectional(dd_buildable &container, encoder_abstract &encoder, option_values &options) {
     LOG_MESSAGE(log_level::info) << "Building bdd by layers unidirectional";
     container.set_num_dds(3);
 
@@ -113,7 +114,7 @@ void construct_dd_by_layer_unidirectional(dd_buildable &container, cnf_encoder &
     }
 }
 
-void construct_dd_by_layer_bidirectional(dd_buildable &container, cnf_encoder &encoder, option_values &options) {
+void construct_dd_by_layer_bidirectional(dd_buildable &container, encoder_abstract &encoder, option_values &options) {
     LOG_MESSAGE(log_level::info) << "Building bdd by layers bidirectional";
     container.set_num_dds(3);
 
@@ -235,7 +236,7 @@ int ipow(int base, int exponent) {
     return result;
 }
 
-void construct_dd_by_layer_exponentially(dd_buildable &container, cnf_encoder &encoder, option_values &options) {
+void construct_dd_by_layer_exponentially(dd_buildable &container, encoder_abstract &encoder, option_values &options) {
     LOG_MESSAGE(log_level::info) << "Building bdd by layers exponentially";
 
     // TODO two ways: construct 2^ceil(log(t)) layers or construct the exact amount. See if first one is faster
@@ -306,7 +307,7 @@ void construct_dd_by_layer_exponentially(dd_buildable &container, cnf_encoder &e
     }
 }
 
-bool goal_is_fullfilled(dd_buildable &container, cnf_encoder &encoder, int main_idx, int temp_idx, int timestep) {
+bool goal_is_fullfilled(dd_buildable &container, encoder_abstract &encoder, int main_idx, int temp_idx, int timestep) {
     LOG_MESSAGE(log_level::info) << "Checking if goal is fulfilled in timestep " << timestep;
     std::vector<logic_primitive> goal_primitives = encoder.get_logic_primitives(goal, timestep);
     container.clear_dd(temp_idx);
@@ -320,7 +321,7 @@ bool goal_is_fullfilled(dd_buildable &container, cnf_encoder &encoder, int main_
     return is_fulfilled;
 }
 
-void construct_dd_without_timesteps(dd_buildable &container, cnf_encoder &encoder, option_values &options) {
+void construct_dd_without_timesteps(dd_buildable &container, encoder_abstract &encoder, option_values &options) {
     LOG_MESSAGE(log_level::info) << "Building BDD without knowing the correct amount of timesteps";
 
     container.set_num_dds(2);

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "cnf_encoder.h"
+#include "encoder_basic.h"
 #include "bdd_container.h"
 #include "options.h"
 
@@ -11,5 +11,5 @@
  */
 namespace variable_grouping {
 
-void create_all_variables(cnf_encoder &encoder, bdd_container &container, option_values &options);
+void create_all_variables(encoder::encoder_basic &encoder, bdd_container &container, option_values &options);
 }  // namespace variable_grouping

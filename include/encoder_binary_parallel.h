@@ -2,23 +2,14 @@
 
 #include <vector>
 
-#include "encoder.h"
+#include "encoder_abstract.h"
 #include "graph.h"
-#include "logic_primitive.h"
-#include "options.h"
-#include "plan_to_cnf_map.h"
-#include "sas_parser.h"
 
 namespace encoder {
 
-class binary_parallel : public virtual encoder {
+class binary_parallel : public virtual encoder_abstract {
    public:
     binary_parallel(option_values &options, sas_problem &problem, graph::undirected_graph &conflict_graph);
-
-    // maps planning variables to cnf variables.
-    planning_logic::plan_to_cnf_map m_symbol_map;
-    // represents the planning problem
-    sas_problem m_sas_problem;
 
     // constructs the logic primitives according to the tag and timestep
     // will change the symbol map if new variables are created
@@ -29,8 +20,6 @@ class binary_parallel : public virtual encoder {
     int m_num_timesteps;
     // increases num_timesteps to the new maximum
     void update_timesteps(int timestep);
-    // holds options for the whole programm. Some are important for the cnf_encoder
-    option_values m_options;
 
     // the edges of the graph represent actions that are not allowed together
     graph::undirected_graph m_action_conflicts;
