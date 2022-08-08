@@ -4,6 +4,42 @@ using namespace planning_logic;
 
 namespace encoder {
 
+std::vector<logic_primitive> binary_parallel::get_logic_primitives(primitive_tag tag, int timestep) {
+    update_timesteps(timestep);
+
+    // std::cout << "Num Vars: " << m_symbol_map.get_num_variables() << " timestep: " << timestep << std::endl;
+
+    switch (tag) {
+        case ini_state:
+            if (timestep != 0) {
+                return std::vector<logic_primitive>();
+            } else {
+                return construct_initial_state();
+            }
+        case goal:
+            return construct_goal(timestep);
+        case eo_var:
+            return construct_no_impossible_value(timestep);
+        case eo_op:
+            return construct_exact_one_action(timestep);
+        case mutex:
+            return construct_mutex(timestep);
+        case precon:
+            return construct_precondition(timestep);
+        case effect:
+            return construct_effect(timestep);
+        case frame:
+            return construct_frame(timestep);
+        case none:
+        default:
+            return std::vector<logic_primitive>();
+    }
+}
+
+void binary_parallel::update_timesteps(int timestep) {
+    m_num_timesteps = timestep > m_num_timesteps ? timestep : m_num_timesteps;
+}
+
 binary_parallel::binary_parallel(option_values &options, sas_problem &problem, graph::undirected_graph &conflict_graph)
     : encoder_abstract(options, problem, problem.m_operators.size()), m_action_conflicts(conflict_graph) {
     graph::undirected_graph complement = m_action_conflicts.construct_complement();
@@ -134,6 +170,8 @@ std::vector<logic_primitive> binary_parallel::construct_exact_one_action(int tim
             }
         }
     }
+
+    return result;
 }
 
 std::vector<logic_primitive> binary_parallel::construct_mutex(int timestep) {

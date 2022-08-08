@@ -9,20 +9,17 @@
 
 namespace encoder {
 
-class encoder_basic : public encoder_abstract {
+class encoder_basic : public virtual encoder_abstract {
    public:
     encoder_basic(option_values &options, sas_problem &problem)
         : encoder_abstract(options, problem, problem.m_operators.size()) {}
 
-    // constructs the logic primitives according to the tag and timestep
-    // will change the symbol map if new variables are created
     std::vector<planning_logic::logic_primitive> get_logic_primitives(planning_logic::primitive_tag tag, int timestep);
 
     // parses a cnf solution from minisat into a bool vector
     // assignemnt gives the truth value for the ith variable (index 0 of assignment has no meaningful value)
     // returns an empty vector if the file contains no solution
     std::vector<bool> parse_cnf_solution(std::string filepath);
-
     // translate the ith cnf variable into the planning context and returns a string description
     // the variable should be greater than 0 and smaller or eaqual to
     // num_variables

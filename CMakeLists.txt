@@ -44,7 +44,7 @@ target_sources(planDD
 		"src/planning_logic_formula.cpp" "src/sas_parser.cpp" 
 		"src/plan_to_cnf_map.cpp" "src/logic_primitive.cpp" 
 		"src/sdd_container.cpp" "src/variable_grouping.cpp"
-		"src/graph.cpp"
+		"src/graph.cpp" "src/encoder_binary_parallel.cpp"
 		"src/fnf/compiler.c" "src/fnf/fnf.c" "src/fnf/io.c" "src/fnf/utils.c")
 
 target_include_directories(planDD PRIVATE "include")

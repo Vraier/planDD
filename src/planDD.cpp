@@ -7,6 +7,7 @@
 
 #include "logging.h"
 #include "encoder_basic.h"
+#include "encoder_binary_parallel.h"
 #include "sas_parser.h"
 #include "sdd_container.h"
 #include "dd_builder.h"
@@ -91,6 +92,8 @@ int planDD::hack_debug(option_values opt_values) {
     for(int i = 0; i < c.size(); i++) {
         std::cout << "id=" << i << " c=" << c[i] << std::endl;
     }
+
+    return 0;
 }
 
 int planDD::conflict_graph(option_values opt_values) {
@@ -125,12 +128,19 @@ int planDD::build_bdd(option_values opt_values) {
         return 0;
     }
 
-    encoder::encoder_basic encoder(opt_values, parser.m_sas_problem);
+    encoder::encoder_abstract *encoder;
+    if(opt_values.binary_parallel){
+        graph::undirected_graph conflict_graph = parser.m_sas_problem.construct_action_conflic_graph();
+        encoder = new encoder::binary_parallel(opt_values, parser.m_sas_problem, conflict_graph);
+    } else {
+        encoder = new encoder::encoder_basic(opt_values, parser.m_sas_problem);
+    }
+
     bdd_container builder(1);
 
     if(opt_values.timesteps >= 0){
-        variable_grouping::create_all_variables(encoder, builder, opt_values);
-        std::vector<int> var_order = variable_order::order_variables(encoder, encoder.m_symbol_map, opt_values);
+        variable_grouping::create_all_variables(*encoder, builder, opt_values);
+        std::vector<int> var_order = variable_order::order_variables(*encoder, opt_values);
         builder.set_variable_order(var_order);
     }
 
@@ -138,9 +148,11 @@ int planDD::build_bdd(option_values opt_values) {
         builder.enable_reordering();
     }
 
-    dd_builder::construct_dd(builder, encoder, opt_values);
+    dd_builder::construct_dd(builder, *encoder, opt_values);
 
     builder.print_bdd_info();
+
+    delete encoder;
 
     //for(auto a: builder.list_minterms(10)){
         //encoder.decode_cnf_solution(a, 5);

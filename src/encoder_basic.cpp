@@ -10,7 +10,6 @@ using namespace planning_logic;
 
 namespace encoder {
 
-// TODO maybe write multiple encoders for different encodings?
 // have to see how advanced binary encoding goes
 std::vector<logic_primitive> encoder_basic::get_logic_primitives(primitive_tag tag, int timestep) {
     update_timesteps(timestep);

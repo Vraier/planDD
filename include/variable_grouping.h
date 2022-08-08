@@ -11,5 +11,5 @@
  */
 namespace variable_grouping {
 
-void create_all_variables(encoder::encoder_basic &encoder, bdd_container &container, option_values &options);
+void create_all_variables(encoder::encoder_abstract &encoder, bdd_container &container, option_values &options);
 }  // namespace variable_grouping
