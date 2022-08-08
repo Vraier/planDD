@@ -30,7 +30,7 @@ bool sas_problem::are_variables_consistent(std::vector<std::pair<int, int>> &set
 
 bool sas_problem::are_operators_conflicting(int op_idx_1, int op_idx_2) {
     // operate should not clinflict with itself
-    if(op_idx_1 == op_idx_2){
+    if (op_idx_1 == op_idx_2) {
         return false;
     }
 
@@ -73,28 +73,29 @@ bool sas_problem::are_operators_conflicting(int op_idx_1, int op_idx_2) {
     return !are_nonconflicting;
 }
 
-graph::undirected_graph sas_problem::construct_action_conflic_graph(){
+graph::undirected_graph sas_problem::construct_action_conflic_graph() {
+    LOG_MESSAGE(log_level::info) << "Start building action conflict graph";
     graph::undirected_graph result(m_operators.size());
 
-    for(int i = 0; i < m_operators.size(); i++){
-        for(int j = i+1; j < m_operators.size(); j++) {
-            if(are_operators_conflicting(i, j)){
-                //std::cout << "Adding " << i << "  " << j << std::endl;
+    for (int i = 0; i < m_operators.size(); i++) {
+        for (int j = i + 1; j < m_operators.size(); j++) {
+            if (are_operators_conflicting(i, j)) {
+                // std::cout << "Adding " << i << "  " << j << std::endl;
                 result.add_edge(i, j);
             }
         }
     }
-
+    LOG_MESSAGE(log_level::info) << "Finished building action conflict graph";
     return result;
 }
 
-graph::undirected_graph sas_problem::construct_complement_action_conflic_graph(){
+graph::undirected_graph sas_problem::construct_complement_action_conflic_graph() {
     graph::undirected_graph result(m_operators.size());
 
-    for(int i = 0; i < m_operators.size(); i++){
-        for(int j = i+1; j < m_operators.size(); j++) {
-            if(!are_operators_conflicting(i, j)){
-                //std::cout << "Adding " << i << "  " << j << std::endl;
+    for (int i = 0; i < m_operators.size(); i++) {
+        for (int j = i + 1; j < m_operators.size(); j++) {
+            if (!are_operators_conflicting(i, j)) {
+                // std::cout << "Adding " << i << "  " << j << std::endl;
                 result.add_edge(i, j);
             }
         }

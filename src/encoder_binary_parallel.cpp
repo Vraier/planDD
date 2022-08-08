@@ -1,8 +1,39 @@
 #include "encoder_binary_parallel.h"
+#include "logging.h"
 
 using namespace planning_logic;
 
 namespace encoder {
+
+binary_parallel::binary_parallel(option_values &options, sas_problem &problem, graph::undirected_graph &conflict_graph)
+    : encoder_abstract(options, problem, problem.m_operators.size()), m_action_conflicts(conflict_graph) {
+    graph::undirected_graph complement = m_action_conflicts.construct_complement();
+    
+    m_group_id = std::vector<int>(m_sas_problem.m_operators.size());
+
+    m_colouring = graph::approximate_colouring(complement);
+    m_num_colours = 0;
+    for (int i = 0; i < m_colouring.size(); i++) {
+        m_num_colours = m_colouring[i] > m_num_colours ? m_colouring[i] : m_num_colours;
+    }
+    m_num_colours++;
+
+    LOG_MESSAGE(log_level::info) << "Encoder found " << m_num_colours << " colour classes";
+
+    m_colour_class_size = std::vector<int>(m_num_colours);
+    for (int op = 0; op < m_sas_problem.m_operators.size(); op++) {
+        int op_col = m_colouring[op];
+        m_group_id[op] = m_colour_class_size[m_colouring[op]];
+        m_colour_class_size[m_colouring[op]]++;
+    }
+
+    // increase every colour class by one to allow a 'noop' action
+    for (int i = 0; i < m_colour_class_size.size(); i++) {
+        m_colour_class_size[i]++;
+    }
+
+    LOG_MESSAGE(log_level::info) << "Finished construction binary parallel encoder";
+}
 
 std::vector<logic_primitive> binary_parallel::get_logic_primitives(primitive_tag tag, int timestep) {
     update_timesteps(timestep);
@@ -38,30 +69,6 @@ std::vector<logic_primitive> binary_parallel::get_logic_primitives(primitive_tag
 
 void binary_parallel::update_timesteps(int timestep) {
     m_num_timesteps = timestep > m_num_timesteps ? timestep : m_num_timesteps;
-}
-
-binary_parallel::binary_parallel(option_values &options, sas_problem &problem, graph::undirected_graph &conflict_graph)
-    : encoder_abstract(options, problem, problem.m_operators.size()), m_action_conflicts(conflict_graph) {
-    graph::undirected_graph complement = m_action_conflicts.construct_complement();
-    m_colouring = graph::approximate_colouring(complement);
-
-    m_num_colours = 0;
-    for (int i = 0; i < m_colouring.size(); i++) {
-        m_num_colours = m_colouring[i] > m_num_colours ? m_colouring[i] : m_num_colours;
-    }
-    m_num_colours++;
-
-    m_colour_class_size = std::vector<int>(m_num_colours);
-    for (int op = 0; op < m_sas_problem.m_operators.size(); op++) {
-        int op_col = m_colouring[op];
-        m_group_id[op] = m_colour_class_size[m_colouring[op]];
-        m_colour_class_size[m_colouring[op]]++;
-    }
-
-    // increase every colour class by one to allow a 'noop' action
-    for (int i = 0; i < m_colour_class_size.size(); i++) {
-        m_colour_class_size[i]++;
-    }
 }
 
 std::vector<logic_primitive> binary_parallel::construct_initial_state() {
