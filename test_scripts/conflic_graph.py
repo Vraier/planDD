@@ -4,7 +4,7 @@ import random
 import os
 
 def draw_random_problem():
-    rand_prob = random.choice(problems.list_all_downward_solved_problems())
+    rand_prob = random.choice(problems.list_all_easy_opt_strips_problems())
     template_downward = "../../downward/fast-downward.py --sas-file prob.sas --translate $path"
     template_planDD = "../build/planDD --sas_file prob.sas --conflict_graph"
     template_graphviz = "fdp -Tpng graph.dot -o graph.png"
