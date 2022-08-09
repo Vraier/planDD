@@ -6,12 +6,11 @@ using namespace planning_logic;
 namespace encoder {
 
 binary_parallel::binary_parallel(option_values &options, sas_problem &problem, graph::undirected_graph &conflict_graph)
-    : encoder_abstract(options, problem, problem.m_operators.size()), m_action_conflicts(conflict_graph) {
-    graph::undirected_graph complement = m_action_conflicts.construct_complement();
-    
+    : encoder_abstract(options, problem, problem.m_operators.size()) {
+
     m_group_id = std::vector<int>(m_sas_problem.m_operators.size());
 
-    m_colouring = graph::approximate_colouring(complement);
+    m_colouring = graph::approximate_colouring(conflict_graph);
     m_num_colours = 0;
     for (int i = 0; i < m_colouring.size(); i++) {
         m_num_colours = m_colouring[i] > m_num_colours ? m_colouring[i] : m_num_colours;
@@ -129,6 +128,7 @@ std::vector<logic_primitive> binary_parallel::construct_no_impossible_value(int 
 std::vector<logic_primitive> binary_parallel::construct_exact_one_action(int timestep) {
     std::vector<logic_primitive> result;
 
+    // prohibit conflicting actions that are in different colour classes
     for (int op1 = 0; op1 < m_sas_problem.m_operators.size(); op1++) {
         for (int op2 = op1 + 1; op2 < m_sas_problem.m_operators.size(); op2++) {
             int col1 = m_colouring[op1];
@@ -140,7 +140,7 @@ std::vector<logic_primitive> binary_parallel::construct_exact_one_action(int tim
                 continue;
             }
 
-            if (m_action_conflicts.are_neighbours(op1, op2)) {
+            if (m_sas_problem.are_operators_conflicting(op1, op2)) {
                 std::vector<int> op_enc1 = m_symbol_map.get_variable_index_binary(
                     variable_plan_binary_op, timestep, col1, m_group_id[op1], m_colour_class_size[col1]);
                 std::vector<int> op_enc2 = m_symbol_map.get_variable_index_binary(
@@ -159,22 +159,35 @@ std::vector<logic_primitive> binary_parallel::construct_exact_one_action(int tim
         }
     }
 
-    // TODO: guarantee that at least one action is taken in every timestep
+    /*
+    // guarantee that at least one action is taken in every timestep
+    // not necessary since we are searching for optimal plans
+    std::vector<int> noop_clause;
+    for (int col = 0; col < m_num_colours; col++) {
+        int noop_id = m_colour_class_size[col] - 1;
+        std::vector<int> noop_enc = m_symbol_map.get_variable_index_binary(variable_plan_binary_op, timestep, col,
+                                                                           noop_id, m_colour_class_size[col]);
+        for (int i = 0; i < noop_enc.size(); i++) {
+            noop_clause.push_back(-noop_enc[i]);
+        }
+    }
+    result.push_back(logic_primitive(logic_clause, eo_op, timestep, noop_clause));
+    */
 
-    if (m_options.binary_exclude_impossible) {
-        // exclude the impossible actions for every colour class
-        for (int col = 0; col < m_num_colours; col++) {
-            // iterate over the indizes that represent imposssible operators
-            int num_imp_ops = (1 << m_symbol_map.num_bits_for_binary_var(m_colour_class_size[col]));
-            for (int imp_op = m_colour_class_size[col]; imp_op < num_imp_ops; imp_op++) {
-                std::vector<int> op_indizes = m_symbol_map.get_variable_index_binary(
-                    variable_plan_binary_op, timestep, col, imp_op, m_colour_class_size[col]);
-                std::vector<int> new_clause;
-                for (int i : op_indizes) {
-                    new_clause.push_back(-i);
-                }
-                result.push_back(logic_primitive(logic_clause, eo_op, timestep, new_clause));
+    // exclude the impossible actions for every colour class
+    // this has to be done
+    // in the other case the solver could choose different impossible actions in one timestep
+    for (int col = 0; col < m_num_colours; col++) {
+        // iterate over the indizes that represent imposssible operators
+        int num_imp_ops = (1 << m_symbol_map.num_bits_for_binary_var(m_colour_class_size[col]));
+        for (int imp_op = m_colour_class_size[col]; imp_op < num_imp_ops; imp_op++) {
+            std::vector<int> op_indizes = m_symbol_map.get_variable_index_binary(variable_plan_binary_op, timestep, col,
+                                                                                 imp_op, m_colour_class_size[col]);
+            std::vector<int> new_clause;
+            for (int i : op_indizes) {
+                new_clause.push_back(-i);
             }
+            result.push_back(logic_primitive(logic_clause, eo_op, timestep, new_clause));
         }
     }
 

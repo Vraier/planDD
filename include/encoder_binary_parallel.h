@@ -9,6 +9,7 @@ namespace encoder {
 
 class binary_parallel : public virtual encoder_abstract {
    public:
+   // the conflict graph has an edge, iff two actions can be taken in the same timestep 
     binary_parallel(option_values &options, sas_problem &problem, graph::undirected_graph &conflict_graph);
 
     // constructs the logic primitives according to the tag and timestep
@@ -21,8 +22,6 @@ class binary_parallel : public virtual encoder_abstract {
     // increases num_timesteps to the new maximum
     void update_timesteps(int timestep);
 
-    // the edges of the graph represent actions that are not allowed together
-    graph::undirected_graph m_action_conflicts;
     // colouring of the complement of the graph above
     std::vector<int> m_colouring;
     // number of colour_classes

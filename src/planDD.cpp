@@ -130,7 +130,7 @@ int planDD::build_bdd(option_values opt_values) {
 
     encoder::encoder_abstract *encoder;
     if(opt_values.binary_parallel){
-        graph::undirected_graph conflict_graph = parser.m_sas_problem.construct_action_conflic_graph();
+        graph::undirected_graph conflict_graph = parser.m_sas_problem.construct_complement_action_conflic_graph();
         encoder = new encoder::binary_parallel(opt_values, parser.m_sas_problem, conflict_graph);
     } else {
         encoder = new encoder::encoder_basic(opt_values, parser.m_sas_problem);
