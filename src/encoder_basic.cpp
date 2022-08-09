@@ -243,6 +243,7 @@ std::vector<logic_primitive> encoder_basic::construct_precondition(int timestep)
     for (int op = 0; op < m_sas_problem.m_operators.size(); op++) {
         // one dnf for all preconditions and effects and one dnf for copying for every single precon
         std::vector<std::vector<int>> default_dnf, op_grouped_dnf;
+        std::vector<int> op_grouped_clause;
         if (m_options.binary_encoding) {
             std::vector<int> op_indizes = m_symbol_map.get_variable_index_for_op_binary(timestep, op);
             for (int o : op_indizes) {
@@ -276,7 +277,7 @@ std::vector<logic_primitive> encoder_basic::construct_precondition(int timestep)
                 std::vector<int> var_indizes = m_symbol_map.get_variable_index_for_var_binary(
                     timestep, effected_var, effected_old_val, effected_var_size);
                 new_dnf.push_back(var_indizes);
-                op_grouped_dnf.push_back(var_indizes);
+                op_grouped_clause.insert(op_grouped_clause.end(), var_indizes.begin(), var_indizes.end());
             } else {
                 // variable unary
                 int index_precondition =
@@ -284,7 +285,7 @@ std::vector<logic_primitive> encoder_basic::construct_precondition(int timestep)
                 std::vector<int> tmp;
                 tmp.push_back(index_precondition);
                 new_dnf.push_back(tmp);
-                op_grouped_dnf.push_back(tmp);
+                op_grouped_clause.push_back(index_precondition);
             }
 
             if (!m_options.group_pre_eff) {
@@ -299,35 +300,18 @@ std::vector<logic_primitive> encoder_basic::construct_precondition(int timestep)
                 effected_new_val = std::get<2>(m_sas_problem.m_operators[op].m_effects[eff]);
                 effected_var_size = m_sas_problem.m_variabels[effected_var].m_range;
 
-                if (m_options.binary_encoding) {
-                    std::vector<int> op_indizes = m_symbol_map.get_variable_index_for_op_binary(timestep, op);
-                    for (int o : op_indizes) {
-                        std::vector<int> tmp;
-                        tmp.push_back(-o);
-                        op_grouped_dnf.push_back(tmp);
-                    }
-                } else {
-                    // unary action encoding
-                    int index_op;
-                    index_op = m_symbol_map.get_variable_index(variable_plan_op, timestep, op);
-                    std::vector<int> tmp;
-                    tmp.push_back(-index_op);
-                    op_grouped_dnf.push_back(tmp);
-                }
-
                 if (m_options.binary_variables) {
                     std::vector<int> var_indizes = m_symbol_map.get_variable_index_for_var_binary(
                         timestep + 1, effected_var, effected_new_val, effected_var_size);
-                    op_grouped_dnf.push_back(var_indizes);
+                    op_grouped_clause.insert(op_grouped_clause.end(), var_indizes.begin(), var_indizes.end());
                 } else {
                     // variable unary
                     int index_precondition = m_symbol_map.get_variable_index(variable_plan_var, timestep + 1,
                                                                              effected_var, effected_new_val);
-                    std::vector<int> tmp;
-                    tmp.push_back(index_precondition);
-                    op_grouped_dnf.push_back(tmp);
+                    op_grouped_clause.push_back(index_precondition);
                 }
             }
+            op_grouped_dnf.push_back(op_grouped_clause);
             result.push_back(logic_primitive(logic_dnf, precon, timestep, op_grouped_dnf));
         }
     }

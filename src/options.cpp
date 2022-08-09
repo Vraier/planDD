@@ -36,6 +36,8 @@ void option_parser::parse_command_line(int argc, char *argv[]) {
          "If this flag is set, the cnf encoder will include the mutexes from the sas problem in its formula")  //
         ("use_ladder_encoding", po::bool_switch(&m_values.use_ladder_encoding)->default_value(false),
          "Uses the ladder encoding for at most one constraints")  //
+        ("group_pre_eff", po::bool_switch(&m_values.group_pre_eff)->default_value(false),
+         "Uses DNF primitives to group the precondition and effect constraints into a singel DNF")  //
         ("exact_one_constraint", po::bool_switch(&m_values.exact_one_constraint)->default_value(false),
          "Builds the exactly one variable is true constraints directly into the DD")  //
         ("parallel_plan", po::bool_switch(&m_values.parallel_plan)->default_value(false),

@@ -343,7 +343,6 @@ void construct_dd_without_timesteps(dd_buildable &container, encoder_abstract &e
             LOG_MESSAGE(log_level::info) << "Goal is fulfilled in layer " << t;
             temp = encoder.get_logic_primitives(goal, t);
             conjoin_primitives_linear(container, temp, 0, true);
-            // conatiner.m_num_variables = encoder.m_symbol_map.get_num_variables();
             return;
         } else {
             // construct new bdd layer
