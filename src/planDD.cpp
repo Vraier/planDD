@@ -144,7 +144,9 @@ int planDD::build_bdd(option_values opt_values) {
         builder.set_variable_order(var_order);
     }
 
-    if(!opt_values.no_reordering){
+    if(opt_values.no_reordering){
+        builder.disable_reordering();
+    } else{
         builder.enable_reordering();
     }
 
