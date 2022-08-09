@@ -114,7 +114,7 @@ int planDD::conflict_graph(option_values opt_values) {
 
     LOG_MESSAGE(log_level::info) << "Num colours: " << max+1;
 
-    graph::write_to_file_with_colouring("graph.dot", complement_graph, colouring, true);
+    graph::write_to_file_with_colouring("graph.dot", complement_graph, colouring, false);
 
     LOG_MESSAGE(log_level::info) << "Finished writing graph";
 

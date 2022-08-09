@@ -473,12 +473,79 @@ def best_27_7_big_test():
     print("Num commands:",len(comms))
     return comms
 
+def best_09_08_big_test():
+    probs = problems.list_all_downward_solved_problems()
+    downward_argument_map = dict(arguments.standart_downward_argument_map)
 
+    # best_27_7_binary_var_no_imp_reorder
+    map_old_best =  {
+        "$timeout" : "300s",
+        "$mode" : "build_bdd",
+        "$addition_flags" : " --linear --build_order igx:rympec: --binary_encoding --binary_variables --binary_exclude_impossible ",
+    }
+    map_binary_parallel = {
+        "$timeout" : "300s",
+        "$timesteps" : -1,
+        "$mode" : "build_bdd",
+        "$addition_flags" : " --linear --build_order rympec:: --binary_parallel ",
+    }
+    map_unary_parallel = {
+        "$timeout" : "300s",
+        "$timesteps" : -1,
+        "$mode" : "build_bdd",
+        "$addition_flags" : " --linear --build_order rympec:: --parallel_plan ",
+    }
+    map_unary_incremental = {
+        "$timeout" : "300s",
+        "$timesteps" : -1,
+        "$mode" : "build_bdd",
+        "$addition_flags" : " --linear --build_order rympec:: ",
+    }
+    map_binary_incremental = {
+        "$timeout" : "300s",
+        "$timesteps" : -1,
+        "$mode" : "build_bdd",
+        "$addition_flags" : " --linear --build_order rympec:: --binary_encoding --binary_variables --binary_exclude_impossible ",
+    }
+
+
+    map_group_pre_eff =  {
+        "$timeout" : "300s",
+        "$mode" : "build_bdd",
+        "$addition_flags" : " --linear --build_order igx:rympec: --binary_encoding --binary_variables --binary_exclude_impossible --group_pre_eff",
+    }
+
+
+    arg1 = ("best_09_08_old_best", map_old_best, downward_argument_map)
+    arg2 = ("best_09_08_binary_parallel", map_binary_parallel, downward_argument_map)
+    arg3 = ("best_09_08_unary_parallel", map_unary_parallel, downward_argument_map)
+    arg4 = ("best_09_08_unary_incremental", map_unary_incremental, downward_argument_map)
+    arg5 = ("best_09_08_binary_incremental", map_binary_incremental, downward_argument_map)
+    arg6 = ("best_09_08_group_pre_eff", map_group_pre_eff, downward_argument_map)
+
+
+    args = [
+        arg1, 
+        arg2, 
+        arg3, 
+        arg4, 
+        arg5,
+        arg6,  
+    ]
+
+    comms = commandfile.generate_command_calls(probs, args)
+    print("Num problems:",len(probs))
+    print("Num configs:",len(args))
+    print("Num commands:",len(comms))
+    return comms
+
+
+# TODO test binary encoding with different clause/var orerings
 # TODO test all var orders with all conjoin orders
 
 
 comms = []
-comms += best_27_7_big_test()
+comms += best_09_08_big_test()
 
 commandfile.generate_parallel_file_from_calls(comms)
 
