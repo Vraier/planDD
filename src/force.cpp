@@ -1,6 +1,8 @@
 #include "force.h"
 
 #include <algorithm>  // std::sort
+#include <cmath>      // std::log2
+
 
 namespace variable_order {
 
@@ -10,6 +12,21 @@ std::vector<int> force_variable_order(std::vector<int> &initial_pos_to_idx,
     std::vector<std::vector<int>> hyper_edges;
     for (int p = 0; p < primitives.size(); p++) {
         hyper_edges.push_back(primitives[p].get_affected_variables());
+    }
+
+    return force_algorithm(initial_pos_to_idx, hyper_edges);
+}
+
+std::vector<int> force_clause_order(std::vector<int> &initial_pos_to_idx,
+                                      std::vector<planning_logic::logic_primitive> &primitives, int num_variables){
+                            
+    std::vector<std::vector<int>> hyper_edges(num_variables);
+    for(int p = 0; p < primitives.size(); p++) {
+        std::vector<int> affected_vars = primitives[p].get_affected_variables()
+        for(int v = 0; v < affected_vars.size(); v++){
+            int affected_var = affected_vars[v];
+            hyper_edges[affected_var].push_back(p);
+        }
     }
 
     return force_algorithm(initial_pos_to_idx, hyper_edges);
@@ -37,6 +54,9 @@ int calculate_total_span(std::vector<int> &node_to_pos, std::vector<std::vector<
 std::vector<int> force_algorithm(std::vector<int> &position_to_node, std::vector<std::vector<int>> &hyper_edges) {
     int num_vertices = position_to_node.size();
     int num_hyperedges = hyper_edges.size();
+
+    const int ITERATION_MULTIPLYER = 1;
+    int max_iterations = ITERATION_MULTIPLYER * std::log2(num_vertices);
 
     std::vector<int> curr_position_to_node = position_to_node;
     std::vector<int> curr_node_to_position(num_vertices);
