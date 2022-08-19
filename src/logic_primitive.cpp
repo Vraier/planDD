@@ -9,18 +9,24 @@ namespace planning_logic {
 std::vector<int> logic_primitive::get_affected_variables() {
     switch (m_type) {
         case logic_clause:
-            return m_data;
+        case logic_eo: {
+            std::set<int> affected_vars;
+
+            for (int i = 0; i < m_data.size(); i++) {
+                affected_vars.insert(std::abs(m_data[i]));
+            }
+            return std::vector<int>(affected_vars.begin(), affected_vars.end());
+        }
         case logic_dnf: {
             std::set<int> affected_vars;
+
             for (int i = 0; i < m_dnf_data.size(); i++) {
                 for (int j = 0; j < m_dnf_data[i].size(); j++) {
-                    affected_vars.insert(m_dnf_data[i][j]);
+                    affected_vars.insert(std::abs(m_dnf_data[i][j]));
                 }
             }
             return std::vector<int>(affected_vars.begin(), affected_vars.end());
         }
-        case logic_eo:
-            return m_data;
         default:
             LOG_MESSAGE(log_level::error) << "Unknown primitive type";
             std::vector<int>();
