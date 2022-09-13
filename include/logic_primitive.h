@@ -38,7 +38,7 @@ class logic_primitive {
                     std::vector<std::vector<int>> dnf_data)
         : m_type(type), m_clause_tag(c_tag), m_timestep(timesteps), m_dnf_data(dnf_data) {}
 
-    std::vector<int> get_affected_variables();
+    std::vector<int> get_affected_variables() const;
     std::string to_string();
 };
 }  // namespace planning_logic

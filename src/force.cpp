@@ -22,7 +22,7 @@ std::vector<int> force_clause_order(std::vector<int> &initial_pos_to_idx,
                             
     std::vector<std::vector<int>> hyper_edges(num_variables);
     for(int p = 0; p < primitives.size(); p++) {
-        std::vector<int> affected_vars = primitives[p].get_affected_variables()
+        std::vector<int> affected_vars = primitives[p].get_affected_variables();
         for(int v = 0; v < affected_vars.size(); v++){
             int affected_var = affected_vars[v];
             hyper_edges[affected_var].push_back(p);
