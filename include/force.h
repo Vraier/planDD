@@ -11,6 +11,8 @@ namespace variable_order {
 std::vector<int> force_variable_order(std::vector<int> &initial_pos_to_idx,
                                       std::vector<planning_logic::logic_primitive> &primitives);
 
+// TODO: clause ordering
+
 // uses the force algorithm to calculate an ordering for this hypergraph
 // position to nodes gives the intial position of the vertices in the ordering
 // returns an optiomized position to node mapping

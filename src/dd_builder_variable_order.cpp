@@ -1,6 +1,8 @@
 #include "dd_builder_variable_order.h"
 
 #include "logging.h"
+#include "force.h"
+
 #include <iostream>
 #include <set>
 
@@ -158,6 +160,53 @@ std::vector<int> order_variables(encoder_abstract &encoder, option_values &optio
 
     LOG_MESSAGE(log_level::info) << "Sorted a total of " << total_variables.size() << " variables";
     return total_variables;
+}
+
+std::vector<int> order_variables_with_force(encoder::encoder_abstract &encoder, option_values &options){
+
+    // collect all logic primitives of the planning problem
+    std::vector<planning_logic::logic_primitive> all_primitives;
+    for(int t = 0; t <= options.timesteps; t++){
+        for(int typ = ini_state; typ < planning_logic::none; typ++){
+            std::vector<planning_logic::logic_primitive> temp = encoder.get_logic_primitives(static_cast<planning_logic::primitive_tag>(typ), t);
+            all_primitives.insert(all_primitives.end(), temp.begin(), temp.end());
+        }
+    }
+
+    // calculate initial variable order (use identity)
+    std::vector<int> initial_order(encoder.m_symbol_map.get_num_variables());
+    for(int i = 0; i < initial_order.size(); i++){
+        initial_order[i] = i;
+    }
+
+    // calculate force order
+    std::vector<int> force_order = force_variable_order(initial_order, all_primitives);
+
+    // calculate order given by order string
+    std::vector<int> custom_order(encoder.m_symbol_map.get_num_variables());
+    // split the order into first and second part (in a really complicated manner)
+    std::stringstream ss(options.build_order);
+    std::string disjoin_order, interleaved_order;
+    std::getline(ss, disjoin_order, ':');
+    std::getline(ss, interleaved_order, ':');
+
+    for (int i = 0; i < disjoin_order.size(); i++) {
+        char current_char = disjoin_order[i];
+        // add the interleved part
+        if (current_char == 'x') {
+            total_variables.insert(total_variables.end(), interleved_variables.begin(), interleved_variables.end());
+            continue;
+        }
+        // add all timesteps for the corresponding var tag
+        for(int vt = 0; vt < char_tag_map[current_char].size(); vt++){
+            variable_tag order_tag = char_tag_map[current_char][vt];
+            for (int t = 0; t <= options.timesteps; t++) {
+                total_variables.insert(total_variables.end(), tagged_variables[order_tag][t].begin(),
+                                    tagged_variables[order_tag][t].end());
+            }
+        }
+    }
+
 }
 
 };  // namespace variable_order

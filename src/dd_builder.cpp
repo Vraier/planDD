@@ -28,6 +28,12 @@ void construct_dd(dd_buildable &container, encoder_abstract &encoder, option_val
     LOG_MESSAGE(log_level::info) << "Finished constructing final DD";
 }
 
+void construct_dd_with_timesteps(dd_buildable &container, encoder_abstract &encoder, option_values &options) {
+    LOG_MESSAGE(log_level::info) << "Building dd with t=" << options.timesteps << " timestpes";
+    std::vector<logic_primitive> all_primitives = conjoin_order::order_all_clauses(encoder, options);
+    conjoin_primitives_linear(container, all_primitives, 0, false);
+}
+
 void construct_dd_linear(dd_buildable &container, encoder_abstract &encoder, option_values &options) {
     LOG_MESSAGE(log_level::info) << "Building dd linear";
     LOG_MESSAGE(log_level::info) << "Ordering all clauses";
