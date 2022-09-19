@@ -6,7 +6,7 @@
 
 namespace planning_logic {
 
-std::vector<int> logic_primitive::get_affected_variables() {
+std::vector<int> logic_primitive::get_affected_variables() const{
     switch (m_type) {
         case logic_clause:
         case logic_eo: {
@@ -29,7 +29,7 @@ std::vector<int> logic_primitive::get_affected_variables() {
         }
         default:
             LOG_MESSAGE(log_level::error) << "Unknown primitive type";
-            std::vector<int>();
+            return std::vector<int>();
     }
 }
 

@@ -49,6 +49,7 @@ int calculate_total_span(std::vector<int> &node_to_pos, std::vector<std::vector<
 
         sum += (right_pos - left_pos);
     }
+    return sum;
 }
 
 std::vector<int> force_algorithm(std::vector<int> &position_to_node, std::vector<std::vector<int>> &hyper_edges) {

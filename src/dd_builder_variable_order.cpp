@@ -247,7 +247,7 @@ std::vector<std::tuple<int, int>> create_custom_var_order_mapping(encoder::encod
     return result;
 }
 
-std::vector<int> order_variables_custom_force(encoder::encoder_abstract &encoder, option_values &options) {
+std::vector<std::tuple<int, int, int>> order_variables_custom_force(encoder::encoder_abstract &encoder, option_values &options) {
 
     std::vector<std::tuple<int, int>> custom_order = create_custom_var_order_mapping(encoder, options);
     std::vector<std::tuple<int, int>> force_order = create_force_var_order_mapping(encoder, options);
@@ -261,7 +261,7 @@ std::vector<int> order_variables_custom_force(encoder::encoder_abstract &encoder
     for(int i = 0; i < force_order.size(); i++){
         int var_idx = std::get<0>(force_order[i]);
         int force_idx = std::get<1>(force_order[i]);
-        combined_order.push_back(std::make_tuple(var_idx, var_order_map[var_idx], force_idx)));
+        combined_order.push_back(std::make_tuple(var_idx, var_order_map[var_idx], force_idx));
     }
 
     // sort by custom order and use force order as tiebreaker
@@ -270,9 +270,11 @@ std::vector<int> order_variables_custom_force(encoder::encoder_abstract &encoder
         if(std::get<1>(lhs) == std::get<1>(rhs)){
             return std::get<2>(lhs) < std::get<2>(rhs);
         } else {
-            return std::get<1>(lhs) < rstd::get<1>(rhs);
+            return std::get<1>(lhs) < std::get<1>(rhs);
         }
     });
+
+    return combined_order;
 }
 
 };  // namespace variable_order

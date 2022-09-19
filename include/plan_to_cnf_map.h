@@ -48,6 +48,7 @@ class plan_to_cnf_map {
     // This method is used for planning operators and helper variables: tag, timestep, var_index
     int get_variable_index(variable_tag tag, int timestep, int var_index);
 
+    // DEPRECATED
     // returns a set of variables (positive and negative) representing the operator
     // should not be mixed with get_variable_index(variable_plan_op, _, _)
     std::vector<int> get_variable_index_for_op_binary(int timestep, int op_index);

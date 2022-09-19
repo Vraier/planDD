@@ -7,7 +7,7 @@
 /*
  * The cnf encoder adds a lot of variables to its symbol map.
  * These variables also have to be created for the dd managers.
- * This class creates the variables for and groups them for the dd manager.
+ * This class creates the variables and groups them for the dd manager.
  */
 namespace variable_grouping {
 

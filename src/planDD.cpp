@@ -69,30 +69,48 @@ int main(int argc, char *argv[]) {
 int planDD::hack_debug(option_values opt_values) {
     LOG_MESSAGE(log_level::info) << "You unlocked full control. good luck modifying the source code";
 
-    graph::undirected_graph g(12);
-    g.add_edge(0,1);
-    g.add_edge(1,2);
-    g.add_edge(2,3);
-    g.add_edge(3,4);
-    g.add_edge(4,0);
-
-    g.add_edge(5,7);
-    g.add_edge(7,9);
-    g.add_edge(9,6);
-    g.add_edge(6,8);
-    g.add_edge(8,5);
-
-    g.add_edge(0,5);
-    g.add_edge(1,6);
-    g.add_edge(2,7);
-    g.add_edge(3,8);
-    g.add_edge(4,9);
-
-    std::vector<int> c = graph::approximate_colouring(g);
-    for(int i = 0; i < c.size(); i++) {
-        std::cout << "id=" << i << " c=" << c[i] << std::endl;
+    sas_parser parser(opt_values.sas_file);
+    if (parser.start_parsing() == -1) {
+        LOG_MESSAGE(log_level::error) << "Error while parsing sas_file";
+        return 0;
     }
 
+    encoder::encoder_abstract *encoder;
+    if(opt_values.binary_parallel){
+        graph::undirected_graph conflict_graph = parser.m_sas_problem.construct_complement_action_conflic_graph();
+        encoder = new encoder::binary_parallel(opt_values, parser.m_sas_problem, conflict_graph);
+    } else {
+        encoder = new encoder::encoder_basic(opt_values, parser.m_sas_problem);
+    }
+
+    bdd_container builder(1);
+
+    LOG_MESSAGE(log_level::info) << "Creating variables";
+    variable_grouping::create_all_variables(*encoder, builder, opt_values);
+
+    LOG_MESSAGE(log_level::info) << "Ordering variables";
+    std::vector<int> var_order = variable_order::order_variables(*encoder, opt_values);
+
+
+    LOG_MESSAGE(log_level::info) << "Outputting order";
+    for(int i = 0; i < var_order.size(); i ++){
+        planning_logic::tagged_variable tv = encoder->m_symbol_map.get_planning_info_for_variable(var_order[i]);
+        std::cout << "tag=" << std::get<0>(tv) << " ";
+        std::cout << "t=" << std::get<1>(tv) << " ";
+        if(std::get<0>(tv) == planning_logic::variable_plan_var){
+            std::cout << parser.m_sas_problem.m_variabels[std::get<2>(tv)].to_string() << " ";
+        } else if(std::get<0>(tv) == planning_logic::variable_plan_op){
+            std::cout << parser.m_sas_problem.m_operators[std::get<2>(tv)].to_string() << " ";
+        }
+        std::cout << "v=" << std::get<3>(tv) << std::endl;
+    }
+
+    delete encoder;
+
+    //for(auto a: builder.list_minterms(10)){
+        //encoder.decode_cnf_solution(a, 5);
+    //}
+    // builder.write_bdd_to_dot_file("normal_bdd.dot");
     return 0;
 }
 
