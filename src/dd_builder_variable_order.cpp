@@ -1,10 +1,10 @@
 #include "dd_builder_variable_order.h"
 
-#include "logging.h"
-#include "force.h"
-
 #include <iostream>
 #include <set>
+
+#include "force.h"
+#include "logging.h"
 
 using namespace planning_logic;
 using namespace encoder;
@@ -13,9 +13,9 @@ namespace variable_order {
 
 // used to interpret the order of clauses from the command line options
 std::map<char, std::vector<variable_tag>> char_tag_map = {
-    {'v', {variable_plan_var, variable_plan_binary_var}},        
+    {'v', {variable_plan_var, variable_plan_binary_var}},
     {'o', {variable_plan_op, variable_plan_binary_op}},
-    {'h', {variable_h_amost_variable, variable_h_amost_operator, variable_h_amost_mutex}}, 
+    {'h', {variable_h_amost_variable, variable_h_amost_operator, variable_h_amost_mutex}},
 };
 
 bool is_valid_variable_order_string(std::string build_order) {
@@ -122,7 +122,7 @@ std::vector<int> order_variables(encoder_abstract &encoder, option_values &optio
             // LOG_MESSAGE(log_level::trace) << "Sorting variable tag " << interleaved_order[i] << " for timestep " <<
             // t;
             char current_char = interleaved_order[i];
-            for(int vt = 0; vt < char_tag_map[current_char].size(); vt++){
+            for (int vt = 0; vt < char_tag_map[current_char].size(); vt++) {
                 variable_tag order_tag = char_tag_map[current_char][vt];
                 // add all the variables for timestep t and tag order_tag
                 interleved_variables.insert(interleved_variables.end(), tagged_variables[order_tag][t].begin(),
@@ -141,11 +141,11 @@ std::vector<int> order_variables(encoder_abstract &encoder, option_values &optio
             continue;
         }
         // add all timesteps for the corresponding var tag
-        for(int vt = 0; vt < char_tag_map[current_char].size(); vt++){
+        for (int vt = 0; vt < char_tag_map[current_char].size(); vt++) {
             variable_tag order_tag = char_tag_map[current_char][vt];
             for (int t = 0; t <= options.timesteps; t++) {
                 total_variables.insert(total_variables.end(), tagged_variables[order_tag][t].begin(),
-                                    tagged_variables[order_tag][t].end());
+                                       tagged_variables[order_tag][t].end());
             }
         }
     }
@@ -162,50 +162,84 @@ std::vector<int> order_variables(encoder_abstract &encoder, option_values &optio
     return total_variables;
 }
 
-std::vector<int> order_variables_with_force(encoder::encoder_abstract &encoder, option_values &options){
-
+// returns a list of var_index, order_index tuples
+std::vector<std::tuple<int, int>> create_force_var_order_mapping(encoder::encoder_abstract &encoder,
+                                                                 option_values &options) {
     // collect all logic primitives of the planning problem
     std::vector<planning_logic::logic_primitive> all_primitives;
-    for(int t = 0; t <= options.timesteps; t++){
-        for(int typ = ini_state; typ < planning_logic::none; typ++){
-            std::vector<planning_logic::logic_primitive> temp = encoder.get_logic_primitives(static_cast<planning_logic::primitive_tag>(typ), t);
+    for (int t = 0; t <= options.timesteps; t++) {
+        for (int typ = ini_state; typ < planning_logic::none; typ++) {
+            std::vector<planning_logic::logic_primitive> temp =
+                encoder.get_logic_primitives(static_cast<planning_logic::primitive_tag>(typ), t);
             all_primitives.insert(all_primitives.end(), temp.begin(), temp.end());
         }
     }
 
     // calculate initial variable order (use identity)
     std::vector<int> initial_order(encoder.m_symbol_map.get_num_variables());
-    for(int i = 0; i < initial_order.size(); i++){
+    for (int i = 0; i < initial_order.size(); i++) {
         initial_order[i] = i;
     }
 
     // calculate force order
     std::vector<int> force_order = force_variable_order(initial_order, all_primitives);
 
+    std::vector<std::tuple<int, int>> result;
+    for (int i = 0; i < force_order.size(); i++) {
+        result.push_back(std::make_tuple(force_order[i], i));
+    }
+
+    return result;
+}
+
+std::vector<std::pair<int, int>> create_custom_var_order_mapping(encoder::encoder_abstract &encoder,
+                                                                 option_values &options) {
     // calculate order given by order string
-    std::vector<int> custom_order(encoder.m_symbol_map.get_num_variables());
+    int custom_order_counter;  // counter that implies the partial order
+    std::vector<std::tuple<int, int>> result;
+
     // split the order into first and second part (in a really complicated manner)
     std::stringstream ss(options.build_order);
     std::string disjoin_order, interleaved_order;
     std::getline(ss, disjoin_order, ':');
     std::getline(ss, interleaved_order, ':');
 
+    // categorize the variables
+    categorized_variables tagged_variables = categorize_variables(encoder.m_symbol_map, options.timesteps);
+
     for (int i = 0; i < disjoin_order.size(); i++) {
         char current_char = disjoin_order[i];
         // add the interleved part
         if (current_char == 'x') {
-            total_variables.insert(total_variables.end(), interleved_variables.begin(), interleved_variables.end());
-            continue;
-        }
-        // add all timesteps for the corresponding var tag
-        for(int vt = 0; vt < char_tag_map[current_char].size(); vt++){
-            variable_tag order_tag = char_tag_map[current_char][vt];
             for (int t = 0; t <= options.timesteps; t++) {
-                total_variables.insert(total_variables.end(), tagged_variables[order_tag][t].begin(),
-                                    tagged_variables[order_tag][t].end());
+                for (int c = 0; c < interleaved_order.size(); c++) {
+                    char interleved_char = interleaved_order[c];
+                    for (int vt = 0; vt < char_tag_map[current_char].size(); vt++) {
+                        variable_tag interleved_tag = char_tag_map[interleved_char][vt];
+                        for (int j = 0; j < tagged_variables[interleved_tag][t].size(); j++) {
+                            result.push_back(
+                                std::make_tuple(tagged_variables[interleved_tag][t][j], custom_order_counter));
+                        }
+                    }
+                }
+                custom_order_counter++;  // increase counter after every timestep
             }
+        } else {
+            // add all timesteps for the corresponding var tag
+            for (int vt = 0; vt < char_tag_map[current_char].size(); vt++) {
+                variable_tag order_tag = char_tag_map[current_char][vt];
+                for (int t = 0; t <= options.timesteps; t++) {
+                    for (int j = 0; j < tagged_variables[order_tag][t].size(); j++) {
+                        result.push_back(std::make_tuple(tagged_variables[order_tag][t][j], custom_order_counter));
+                    }
+                }
+            }
+            custom_order_counter++;  // increase counter for every group
         }
     }
+}
+
+std::vector<int> order_variables_with_force(encoder::encoder_abstract &encoder, option_values &options) {
 
 }
 
