@@ -165,6 +165,9 @@ std::vector<int> order_variables(encoder_abstract &encoder, option_values &optio
 // returns a list of var_index, order_index tuples
 std::vector<std::tuple<int, int>> create_force_var_order_mapping(encoder::encoder_abstract &encoder,
                                                                  option_values &options) {
+
+    LOG_MESSAGE(log_level::info) << "Calculating force variable order";
+
     // collect all logic primitives of the planning problem
     std::vector<planning_logic::logic_primitive> all_primitives;
     for (int t = 0; t <= options.timesteps; t++) {
@@ -192,8 +195,11 @@ std::vector<std::tuple<int, int>> create_force_var_order_mapping(encoder::encode
     return result;
 }
 
-std::vector<std::pair<int, int>> create_custom_var_order_mapping(encoder::encoder_abstract &encoder,
+std::vector<std::tuple<int, int>> create_custom_var_order_mapping(encoder::encoder_abstract &encoder,
                                                                  option_values &options) {
+
+    LOG_MESSAGE(log_level::info) << "Calculating custom variable order";
+    
     // calculate order given by order string
     int custom_order_counter;  // counter that implies the partial order
     std::vector<std::tuple<int, int>> result;
@@ -237,10 +243,36 @@ std::vector<std::pair<int, int>> create_custom_var_order_mapping(encoder::encode
             custom_order_counter++;  // increase counter for every group
         }
     }
+
+    return result;
 }
 
-std::vector<int> order_variables_with_force(encoder::encoder_abstract &encoder, option_values &options) {
+std::vector<int> order_variables_custom_force(encoder::encoder_abstract &encoder, option_values &options) {
 
+    std::vector<std::tuple<int, int>> custom_order = create_custom_var_order_mapping(encoder, options);
+    std::vector<std::tuple<int, int>> force_order = create_force_var_order_mapping(encoder, options);
+
+    // combine tuples to triples
+    std::vector<std::tuple<int, int, int>> combined_order;
+    std::map<int, int> var_order_map; // helper map, maps var index to custom order
+    for(int i = 0; i < custom_order.size(); i++){
+        var_order_map[std::get<0>(custom_order[i])] = std::get<1>(custom_order[i]);
+    }
+    for(int i = 0; i < force_order.size(); i++){
+        int var_idx = std::get<0>(force_order[i]);
+        int force_idx = std::get<1>(force_order[i]);
+        combined_order.push_back(std::make_tuple(var_idx, var_order_map[var_idx], force_idx)));
+    }
+
+    // sort by custom order and use force order as tiebreaker
+    sort( combined_order.begin( ), combined_order.end( ), [ ]( const std::tuple<int, int, int>& lhs, const std::tuple<int, int, int>& rhs )
+    {
+        if(std::get<1>(lhs) == std::get<1>(rhs)){
+            return std::get<2>(lhs) < std::get<2>(rhs);
+        } else {
+            return std::get<1>(lhs) < rstd::get<1>(rhs);
+        }
+    });
 }
 
 };  // namespace variable_order

@@ -26,8 +26,9 @@ struct option_values {
     bool group_variables, group_variables_small, group_actions;
     // DD layer building
     bool share_foundations, use_layer_permutation, reverse_layer_building;
-    // TODO incorporate them
-    bool order_f_v_to, order_f_v_ti, order_f_v_g, order_f_c_to, order_f_c_ti, order_f_c_g;
+
+    // variable ordering with custom, force or combined
+    bool var_order_custom, var_order_force, var_order_custom_force;
 };
 
 /**
