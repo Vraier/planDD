@@ -70,6 +70,15 @@ void option_parser::parse_command_line(int argc, char *argv[]) {
         ("initial_state_variables_first",
          po::bool_switch(&m_values.initial_state_variables_first)->default_value(false),
          "If this flag is set, variables in initial state clauses will be moved to the front of the variable order")  //
+        ("var_order_force",
+         po::bool_switch(&m_values.var_order_force)->default_value(false),
+         "Use force to order all variables")  //
+        ("var_order_custom",
+         po::bool_switch(&m_values.var_order_force)->default_value(false),
+         "Use custom to order all variables (needs variable_order string)")  //
+        ("var_order_custom_force",
+         po::bool_switch(&m_values.var_order_force)->default_value(false),
+         "Combines force and custom")  //
         // variable grouping
         ("group_variables", po::bool_switch(&m_values.group_variables)->default_value(false),
          "Groups the variables for one timestep together")  //

@@ -169,6 +169,7 @@ std::vector<std::tuple<int, int>> create_force_var_order_mapping(encoder::encode
     LOG_MESSAGE(log_level::info) << "Calculating force variable order";
 
     // collect all logic primitives of the planning problem
+    LOG_MESSAGE(log_level::info) << "Collecting primitives";
     std::vector<planning_logic::logic_primitive> all_primitives;
     for (int t = 0; t <= options.timesteps; t++) {
         for (int typ = ini_state; typ < planning_logic::none; typ++) {
@@ -185,8 +186,10 @@ std::vector<std::tuple<int, int>> create_force_var_order_mapping(encoder::encode
     }
 
     // calculate force order
+    LOG_MESSAGE(log_level::info) << "Apllying force algorithm";
     std::vector<int> force_order = force_variable_order(initial_order, all_primitives);
 
+    LOG_MESSAGE(log_level::info) << "Transforming to result";
     std::vector<std::tuple<int, int>> result;
     for (int i = 0; i < force_order.size(); i++) {
         result.push_back(std::make_tuple(force_order[i], i));

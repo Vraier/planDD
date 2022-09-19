@@ -89,8 +89,15 @@ int planDD::hack_debug(option_values opt_values) {
     variable_grouping::create_all_variables(*encoder, builder, opt_values);
 
     LOG_MESSAGE(log_level::info) << "Ordering variables";
-    std::vector<int> var_order = variable_order::order_variables(*encoder, opt_values);
-
+    std::vector<int> var_order;
+    if(opt_values.var_order_force){
+        std::vector<std::tuple<int, int>> temp = variable_order::create_force_var_order_mapping(*encoder, opt_values);
+        for(int i = 0; i < temp.size(); i++){
+            var_order.push_back(std::get<0>(temp[i]));
+        }
+    } else {
+        var_order = variable_order::order_variables(*encoder, opt_values);
+    }
 
     LOG_MESSAGE(log_level::info) << "Outputting order";
     for(int i = 0; i < var_order.size(); i ++){

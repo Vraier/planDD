@@ -1,5 +1,6 @@
 #include "force.h"
 
+#include <iostream>
 #include <algorithm>  // std::sort
 #include <cmath>      // std::log2
 
@@ -13,7 +14,6 @@ std::vector<int> force_variable_order(std::vector<int> &initial_pos_to_idx,
     for (int p = 0; p < primitives.size(); p++) {
         hyper_edges.push_back(primitives[p].get_affected_variables());
     }
-
     return force_algorithm(initial_pos_to_idx, hyper_edges);
 }
 
@@ -61,14 +61,21 @@ std::vector<int> force_algorithm(std::vector<int> &position_to_node, std::vector
 
     std::vector<int> curr_position_to_node = position_to_node;
     std::vector<int> curr_node_to_position(num_vertices);
+
+        std::cout << "node to pos mapping" << std::endl;
+
     for (int pos = 0; pos < num_vertices; pos++) {
         curr_node_to_position[curr_position_to_node[pos]] = pos;
     }
+        std::cout << "total span" << std::endl;
+
 
     int iteration = 0;
     int current_span = calculate_total_span(curr_node_to_position, hyper_edges);
     int last_span = current_span + 1;
     while (iteration < max_iterations && last_span - current_span > 0) {
+            std::cout << "iteration " << iteration << std::endl;
+
         // calculate center of gravity for every hyper edge
         std::vector<double> center_of_gravity(num_hyperedges);
         for (int h = 0; h < num_hyperedges; h++) {
@@ -78,6 +85,9 @@ std::vector<int> force_algorithm(std::vector<int> &position_to_node, std::vector
             }
             center_of_gravity[h] = pos_sum / hyper_edges[h].size();
         }
+
+                    std::cout << "node positions, num vertices " << num_vertices << std::endl;
+
 
         // calculate new positioning for nodes
         std::vector<double> pos_sum(num_vertices);
@@ -91,19 +101,33 @@ std::vector<int> force_algorithm(std::vector<int> &position_to_node, std::vector
                 num_edges[node] += 1;
             }
         }
+                            std::cout << "sort nodes " << std::endl;
+
 
         // sort nodes according to new position
         std::vector<std::pair<double, int>> pos_node_pairs;
         for (int v = 0; v < num_vertices; v++) {
-            pos_node_pairs.push_back(std::make_pair(pos_sum[v] / num_edges[v], v));
+            if (num_edges[v] != 0){
+                pos_node_pairs.push_back(std::make_pair(pos_sum[v] / num_edges[v], v));
+            } else {
+                pos_node_pairs.push_back(std::make_pair(0.0f, v));
+            }
         }
+                            std::cout << "sort call " << std::endl;
+
+        
         std::sort(pos_node_pairs.begin(), pos_node_pairs.end());
+
+                    std::cout << "node to position mapping " << std::endl;
 
         // calculate the node to position mappings again
         for (int v = 0; v < num_vertices; v++) {
             curr_position_to_node[v] = pos_node_pairs[v].second;
             curr_node_to_position[curr_position_to_node[v]] = v;
         }
+
+                            std::cout << "counter update " << std::endl;
+
 
         // update counters
         iteration++;

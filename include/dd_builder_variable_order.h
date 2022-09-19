@@ -1,12 +1,12 @@
 #pragma once
 
+#include <map>
 #include <string>
 #include <vector>
-#include <map>
 
-#include "planning_logic_formula.h"
-#include "options.h"
 #include "encoder_basic.h"
+#include "options.h"
+#include "planning_logic_formula.h"
 
 namespace variable_order {
 
@@ -28,6 +28,11 @@ std::vector<int> put_variables_of_tag_first(encoder::encoder_abstract *encoder, 
 // The i-th entry of the permutation array contains the index of the variable that should be brought to the i-th level
 std::vector<int> order_variables(encoder::encoder_abstract &encoder, option_values &options);
 
-std::vector<std::tuple<int, int, int>> order_variables_custom_force(encoder::encoder_abstract &encoder, option_values &options);
+std::vector<std::tuple<int, int, int>> order_variables_custom_force(encoder::encoder_abstract &encoder,
+                                                                    option_values &options);
+std::vector<std::tuple<int, int>> create_force_var_order_mapping(encoder::encoder_abstract &encoder,
+                                                                 option_values &options);
+std::vector<std::tuple<int, int>> create_custom_var_order_mapping(encoder::encoder_abstract &encoder,
+                                                                  option_values &options);
 
 };  // namespace variable_order
