@@ -86,7 +86,20 @@ int planDD::hack_debug(option_values opt_values) {
     LOG_MESSAGE(log_level::info) << "Ordering variables";
     std::vector<int> var_order;
     if(opt_values.var_order_force){
+        std::cout << "force" << std::endl;
         std::vector<std::tuple<int, int>> temp = variable_order::create_force_var_order_mapping(*encoder, opt_values);
+        for(int i = 0; i < temp.size(); i++){
+            var_order.push_back(std::get<0>(temp[i]));
+        }
+    } else if (opt_values.var_order_custom_force) {
+        std::cout << "customforce" << std::endl;
+        std::vector<std::tuple<int, int, int>> temp = variable_order::order_variables_custom_force(*encoder, opt_values);
+        for(int i = 0; i < temp.size(); i++){
+            var_order.push_back(std::get<0>(temp[i]));
+        }
+    } else if (opt_values.var_order_custom) {
+        std::cout << "custom" << std::endl;
+        std::vector<std::tuple<int, int>> temp = variable_order::create_custom_var_order_mapping(*encoder, opt_values);
         for(int i = 0; i < temp.size(); i++){
             var_order.push_back(std::get<0>(temp[i]));
         }

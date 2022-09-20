@@ -1,0 +1,718 @@
+Using the following config: 
+> ass_file(default)=minisat.ass
+> binary_encoding(default)=false
+> binary_exclude_impossible(default)=false
+> binary_parallel(default)=false
+> binary_variables(default)=false
+> build_bdd(default)=false
+> build_order(default)=igx:rympec:
+> build_sdd(default)=false
+> cnf_file(default)=problem.cnf
+> cnf_to_bdd(default)=false
+> conflict_graph(default)=false
+> count_minisat(default)=false
+> encode_cnf(default)=false
+> exact_one_constraint(default)=false
+> goal_variables_first(default)=false
+> group_actions(default)=false
+> group_pre_eff(default)=false
+> group_variables(default)=false
+> group_variables_small(default)=false
+> hack_debug=true
+> include_mutex(default)=false
+> initial_state_variables_first(default)=false
+> layer(default)=false
+> layer_bi(default)=false
+> layer_expo(default)=false
+> linear(default)=false
+> no_reordering(default)=false
+> parallel_plan(default)=false
+> reverse_layer_building(default)=false
+> reverse_order(default)=false
+> sas_file=gripper.sas
+> share_foundations(default)=false
+> single_minisat(default)=false
+> timesteps=11
+> use_ladder_encoding(default)=false
+> use_layer_permutation(default)=false
+> var_order_custom(default)=false
+> var_order_custom_force(default)=false
+> var_order_force=true
+> variable_order=x:voh
+[00:00:00.010804][info] You unlocked full control. good luck modifying the source code
+[00:00:00.011600][info] Start Parsing SAS Problem
+[00:00:00.014217][info] Finished parsing SAS problem. The problem has 7 variables, 34 operators, 7 is the size of the initial states and 4 is the size of the goal
+[00:00:00.065549][info] Creating variables
+[00:00:00.094748][info] Constructed 662 variables during symbol map initialization
+[00:00:00.105587][info] Ordering variables
+force
+[00:00:00.105996][info] Calculating force variable order
+[00:00:00.106269][info] Collecting primitives
+[00:00:00.401392][info] Ordered a total of 8934 primitives
+[00:00:00.409724][info] Apllying force algorithm
+[00:00:00.541069][info] Force did 14 iterations, went from 16 to 16
+[00:00:00.544069][info] Transforming to result
+[00:00:00.550027][info] Outputting order
+tag=7 t=-1 v=-1
+tag=0 t=0 Var: var1 5 Atom carry(ball1, left) Atom carry(ball2, left) Atom carry(ball3, left) Atom carry(ball4, left) Atom free(left) v=0
+tag=0 t=0 Var: var1 5 Atom carry(ball1, left) Atom carry(ball2, left) Atom carry(ball3, left) Atom carry(ball4, left) Atom free(left) v=1
+tag=0 t=0 Var: var1 5 Atom carry(ball1, left) Atom carry(ball2, left) Atom carry(ball3, left) Atom carry(ball4, left) Atom free(left) v=2
+tag=0 t=0 Var: var2 5 Atom carry(ball1, right) Atom carry(ball2, right) Atom carry(ball3, right) Atom carry(ball4, right) Atom free(right) v=0
+tag=0 t=0 Var: var3 3 Atom at(ball1, rooma) Atom at(ball1, roomb) <none of those> v=2
+tag=0 t=0 Var: var1 5 Atom carry(ball1, left) Atom carry(ball2, left) Atom carry(ball3, left) Atom carry(ball4, left) Atom free(left) v=3
+tag=0 t=0 Var: var2 5 Atom carry(ball1, right) Atom carry(ball2, right) Atom carry(ball3, right) Atom carry(ball4, right) Atom free(right) v=1
+tag=0 t=0 Var: var3 3 Atom at(ball1, rooma) Atom at(ball1, roomb) <none of those> v=0
+tag=0 t=0 Var: var2 5 Atom carry(ball1, right) Atom carry(ball2, right) Atom carry(ball3, right) Atom carry(ball4, right) Atom free(right) v=2
+tag=0 t=0 Var: var3 3 Atom at(ball1, rooma) Atom at(ball1, roomb) <none of those> v=1
+tag=0 t=0 Var: var2 5 Atom carry(ball1, right) Atom carry(ball2, right) Atom carry(ball3, right) Atom carry(ball4, right) Atom free(right) v=3
+tag=0 t=0 Var: var4 3 Atom at(ball2, rooma) Atom at(ball2, roomb) <none of those> v=2
+tag=0 t=0 Var: var4 3 Atom at(ball2, rooma) Atom at(ball2, roomb) <none of those> v=0
+tag=0 t=0 Var: var4 3 Atom at(ball2, rooma) Atom at(ball2, roomb) <none of those> v=1
+tag=0 t=0 Var: var1 5 Atom carry(ball1, left) Atom carry(ball2, left) Atom carry(ball3, left) Atom carry(ball4, left) Atom free(left) v=4
+tag=0 t=0 Var: var5 3 Atom at(ball3, rooma) Atom at(ball3, roomb) <none of those> v=2
+tag=0 t=0 Var: var2 5 Atom carry(ball1, right) Atom carry(ball2, right) Atom carry(ball3, right) Atom carry(ball4, right) Atom free(right) v=4
+tag=0 t=0 Var: var5 3 Atom at(ball3, rooma) Atom at(ball3, roomb) <none of those> v=0
+tag=0 t=0 Var: var5 3 Atom at(ball3, rooma) Atom at(ball3, roomb) <none of those> v=1
+tag=0 t=0 Var: var6 3 Atom at(ball4, rooma) Atom at(ball4, roomb) <none of those> v=2
+tag=0 t=0 Var: var6 3 Atom at(ball4, rooma) Atom at(ball4, roomb) <none of those> v=0
+tag=0 t=0 Var: var0 2 Atom at-robby(rooma) Atom at-robby(roomb) v=0
+tag=0 t=0 Var: var6 3 Atom at(ball4, rooma) Atom at(ball4, roomb) <none of those> v=1
+tag=0 t=0 Var: var0 2 Atom at-robby(rooma) Atom at-robby(roomb) v=1
+tag=2 t=0 Op: drop ball1 rooma left 0 0 0 3 -1 0 1 0 4 v=0
+tag=2 t=0 Op: drop ball1 rooma right 0 0 0 3 -1 0 2 0 4 v=0
+tag=2 t=0 Op: drop ball1 roomb left 0 1 1 3 -1 1 1 0 4 v=0
+tag=2 t=0 Op: drop ball1 roomb right 0 1 1 3 -1 1 2 0 4 v=0
+tag=2 t=0 Op: drop ball2 rooma left 0 0 0 4 -1 0 1 1 4 v=0
+tag=2 t=0 Op: drop ball2 rooma right 0 0 0 4 -1 0 2 1 4 v=0
+tag=2 t=0 Op: drop ball2 roomb left 0 1 1 4 -1 1 1 1 4 v=0
+tag=2 t=0 Op: drop ball2 roomb right 0 1 1 4 -1 1 2 1 4 v=0
+tag=2 t=0 Op: drop ball3 rooma left 0 0 0 5 -1 0 1 2 4 v=0
+tag=2 t=0 Op: pick ball1 rooma left 0 0 0 3 0 2 1 4 0 v=0
+tag=2 t=0 Op: drop ball3 rooma right 0 0 0 5 -1 0 2 2 4 v=0
+tag=2 t=0 Op: drop ball3 roomb left 0 1 1 5 -1 1 1 2 4 v=0
+tag=2 t=0 Op: drop ball3 roomb right 0 1 1 5 -1 1 2 2 4 v=0
+tag=2 t=0 Op: drop ball4 rooma left 0 0 0 6 -1 0 1 3 4 v=0
+tag=2 t=0 Op: drop ball4 rooma right 0 0 0 6 -1 0 2 3 4 v=0
+tag=2 t=0 Op: drop ball4 roomb left 0 1 1 6 -1 1 1 3 4 v=0
+tag=2 t=0 Op: move rooma roomb 0 0 1 v=0
+tag=2 t=0 Op: move roomb rooma 0 1 0 v=0
+tag=2 t=0 Op: pick ball1 rooma right 0 0 0 3 0 2 2 4 0 v=0
+tag=2 t=0 Op: pick ball1 roomb left 0 1 1 3 1 2 1 4 0 v=0
+tag=2 t=0 Op: pick ball1 roomb right 0 1 1 3 1 2 2 4 0 v=0
+tag=2 t=0 Op: pick ball2 rooma left 0 0 0 4 0 2 1 4 1 v=0
+tag=2 t=0 Op: pick ball2 rooma right 0 0 0 4 0 2 2 4 1 v=0
+tag=2 t=0 Op: pick ball2 roomb left 0 1 1 4 1 2 1 4 1 v=0
+tag=2 t=0 Op: drop ball4 roomb right 0 1 1 6 -1 1 2 3 4 v=0
+tag=2 t=0 Op: pick ball2 roomb right 0 1 1 4 1 2 2 4 1 v=0
+tag=2 t=0 Op: pick ball3 rooma left 0 0 0 5 0 2 1 4 2 v=0
+tag=2 t=0 Op: pick ball3 rooma right 0 0 0 5 0 2 2 4 2 v=0
+tag=2 t=0 Op: pick ball3 roomb left 0 1 1 5 1 2 1 4 2 v=0
+tag=2 t=0 Op: pick ball3 roomb right 0 1 1 5 1 2 2 4 2 v=0
+tag=2 t=0 Op: pick ball4 rooma left 0 0 0 6 0 2 1 4 3 v=0
+tag=2 t=0 Op: pick ball4 rooma right 0 0 0 6 0 2 2 4 3 v=0
+tag=2 t=0 Op: pick ball4 roomb left 0 1 1 6 1 2 1 4 3 v=0
+tag=2 t=0 Op: pick ball4 roomb right 0 1 1 6 1 2 2 4 3 v=0
+tag=0 t=1 Var: var3 3 Atom at(ball1, rooma) Atom at(ball1, roomb) <none of those> v=2
+tag=0 t=1 Var: var3 3 Atom at(ball1, rooma) Atom at(ball1, roomb) <none of those> v=0
+tag=0 t=1 Var: var3 3 Atom at(ball1, rooma) Atom at(ball1, roomb) <none of those> v=1
+tag=0 t=1 Var: var4 3 Atom at(ball2, rooma) Atom at(ball2, roomb) <none of those> v=2
+tag=0 t=1 Var: var4 3 Atom at(ball2, rooma) Atom at(ball2, roomb) <none of those> v=0
+tag=0 t=1 Var: var4 3 Atom at(ball2, rooma) Atom at(ball2, roomb) <none of those> v=1
+tag=0 t=1 Var: var5 3 Atom at(ball3, rooma) Atom at(ball3, roomb) <none of those> v=2
+tag=0 t=1 Var: var1 5 Atom carry(ball1, left) Atom carry(ball2, left) Atom carry(ball3, left) Atom carry(ball4, left) Atom free(left) v=0
+tag=0 t=1 Var: var1 5 Atom carry(ball1, left) Atom carry(ball2, left) Atom carry(ball3, left) Atom carry(ball4, left) Atom free(left) v=4
+tag=0 t=1 Var: var0 2 Atom at-robby(rooma) Atom at-robby(roomb) v=0
+tag=0 t=1 Var: var5 3 Atom at(ball3, rooma) Atom at(ball3, roomb) <none of those> v=0
+tag=0 t=1 Var: var1 5 Atom carry(ball1, left) Atom carry(ball2, left) Atom carry(ball3, left) Atom carry(ball4, left) Atom free(left) v=1
+tag=0 t=1 Var: var5 3 Atom at(ball3, rooma) Atom at(ball3, roomb) <none of those> v=1
+tag=0 t=1 Var: var1 5 Atom carry(ball1, left) Atom carry(ball2, left) Atom carry(ball3, left) Atom carry(ball4, left) Atom free(left) v=2
+tag=0 t=1 Var: var0 2 Atom at-robby(rooma) Atom at-robby(roomb) v=1
+tag=0 t=1 Var: var2 5 Atom carry(ball1, right) Atom carry(ball2, right) Atom carry(ball3, right) Atom carry(ball4, right) Atom free(right) v=0
+tag=0 t=1 Var: var2 5 Atom carry(ball1, right) Atom carry(ball2, right) Atom carry(ball3, right) Atom carry(ball4, right) Atom free(right) v=4
+tag=0 t=1 Var: var6 3 Atom at(ball4, rooma) Atom at(ball4, roomb) <none of those> v=2
+tag=0 t=1 Var: var1 5 Atom carry(ball1, left) Atom carry(ball2, left) Atom carry(ball3, left) Atom carry(ball4, left) Atom free(left) v=3
+tag=0 t=1 Var: var2 5 Atom carry(ball1, right) Atom carry(ball2, right) Atom carry(ball3, right) Atom carry(ball4, right) Atom free(right) v=1
+tag=0 t=1 Var: var2 5 Atom carry(ball1, right) Atom carry(ball2, right) Atom carry(ball3, right) Atom carry(ball4, right) Atom free(right) v=2
+tag=0 t=1 Var: var6 3 Atom at(ball4, rooma) Atom at(ball4, roomb) <none of those> v=0
+tag=0 t=1 Var: var6 3 Atom at(ball4, rooma) Atom at(ball4, roomb) <none of those> v=1
+tag=0 t=1 Var: var2 5 Atom carry(ball1, right) Atom carry(ball2, right) Atom carry(ball3, right) Atom carry(ball4, right) Atom free(right) v=3
+tag=2 t=1 Op: drop ball1 rooma left 0 0 0 3 -1 0 1 0 4 v=0
+tag=2 t=1 Op: drop ball1 rooma right 0 0 0 3 -1 0 2 0 4 v=0
+tag=2 t=1 Op: drop ball1 roomb left 0 1 1 3 -1 1 1 0 4 v=0
+tag=2 t=1 Op: drop ball1 roomb right 0 1 1 3 -1 1 2 0 4 v=0
+tag=2 t=1 Op: drop ball2 rooma left 0 0 0 4 -1 0 1 1 4 v=0
+tag=2 t=1 Op: pick ball1 rooma left 0 0 0 3 0 2 1 4 0 v=0
+tag=2 t=1 Op: drop ball2 rooma right 0 0 0 4 -1 0 2 1 4 v=0
+tag=2 t=1 Op: drop ball2 roomb left 0 1 1 4 -1 1 1 1 4 v=0
+tag=2 t=1 Op: drop ball2 roomb right 0 1 1 4 -1 1 2 1 4 v=0
+tag=2 t=1 Op: drop ball3 rooma left 0 0 0 5 -1 0 1 2 4 v=0
+tag=2 t=1 Op: drop ball3 rooma right 0 0 0 5 -1 0 2 2 4 v=0
+tag=2 t=1 Op: drop ball3 roomb left 0 1 1 5 -1 1 1 2 4 v=0
+tag=2 t=1 Op: drop ball3 roomb right 0 1 1 5 -1 1 2 2 4 v=0
+tag=2 t=1 Op: drop ball4 rooma left 0 0 0 6 -1 0 1 3 4 v=0
+tag=2 t=1 Op: move rooma roomb 0 0 1 v=0
+tag=2 t=1 Op: move roomb rooma 0 1 0 v=0
+tag=2 t=1 Op: pick ball1 rooma right 0 0 0 3 0 2 2 4 0 v=0
+tag=2 t=1 Op: pick ball1 roomb left 0 1 1 3 1 2 1 4 0 v=0
+tag=2 t=1 Op: pick ball1 roomb right 0 1 1 3 1 2 2 4 0 v=0
+tag=2 t=1 Op: pick ball2 rooma left 0 0 0 4 0 2 1 4 1 v=0
+tag=2 t=1 Op: pick ball2 rooma right 0 0 0 4 0 2 2 4 1 v=0
+tag=2 t=1 Op: pick ball2 roomb left 0 1 1 4 1 2 1 4 1 v=0
+tag=2 t=1 Op: drop ball4 rooma right 0 0 0 6 -1 0 2 3 4 v=0
+tag=2 t=1 Op: drop ball4 roomb left 0 1 1 6 -1 1 1 3 4 v=0
+tag=2 t=1 Op: pick ball2 roomb right 0 1 1 4 1 2 2 4 1 v=0
+tag=2 t=1 Op: pick ball3 rooma left 0 0 0 5 0 2 1 4 2 v=0
+tag=2 t=1 Op: pick ball3 rooma right 0 0 0 5 0 2 2 4 2 v=0
+tag=2 t=1 Op: pick ball3 roomb left 0 1 1 5 1 2 1 4 2 v=0
+tag=2 t=1 Op: drop ball4 roomb right 0 1 1 6 -1 1 2 3 4 v=0
+tag=2 t=1 Op: pick ball3 roomb right 0 1 1 5 1 2 2 4 2 v=0
+tag=2 t=1 Op: pick ball4 rooma left 0 0 0 6 0 2 1 4 3 v=0
+tag=2 t=1 Op: pick ball4 rooma right 0 0 0 6 0 2 2 4 3 v=0
+tag=2 t=1 Op: pick ball4 roomb left 0 1 1 6 1 2 1 4 3 v=0
+tag=2 t=1 Op: pick ball4 roomb right 0 1 1 6 1 2 2 4 3 v=0
+tag=0 t=2 Var: var3 3 Atom at(ball1, rooma) Atom at(ball1, roomb) <none of those> v=2
+tag=0 t=2 Var: var3 3 Atom at(ball1, rooma) Atom at(ball1, roomb) <none of those> v=0
+tag=0 t=2 Var: var4 3 Atom at(ball2, rooma) Atom at(ball2, roomb) <none of those> v=2
+tag=0 t=2 Var: var3 3 Atom at(ball1, rooma) Atom at(ball1, roomb) <none of those> v=1
+tag=0 t=2 Var: var4 3 Atom at(ball2, rooma) Atom at(ball2, roomb) <none of those> v=0
+tag=0 t=2 Var: var4 3 Atom at(ball2, rooma) Atom at(ball2, roomb) <none of those> v=1
+tag=0 t=2 Var: var5 3 Atom at(ball3, rooma) Atom at(ball3, roomb) <none of those> v=2
+tag=0 t=2 Var: var1 5 Atom carry(ball1, left) Atom carry(ball2, left) Atom carry(ball3, left) Atom carry(ball4, left) Atom free(left) v=0
+tag=0 t=2 Var: var1 5 Atom carry(ball1, left) Atom carry(ball2, left) Atom carry(ball3, left) Atom carry(ball4, left) Atom free(left) v=4
+tag=0 t=2 Var: var0 2 Atom at-robby(rooma) Atom at-robby(roomb) v=0
+tag=0 t=2 Var: var5 3 Atom at(ball3, rooma) Atom at(ball3, roomb) <none of those> v=0
+tag=0 t=2 Var: var1 5 Atom carry(ball1, left) Atom carry(ball2, left) Atom carry(ball3, left) Atom carry(ball4, left) Atom free(left) v=1
+tag=0 t=2 Var: var5 3 Atom at(ball3, rooma) Atom at(ball3, roomb) <none of those> v=1
+tag=0 t=2 Var: var1 5 Atom carry(ball1, left) Atom carry(ball2, left) Atom carry(ball3, left) Atom carry(ball4, left) Atom free(left) v=2
+tag=0 t=2 Var: var0 2 Atom at-robby(rooma) Atom at-robby(roomb) v=1
+tag=0 t=2 Var: var2 5 Atom carry(ball1, right) Atom carry(ball2, right) Atom carry(ball3, right) Atom carry(ball4, right) Atom free(right) v=0
+tag=0 t=2 Var: var2 5 Atom carry(ball1, right) Atom carry(ball2, right) Atom carry(ball3, right) Atom carry(ball4, right) Atom free(right) v=4
+tag=0 t=2 Var: var6 3 Atom at(ball4, rooma) Atom at(ball4, roomb) <none of those> v=2
+tag=0 t=2 Var: var1 5 Atom carry(ball1, left) Atom carry(ball2, left) Atom carry(ball3, left) Atom carry(ball4, left) Atom free(left) v=3
+tag=0 t=2 Var: var2 5 Atom carry(ball1, right) Atom carry(ball2, right) Atom carry(ball3, right) Atom carry(ball4, right) Atom free(right) v=1
+tag=0 t=2 Var: var6 3 Atom at(ball4, rooma) Atom at(ball4, roomb) <none of those> v=0
+tag=0 t=2 Var: var2 5 Atom carry(ball1, right) Atom carry(ball2, right) Atom carry(ball3, right) Atom carry(ball4, right) Atom free(right) v=2
+tag=0 t=2 Var: var2 5 Atom carry(ball1, right) Atom carry(ball2, right) Atom carry(ball3, right) Atom carry(ball4, right) Atom free(right) v=3
+tag=0 t=2 Var: var6 3 Atom at(ball4, rooma) Atom at(ball4, roomb) <none of those> v=1
+tag=2 t=2 Op: drop ball1 rooma left 0 0 0 3 -1 0 1 0 4 v=0
+tag=2 t=2 Op: drop ball1 rooma right 0 0 0 3 -1 0 2 0 4 v=0
+tag=2 t=2 Op: drop ball1 roomb left 0 1 1 3 -1 1 1 0 4 v=0
+tag=2 t=2 Op: drop ball1 roomb right 0 1 1 3 -1 1 2 0 4 v=0
+tag=2 t=2 Op: drop ball2 rooma left 0 0 0 4 -1 0 1 1 4 v=0
+tag=2 t=2 Op: pick ball1 rooma left 0 0 0 3 0 2 1 4 0 v=0
+tag=2 t=2 Op: drop ball2 rooma right 0 0 0 4 -1 0 2 1 4 v=0
+tag=2 t=2 Op: drop ball2 roomb left 0 1 1 4 -1 1 1 1 4 v=0
+tag=2 t=2 Op: drop ball2 roomb right 0 1 1 4 -1 1 2 1 4 v=0
+tag=2 t=2 Op: drop ball3 rooma left 0 0 0 5 -1 0 1 2 4 v=0
+tag=2 t=2 Op: drop ball3 rooma right 0 0 0 5 -1 0 2 2 4 v=0
+tag=2 t=2 Op: drop ball3 roomb left 0 1 1 5 -1 1 1 2 4 v=0
+tag=2 t=2 Op: drop ball3 roomb right 0 1 1 5 -1 1 2 2 4 v=0
+tag=2 t=2 Op: drop ball4 rooma left 0 0 0 6 -1 0 1 3 4 v=0
+tag=2 t=2 Op: move rooma roomb 0 0 1 v=0
+tag=2 t=2 Op: move roomb rooma 0 1 0 v=0
+tag=2 t=2 Op: pick ball1 rooma right 0 0 0 3 0 2 2 4 0 v=0
+tag=2 t=2 Op: pick ball1 roomb left 0 1 1 3 1 2 1 4 0 v=0
+tag=2 t=2 Op: pick ball1 roomb right 0 1 1 3 1 2 2 4 0 v=0
+tag=2 t=2 Op: pick ball2 rooma left 0 0 0 4 0 2 1 4 1 v=0
+tag=2 t=2 Op: pick ball2 rooma right 0 0 0 4 0 2 2 4 1 v=0
+tag=2 t=2 Op: pick ball2 roomb left 0 1 1 4 1 2 1 4 1 v=0
+tag=2 t=2 Op: drop ball4 rooma right 0 0 0 6 -1 0 2 3 4 v=0
+tag=2 t=2 Op: drop ball4 roomb left 0 1 1 6 -1 1 1 3 4 v=0
+tag=2 t=2 Op: pick ball2 roomb right 0 1 1 4 1 2 2 4 1 v=0
+tag=2 t=2 Op: pick ball3 rooma left 0 0 0 5 0 2 1 4 2 v=0
+tag=2 t=2 Op: pick ball3 rooma right 0 0 0 5 0 2 2 4 2 v=0
+tag=2 t=2 Op: pick ball3 roomb left 0 1 1 5 1 2 1 4 2 v=0
+tag=2 t=2 Op: drop ball4 roomb right 0 1 1 6 -1 1 2 3 4 v=0
+tag=2 t=2 Op: pick ball3 roomb right 0 1 1 5 1 2 2 4 2 v=0
+tag=2 t=2 Op: pick ball4 rooma left 0 0 0 6 0 2 1 4 3 v=0
+tag=2 t=2 Op: pick ball4 rooma right 0 0 0 6 0 2 2 4 3 v=0
+tag=2 t=2 Op: pick ball4 roomb left 0 1 1 6 1 2 1 4 3 v=0
+tag=2 t=2 Op: pick ball4 roomb right 0 1 1 6 1 2 2 4 3 v=0
+tag=0 t=3 Var: var3 3 Atom at(ball1, rooma) Atom at(ball1, roomb) <none of those> v=2
+tag=0 t=3 Var: var3 3 Atom at(ball1, rooma) Atom at(ball1, roomb) <none of those> v=0
+tag=0 t=3 Var: var4 3 Atom at(ball2, rooma) Atom at(ball2, roomb) <none of those> v=2
+tag=0 t=3 Var: var3 3 Atom at(ball1, rooma) Atom at(ball1, roomb) <none of those> v=1
+tag=0 t=3 Var: var4 3 Atom at(ball2, rooma) Atom at(ball2, roomb) <none of those> v=0
+tag=0 t=3 Var: var4 3 Atom at(ball2, rooma) Atom at(ball2, roomb) <none of those> v=1
+tag=0 t=3 Var: var5 3 Atom at(ball3, rooma) Atom at(ball3, roomb) <none of those> v=2
+tag=0 t=3 Var: var1 5 Atom carry(ball1, left) Atom carry(ball2, left) Atom carry(ball3, left) Atom carry(ball4, left) Atom free(left) v=0
+tag=0 t=3 Var: var1 5 Atom carry(ball1, left) Atom carry(ball2, left) Atom carry(ball3, left) Atom carry(ball4, left) Atom free(left) v=4
+tag=0 t=3 Var: var0 2 Atom at-robby(rooma) Atom at-robby(roomb) v=0
+tag=0 t=3 Var: var5 3 Atom at(ball3, rooma) Atom at(ball3, roomb) <none of those> v=0
+tag=0 t=3 Var: var1 5 Atom carry(ball1, left) Atom carry(ball2, left) Atom carry(ball3, left) Atom carry(ball4, left) Atom free(left) v=1
+tag=0 t=3 Var: var5 3 Atom at(ball3, rooma) Atom at(ball3, roomb) <none of those> v=1
+tag=0 t=3 Var: var1 5 Atom carry(ball1, left) Atom carry(ball2, left) Atom carry(ball3, left) Atom carry(ball4, left) Atom free(left) v=2
+tag=0 t=3 Var: var0 2 Atom at-robby(rooma) Atom at-robby(roomb) v=1
+tag=0 t=3 Var: var2 5 Atom carry(ball1, right) Atom carry(ball2, right) Atom carry(ball3, right) Atom carry(ball4, right) Atom free(right) v=0
+tag=0 t=3 Var: var2 5 Atom carry(ball1, right) Atom carry(ball2, right) Atom carry(ball3, right) Atom carry(ball4, right) Atom free(right) v=4
+tag=0 t=3 Var: var6 3 Atom at(ball4, rooma) Atom at(ball4, roomb) <none of those> v=2
+tag=0 t=3 Var: var1 5 Atom carry(ball1, left) Atom carry(ball2, left) Atom carry(ball3, left) Atom carry(ball4, left) Atom free(left) v=3
+tag=0 t=3 Var: var2 5 Atom carry(ball1, right) Atom carry(ball2, right) Atom carry(ball3, right) Atom carry(ball4, right) Atom free(right) v=1
+tag=0 t=3 Var: var6 3 Atom at(ball4, rooma) Atom at(ball4, roomb) <none of those> v=0
+tag=0 t=3 Var: var2 5 Atom carry(ball1, right) Atom carry(ball2, right) Atom carry(ball3, right) Atom carry(ball4, right) Atom free(right) v=2
+tag=0 t=3 Var: var6 3 Atom at(ball4, rooma) Atom at(ball4, roomb) <none of those> v=1
+tag=0 t=3 Var: var2 5 Atom carry(ball1, right) Atom carry(ball2, right) Atom carry(ball3, right) Atom carry(ball4, right) Atom free(right) v=3
+tag=2 t=3 Op: drop ball1 rooma left 0 0 0 3 -1 0 1 0 4 v=0
+tag=2 t=3 Op: drop ball1 rooma right 0 0 0 3 -1 0 2 0 4 v=0
+tag=2 t=3 Op: drop ball1 roomb left 0 1 1 3 -1 1 1 0 4 v=0
+tag=2 t=3 Op: drop ball1 roomb right 0 1 1 3 -1 1 2 0 4 v=0
+tag=2 t=3 Op: drop ball2 rooma left 0 0 0 4 -1 0 1 1 4 v=0
+tag=2 t=3 Op: pick ball1 rooma left 0 0 0 3 0 2 1 4 0 v=0
+tag=2 t=3 Op: drop ball2 rooma right 0 0 0 4 -1 0 2 1 4 v=0
+tag=2 t=3 Op: drop ball2 roomb left 0 1 1 4 -1 1 1 1 4 v=0
+tag=2 t=3 Op: drop ball2 roomb right 0 1 1 4 -1 1 2 1 4 v=0
+tag=2 t=3 Op: drop ball3 rooma left 0 0 0 5 -1 0 1 2 4 v=0
+tag=2 t=3 Op: drop ball3 rooma right 0 0 0 5 -1 0 2 2 4 v=0
+tag=2 t=3 Op: drop ball3 roomb left 0 1 1 5 -1 1 1 2 4 v=0
+tag=2 t=3 Op: drop ball3 roomb right 0 1 1 5 -1 1 2 2 4 v=0
+tag=2 t=3 Op: drop ball4 rooma left 0 0 0 6 -1 0 1 3 4 v=0
+tag=2 t=3 Op: move rooma roomb 0 0 1 v=0
+tag=2 t=3 Op: move roomb rooma 0 1 0 v=0
+tag=2 t=3 Op: pick ball1 rooma right 0 0 0 3 0 2 2 4 0 v=0
+tag=2 t=3 Op: pick ball1 roomb left 0 1 1 3 1 2 1 4 0 v=0
+tag=2 t=3 Op: pick ball1 roomb right 0 1 1 3 1 2 2 4 0 v=0
+tag=2 t=3 Op: pick ball2 rooma left 0 0 0 4 0 2 1 4 1 v=0
+tag=2 t=3 Op: pick ball2 rooma right 0 0 0 4 0 2 2 4 1 v=0
+tag=2 t=3 Op: pick ball2 roomb left 0 1 1 4 1 2 1 4 1 v=0
+tag=2 t=3 Op: drop ball4 rooma right 0 0 0 6 -1 0 2 3 4 v=0
+tag=2 t=3 Op: drop ball4 roomb left 0 1 1 6 -1 1 1 3 4 v=0
+tag=2 t=3 Op: pick ball2 roomb right 0 1 1 4 1 2 2 4 1 v=0
+tag=2 t=3 Op: pick ball3 rooma left 0 0 0 5 0 2 1 4 2 v=0
+tag=2 t=3 Op: pick ball3 rooma right 0 0 0 5 0 2 2 4 2 v=0
+tag=2 t=3 Op: pick ball3 roomb left 0 1 1 5 1 2 1 4 2 v=0
+tag=2 t=3 Op: drop ball4 roomb right 0 1 1 6 -1 1 2 3 4 v=0
+tag=2 t=3 Op: pick ball3 roomb right 0 1 1 5 1 2 2 4 2 v=0
+tag=2 t=3 Op: pick ball4 rooma left 0 0 0 6 0 2 1 4 3 v=0
+tag=2 t=3 Op: pick ball4 rooma right 0 0 0 6 0 2 2 4 3 v=0
+tag=2 t=3 Op: pick ball4 roomb left 0 1 1 6 1 2 1 4 3 v=0
+tag=2 t=3 Op: pick ball4 roomb right 0 1 1 6 1 2 2 4 3 v=0
+tag=0 t=4 Var: var3 3 Atom at(ball1, rooma) Atom at(ball1, roomb) <none of those> v=2
+tag=0 t=4 Var: var3 3 Atom at(ball1, rooma) Atom at(ball1, roomb) <none of those> v=0
+tag=0 t=4 Var: var4 3 Atom at(ball2, rooma) Atom at(ball2, roomb) <none of those> v=2
+tag=0 t=4 Var: var3 3 Atom at(ball1, rooma) Atom at(ball1, roomb) <none of those> v=1
+tag=0 t=4 Var: var4 3 Atom at(ball2, rooma) Atom at(ball2, roomb) <none of those> v=0
+tag=0 t=4 Var: var4 3 Atom at(ball2, rooma) Atom at(ball2, roomb) <none of those> v=1
+tag=0 t=4 Var: var5 3 Atom at(ball3, rooma) Atom at(ball3, roomb) <none of those> v=2
+tag=0 t=4 Var: var1 5 Atom carry(ball1, left) Atom carry(ball2, left) Atom carry(ball3, left) Atom carry(ball4, left) Atom free(left) v=0
+tag=0 t=4 Var: var1 5 Atom carry(ball1, left) Atom carry(ball2, left) Atom carry(ball3, left) Atom carry(ball4, left) Atom free(left) v=4
+tag=0 t=4 Var: var0 2 Atom at-robby(rooma) Atom at-robby(roomb) v=0
+tag=0 t=4 Var: var5 3 Atom at(ball3, rooma) Atom at(ball3, roomb) <none of those> v=0
+tag=0 t=4 Var: var1 5 Atom carry(ball1, left) Atom carry(ball2, left) Atom carry(ball3, left) Atom carry(ball4, left) Atom free(left) v=1
+tag=0 t=4 Var: var5 3 Atom at(ball3, rooma) Atom at(ball3, roomb) <none of those> v=1
+tag=0 t=4 Var: var1 5 Atom carry(ball1, left) Atom carry(ball2, left) Atom carry(ball3, left) Atom carry(ball4, left) Atom free(left) v=2
+tag=0 t=4 Var: var0 2 Atom at-robby(rooma) Atom at-robby(roomb) v=1
+tag=0 t=4 Var: var2 5 Atom carry(ball1, right) Atom carry(ball2, right) Atom carry(ball3, right) Atom carry(ball4, right) Atom free(right) v=0
+tag=0 t=4 Var: var2 5 Atom carry(ball1, right) Atom carry(ball2, right) Atom carry(ball3, right) Atom carry(ball4, right) Atom free(right) v=4
+tag=0 t=4 Var: var6 3 Atom at(ball4, rooma) Atom at(ball4, roomb) <none of those> v=2
+tag=0 t=4 Var: var1 5 Atom carry(ball1, left) Atom carry(ball2, left) Atom carry(ball3, left) Atom carry(ball4, left) Atom free(left) v=3
+tag=0 t=4 Var: var2 5 Atom carry(ball1, right) Atom carry(ball2, right) Atom carry(ball3, right) Atom carry(ball4, right) Atom free(right) v=1
+tag=0 t=4 Var: var6 3 Atom at(ball4, rooma) Atom at(ball4, roomb) <none of those> v=0
+tag=0 t=4 Var: var2 5 Atom carry(ball1, right) Atom carry(ball2, right) Atom carry(ball3, right) Atom carry(ball4, right) Atom free(right) v=2
+tag=0 t=4 Var: var6 3 Atom at(ball4, rooma) Atom at(ball4, roomb) <none of those> v=1
+tag=0 t=4 Var: var2 5 Atom carry(ball1, right) Atom carry(ball2, right) Atom carry(ball3, right) Atom carry(ball4, right) Atom free(right) v=3
+tag=2 t=4 Op: drop ball1 rooma left 0 0 0 3 -1 0 1 0 4 v=0
+tag=2 t=4 Op: drop ball1 rooma right 0 0 0 3 -1 0 2 0 4 v=0
+tag=2 t=4 Op: drop ball1 roomb left 0 1 1 3 -1 1 1 0 4 v=0
+tag=2 t=4 Op: drop ball1 roomb right 0 1 1 3 -1 1 2 0 4 v=0
+tag=2 t=4 Op: drop ball2 rooma left 0 0 0 4 -1 0 1 1 4 v=0
+tag=2 t=4 Op: pick ball1 rooma left 0 0 0 3 0 2 1 4 0 v=0
+tag=2 t=4 Op: drop ball2 rooma right 0 0 0 4 -1 0 2 1 4 v=0
+tag=2 t=4 Op: drop ball2 roomb left 0 1 1 4 -1 1 1 1 4 v=0
+tag=2 t=4 Op: drop ball2 roomb right 0 1 1 4 -1 1 2 1 4 v=0
+tag=2 t=4 Op: drop ball3 rooma left 0 0 0 5 -1 0 1 2 4 v=0
+tag=2 t=4 Op: drop ball3 rooma right 0 0 0 5 -1 0 2 2 4 v=0
+tag=2 t=4 Op: drop ball3 roomb left 0 1 1 5 -1 1 1 2 4 v=0
+tag=2 t=4 Op: drop ball3 roomb right 0 1 1 5 -1 1 2 2 4 v=0
+tag=2 t=4 Op: drop ball4 rooma left 0 0 0 6 -1 0 1 3 4 v=0
+tag=2 t=4 Op: move rooma roomb 0 0 1 v=0
+tag=2 t=4 Op: move roomb rooma 0 1 0 v=0
+tag=2 t=4 Op: pick ball1 rooma right 0 0 0 3 0 2 2 4 0 v=0
+tag=2 t=4 Op: pick ball1 roomb left 0 1 1 3 1 2 1 4 0 v=0
+tag=2 t=4 Op: pick ball1 roomb right 0 1 1 3 1 2 2 4 0 v=0
+tag=2 t=4 Op: pick ball2 rooma left 0 0 0 4 0 2 1 4 1 v=0
+tag=2 t=4 Op: pick ball2 rooma right 0 0 0 4 0 2 2 4 1 v=0
+tag=2 t=4 Op: pick ball2 roomb left 0 1 1 4 1 2 1 4 1 v=0
+tag=2 t=4 Op: drop ball4 rooma right 0 0 0 6 -1 0 2 3 4 v=0
+tag=2 t=4 Op: drop ball4 roomb left 0 1 1 6 -1 1 1 3 4 v=0
+tag=2 t=4 Op: pick ball2 roomb right 0 1 1 4 1 2 2 4 1 v=0
+tag=2 t=4 Op: pick ball3 rooma left 0 0 0 5 0 2 1 4 2 v=0
+tag=2 t=4 Op: pick ball3 rooma right 0 0 0 5 0 2 2 4 2 v=0
+tag=2 t=4 Op: pick ball3 roomb left 0 1 1 5 1 2 1 4 2 v=0
+tag=2 t=4 Op: drop ball4 roomb right 0 1 1 6 -1 1 2 3 4 v=0
+tag=2 t=4 Op: pick ball3 roomb right 0 1 1 5 1 2 2 4 2 v=0
+tag=2 t=4 Op: pick ball4 rooma left 0 0 0 6 0 2 1 4 3 v=0
+tag=2 t=4 Op: pick ball4 rooma right 0 0 0 6 0 2 2 4 3 v=0
+tag=2 t=4 Op: pick ball4 roomb left 0 1 1 6 1 2 1 4 3 v=0
+tag=2 t=4 Op: pick ball4 roomb right 0 1 1 6 1 2 2 4 3 v=0
+tag=0 t=5 Var: var3 3 Atom at(ball1, rooma) Atom at(ball1, roomb) <none of those> v=2
+tag=0 t=5 Var: var3 3 Atom at(ball1, rooma) Atom at(ball1, roomb) <none of those> v=0
+tag=0 t=5 Var: var4 3 Atom at(ball2, rooma) Atom at(ball2, roomb) <none of those> v=2
+tag=0 t=5 Var: var3 3 Atom at(ball1, rooma) Atom at(ball1, roomb) <none of those> v=1
+tag=0 t=5 Var: var4 3 Atom at(ball2, rooma) Atom at(ball2, roomb) <none of those> v=0
+tag=0 t=5 Var: var4 3 Atom at(ball2, rooma) Atom at(ball2, roomb) <none of those> v=1
+tag=0 t=5 Var: var5 3 Atom at(ball3, rooma) Atom at(ball3, roomb) <none of those> v=2
+tag=0 t=5 Var: var1 5 Atom carry(ball1, left) Atom carry(ball2, left) Atom carry(ball3, left) Atom carry(ball4, left) Atom free(left) v=0
+tag=0 t=5 Var: var1 5 Atom carry(ball1, left) Atom carry(ball2, left) Atom carry(ball3, left) Atom carry(ball4, left) Atom free(left) v=4
+tag=0 t=5 Var: var0 2 Atom at-robby(rooma) Atom at-robby(roomb) v=0
+tag=0 t=5 Var: var5 3 Atom at(ball3, rooma) Atom at(ball3, roomb) <none of those> v=0
+tag=0 t=5 Var: var1 5 Atom carry(ball1, left) Atom carry(ball2, left) Atom carry(ball3, left) Atom carry(ball4, left) Atom free(left) v=1
+tag=0 t=5 Var: var5 3 Atom at(ball3, rooma) Atom at(ball3, roomb) <none of those> v=1
+tag=0 t=5 Var: var1 5 Atom carry(ball1, left) Atom carry(ball2, left) Atom carry(ball3, left) Atom carry(ball4, left) Atom free(left) v=2
+tag=0 t=5 Var: var0 2 Atom at-robby(rooma) Atom at-robby(roomb) v=1
+tag=0 t=5 Var: var2 5 Atom carry(ball1, right) Atom carry(ball2, right) Atom carry(ball3, right) Atom carry(ball4, right) Atom free(right) v=0
+tag=0 t=5 Var: var2 5 Atom carry(ball1, right) Atom carry(ball2, right) Atom carry(ball3, right) Atom carry(ball4, right) Atom free(right) v=4
+tag=0 t=5 Var: var6 3 Atom at(ball4, rooma) Atom at(ball4, roomb) <none of those> v=2
+tag=0 t=5 Var: var1 5 Atom carry(ball1, left) Atom carry(ball2, left) Atom carry(ball3, left) Atom carry(ball4, left) Atom free(left) v=3
+tag=0 t=5 Var: var2 5 Atom carry(ball1, right) Atom carry(ball2, right) Atom carry(ball3, right) Atom carry(ball4, right) Atom free(right) v=1
+tag=0 t=5 Var: var6 3 Atom at(ball4, rooma) Atom at(ball4, roomb) <none of those> v=0
+tag=0 t=5 Var: var2 5 Atom carry(ball1, right) Atom carry(ball2, right) Atom carry(ball3, right) Atom carry(ball4, right) Atom free(right) v=2
+tag=0 t=5 Var: var6 3 Atom at(ball4, rooma) Atom at(ball4, roomb) <none of those> v=1
+tag=0 t=5 Var: var2 5 Atom carry(ball1, right) Atom carry(ball2, right) Atom carry(ball3, right) Atom carry(ball4, right) Atom free(right) v=3
+tag=2 t=5 Op: drop ball1 rooma left 0 0 0 3 -1 0 1 0 4 v=0
+tag=2 t=5 Op: drop ball1 rooma right 0 0 0 3 -1 0 2 0 4 v=0
+tag=2 t=5 Op: drop ball1 roomb left 0 1 1 3 -1 1 1 0 4 v=0
+tag=2 t=5 Op: drop ball1 roomb right 0 1 1 3 -1 1 2 0 4 v=0
+tag=2 t=5 Op: drop ball2 rooma left 0 0 0 4 -1 0 1 1 4 v=0
+tag=2 t=5 Op: pick ball1 rooma left 0 0 0 3 0 2 1 4 0 v=0
+tag=2 t=5 Op: drop ball2 rooma right 0 0 0 4 -1 0 2 1 4 v=0
+tag=2 t=5 Op: drop ball2 roomb left 0 1 1 4 -1 1 1 1 4 v=0
+tag=2 t=5 Op: drop ball2 roomb right 0 1 1 4 -1 1 2 1 4 v=0
+tag=2 t=5 Op: drop ball3 rooma left 0 0 0 5 -1 0 1 2 4 v=0
+tag=2 t=5 Op: drop ball3 rooma right 0 0 0 5 -1 0 2 2 4 v=0
+tag=2 t=5 Op: drop ball3 roomb left 0 1 1 5 -1 1 1 2 4 v=0
+tag=2 t=5 Op: drop ball3 roomb right 0 1 1 5 -1 1 2 2 4 v=0
+tag=2 t=5 Op: drop ball4 rooma left 0 0 0 6 -1 0 1 3 4 v=0
+tag=2 t=5 Op: move rooma roomb 0 0 1 v=0
+tag=2 t=5 Op: move roomb rooma 0 1 0 v=0
+tag=2 t=5 Op: pick ball1 rooma right 0 0 0 3 0 2 2 4 0 v=0
+tag=2 t=5 Op: pick ball1 roomb left 0 1 1 3 1 2 1 4 0 v=0
+tag=2 t=5 Op: pick ball1 roomb right 0 1 1 3 1 2 2 4 0 v=0
+tag=2 t=5 Op: pick ball2 rooma left 0 0 0 4 0 2 1 4 1 v=0
+tag=2 t=5 Op: pick ball2 rooma right 0 0 0 4 0 2 2 4 1 v=0
+tag=2 t=5 Op: pick ball2 roomb left 0 1 1 4 1 2 1 4 1 v=0
+tag=2 t=5 Op: drop ball4 rooma right 0 0 0 6 -1 0 2 3 4 v=0
+tag=2 t=5 Op: drop ball4 roomb left 0 1 1 6 -1 1 1 3 4 v=0
+tag=2 t=5 Op: pick ball2 roomb right 0 1 1 4 1 2 2 4 1 v=0
+tag=2 t=5 Op: pick ball3 rooma left 0 0 0 5 0 2 1 4 2 v=0
+tag=2 t=5 Op: pick ball3 rooma right 0 0 0 5 0 2 2 4 2 v=0
+tag=2 t=5 Op: pick ball3 roomb left 0 1 1 5 1 2 1 4 2 v=0
+tag=2 t=5 Op: drop ball4 roomb right 0 1 1 6 -1 1 2 3 4 v=0
+tag=2 t=5 Op: pick ball3 roomb right 0 1 1 5 1 2 2 4 2 v=0
+tag=2 t=5 Op: pick ball4 rooma left 0 0 0 6 0 2 1 4 3 v=0
+tag=2 t=5 Op: pick ball4 rooma right 0 0 0 6 0 2 2 4 3 v=0
+tag=2 t=5 Op: pick ball4 roomb left 0 1 1 6 1 2 1 4 3 v=0
+tag=2 t=5 Op: pick ball4 roomb right 0 1 1 6 1 2 2 4 3 v=0
+tag=0 t=6 Var: var3 3 Atom at(ball1, rooma) Atom at(ball1, roomb) <none of those> v=2
+tag=0 t=6 Var: var3 3 Atom at(ball1, rooma) Atom at(ball1, roomb) <none of those> v=0
+tag=0 t=6 Var: var4 3 Atom at(ball2, rooma) Atom at(ball2, roomb) <none of those> v=2
+tag=0 t=6 Var: var3 3 Atom at(ball1, rooma) Atom at(ball1, roomb) <none of those> v=1
+tag=0 t=6 Var: var4 3 Atom at(ball2, rooma) Atom at(ball2, roomb) <none of those> v=0
+tag=0 t=6 Var: var4 3 Atom at(ball2, rooma) Atom at(ball2, roomb) <none of those> v=1
+tag=0 t=6 Var: var5 3 Atom at(ball3, rooma) Atom at(ball3, roomb) <none of those> v=2
+tag=0 t=6 Var: var1 5 Atom carry(ball1, left) Atom carry(ball2, left) Atom carry(ball3, left) Atom carry(ball4, left) Atom free(left) v=0
+tag=0 t=6 Var: var1 5 Atom carry(ball1, left) Atom carry(ball2, left) Atom carry(ball3, left) Atom carry(ball4, left) Atom free(left) v=4
+tag=0 t=6 Var: var0 2 Atom at-robby(rooma) Atom at-robby(roomb) v=0
+tag=0 t=6 Var: var5 3 Atom at(ball3, rooma) Atom at(ball3, roomb) <none of those> v=0
+tag=0 t=6 Var: var1 5 Atom carry(ball1, left) Atom carry(ball2, left) Atom carry(ball3, left) Atom carry(ball4, left) Atom free(left) v=1
+tag=0 t=6 Var: var5 3 Atom at(ball3, rooma) Atom at(ball3, roomb) <none of those> v=1
+tag=0 t=6 Var: var1 5 Atom carry(ball1, left) Atom carry(ball2, left) Atom carry(ball3, left) Atom carry(ball4, left) Atom free(left) v=2
+tag=0 t=6 Var: var0 2 Atom at-robby(rooma) Atom at-robby(roomb) v=1
+tag=0 t=6 Var: var2 5 Atom carry(ball1, right) Atom carry(ball2, right) Atom carry(ball3, right) Atom carry(ball4, right) Atom free(right) v=0
+tag=0 t=6 Var: var2 5 Atom carry(ball1, right) Atom carry(ball2, right) Atom carry(ball3, right) Atom carry(ball4, right) Atom free(right) v=4
+tag=0 t=6 Var: var6 3 Atom at(ball4, rooma) Atom at(ball4, roomb) <none of those> v=2
+tag=0 t=6 Var: var1 5 Atom carry(ball1, left) Atom carry(ball2, left) Atom carry(ball3, left) Atom carry(ball4, left) Atom free(left) v=3
+tag=0 t=6 Var: var2 5 Atom carry(ball1, right) Atom carry(ball2, right) Atom carry(ball3, right) Atom carry(ball4, right) Atom free(right) v=1
+tag=0 t=6 Var: var6 3 Atom at(ball4, rooma) Atom at(ball4, roomb) <none of those> v=0
+tag=0 t=6 Var: var2 5 Atom carry(ball1, right) Atom carry(ball2, right) Atom carry(ball3, right) Atom carry(ball4, right) Atom free(right) v=2
+tag=0 t=6 Var: var6 3 Atom at(ball4, rooma) Atom at(ball4, roomb) <none of those> v=1
+tag=0 t=6 Var: var2 5 Atom carry(ball1, right) Atom carry(ball2, right) Atom carry(ball3, right) Atom carry(ball4, right) Atom free(right) v=3
+tag=2 t=6 Op: drop ball1 rooma left 0 0 0 3 -1 0 1 0 4 v=0
+tag=2 t=6 Op: drop ball1 rooma right 0 0 0 3 -1 0 2 0 4 v=0
+tag=2 t=6 Op: drop ball1 roomb left 0 1 1 3 -1 1 1 0 4 v=0
+tag=2 t=6 Op: drop ball1 roomb right 0 1 1 3 -1 1 2 0 4 v=0
+tag=2 t=6 Op: drop ball2 rooma left 0 0 0 4 -1 0 1 1 4 v=0
+tag=2 t=6 Op: pick ball1 rooma left 0 0 0 3 0 2 1 4 0 v=0
+tag=2 t=6 Op: drop ball2 rooma right 0 0 0 4 -1 0 2 1 4 v=0
+tag=2 t=6 Op: drop ball2 roomb left 0 1 1 4 -1 1 1 1 4 v=0
+tag=2 t=6 Op: drop ball2 roomb right 0 1 1 4 -1 1 2 1 4 v=0
+tag=2 t=6 Op: drop ball3 rooma left 0 0 0 5 -1 0 1 2 4 v=0
+tag=2 t=6 Op: drop ball3 rooma right 0 0 0 5 -1 0 2 2 4 v=0
+tag=2 t=6 Op: drop ball3 roomb left 0 1 1 5 -1 1 1 2 4 v=0
+tag=2 t=6 Op: drop ball3 roomb right 0 1 1 5 -1 1 2 2 4 v=0
+tag=2 t=6 Op: drop ball4 rooma left 0 0 0 6 -1 0 1 3 4 v=0
+tag=2 t=6 Op: move rooma roomb 0 0 1 v=0
+tag=2 t=6 Op: move roomb rooma 0 1 0 v=0
+tag=2 t=6 Op: pick ball1 rooma right 0 0 0 3 0 2 2 4 0 v=0
+tag=2 t=6 Op: pick ball1 roomb left 0 1 1 3 1 2 1 4 0 v=0
+tag=2 t=6 Op: pick ball1 roomb right 0 1 1 3 1 2 2 4 0 v=0
+tag=2 t=6 Op: pick ball2 rooma left 0 0 0 4 0 2 1 4 1 v=0
+tag=2 t=6 Op: pick ball2 rooma right 0 0 0 4 0 2 2 4 1 v=0
+tag=2 t=6 Op: pick ball2 roomb left 0 1 1 4 1 2 1 4 1 v=0
+tag=2 t=6 Op: drop ball4 rooma right 0 0 0 6 -1 0 2 3 4 v=0
+tag=2 t=6 Op: drop ball4 roomb left 0 1 1 6 -1 1 1 3 4 v=0
+tag=2 t=6 Op: pick ball2 roomb right 0 1 1 4 1 2 2 4 1 v=0
+tag=2 t=6 Op: pick ball3 rooma left 0 0 0 5 0 2 1 4 2 v=0
+tag=2 t=6 Op: pick ball3 rooma right 0 0 0 5 0 2 2 4 2 v=0
+tag=2 t=6 Op: pick ball3 roomb left 0 1 1 5 1 2 1 4 2 v=0
+tag=2 t=6 Op: drop ball4 roomb right 0 1 1 6 -1 1 2 3 4 v=0
+tag=2 t=6 Op: pick ball3 roomb right 0 1 1 5 1 2 2 4 2 v=0
+tag=2 t=6 Op: pick ball4 rooma left 0 0 0 6 0 2 1 4 3 v=0
+tag=2 t=6 Op: pick ball4 rooma right 0 0 0 6 0 2 2 4 3 v=0
+tag=2 t=6 Op: pick ball4 roomb left 0 1 1 6 1 2 1 4 3 v=0
+tag=2 t=6 Op: pick ball4 roomb right 0 1 1 6 1 2 2 4 3 v=0
+tag=0 t=7 Var: var3 3 Atom at(ball1, rooma) Atom at(ball1, roomb) <none of those> v=2
+tag=0 t=7 Var: var3 3 Atom at(ball1, rooma) Atom at(ball1, roomb) <none of those> v=0
+tag=0 t=7 Var: var4 3 Atom at(ball2, rooma) Atom at(ball2, roomb) <none of those> v=2
+tag=0 t=7 Var: var3 3 Atom at(ball1, rooma) Atom at(ball1, roomb) <none of those> v=1
+tag=0 t=7 Var: var4 3 Atom at(ball2, rooma) Atom at(ball2, roomb) <none of those> v=0
+tag=0 t=7 Var: var4 3 Atom at(ball2, rooma) Atom at(ball2, roomb) <none of those> v=1
+tag=0 t=7 Var: var5 3 Atom at(ball3, rooma) Atom at(ball3, roomb) <none of those> v=2
+tag=0 t=7 Var: var1 5 Atom carry(ball1, left) Atom carry(ball2, left) Atom carry(ball3, left) Atom carry(ball4, left) Atom free(left) v=0
+tag=0 t=7 Var: var1 5 Atom carry(ball1, left) Atom carry(ball2, left) Atom carry(ball3, left) Atom carry(ball4, left) Atom free(left) v=4
+tag=0 t=7 Var: var0 2 Atom at-robby(rooma) Atom at-robby(roomb) v=0
+tag=0 t=7 Var: var5 3 Atom at(ball3, rooma) Atom at(ball3, roomb) <none of those> v=0
+tag=0 t=7 Var: var1 5 Atom carry(ball1, left) Atom carry(ball2, left) Atom carry(ball3, left) Atom carry(ball4, left) Atom free(left) v=1
+tag=0 t=7 Var: var5 3 Atom at(ball3, rooma) Atom at(ball3, roomb) <none of those> v=1
+tag=0 t=7 Var: var1 5 Atom carry(ball1, left) Atom carry(ball2, left) Atom carry(ball3, left) Atom carry(ball4, left) Atom free(left) v=2
+tag=0 t=7 Var: var0 2 Atom at-robby(rooma) Atom at-robby(roomb) v=1
+tag=0 t=7 Var: var2 5 Atom carry(ball1, right) Atom carry(ball2, right) Atom carry(ball3, right) Atom carry(ball4, right) Atom free(right) v=0
+tag=0 t=7 Var: var2 5 Atom carry(ball1, right) Atom carry(ball2, right) Atom carry(ball3, right) Atom carry(ball4, right) Atom free(right) v=4
+tag=0 t=7 Var: var6 3 Atom at(ball4, rooma) Atom at(ball4, roomb) <none of those> v=2
+tag=0 t=7 Var: var1 5 Atom carry(ball1, left) Atom carry(ball2, left) Atom carry(ball3, left) Atom carry(ball4, left) Atom free(left) v=3
+tag=0 t=7 Var: var2 5 Atom carry(ball1, right) Atom carry(ball2, right) Atom carry(ball3, right) Atom carry(ball4, right) Atom free(right) v=1
+tag=0 t=7 Var: var6 3 Atom at(ball4, rooma) Atom at(ball4, roomb) <none of those> v=0
+tag=0 t=7 Var: var2 5 Atom carry(ball1, right) Atom carry(ball2, right) Atom carry(ball3, right) Atom carry(ball4, right) Atom free(right) v=2
+tag=0 t=7 Var: var6 3 Atom at(ball4, rooma) Atom at(ball4, roomb) <none of those> v=1
+tag=0 t=7 Var: var2 5 Atom carry(ball1, right) Atom carry(ball2, right) Atom carry(ball3, right) Atom carry(ball4, right) Atom free(right) v=3
+tag=2 t=7 Op: drop ball1 rooma left 0 0 0 3 -1 0 1 0 4 v=0
+tag=2 t=7 Op: drop ball1 rooma right 0 0 0 3 -1 0 2 0 4 v=0
+tag=2 t=7 Op: drop ball1 roomb left 0 1 1 3 -1 1 1 0 4 v=0
+tag=2 t=7 Op: drop ball1 roomb right 0 1 1 3 -1 1 2 0 4 v=0
+tag=2 t=7 Op: drop ball2 rooma left 0 0 0 4 -1 0 1 1 4 v=0
+tag=2 t=7 Op: pick ball1 rooma left 0 0 0 3 0 2 1 4 0 v=0
+tag=2 t=7 Op: drop ball2 rooma right 0 0 0 4 -1 0 2 1 4 v=0
+tag=2 t=7 Op: drop ball2 roomb left 0 1 1 4 -1 1 1 1 4 v=0
+tag=2 t=7 Op: drop ball2 roomb right 0 1 1 4 -1 1 2 1 4 v=0
+tag=2 t=7 Op: drop ball3 rooma left 0 0 0 5 -1 0 1 2 4 v=0
+tag=2 t=7 Op: drop ball3 rooma right 0 0 0 5 -1 0 2 2 4 v=0
+tag=2 t=7 Op: drop ball3 roomb left 0 1 1 5 -1 1 1 2 4 v=0
+tag=2 t=7 Op: drop ball3 roomb right 0 1 1 5 -1 1 2 2 4 v=0
+tag=2 t=7 Op: drop ball4 rooma left 0 0 0 6 -1 0 1 3 4 v=0
+tag=2 t=7 Op: move rooma roomb 0 0 1 v=0
+tag=2 t=7 Op: move roomb rooma 0 1 0 v=0
+tag=2 t=7 Op: pick ball1 rooma right 0 0 0 3 0 2 2 4 0 v=0
+tag=2 t=7 Op: pick ball1 roomb left 0 1 1 3 1 2 1 4 0 v=0
+tag=2 t=7 Op: pick ball1 roomb right 0 1 1 3 1 2 2 4 0 v=0
+tag=2 t=7 Op: pick ball2 rooma left 0 0 0 4 0 2 1 4 1 v=0
+tag=2 t=7 Op: pick ball2 rooma right 0 0 0 4 0 2 2 4 1 v=0
+tag=2 t=7 Op: pick ball2 roomb left 0 1 1 4 1 2 1 4 1 v=0
+tag=2 t=7 Op: drop ball4 rooma right 0 0 0 6 -1 0 2 3 4 v=0
+tag=2 t=7 Op: drop ball4 roomb left 0 1 1 6 -1 1 1 3 4 v=0
+tag=2 t=7 Op: pick ball2 roomb right 0 1 1 4 1 2 2 4 1 v=0
+tag=2 t=7 Op: pick ball3 rooma left 0 0 0 5 0 2 1 4 2 v=0
+tag=2 t=7 Op: pick ball3 rooma right 0 0 0 5 0 2 2 4 2 v=0
+tag=2 t=7 Op: pick ball3 roomb left 0 1 1 5 1 2 1 4 2 v=0
+tag=2 t=7 Op: drop ball4 roomb right 0 1 1 6 -1 1 2 3 4 v=0
+tag=2 t=7 Op: pick ball3 roomb right 0 1 1 5 1 2 2 4 2 v=0
+tag=2 t=7 Op: pick ball4 rooma left 0 0 0 6 0 2 1 4 3 v=0
+tag=2 t=7 Op: pick ball4 rooma right 0 0 0 6 0 2 2 4 3 v=0
+tag=2 t=7 Op: pick ball4 roomb left 0 1 1 6 1 2 1 4 3 v=0
+tag=2 t=7 Op: pick ball4 roomb right 0 1 1 6 1 2 2 4 3 v=0
+tag=0 t=8 Var: var3 3 Atom at(ball1, rooma) Atom at(ball1, roomb) <none of those> v=2
+tag=0 t=8 Var: var3 3 Atom at(ball1, rooma) Atom at(ball1, roomb) <none of those> v=0
+tag=0 t=8 Var: var4 3 Atom at(ball2, rooma) Atom at(ball2, roomb) <none of those> v=2
+tag=0 t=8 Var: var3 3 Atom at(ball1, rooma) Atom at(ball1, roomb) <none of those> v=1
+tag=0 t=8 Var: var4 3 Atom at(ball2, rooma) Atom at(ball2, roomb) <none of those> v=0
+tag=0 t=8 Var: var4 3 Atom at(ball2, rooma) Atom at(ball2, roomb) <none of those> v=1
+tag=0 t=8 Var: var5 3 Atom at(ball3, rooma) Atom at(ball3, roomb) <none of those> v=2
+tag=0 t=8 Var: var1 5 Atom carry(ball1, left) Atom carry(ball2, left) Atom carry(ball3, left) Atom carry(ball4, left) Atom free(left) v=0
+tag=0 t=8 Var: var1 5 Atom carry(ball1, left) Atom carry(ball2, left) Atom carry(ball3, left) Atom carry(ball4, left) Atom free(left) v=4
+tag=0 t=8 Var: var0 2 Atom at-robby(rooma) Atom at-robby(roomb) v=0
+tag=0 t=8 Var: var5 3 Atom at(ball3, rooma) Atom at(ball3, roomb) <none of those> v=0
+tag=0 t=8 Var: var1 5 Atom carry(ball1, left) Atom carry(ball2, left) Atom carry(ball3, left) Atom carry(ball4, left) Atom free(left) v=1
+tag=0 t=8 Var: var5 3 Atom at(ball3, rooma) Atom at(ball3, roomb) <none of those> v=1
+tag=0 t=8 Var: var1 5 Atom carry(ball1, left) Atom carry(ball2, left) Atom carry(ball3, left) Atom carry(ball4, left) Atom free(left) v=2
+tag=0 t=8 Var: var0 2 Atom at-robby(rooma) Atom at-robby(roomb) v=1
+tag=0 t=8 Var: var2 5 Atom carry(ball1, right) Atom carry(ball2, right) Atom carry(ball3, right) Atom carry(ball4, right) Atom free(right) v=0
+tag=0 t=8 Var: var2 5 Atom carry(ball1, right) Atom carry(ball2, right) Atom carry(ball3, right) Atom carry(ball4, right) Atom free(right) v=4
+tag=0 t=8 Var: var6 3 Atom at(ball4, rooma) Atom at(ball4, roomb) <none of those> v=2
+tag=0 t=8 Var: var1 5 Atom carry(ball1, left) Atom carry(ball2, left) Atom carry(ball3, left) Atom carry(ball4, left) Atom free(left) v=3
+tag=0 t=8 Var: var2 5 Atom carry(ball1, right) Atom carry(ball2, right) Atom carry(ball3, right) Atom carry(ball4, right) Atom free(right) v=1
+tag=0 t=8 Var: var6 3 Atom at(ball4, rooma) Atom at(ball4, roomb) <none of those> v=0
+tag=0 t=8 Var: var2 5 Atom carry(ball1, right) Atom carry(ball2, right) Atom carry(ball3, right) Atom carry(ball4, right) Atom free(right) v=2
+tag=0 t=8 Var: var6 3 Atom at(ball4, rooma) Atom at(ball4, roomb) <none of those> v=1
+tag=0 t=8 Var: var2 5 Atom carry(ball1, right) Atom carry(ball2, right) Atom carry(ball3, right) Atom carry(ball4, right) Atom free(right) v=3
+tag=2 t=8 Op: drop ball1 rooma left 0 0 0 3 -1 0 1 0 4 v=0
+tag=2 t=8 Op: drop ball1 rooma right 0 0 0 3 -1 0 2 0 4 v=0
+tag=2 t=8 Op: drop ball1 roomb left 0 1 1 3 -1 1 1 0 4 v=0
+tag=2 t=8 Op: drop ball1 roomb right 0 1 1 3 -1 1 2 0 4 v=0
+tag=2 t=8 Op: drop ball2 rooma left 0 0 0 4 -1 0 1 1 4 v=0
+tag=2 t=8 Op: pick ball1 rooma left 0 0 0 3 0 2 1 4 0 v=0
+tag=2 t=8 Op: drop ball2 rooma right 0 0 0 4 -1 0 2 1 4 v=0
+tag=2 t=8 Op: drop ball2 roomb left 0 1 1 4 -1 1 1 1 4 v=0
+tag=2 t=8 Op: drop ball2 roomb right 0 1 1 4 -1 1 2 1 4 v=0
+tag=2 t=8 Op: drop ball3 rooma left 0 0 0 5 -1 0 1 2 4 v=0
+tag=2 t=8 Op: drop ball3 rooma right 0 0 0 5 -1 0 2 2 4 v=0
+tag=2 t=8 Op: drop ball3 roomb left 0 1 1 5 -1 1 1 2 4 v=0
+tag=2 t=8 Op: drop ball3 roomb right 0 1 1 5 -1 1 2 2 4 v=0
+tag=2 t=8 Op: drop ball4 rooma left 0 0 0 6 -1 0 1 3 4 v=0
+tag=2 t=8 Op: move rooma roomb 0 0 1 v=0
+tag=2 t=8 Op: move roomb rooma 0 1 0 v=0
+tag=2 t=8 Op: pick ball1 rooma right 0 0 0 3 0 2 2 4 0 v=0
+tag=2 t=8 Op: pick ball1 roomb left 0 1 1 3 1 2 1 4 0 v=0
+tag=2 t=8 Op: pick ball1 roomb right 0 1 1 3 1 2 2 4 0 v=0
+tag=2 t=8 Op: pick ball2 rooma left 0 0 0 4 0 2 1 4 1 v=0
+tag=2 t=8 Op: pick ball2 rooma right 0 0 0 4 0 2 2 4 1 v=0
+tag=2 t=8 Op: pick ball2 roomb left 0 1 1 4 1 2 1 4 1 v=0
+tag=2 t=8 Op: drop ball4 rooma right 0 0 0 6 -1 0 2 3 4 v=0
+tag=2 t=8 Op: drop ball4 roomb left 0 1 1 6 -1 1 1 3 4 v=0
+tag=2 t=8 Op: pick ball2 roomb right 0 1 1 4 1 2 2 4 1 v=0
+tag=2 t=8 Op: pick ball3 rooma left 0 0 0 5 0 2 1 4 2 v=0
+tag=2 t=8 Op: pick ball3 rooma right 0 0 0 5 0 2 2 4 2 v=0
+tag=2 t=8 Op: pick ball3 roomb left 0 1 1 5 1 2 1 4 2 v=0
+tag=2 t=8 Op: drop ball4 roomb right 0 1 1 6 -1 1 2 3 4 v=0
+tag=2 t=8 Op: pick ball3 roomb right 0 1 1 5 1 2 2 4 2 v=0
+tag=2 t=8 Op: pick ball4 rooma left 0 0 0 6 0 2 1 4 3 v=0
+tag=2 t=8 Op: pick ball4 rooma right 0 0 0 6 0 2 2 4 3 v=0
+tag=2 t=8 Op: pick ball4 roomb left 0 1 1 6 1 2 1 4 3 v=0
+tag=2 t=8 Op: pick ball4 roomb right 0 1 1 6 1 2 2 4 3 v=0
+tag=0 t=9 Var: var3 3 Atom at(ball1, rooma) Atom at(ball1, roomb) <none of those> v=2
+tag=0 t=9 Var: var3 3 Atom at(ball1, rooma) Atom at(ball1, roomb) <none of those> v=0
+tag=0 t=9 Var: var4 3 Atom at(ball2, rooma) Atom at(ball2, roomb) <none of those> v=2
+tag=0 t=9 Var: var3 3 Atom at(ball1, rooma) Atom at(ball1, roomb) <none of those> v=1
+tag=0 t=9 Var: var4 3 Atom at(ball2, rooma) Atom at(ball2, roomb) <none of those> v=0
+tag=0 t=9 Var: var4 3 Atom at(ball2, rooma) Atom at(ball2, roomb) <none of those> v=1
+tag=0 t=9 Var: var5 3 Atom at(ball3, rooma) Atom at(ball3, roomb) <none of those> v=2
+tag=0 t=9 Var: var1 5 Atom carry(ball1, left) Atom carry(ball2, left) Atom carry(ball3, left) Atom carry(ball4, left) Atom free(left) v=0
+tag=0 t=9 Var: var1 5 Atom carry(ball1, left) Atom carry(ball2, left) Atom carry(ball3, left) Atom carry(ball4, left) Atom free(left) v=4
+tag=0 t=9 Var: var0 2 Atom at-robby(rooma) Atom at-robby(roomb) v=0
+tag=0 t=9 Var: var5 3 Atom at(ball3, rooma) Atom at(ball3, roomb) <none of those> v=0
+tag=0 t=9 Var: var1 5 Atom carry(ball1, left) Atom carry(ball2, left) Atom carry(ball3, left) Atom carry(ball4, left) Atom free(left) v=1
+tag=0 t=9 Var: var5 3 Atom at(ball3, rooma) Atom at(ball3, roomb) <none of those> v=1
+tag=0 t=9 Var: var1 5 Atom carry(ball1, left) Atom carry(ball2, left) Atom carry(ball3, left) Atom carry(ball4, left) Atom free(left) v=2
+tag=0 t=9 Var: var0 2 Atom at-robby(rooma) Atom at-robby(roomb) v=1
+tag=0 t=9 Var: var2 5 Atom carry(ball1, right) Atom carry(ball2, right) Atom carry(ball3, right) Atom carry(ball4, right) Atom free(right) v=0
+tag=0 t=9 Var: var2 5 Atom carry(ball1, right) Atom carry(ball2, right) Atom carry(ball3, right) Atom carry(ball4, right) Atom free(right) v=4
+tag=0 t=9 Var: var6 3 Atom at(ball4, rooma) Atom at(ball4, roomb) <none of those> v=2
+tag=0 t=9 Var: var1 5 Atom carry(ball1, left) Atom carry(ball2, left) Atom carry(ball3, left) Atom carry(ball4, left) Atom free(left) v=3
+tag=0 t=9 Var: var2 5 Atom carry(ball1, right) Atom carry(ball2, right) Atom carry(ball3, right) Atom carry(ball4, right) Atom free(right) v=1
+tag=0 t=9 Var: var6 3 Atom at(ball4, rooma) Atom at(ball4, roomb) <none of those> v=0
+tag=0 t=9 Var: var2 5 Atom carry(ball1, right) Atom carry(ball2, right) Atom carry(ball3, right) Atom carry(ball4, right) Atom free(right) v=2
+tag=0 t=9 Var: var6 3 Atom at(ball4, rooma) Atom at(ball4, roomb) <none of those> v=1
+tag=0 t=9 Var: var2 5 Atom carry(ball1, right) Atom carry(ball2, right) Atom carry(ball3, right) Atom carry(ball4, right) Atom free(right) v=3
+tag=2 t=9 Op: drop ball1 rooma left 0 0 0 3 -1 0 1 0 4 v=0
+tag=2 t=9 Op: drop ball1 rooma right 0 0 0 3 -1 0 2 0 4 v=0
+tag=2 t=9 Op: drop ball1 roomb left 0 1 1 3 -1 1 1 0 4 v=0
+tag=2 t=9 Op: drop ball1 roomb right 0 1 1 3 -1 1 2 0 4 v=0
+tag=2 t=9 Op: drop ball2 rooma left 0 0 0 4 -1 0 1 1 4 v=0
+tag=2 t=9 Op: pick ball1 rooma left 0 0 0 3 0 2 1 4 0 v=0
+tag=2 t=9 Op: drop ball2 rooma right 0 0 0 4 -1 0 2 1 4 v=0
+tag=2 t=9 Op: drop ball2 roomb left 0 1 1 4 -1 1 1 1 4 v=0
+tag=2 t=9 Op: drop ball2 roomb right 0 1 1 4 -1 1 2 1 4 v=0
+tag=2 t=9 Op: drop ball3 rooma left 0 0 0 5 -1 0 1 2 4 v=0
+tag=2 t=9 Op: drop ball3 rooma right 0 0 0 5 -1 0 2 2 4 v=0
+tag=2 t=9 Op: drop ball3 roomb left 0 1 1 5 -1 1 1 2 4 v=0
+tag=2 t=9 Op: drop ball3 roomb right 0 1 1 5 -1 1 2 2 4 v=0
+tag=2 t=9 Op: drop ball4 rooma left 0 0 0 6 -1 0 1 3 4 v=0
+tag=2 t=9 Op: move rooma roomb 0 0 1 v=0
+tag=2 t=9 Op: move roomb rooma 0 1 0 v=0
+tag=2 t=9 Op: pick ball1 rooma right 0 0 0 3 0 2 2 4 0 v=0
+tag=2 t=9 Op: pick ball1 roomb left 0 1 1 3 1 2 1 4 0 v=0
+tag=2 t=9 Op: pick ball1 roomb right 0 1 1 3 1 2 2 4 0 v=0
+tag=2 t=9 Op: pick ball2 rooma left 0 0 0 4 0 2 1 4 1 v=0
+tag=2 t=9 Op: pick ball2 rooma right 0 0 0 4 0 2 2 4 1 v=0
+tag=2 t=9 Op: drop ball4 rooma right 0 0 0 6 -1 0 2 3 4 v=0
+tag=2 t=9 Op: pick ball2 roomb left 0 1 1 4 1 2 1 4 1 v=0
+tag=2 t=9 Op: drop ball4 roomb left 0 1 1 6 -1 1 1 3 4 v=0
+tag=2 t=9 Op: pick ball2 roomb right 0 1 1 4 1 2 2 4 1 v=0
+tag=2 t=9 Op: pick ball3 rooma left 0 0 0 5 0 2 1 4 2 v=0
+tag=2 t=9 Op: pick ball3 rooma right 0 0 0 5 0 2 2 4 2 v=0
+tag=2 t=9 Op: pick ball3 roomb left 0 1 1 5 1 2 1 4 2 v=0
+tag=2 t=9 Op: drop ball4 roomb right 0 1 1 6 -1 1 2 3 4 v=0
+tag=2 t=9 Op: pick ball3 roomb right 0 1 1 5 1 2 2 4 2 v=0
+tag=2 t=9 Op: pick ball4 rooma left 0 0 0 6 0 2 1 4 3 v=0
+tag=2 t=9 Op: pick ball4 rooma right 0 0 0 6 0 2 2 4 3 v=0
+tag=2 t=9 Op: pick ball4 roomb left 0 1 1 6 1 2 1 4 3 v=0
+tag=2 t=9 Op: pick ball4 roomb right 0 1 1 6 1 2 2 4 3 v=0
+tag=0 t=10 Var: var3 3 Atom at(ball1, rooma) Atom at(ball1, roomb) <none of those> v=2
+tag=0 t=10 Var: var3 3 Atom at(ball1, rooma) Atom at(ball1, roomb) <none of those> v=0
+tag=0 t=10 Var: var3 3 Atom at(ball1, rooma) Atom at(ball1, roomb) <none of those> v=1
+tag=0 t=10 Var: var4 3 Atom at(ball2, rooma) Atom at(ball2, roomb) <none of those> v=2
+tag=0 t=10 Var: var4 3 Atom at(ball2, rooma) Atom at(ball2, roomb) <none of those> v=0
+tag=0 t=10 Var: var4 3 Atom at(ball2, rooma) Atom at(ball2, roomb) <none of those> v=1
+tag=0 t=10 Var: var5 3 Atom at(ball3, rooma) Atom at(ball3, roomb) <none of those> v=2
+tag=0 t=10 Var: var1 5 Atom carry(ball1, left) Atom carry(ball2, left) Atom carry(ball3, left) Atom carry(ball4, left) Atom free(left) v=0
+tag=0 t=10 Var: var1 5 Atom carry(ball1, left) Atom carry(ball2, left) Atom carry(ball3, left) Atom carry(ball4, left) Atom free(left) v=4
+tag=0 t=10 Var: var0 2 Atom at-robby(rooma) Atom at-robby(roomb) v=0
+tag=0 t=10 Var: var5 3 Atom at(ball3, rooma) Atom at(ball3, roomb) <none of those> v=0
+tag=0 t=10 Var: var5 3 Atom at(ball3, rooma) Atom at(ball3, roomb) <none of those> v=1
+tag=0 t=10 Var: var1 5 Atom carry(ball1, left) Atom carry(ball2, left) Atom carry(ball3, left) Atom carry(ball4, left) Atom free(left) v=1
+tag=0 t=10 Var: var1 5 Atom carry(ball1, left) Atom carry(ball2, left) Atom carry(ball3, left) Atom carry(ball4, left) Atom free(left) v=2
+tag=0 t=10 Var: var0 2 Atom at-robby(rooma) Atom at-robby(roomb) v=1
+tag=0 t=10 Var: var2 5 Atom carry(ball1, right) Atom carry(ball2, right) Atom carry(ball3, right) Atom carry(ball4, right) Atom free(right) v=4
+tag=0 t=10 Var: var6 3 Atom at(ball4, rooma) Atom at(ball4, roomb) <none of those> v=2
+tag=0 t=10 Var: var2 5 Atom carry(ball1, right) Atom carry(ball2, right) Atom carry(ball3, right) Atom carry(ball4, right) Atom free(right) v=0
+tag=0 t=10 Var: var1 5 Atom carry(ball1, left) Atom carry(ball2, left) Atom carry(ball3, left) Atom carry(ball4, left) Atom free(left) v=3
+tag=0 t=10 Var: var2 5 Atom carry(ball1, right) Atom carry(ball2, right) Atom carry(ball3, right) Atom carry(ball4, right) Atom free(right) v=1
+tag=0 t=10 Var: var6 3 Atom at(ball4, rooma) Atom at(ball4, roomb) <none of those> v=0
+tag=0 t=10 Var: var2 5 Atom carry(ball1, right) Atom carry(ball2, right) Atom carry(ball3, right) Atom carry(ball4, right) Atom free(right) v=2
+tag=0 t=10 Var: var6 3 Atom at(ball4, rooma) Atom at(ball4, roomb) <none of those> v=1
+tag=0 t=10 Var: var2 5 Atom carry(ball1, right) Atom carry(ball2, right) Atom carry(ball3, right) Atom carry(ball4, right) Atom free(right) v=3
+tag=2 t=10 Op: drop ball1 rooma left 0 0 0 3 -1 0 1 0 4 v=0
+tag=2 t=10 Op: drop ball1 rooma right 0 0 0 3 -1 0 2 0 4 v=0
+tag=2 t=10 Op: drop ball1 roomb left 0 1 1 3 -1 1 1 0 4 v=0
+tag=2 t=10 Op: drop ball1 roomb right 0 1 1 3 -1 1 2 0 4 v=0
+tag=2 t=10 Op: drop ball2 rooma left 0 0 0 4 -1 0 1 1 4 v=0
+tag=2 t=10 Op: drop ball2 rooma right 0 0 0 4 -1 0 2 1 4 v=0
+tag=2 t=10 Op: drop ball2 roomb left 0 1 1 4 -1 1 1 1 4 v=0
+tag=2 t=10 Op: drop ball2 roomb right 0 1 1 4 -1 1 2 1 4 v=0
+tag=2 t=10 Op: drop ball3 rooma left 0 0 0 5 -1 0 1 2 4 v=0
+tag=2 t=10 Op: drop ball3 rooma right 0 0 0 5 -1 0 2 2 4 v=0
+tag=2 t=10 Op: drop ball3 roomb left 0 1 1 5 -1 1 1 2 4 v=0
+tag=2 t=10 Op: drop ball3 roomb right 0 1 1 5 -1 1 2 2 4 v=0
+tag=2 t=10 Op: drop ball4 rooma left 0 0 0 6 -1 0 1 3 4 v=0
+tag=2 t=10 Op: drop ball4 rooma right 0 0 0 6 -1 0 2 3 4 v=0
+tag=2 t=10 Op: drop ball4 roomb left 0 1 1 6 -1 1 1 3 4 v=0
+tag=2 t=10 Op: move rooma roomb 0 0 1 v=0
+tag=2 t=10 Op: move roomb rooma 0 1 0 v=0
+tag=2 t=10 Op: pick ball1 rooma left 0 0 0 3 0 2 1 4 0 v=0
+tag=2 t=10 Op: pick ball1 rooma right 0 0 0 3 0 2 2 4 0 v=0
+tag=2 t=10 Op: pick ball1 roomb left 0 1 1 3 1 2 1 4 0 v=0
+tag=2 t=10 Op: pick ball1 roomb right 0 1 1 3 1 2 2 4 0 v=0
+tag=2 t=10 Op: pick ball2 rooma left 0 0 0 4 0 2 1 4 1 v=0
+tag=2 t=10 Op: drop ball4 roomb right 0 1 1 6 -1 1 2 3 4 v=0
+tag=2 t=10 Op: pick ball2 rooma right 0 0 0 4 0 2 2 4 1 v=0
+tag=2 t=10 Op: pick ball2 roomb left 0 1 1 4 1 2 1 4 1 v=0
+tag=2 t=10 Op: pick ball2 roomb right 0 1 1 4 1 2 2 4 1 v=0
+tag=2 t=10 Op: pick ball3 rooma left 0 0 0 5 0 2 1 4 2 v=0
+tag=2 t=10 Op: pick ball3 rooma right 0 0 0 5 0 2 2 4 2 v=0
+tag=2 t=10 Op: pick ball3 roomb left 0 1 1 5 1 2 1 4 2 v=0
+tag=2 t=10 Op: pick ball3 roomb right 0 1 1 5 1 2 2 4 2 v=0
+tag=2 t=10 Op: pick ball4 rooma left 0 0 0 6 0 2 1 4 3 v=0
+tag=0 t=11 Var: var3 3 Atom at(ball1, rooma) Atom at(ball1, roomb) <none of those> v=0
+tag=2 t=10 Op: pick ball4 rooma right 0 0 0 6 0 2 2 4 3 v=0
+tag=2 t=10 Op: pick ball4 roomb left 0 1 1 6 1 2 1 4 3 v=0
+tag=2 t=10 Op: pick ball4 roomb right 0 1 1 6 1 2 2 4 3 v=0
+tag=0 t=11 Var: var0 2 Atom at-robby(rooma) Atom at-robby(roomb) v=0
+tag=0 t=11 Var: var0 2 Atom at-robby(rooma) Atom at-robby(roomb) v=1
+tag=0 t=11 Var: var3 3 Atom at(ball1, rooma) Atom at(ball1, roomb) <none of those> v=1
+tag=0 t=11 Var: var4 3 Atom at(ball2, rooma) Atom at(ball2, roomb) <none of those> v=0
+tag=0 t=11 Var: var1 5 Atom carry(ball1, left) Atom carry(ball2, left) Atom carry(ball3, left) Atom carry(ball4, left) Atom free(left) v=4
+tag=0 t=11 Var: var3 3 Atom at(ball1, rooma) Atom at(ball1, roomb) <none of those> v=2
+tag=0 t=11 Var: var4 3 Atom at(ball2, rooma) Atom at(ball2, roomb) <none of those> v=1
+tag=0 t=11 Var: var2 5 Atom carry(ball1, right) Atom carry(ball2, right) Atom carry(ball3, right) Atom carry(ball4, right) Atom free(right) v=4
+tag=0 t=11 Var: var5 3 Atom at(ball3, rooma) Atom at(ball3, roomb) <none of those> v=0
+tag=0 t=11 Var: var4 3 Atom at(ball2, rooma) Atom at(ball2, roomb) <none of those> v=2
+tag=0 t=11 Var: var5 3 Atom at(ball3, rooma) Atom at(ball3, roomb) <none of those> v=1
+tag=0 t=11 Var: var6 3 Atom at(ball4, rooma) Atom at(ball4, roomb) <none of those> v=0
+tag=0 t=11 Var: var5 3 Atom at(ball3, rooma) Atom at(ball3, roomb) <none of those> v=2
+tag=0 t=11 Var: var6 3 Atom at(ball4, rooma) Atom at(ball4, roomb) <none of those> v=1
+tag=0 t=11 Var: var1 5 Atom carry(ball1, left) Atom carry(ball2, left) Atom carry(ball3, left) Atom carry(ball4, left) Atom free(left) v=0
+tag=0 t=11 Var: var1 5 Atom carry(ball1, left) Atom carry(ball2, left) Atom carry(ball3, left) Atom carry(ball4, left) Atom free(left) v=1
+tag=0 t=11 Var: var6 3 Atom at(ball4, rooma) Atom at(ball4, roomb) <none of those> v=2
+tag=0 t=11 Var: var1 5 Atom carry(ball1, left) Atom carry(ball2, left) Atom carry(ball3, left) Atom carry(ball4, left) Atom free(left) v=2
+tag=0 t=11 Var: var2 5 Atom carry(ball1, right) Atom carry(ball2, right) Atom carry(ball3, right) Atom carry(ball4, right) Atom free(right) v=0
+tag=0 t=11 Var: var1 5 Atom carry(ball1, left) Atom carry(ball2, left) Atom carry(ball3, left) Atom carry(ball4, left) Atom free(left) v=3
+tag=0 t=11 Var: var2 5 Atom carry(ball1, right) Atom carry(ball2, right) Atom carry(ball3, right) Atom carry(ball4, right) Atom free(right) v=1
+tag=0 t=11 Var: var2 5 Atom carry(ball1, right) Atom carry(ball2, right) Atom carry(ball3, right) Atom carry(ball4, right) Atom free(right) v=2
+tag=0 t=11 Var: var2 5 Atom carry(ball1, right) Atom carry(ball2, right) Atom carry(ball3, right) Atom carry(ball4, right) Atom free(right) v=3

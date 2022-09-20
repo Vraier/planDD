@@ -74,10 +74,10 @@ void option_parser::parse_command_line(int argc, char *argv[]) {
          po::bool_switch(&m_values.var_order_force)->default_value(false),
          "Use force to order all variables")  //
         ("var_order_custom",
-         po::bool_switch(&m_values.var_order_force)->default_value(false),
+         po::bool_switch(&m_values.var_order_custom)->default_value(false),
          "Use custom to order all variables (needs variable_order string)")  //
         ("var_order_custom_force",
-         po::bool_switch(&m_values.var_order_force)->default_value(false),
+         po::bool_switch(&m_values.var_order_custom_force)->default_value(false),
          "Combines force and custom")  //
         // variable grouping
         ("group_variables", po::bool_switch(&m_values.group_variables)->default_value(false),
