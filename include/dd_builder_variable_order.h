@@ -24,11 +24,17 @@ categorized_variables categorize_variables(planning_logic::plan_to_cnf_map &symb
 // current_order[i] = what variable is at layer i?
 std::vector<int> put_variables_of_tag_first(encoder::encoder_abstract *encoder, std::vector<int> &current_order,
                                             planning_logic::primitive_tag front_tag, int timesteps);
+
 // returns a vector V that represents a permutation of the variables of the cnf problem
 // The i-th entry of the permutation array contains the index of the variable that should be brought to the i-th level
+// chooses the correct ordering method and applies post processing
 std::vector<int> order_variables(encoder::encoder_abstract &encoder, option_values &options);
 
-std::vector<std::tuple<int, int, int>> order_variables_custom_force(encoder::encoder_abstract &encoder,
+// helper methods to order variables. The correct ordering method will be used by order_variables
+// the tuples have the var index at the first positions.
+// the tuples are sorted in the correct order
+// the second and first entry have information about the toal/partial orer of the variables
+std::vector<std::tuple<int, int, int>> create_custom_force_var_order_mapping(encoder::encoder_abstract &encoder,
                                                                     option_values &options);
 std::vector<std::tuple<int, int>> create_force_var_order_mapping(encoder::encoder_abstract &encoder,
                                                                  option_values &options);

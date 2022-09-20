@@ -99,70 +99,43 @@ std::vector<int> put_variables_of_tag_first(encoder_abstract &encoder, std::vect
 
 std::vector<int> order_variables(encoder_abstract &encoder, option_values &options) {
     std::string variable_order = options.variable_order;
-
     if (!is_valid_variable_order_string(variable_order)) {
         LOG_MESSAGE(log_level::error) << "Can't build the following variable order " << variable_order;
         return std::vector<int>();
     }
 
-    // categorize the variables
-    categorized_variables tagged_variables = categorize_variables(encoder.m_symbol_map, options.timesteps);
+    std::vector<int> ordered_variables;
 
-    // contains the result at the end
-    std::vector<int> interleved_variables;
-    std::vector<int> total_variables;
-    total_variables.push_back(0);  // the 0th variable does not exist
-
-    // split the order into first and second part (in a really complicated manner)
-    std::stringstream ss(variable_order);
-    std::string disjoin_order, interleaved_order;
-    std::getline(ss, disjoin_order, ':');
-    std::getline(ss, interleaved_order, ':');
-
-    // sort the interleaved part
-    for (int t = 0; t <= options.timesteps; t++) {
-        for (int i = 0; i < interleaved_order.size(); i++) {
-            // LOG_MESSAGE(log_level::trace) << "Sorting variable tag " << interleaved_order[i] << " for timestep " <<
-            // t;
-            char current_char = interleaved_order[i];
-            for (int vt = 0; vt < char_tag_map[current_char].size(); vt++) {
-                variable_tag order_tag = char_tag_map[current_char][vt];
-                // add all the variables for timestep t and tag order_tag
-                interleved_variables.insert(interleved_variables.end(), tagged_variables[order_tag][t].begin(),
-                                            tagged_variables[order_tag][t].end());
-            }
+    if (options.var_order_force) {
+        std::vector<std::tuple<int, int>> temp = variable_order::create_force_var_order_mapping(encoder, options);
+        for (int i = 0; i < temp.size(); i++) {
+            ordered_variables.push_back(std::get<0>(temp[i]));
         }
-    }
-
-    for (int i = 0; i < disjoin_order.size(); i++) {
-        char current_char = disjoin_order[i];
-        // LOG_MESSAGE(log_level::trace) << "Sorting variable tag " << disjoin_order[i] << " for every timestep";
-
-        // add the interleved part
-        if (current_char == 'x') {
-            total_variables.insert(total_variables.end(), interleved_variables.begin(), interleved_variables.end());
-            continue;
+    } else if (options.var_order_custom) {
+        std::vector<std::tuple<int, int>> temp = variable_order::create_custom_var_order_mapping(encoder, options);
+        for (int i = 0; i < temp.size(); i++) {
+            ordered_variables.push_back(std::get<0>(temp[i]));
         }
-        // add all timesteps for the corresponding var tag
-        for (int vt = 0; vt < char_tag_map[current_char].size(); vt++) {
-            variable_tag order_tag = char_tag_map[current_char][vt];
-            for (int t = 0; t <= options.timesteps; t++) {
-                total_variables.insert(total_variables.end(), tagged_variables[order_tag][t].begin(),
-                                       tagged_variables[order_tag][t].end());
-            }
+    } else if (options.var_order_custom_force) {
+        std::vector<std::tuple<int, int, int>> temp =
+            variable_order::create_custom_force_var_order_mapping(encoder, options);
+        for (int i = 0; i < temp.size(); i++) {
+            ordered_variables.push_back(std::get<0>(temp[i]));
         }
+    } else {
+        LOG_MESSAGE(log_level::error) << "No variable order selected " << variable_order;
     }
 
     // move goal or initial_state variable first
     if (options.goal_variables_first) {
-        total_variables = put_variables_of_tag_first(encoder, total_variables, goal, options.timesteps);
+        ordered_variables = put_variables_of_tag_first(encoder, ordered_variables, goal, options.timesteps);
     }
     if (options.initial_state_variables_first) {
-        total_variables = put_variables_of_tag_first(encoder, total_variables, ini_state, options.timesteps);
+        ordered_variables = put_variables_of_tag_first(encoder, ordered_variables, ini_state, options.timesteps);
     }
 
-    LOG_MESSAGE(log_level::info) << "Sorted a total of " << total_variables.size() << " variables";
-    return total_variables;
+    LOG_MESSAGE(log_level::info) << "Sorted a total of " << ordered_variables.size() << " variables";
+    return ordered_variables;
 }
 
 // returns a list of var_index, order_index tuples
@@ -181,8 +154,8 @@ std::vector<std::tuple<int, int>> create_force_var_order_mapping(encoder::encode
     }
 
     // enable for random initial permutation
-    //auto rng = std::default_random_engine {};
-    //std::shuffle(std::begin(initial_order), std::end(initial_order), rng);
+    auto rng = std::default_random_engine {};
+    std::shuffle(std::begin(initial_order), std::end(initial_order), rng);
 
     // calculate force order
     LOG_MESSAGE(log_level::info) << "Apllying force algorithm";
@@ -204,6 +177,8 @@ std::vector<std::tuple<int, int>> create_custom_var_order_mapping(encoder::encod
     // calculate order given by order string
     int custom_order_counter;  // counter that implies the partial order
     std::vector<std::tuple<int, int>> result;
+    result.push_back(std::make_tuple(0, custom_order_counter)); // o variable at first position
+    custom_order_counter++;
 
     // split the order into first and second part (in a really complicated manner)
     std::stringstream ss(options.variable_order);
@@ -226,7 +201,7 @@ std::vector<std::tuple<int, int>> create_custom_var_order_mapping(encoder::encod
                     for (int vt = 0; vt < char_tag_map[interleaved_char].size(); vt++) {
                         variable_tag order_tag = char_tag_map[interleaved_char][vt];
                         // add all the variables for timestep t and tag order_tag
-                        for(int k = 0; k < tagged_variables[order_tag][t].size(); k++){
+                        for (int k = 0; k < tagged_variables[order_tag][t].size(); k++) {
                             result.push_back(std::make_tuple(tagged_variables[order_tag][t][k], custom_order_counter));
                         }
                     }
@@ -239,7 +214,7 @@ std::vector<std::tuple<int, int>> create_custom_var_order_mapping(encoder::encod
         for (int vt = 0; vt < char_tag_map[current_char].size(); vt++) {
             variable_tag order_tag = char_tag_map[current_char][vt];
             for (int t = 0; t <= options.timesteps; t++) {
-                for(int k = 0; k < tagged_variables[order_tag][t].size(); k++){
+                for (int k = 0; k < tagged_variables[order_tag][t].size(); k++) {
                     result.push_back(std::make_tuple(tagged_variables[order_tag][t][k], custom_order_counter));
                 }
             }
@@ -249,8 +224,10 @@ std::vector<std::tuple<int, int>> create_custom_var_order_mapping(encoder::encod
     return result;
 }
 
-std::vector<std::tuple<int, int, int>> order_variables_custom_force(encoder::encoder_abstract &encoder,
-                                                                    option_values &options) {
+std::vector<std::tuple<int, int, int>> create_custom_force_var_order_mapping(encoder::encoder_abstract &encoder,
+                                                                             option_values &options) {
+    LOG_MESSAGE(log_level::error) << "Calculating custom force variable order";
+
     std::vector<std::tuple<int, int>> custom_order = create_custom_var_order_mapping(encoder, options);
     std::vector<std::tuple<int, int>> force_order = create_force_var_order_mapping(encoder, options);
 

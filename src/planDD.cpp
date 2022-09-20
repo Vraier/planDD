@@ -93,7 +93,7 @@ int planDD::hack_debug(option_values opt_values) {
         }
     } else if (opt_values.var_order_custom_force) {
         std::cout << "customforce" << std::endl;
-        std::vector<std::tuple<int, int, int>> temp = variable_order::order_variables_custom_force(*encoder, opt_values);
+        std::vector<std::tuple<int, int, int>> temp = variable_order::create_custom_force_var_order_mapping(*encoder, opt_values);
         for(int i = 0; i < temp.size(); i++){
             var_order.push_back(std::get<0>(temp[i]));
         }
@@ -107,7 +107,7 @@ int planDD::hack_debug(option_values opt_values) {
         var_order = variable_order::order_variables(*encoder, opt_values);
     }
 
-    
+    /*
     LOG_MESSAGE(log_level::info) << "Outputting order";
     for(int i = 0; i < var_order.size(); i ++){
         planning_logic::tagged_variable tv = encoder->m_symbol_map.get_planning_info_for_variable(var_order[i]);
@@ -119,7 +119,7 @@ int planDD::hack_debug(option_values opt_values) {
             std::cout << parser.m_sas_problem.m_operators[std::get<2>(tv)].to_string() << " ";
         }
         std::cout << "v=" << std::get<3>(tv) << std::endl;
-    }
+    }*/
 
     delete encoder;
 
