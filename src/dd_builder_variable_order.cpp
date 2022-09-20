@@ -2,9 +2,12 @@
 
 #include <iostream>
 #include <set>
+#include <algorithm>
+#include <random>
 
 #include "force.h"
 #include "logging.h"
+#include "dd_builder_conjoin_order.h"
 
 using namespace planning_logic;
 using namespace encoder;
@@ -170,20 +173,18 @@ std::vector<std::tuple<int, int>> create_force_var_order_mapping(encoder::encode
 
     // collect all logic primitives of the planning problem
     LOG_MESSAGE(log_level::info) << "Collecting primitives";
-    std::vector<planning_logic::logic_primitive> all_primitives;
-    for (int t = 0; t <= options.timesteps; t++) {
-        for (int typ = ini_state; typ < planning_logic::none; typ++) {
-            std::vector<planning_logic::logic_primitive> temp =
-                encoder.get_logic_primitives(static_cast<planning_logic::primitive_tag>(typ), t);
-            all_primitives.insert(all_primitives.end(), temp.begin(), temp.end());
-        }
-    }
+    std::vector<planning_logic::logic_primitive> all_primitives = conjoin_order::order_all_clauses(encoder, options);
 
     // calculate initial variable order (use identity)
-    std::vector<int> initial_order(encoder.m_symbol_map.get_num_variables());
+    std::vector<int> initial_order(encoder.m_symbol_map.get_num_variables() + 1); // + one because of zero variable
     for (int i = 0; i < initial_order.size(); i++) {
         initial_order[i] = i;
     }
+    
+    // enable for random initial permutation
+    //auto rng = std::default_random_engine {};
+    //std::shuffle(std::begin(initial_order), std::end(initial_order), rng);
+
 
     // calculate force order
     LOG_MESSAGE(log_level::info) << "Apllying force algorithm";

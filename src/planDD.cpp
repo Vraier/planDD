@@ -76,12 +76,7 @@ int planDD::hack_debug(option_values opt_values) {
     }
 
     encoder::encoder_abstract *encoder;
-    if(opt_values.binary_parallel){
-        graph::undirected_graph conflict_graph = parser.m_sas_problem.construct_complement_action_conflic_graph();
-        encoder = new encoder::binary_parallel(opt_values, parser.m_sas_problem, conflict_graph);
-    } else {
-        encoder = new encoder::encoder_basic(opt_values, parser.m_sas_problem);
-    }
+    encoder = new encoder::encoder_basic(opt_values, parser.m_sas_problem);
 
     bdd_container builder(1);
 
@@ -99,6 +94,7 @@ int planDD::hack_debug(option_values opt_values) {
         var_order = variable_order::order_variables(*encoder, opt_values);
     }
 
+    
     LOG_MESSAGE(log_level::info) << "Outputting order";
     for(int i = 0; i < var_order.size(); i ++){
         planning_logic::tagged_variable tv = encoder->m_symbol_map.get_planning_info_for_variable(var_order[i]);
