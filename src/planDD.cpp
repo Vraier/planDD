@@ -17,6 +17,7 @@
 #include "plan_to_cnf_map.h"
 #include "variable_grouping.h"
 #include "graph.h"
+#include "order_visualization.h"
 
 int main(int argc, char *argv[]) {
     // start logging
@@ -76,36 +77,22 @@ int planDD::hack_debug(option_values opt_values) {
     }
 
     encoder::encoder_abstract *encoder;
-    encoder = new encoder::encoder_basic(opt_values, parser.m_sas_problem);
+    if(opt_values.binary_parallel){
+        graph::undirected_graph conflict_graph = parser.m_sas_problem.construct_complement_action_conflic_graph();
+        encoder = new encoder::binary_parallel(opt_values, parser.m_sas_problem, conflict_graph);
+    } else {
+        encoder = new encoder::encoder_basic(opt_values, parser.m_sas_problem);
+    }
 
     bdd_container builder(1);
 
-    LOG_MESSAGE(log_level::info) << "Creating variables";
     variable_grouping::create_all_variables(*encoder, builder, opt_values);
+    std::vector<int> var_order = variable_order::order_variables(*encoder, opt_values);
+    builder.set_variable_order(var_order);
 
-    LOG_MESSAGE(log_level::info) << "Ordering variables";
-    std::vector<int> var_order;
-    if(opt_values.var_order_force){
-        std::cout << "force" << std::endl;
-        std::vector<std::tuple<int, int>> temp = variable_order::create_force_var_order_mapping(*encoder, opt_values);
-        for(int i = 0; i < temp.size(); i++){
-            var_order.push_back(std::get<0>(temp[i]));
-        }
-    } else if (opt_values.var_order_custom_force) {
-        std::cout << "customforce" << std::endl;
-        std::vector<std::tuple<int, int, int>> temp = variable_order::create_custom_force_var_order_mapping(*encoder, opt_values);
-        for(int i = 0; i < temp.size(); i++){
-            var_order.push_back(std::get<0>(temp[i]));
-        }
-    } else if (opt_values.var_order_custom) {
-        std::cout << "custom" << std::endl;
-        std::vector<std::tuple<int, int>> temp = variable_order::create_custom_var_order_mapping(*encoder, opt_values);
-        for(int i = 0; i < temp.size(); i++){
-            var_order.push_back(std::get<0>(temp[i]));
-        }
-    } else {
-        var_order = variable_order::order_variables(*encoder, opt_values);
-    }
+    std::vector<planning_logic::logic_primitive> all_primitives = conjoin_order::order_all_clauses(*encoder, opt_values);
+    visualize::visualize_var_order(var_order, all_primitives);
+
 
     /*
     LOG_MESSAGE(log_level::info) << "Outputting order";
