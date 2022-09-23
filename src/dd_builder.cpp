@@ -37,8 +37,20 @@ void construct_dd_with_timesteps(dd_buildable &container, encoder_abstract &enco
 void construct_dd_linear(dd_buildable &container, encoder_abstract &encoder, option_values &options) {
     LOG_MESSAGE(log_level::info) << "Building dd linear";
     LOG_MESSAGE(log_level::info) << "Ordering all clauses";
-    std::vector<logic_primitive> all_primitives = conjoin_order::order_all_clauses(encoder, options);
-    conjoin_primitives_linear(container, all_primitives, 0, false);
+
+    if (options.clause_order_force) {
+        std::vector<std::tuple<logic_primitive, int>> force_order =
+            conjoin_order::create_force_clause_order_mapping(encoder, options);
+        std::vector<logic_primitive> trimmed_order;
+        for (int i = 0; i < force_order.size(); i++) {
+            trimmed_order.push_back(std::get<0>(force_order[i]));
+        }
+        conjoin_primitives_linear(container, trimmed_order, 0, false);
+
+    } else {
+        std::vector<logic_primitive> all_primitives = conjoin_order::order_all_clauses(encoder, options);
+        conjoin_primitives_linear(container, all_primitives, 0, false);
+    }
 }
 
 void construct_dd_by_layer_unidirectional(dd_buildable &container, encoder_abstract &encoder, option_values &options) {

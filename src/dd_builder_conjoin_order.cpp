@@ -1,6 +1,7 @@
 #include "dd_builder_conjoin_order.h"
 
 #include <algorithm>
+#include <random>
 
 #include "logging.h"
 #include "force.h"
@@ -143,13 +144,18 @@ std::vector<std::tuple<logic_primitive, int>> create_force_clause_order_mapping(
     for (int i = 0; i < all_primitives.size(); i++) {
         initial_mapping[i] = i;
     }
+    // enable for random initial permutation
+    if(options.force_random_seed){
+        auto rng = std::default_random_engine {};
+        std::shuffle(std::begin(initial_mapping), std::end(initial_mapping), rng);
+    }
 
     std::vector<int> force_order =
-        variable_order::force_clause_order(initial_mapping, all_primitives, encoder.m_symbol_map.get_num_variables());
+        variable_order::force_clause_order(initial_mapping, all_primitives, encoder.m_symbol_map.get_num_variables()+1);
 
     std::vector<std::tuple<logic_primitive, int>> result;
     for (int i = 0; i < force_order.size(); i++) {
-        result.push_back(std::make_tuple(all_primitives[i], i));
+        result.push_back(std::make_tuple(all_primitives[force_order[i]], i));
     }
 
     return result;
