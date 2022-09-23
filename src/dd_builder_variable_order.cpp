@@ -154,8 +154,8 @@ std::vector<std::tuple<int, int>> create_force_var_order_mapping(encoder::encode
     }
 
     // enable for random initial permutation
-    //auto rng = std::default_random_engine {};
-    //std::shuffle(std::begin(initial_order), std::end(initial_order), rng);
+    auto rng = std::default_random_engine {};
+    std::shuffle(std::begin(initial_order), std::end(initial_order), rng);
 
     // calculate force order
     LOG_MESSAGE(log_level::info) << "Apllying force algorithm";

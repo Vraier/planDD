@@ -33,18 +33,19 @@ void visualize_var_order(std::vector<int> &var_order, std::vector<planning_logic
     std::vector<std::pair<double, double>> var_positions(var_order.size());
     std::vector<std::pair<double, double>> primitive_positions(primitives.size());
 
-    // calculate var positions (on x axis, y=0)
-    for (int i = 0; i < var_order.size(); i++) {
-        var_positions[i] = std::make_pair(i, 0);
-    }
-
     // calculate inverse permutation
     std::vector<int> var_to_pos(var_order.size());
     for (int i = 0; i < var_order.size(); i++) {
         var_to_pos[var_order[i]] = i;
     }
 
+    // calculate var positions (on x axis, y=0)
+    for (int i = 0; i < var_order.size(); i++) {
+        var_positions[i] = std::make_pair(var_to_pos[i], 0);
+    }
+
     double total_span = 0;
+
     // calculate upper layer (clauses) and lines
     for (int i = 0; i < primitives.size(); i++) {
         double average_pos = 0;
@@ -99,7 +100,7 @@ void visualize_var_order(std::vector<int> &var_order, std::vector<planning_logic
         //std::cout << "p: " << primitive_positions[i].first << " " << primitive_positions[i].second << std::endl;
         primitive_positions[i] =
             std::make_pair(primitive_positions[i].first - min_x + 1, primitive_positions[i].second - min_y + 1);
-        std::cout << "p: " << primitive_positions[i].first << " " << primitive_positions[i].second << std::endl;
+        //std::cout << "p: " << primitive_positions[i].first << " " << primitive_positions[i].second << std::endl;
 
     }
 
@@ -114,23 +115,31 @@ void visualize_var_order(std::vector<int> &var_order, std::vector<planning_logic
 
     // draw variables
     for (int i = 0; i < var_positions.size(); i++) {
-        std::cout << "v: " << var_positions[i].first << " " << var_positions[i].second << std::endl;
+        //std::cout << "v: " << var_positions[i].first << " " << var_positions[i].second << std::endl;
         draw_circle(file, var_positions[i].first, var_positions[i].second, RADIUS);
     }
 
     // draw clauses with lines
     for (int i = 0; i < primitives.size(); i++) {
-        std::cout << "p: " << primitive_positions[i].first << " " << primitive_positions[i].second << std::endl;
+        //std::cout << "p: " << primitive_positions[i].first << " " << primitive_positions[i].second << std::endl;
         draw_circle(file, primitive_positions[i].first, primitive_positions[i].second, RADIUS);
+
+        double min_span = var_order.size() + 2;
+        double max_span = 0;
+        for (int a = 0; a < primitives[i].get_affected_variables().size(); a++) {
+            double var_pos = var_to_pos[primitives[i].get_affected_variables()[a]];
+            min_span = std::min(min_span, var_pos);
+            max_span = std::max(max_span, var_pos);
+        }
+        double span = (std::min(max_span-min_span, 100.0) / 100) * 255;
 
         for (int a = 0; a < primitives[i].get_affected_variables().size(); a++) {
             int neighbour = primitives[i].get_affected_variables()[a];
             // determine colour of line (colour is dependent on the span of a clause, capped at 100)
-            double diff = (std::min(primitive_positions[i].second/SCALED_LAYER_DIST, 100.0) / 100) * 255;
 
             draw_line(file, primitive_positions[i].first, primitive_positions[i].second, 
                             var_positions[neighbour].first, var_positions[neighbour].second, 
-                            diff, 255.0 - diff, 0, 0.1);
+                            span, 255.0 - span, 0, 0.1);
         }
     }
 

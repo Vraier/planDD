@@ -1,8 +1,9 @@
 #include "dd_builder_conjoin_order.h"
 
-#include "logging.h"
-
 #include <algorithm>
+
+#include "logging.h"
+#include "force.h"
 
 using namespace planning_logic;
 using namespace encoder;
@@ -128,6 +129,36 @@ std::vector<logic_primitive> order_all_clauses(encoder_abstract &encoder, option
     return total_primitives;
 }
 
+std::vector<std::tuple<logic_primitive, int, int>> create_custom_force_clause_order_mapping(
+    encoder::encoder_abstract &encoder, option_values &options) {
+    return std::vector<std::tuple<logic_primitive, int, int>>();
+}
+
+std::vector<std::tuple<logic_primitive, int>> create_force_clause_order_mapping(encoder::encoder_abstract &encoder,
+                                                                                option_values &options) {
+    // order the primitives by custom order
+    std::vector<logic_primitive> all_primitives = order_all_clauses(encoder, options);
+    std::vector<int> initial_mapping(all_primitives.size());
+    // use identity for initial mapping
+    for (int i = 0; i < all_primitives.size(); i++) {
+        initial_mapping[i] = i;
+    }
+
+    std::vector<int> force_order =
+        variable_order::force_clause_order(initial_mapping, all_primitives, encoder.m_symbol_map.get_num_variables());
+
+    std::vector<std::tuple<logic_primitive, int>> result;
+    for (int i = 0; i < force_order.size(); i++) {
+        result.push_back(std::make_tuple(all_primitives[i], i));
+    }
+
+    return result;
+}
+std::vector<std::tuple<planning_logic::logic_primitive, int>> create_custom_clause_order_mapping(
+    encoder::encoder_abstract &encoder, option_values &options) {
+    return std::vector<std::tuple<planning_logic::logic_primitive, int>>();
+}
+
 std::vector<logic_primitive> order_clauses_for_layer(encoder_abstract &encoder, std::string &order_string, int layer) {
     LOG_MESSAGE(log_level::info) << "Ordering clauses for single layer " << layer;
 
@@ -172,8 +203,8 @@ std::vector<logic_primitive> order_clauses_for_foundation(encoder_abstract &enco
     return result_clauses;
 }
 
-std::vector<logic_primitive> collect_primitives_for_all_timesteps(encoder_abstract &encoder, primitive_tag primitive_type,
-                                                                  int timesteps) {
+std::vector<logic_primitive> collect_primitives_for_all_timesteps(encoder_abstract &encoder,
+                                                                  primitive_tag primitive_type, int timesteps) {
     std::vector<logic_primitive> result_primitives;
 
     for (int t = 0; t <= timesteps; t++) {
@@ -183,8 +214,8 @@ std::vector<logic_primitive> collect_primitives_for_all_timesteps(encoder_abstra
     return result_primitives;
 }
 
-std::vector<logic_primitive> collect_primitives_for_single_timestep(encoder_abstract &encoder, primitive_tag primitive_type,
-                                                                    int timestep) {
+std::vector<logic_primitive> collect_primitives_for_single_timestep(encoder_abstract &encoder,
+                                                                    primitive_tag primitive_type, int timestep) {
     return encoder.get_logic_primitives(primitive_type, timestep);
 }
 

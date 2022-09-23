@@ -45,6 +45,10 @@ def print_big_information_from_dicts(all_dics):
     average_bdd_nodes = statistics.mean([get_number_of_nodes_from_bdd_from_info(i) for i in solved_dics])
     print("Average number of nodes for bdd on solved test cases {:0.0f}".format(average_bdd_nodes))
 
+    average_colouring_time = statistics.mean([i["finish_colouring"] for i in solved_dics])
+    average_colours = statistics.mean([i["num_colour_classes"] for i in solved_dics])
+    print("Average number of colouring time and colours: {:0.3f}, {:0.1f}".format(average_colouring_time, average_colours))
+
 # print information in multiple suites are of interest. 
 # key arguments hold the config values that differentiate between the runs
 def get_small_information_from_dicts(all_dics, key_arguments):
@@ -224,9 +228,9 @@ layer_building_differences = [
 #write_all_information_to_file("../../test_output/best_13_7_big_test/best_13_7_big_test_no_timesteps_parallel",      "../../test_output/best_13_7_big_test_no_timesteps_parallel.pkl")
 #write_all_information_to_file("../../test_output/best_13_7_big_test/best_13_7_big_test_binary_encoding",            "../../test_output/best_13_7_big_test_binary_encoding.pkl")
 #best_13_7_big_test_old = read_all_information_from_file("../../test_output/best_13_7_big_test_old.pkl")
-#best_13_7_big_test_no_timesteps = read_all_information_from_file("../../test_output/best_13_7_big_test_no_timesteps.pkl")
-#best_13_7_big_test_no_timesteps_parallel = read_all_information_from_file("../../test_output/best_13_7_big_test_no_timesteps_parallel.pkl")
-#best_13_7_big_test_binary_encoding = read_all_information_from_file("../../test_output/best_13_7_big_test_binary_encoding.pkl")
+best_13_7_big_test_no_timesteps = read_all_information_from_file("../../test_output/best_13_7_big_test_no_timesteps.pkl")
+best_13_7_big_test_no_timesteps_parallel = read_all_information_from_file("../../test_output/best_13_7_big_test_no_timesteps_parallel.pkl")
+best_13_7_big_test_binary_encoding = read_all_information_from_file("../../test_output/best_13_7_big_test_binary_encoding.pkl")
 #print_big_information_from_dicts(best_13_7_big_test_old)
 #print_big_information_from_dicts(best_13_7_big_test_no_timesteps)
 #print_big_information_from_dicts(best_13_7_big_test_no_timesteps_parallel)
@@ -287,22 +291,30 @@ suite_names = [
     #"best_20_7_binary_no_reorder",
     #"best_27_7_old_best",
 
-    "best_27_7_old_best", #binary and no reordering
-    "best_27_7_binary_var", # also doing binary variables is even better
-    "best_27_7_binary_no_imp", # excluding impossible actions also makes it better
-    "best_27_7_binary_var_no_imp", # combining both is the best
+    #"best_27_7_old_best", #binary and no reordering
+    #"best_27_7_binary_var", # also doing binary variables is even better
+    #"best_27_7_binary_no_imp", # excluding impossible actions also makes it better
+    #"best_27_7_binary_var_no_imp", # combining both is the best
 
     # as soon as i use binary variables, enabeling the reordering makes it better again
-    "best_27_7_binary_reorder", # worse
-    "best_27_7_binary_var_reorder", #better
-    "best_27_7_binary_no_imp_reorder", #worse
-    "best_27_7_binary_var_no_imp_reorder", #better (best)
+    #"best_27_7_binary_reorder", # worse
+    #"best_27_7_binary_var_reorder", #better
+    #"best_27_7_binary_no_imp_reorder", #worse
+    #"best_27_7_binary_var_no_imp_reorder", #better (best)
+
+    #"best_27_7_binary_var_no_imp_reorder", # comparison
+    "best_09_08_old_best", 
+    "best_09_08_binary_parallel", 
+    "best_09_08_unary_parallel", 
+    "best_09_08_unary_incremental", # TODO unary incremental got much worse. compare to: print_big_information_from_dicts(best_13_7_big_test_no_timesteps)
+    "best_09_08_binary_incremental", 
+    "best_09_08_group_pre_eff", 
 
 ]
 suite_dics = []
 
 for x in suite_names:
-    #write_all_information_to_file("../../test_output/best_27_7_big_test/" + x, "../../test_output/" + x + ".pkl")
+    #write_all_information_to_file("../../test_output/best_09_08/" + x, "../../test_output/" + x + ".pkl")
     pass
 
 for x in suite_names:
@@ -316,6 +328,7 @@ portfolio_suite_names = [
     "best_27_7_binary_var_no_imp_reorder",
     "best_27_7_binary_var_no_imp", 
     "best_27_7_binary_var_reorder", 
+    "best_09_08_binary_parallel", 
 ]
 portfolio_dics = []
 for x in portfolio_suite_names:

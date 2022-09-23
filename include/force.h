@@ -11,7 +11,10 @@ namespace variable_order {
 std::vector<int> force_variable_order(std::vector<int> &initial_pos_to_idx,
                                       std::vector<planning_logic::logic_primitive> &primitives);
 
-// TODO: clause ordering
+// returns a vector (pos to clause mapping), the ith entry in the vector indicates, which clause should be conjoined at
+// the ith step
+std::vector<int> force_clause_order(std::vector<int> &initial_pos_to_idx,
+                                    std::vector<planning_logic::logic_primitive> &primitives, int num_variables);
 
 // uses the force algorithm to calculate an ordering for this hypergraph
 // position to nodes gives the intial position of the vertices in the ordering

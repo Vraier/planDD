@@ -41,7 +41,8 @@ def compile_information_about_planDD_into_dic(domain_desc, file_path):
     info["finish_time"] = extract_finish_time(file_path)
     info["constructed_clauses"] = extract_total_constructed_clauses(file_path)
     info["constructed_variables"] = extract_constructed_variables(file_path)
-
+    info["finish_colouring"] = extract_colouring_time(file_path)
+    info["num_colour_classes"] = extract_num_colours(file_path)
     # parse info again to get more polished information
 
     return info
@@ -153,6 +154,23 @@ def extract_finish_time(file_path):
                 time_string = p3.search(line).group(1)
                 return convert_time_string_to_float(time_string)
     return -1
+
+def extract_colouring_time(file_path):
+    with open(file_path, "r") as f:
+        for line in f:
+            p3 = re.compile("\[(.*)\]\[info\] Encoder found .* colour classes.*")
+            if p3.match(line):
+                time_string = p3.search(line).group(1)
+                return convert_time_string_to_float(time_string)
+    return -99999
+
+def extract_num_colours(file_path):
+    with open(file_path, "r") as f:
+        for line in f:
+            p = re.compile("\[.*\]\[info\] Encoder found (.*) colour classes.*")
+            if p.match(line):
+                return int(p.search(line).group(1))
+    return -99999
 
 def extract_total_constructed_clauses(file_path):
     with open(file_path, "r") as f:
