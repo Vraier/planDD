@@ -40,5 +40,7 @@ class logic_primitive {
 
     std::vector<int> get_affected_variables() const;
     std::string to_string();
+
+    bool operator <(const logic_primitive& rhs) const;
 };
 }  // namespace planning_logic

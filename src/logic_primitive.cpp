@@ -6,7 +6,7 @@
 
 namespace planning_logic {
 
-std::vector<int> logic_primitive::get_affected_variables() const{
+std::vector<int> logic_primitive::get_affected_variables() const {
     switch (m_type) {
         case logic_clause:
         case logic_eo: {
@@ -63,5 +63,17 @@ std::string logic_primitive::to_string() {
         data += ",";
     }
     return type + " " + time + " " + data;
+}
+
+bool logic_primitive::operator<(const logic_primitive& rhs) const {
+    if (m_type == rhs.m_type) {
+        if (m_data.size() != 0) {
+            return m_data < rhs.m_data;
+        } else {
+            return m_dnf_data < rhs.m_dnf_data;
+        }
+    } else {
+        return m_type < rhs.m_type;
+    }
 }
 }  // namespace planning_logic

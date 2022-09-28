@@ -145,7 +145,11 @@ std::vector<std::tuple<int, int>> create_force_var_order_mapping(encoder::encode
 
     // collect all logic primitives of the planning problem
     LOG_MESSAGE(log_level::info) << "Collecting primitives";
-    std::vector<planning_logic::logic_primitive> all_primitives = conjoin_order::order_all_clauses(encoder, options);
+    std::vector<std::tuple<logic_primitive, int>> all_primitives = conjoin_order::create_custom_clause_order_mapping(encoder, options);
+    std::vector<logic_primitive> stripped_primitives;
+    for(int i = 0; i < all_primitives.size(); i++){
+        stripped_primitives.push_back(std::get<0>(all_primitives[i]));
+    }
 
     // calculate initial variable order (use identity)
     std::vector<int> initial_order(encoder.m_symbol_map.get_num_variables() + 1);  // + one because of zero variable
@@ -161,7 +165,7 @@ std::vector<std::tuple<int, int>> create_force_var_order_mapping(encoder::encode
 
     // calculate force order
     LOG_MESSAGE(log_level::info) << "Apllying force algorithm";
-    std::vector<int> force_order = force_variable_order(initial_order, all_primitives);
+    std::vector<int> force_order = force_variable_order(initial_order, stripped_primitives);
 
     LOG_MESSAGE(log_level::info) << "Transforming to result";
     std::vector<std::tuple<int, int>> result;
@@ -228,7 +232,7 @@ std::vector<std::tuple<int, int>> create_custom_var_order_mapping(encoder::encod
 
 std::vector<std::tuple<int, int, int>> create_custom_force_var_order_mapping(encoder::encoder_abstract &encoder,
                                                                              option_values &options) {
-    LOG_MESSAGE(log_level::error) << "Calculating custom force variable order";
+    LOG_MESSAGE(log_level::info) << "Calculating custom force variable order";
 
     std::vector<std::tuple<int, int>> custom_order = create_custom_var_order_mapping(encoder, options);
     std::vector<std::tuple<int, int>> force_order = create_force_var_order_mapping(encoder, options);

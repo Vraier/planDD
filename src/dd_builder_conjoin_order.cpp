@@ -64,15 +64,30 @@ bool is_valid_layer_order_string(std::string &build_order) {
     return true;
 }
 
-std::vector<std::tuple<logic_primitive, int>> create_custom_clause_order_mapping(encoder_abstract &encoder,
-                                                                                 option_values &options) {
+std::vector<logic_primitive> order_all_clauses(encoder_abstract &encoder, option_values &options) {
     std::string build_order = options.build_order;
-    int custom_order_counter;  // counter that implies the partial order
 
     if (!is_valid_conjoin_order_string(build_order)) {
         LOG_MESSAGE(log_level::error) << "Can't build the following conjoin order " << build_order;
-        return std::vector<std::tuple<logic_primitive, int>>();
+        return std::vector<logic_primitive>();
     }
+
+    // this reverses the order of the clauses. It allows the variables with the highes timesteps to be conjoined first
+    if (options.reverse_order) {
+        LOG_MESSAGE(log_level::info) << "Reversing order of the logic primitives";
+        std::reverse(total_primitives.begin(), total_primitives.end());
+    }
+
+    LOG_MESSAGE(log_level::info) << "Ordered a total of " << total_primitives.size() << " primitives";
+    return total_primitives;
+}
+
+std::vector<std::tuple<logic_primitive, int>> create_custom_clause_order_mapping(encoder_abstract &encoder,
+                                                                                 option_values &options) {
+    LOG_MESSAGE(log_level::info) << "Calculating custom  clause order";
+
+    std::string build_order = options.build_order;
+    int custom_order_counter;  // counter that implies the partial order
 
     // contains the result at the end
     std::vector<std::tuple<logic_primitive, int>> result;
@@ -126,84 +141,21 @@ std::vector<std::tuple<logic_primitive, int>> create_custom_clause_order_mapping
     return result;
 }
 
-std::vector<logic_primitive> order_all_clauses(encoder_abstract &encoder, option_values &options) {
-    std::string build_order = options.build_order;
-
-    if (!is_valid_conjoin_order_string(build_order)) {
-        LOG_MESSAGE(log_level::error) << "Can't build the following conjoin order " << build_order;
-        return std::vector<logic_primitive>();
-    }
-
-    // contains the result at the end
-    std::vector<logic_primitive> interleaved_primitives;
-    std::vector<logic_primitive> total_primitives;
-
-    // split the order into first and second part (in a really complicated manner)
-    std::stringstream ss(build_order);
-    std::string disjoin_order, interleaved_order, tail_part;
-    std::getline(ss, disjoin_order, ':');
-    std::getline(ss, interleaved_order, ':');
-    std::getline(ss, tail_part, ':');
-
-    // sort the interleaved part
-    for (int t = 0; t <= options.timesteps; t++) {
-        for (int i = 0; i < interleaved_order.size(); i++) {
-            char current_char = interleaved_order[i];
-            primitive_tag order_tag = char_tag_map[current_char];
-
-            // only add last timestep for exact one var clauses
-            if (t != options.timesteps || current_char == 'r') {
-                std::vector<logic_primitive> temp_clauses =
-                    collect_primitives_for_single_timestep(encoder, order_tag, t);
-                interleaved_primitives.insert(interleaved_primitives.end(), temp_clauses.begin(), temp_clauses.end());
-            }
-        }
-    }
-
-    for (int i = 0; i < disjoin_order.size(); i++) {
-        char current_char = disjoin_order[i];
-        // add the interleved part
-        if (current_char == 'x') {
-            total_primitives.insert(total_primitives.end(), interleaved_primitives.begin(),
-                                    interleaved_primitives.end());
-        } else {
-            primitive_tag order_tag = char_tag_map[current_char];
-            std::vector<logic_primitive> temp_clauses;
-            if (order_tag == ini_state) {
-                temp_clauses = collect_primitives_for_single_timestep(encoder, order_tag, 0);
-            } else if (order_tag == goal) {
-                temp_clauses = collect_primitives_for_single_timestep(encoder, order_tag, options.timesteps);
-            } else if (order_tag == eo_var) {
-                temp_clauses = collect_primitives_for_all_timesteps(encoder, order_tag, options.timesteps);
-            } else {
-                temp_clauses = collect_primitives_for_all_timesteps(encoder, order_tag, options.timesteps - 1);
-            }
-            total_primitives.insert(total_primitives.end(), temp_clauses.begin(), temp_clauses.end());
-        }
-    }
-
-    // this reverses the order of the clauses. It allows the variables with the highes timesteps to be conjoined first
-    if (options.reverse_order) {
-        LOG_MESSAGE(log_level::info) << "Reversing order of the logic primitives";
-        std::reverse(total_primitives.begin(), total_primitives.end());
-    }
-
-    LOG_MESSAGE(log_level::info) << "Ordered a total of " << total_primitives.size() << " primitives";
-    return total_primitives;
-}
-
-std::vector<std::tuple<logic_primitive, int, int>> create_custom_force_clause_order_mapping(
-    encoder::encoder_abstract &encoder, option_values &options) {
-    return std::vector<std::tuple<logic_primitive, int, int>>();
-}
-
 std::vector<std::tuple<logic_primitive, int>> create_force_clause_order_mapping(encoder::encoder_abstract &encoder,
                                                                                 option_values &options) {
+    LOG_MESSAGE(log_level::info) << "Calculating force clause order";
+
     // order the primitives by custom order
-    std::vector<logic_primitive> all_primitives = order_all_clauses(encoder, options);
-    std::vector<int> initial_mapping(all_primitives.size());
-    // use identity for initial mapping
+    std::vector<std::tuple<logic_primitive, int>> all_primitives =
+        conjoin_order::create_custom_clause_order_mapping(encoder, options);
+    std::vector<logic_primitive> stripped_primitives;
     for (int i = 0; i < all_primitives.size(); i++) {
+        stripped_primitives.push_back(std::get<0>(all_primitives[i]));
+    }
+
+    // use identity for initial mapping
+    std::vector<int> initial_mapping(stripped_primitives.size());
+    for (int i = 0; i < stripped_primitives.size(); i++) {
         initial_mapping[i] = i;
     }
     // enable for random initial permutation
@@ -212,19 +164,47 @@ std::vector<std::tuple<logic_primitive, int>> create_force_clause_order_mapping(
         std::shuffle(std::begin(initial_mapping), std::end(initial_mapping), rng);
     }
 
-    std::vector<int> force_order = variable_order::force_clause_order(initial_mapping, all_primitives,
+    std::vector<int> force_order = variable_order::force_clause_order(initial_mapping, stripped_primitives,
                                                                       encoder.m_symbol_map.get_num_variables() + 1);
 
     std::vector<std::tuple<logic_primitive, int>> result;
     for (int i = 0; i < force_order.size(); i++) {
-        result.push_back(std::make_tuple(all_primitives[force_order[i]], i));
+        result.push_back(std::make_tuple(stripped_primitives[force_order[i]], i));
     }
 
     return result;
 }
-std::vector<std::tuple<planning_logic::logic_primitive, int>> create_custom_clause_order_mapping(
+
+std::vector<std::tuple<logic_primitive, int, int>> create_custom_force_clause_order_mapping(
     encoder::encoder_abstract &encoder, option_values &options) {
-    return std::vector<std::tuple<planning_logic::logic_primitive, int>>();
+    LOG_MESSAGE(log_level::info) << "Calculating custom force clause order";
+
+    std::vector<std::tuple<logic_primitive, int>> custom_order = create_custom_clause_order_mapping(encoder, options);
+    std::vector<std::tuple<logic_primitive, int>> force_order = create_force_clause_order_mapping(encoder, options);
+
+    // combine tuples to triples
+    std::vector<std::tuple<logic_primitive, int, int>> combined_order;
+    std::map<logic_primitive, int> clause_order_map;  // helper map, maps var index to custom order
+    for (int i = 0; i < custom_order.size(); i++) {
+        clause_order_map[std::get<0>(custom_order[i])] = std::get<1>(custom_order[i]);
+    }
+    for (int i = 0; i < force_order.size(); i++) {
+        logic_primitive force_primitive = std::get<0>(force_order[i]);
+        int force_idx = std::get<1>(force_order[i]);
+        combined_order.push_back(std::make_tuple(force_primitive, clause_order_map[force_primitive], force_idx));
+    }
+
+    // sort by custom order and use force order as tiebreaker
+    sort(combined_order.begin(), combined_order.end(),
+         [](const std::tuple<int, int, int> &lhs, const std::tuple<int, int, int> &rhs) {
+             if (std::get<1>(lhs) == std::get<1>(rhs)) {
+                 return std::get<2>(lhs) < std::get<2>(rhs);
+             } else {
+                 return std::get<1>(lhs) < std::get<1>(rhs);
+             }
+         });
+
+    return combined_order;
 }
 
 std::vector<logic_primitive> order_clauses_for_layer(encoder_abstract &encoder, std::string &order_string, int layer) {
