@@ -64,6 +64,68 @@ bool is_valid_layer_order_string(std::string &build_order) {
     return true;
 }
 
+std::vector<std::tuple<logic_primitive, int>> create_custom_clause_order_mapping(encoder_abstract &encoder,
+                                                                                 option_values &options) {
+    std::string build_order = options.build_order;
+    int custom_order_counter;  // counter that implies the partial order
+
+    if (!is_valid_conjoin_order_string(build_order)) {
+        LOG_MESSAGE(log_level::error) << "Can't build the following conjoin order " << build_order;
+        return std::vector<std::tuple<logic_primitive, int>>();
+    }
+
+    // contains the result at the end
+    std::vector<std::tuple<logic_primitive, int>> result;
+
+    // split the order into first and second part (in a really complicated manner)
+    std::stringstream ss(build_order);
+    std::string disjoin_order, interleaved_order, tail_part;
+    std::getline(ss, disjoin_order, ':');
+    std::getline(ss, interleaved_order, ':');
+    std::getline(ss, tail_part, ':');
+
+    for (int i = 0; i < disjoin_order.size(); i++) {
+        char current_char = disjoin_order[i];
+        // add the interleved part
+        if (current_char == 'x') {
+            // sort the interleaved part
+            for (int t = 0; t <= options.timesteps; t++) {
+                for (int j = 0; j < interleaved_order.size(); j++) {
+                    char interleaved_char = interleaved_order[j];
+                    primitive_tag order_tag = char_tag_map[interleaved_char];
+                    // only add last timestep for exact one var clauses
+                    if (t != options.timesteps || interleaved_char == 'r') {
+                        std::vector<logic_primitive> temp_clauses =
+                            collect_primitives_for_single_timestep(encoder, order_tag, t);
+                        for (int k = 0; k < temp_clauses.size(); k++) {
+                            result.push_back(std::make_tuple(temp_clauses[k], custom_order_counter));
+                        }
+                    }
+                }
+                custom_order_counter++;  // increase counter after every timestep
+            }
+            // sort the disjoint part
+        } else {
+            primitive_tag order_tag = char_tag_map[current_char];
+            std::vector<logic_primitive> temp_clauses;
+            if (order_tag == ini_state) {
+                temp_clauses = collect_primitives_for_single_timestep(encoder, order_tag, 0);
+            } else if (order_tag == goal) {
+                temp_clauses = collect_primitives_for_single_timestep(encoder, order_tag, options.timesteps);
+            } else if (order_tag == eo_var) {
+                temp_clauses = collect_primitives_for_all_timesteps(encoder, order_tag, options.timesteps);
+            } else {  // eo_clause?
+                temp_clauses = collect_primitives_for_all_timesteps(encoder, order_tag, options.timesteps - 1);
+            }
+            for (int k = 0; k < temp_clauses.size(); k++) {
+                result.push_back(std::make_tuple(temp_clauses[k], custom_order_counter));
+            }
+            custom_order_counter++;  // increase counter for every group
+        }
+    }
+    return result;
+}
+
 std::vector<logic_primitive> order_all_clauses(encoder_abstract &encoder, option_values &options) {
     std::string build_order = options.build_order;
 
@@ -145,13 +207,13 @@ std::vector<std::tuple<logic_primitive, int>> create_force_clause_order_mapping(
         initial_mapping[i] = i;
     }
     // enable for random initial permutation
-    if(options.force_random_seed){
-        auto rng = std::default_random_engine {};
+    if (options.force_random_seed) {
+        auto rng = std::default_random_engine{};
         std::shuffle(std::begin(initial_mapping), std::end(initial_mapping), rng);
     }
 
-    std::vector<int> force_order =
-        variable_order::force_clause_order(initial_mapping, all_primitives, encoder.m_symbol_map.get_num_variables()+1);
+    std::vector<int> force_order = variable_order::force_clause_order(initial_mapping, all_primitives,
+                                                                      encoder.m_symbol_map.get_num_variables() + 1);
 
     std::vector<std::tuple<logic_primitive, int>> result;
     for (int i = 0; i < force_order.size(); i++) {
