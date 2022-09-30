@@ -3,8 +3,8 @@
 #include <algorithm>
 #include <random>
 
-#include "logging.h"
 #include "force.h"
+#include "logging.h"
 
 using namespace planning_logic;
 using namespace encoder;
@@ -66,20 +66,41 @@ bool is_valid_layer_order_string(std::string &build_order) {
 
 std::vector<logic_primitive> order_all_clauses(encoder_abstract &encoder, option_values &options) {
     std::string build_order = options.build_order;
-
     if (!is_valid_conjoin_order_string(build_order)) {
         LOG_MESSAGE(log_level::error) << "Can't build the following conjoin order " << build_order;
         return std::vector<logic_primitive>();
     }
 
+    std::vector<logic_primitive> ordered_primitives;
+
+    if (options.clause_order_force) {
+        std::vector<std::tuple<logic_primitive, int>> temp = create_force_clause_order_mapping(encoder, options);
+        for (int i = 0; i < temp.size(); i++) {
+            ordered_primitives.push_back(std::get<0>(temp[i]));
+        }
+    } else if (options.clause_order_custom) {
+        std::vector<std::tuple<logic_primitive, int>> temp = create_custom_clause_order_mapping(encoder, options);
+        for (int i = 0; i < temp.size(); i++) {
+            ordered_primitives.push_back(std::get<0>(temp[i]));
+        }
+    } else if (options.clause_order_custom_force) {
+        std::vector<std::tuple<logic_primitive, int, int>> temp =
+            create_custom_force_clause_order_mapping(encoder, options);
+        for (int i = 0; i < temp.size(); i++) {
+            ordered_primitives.push_back(std::get<0>(temp[i]));
+        }
+    } else {
+        LOG_MESSAGE(log_level::error) << "No known conjoin order selected";
+    }
+
     // this reverses the order of the clauses. It allows the variables with the highes timesteps to be conjoined first
     if (options.reverse_order) {
         LOG_MESSAGE(log_level::info) << "Reversing order of the logic primitives";
-        std::reverse(total_primitives.begin(), total_primitives.end());
+        std::reverse(ordered_primitives.begin(), ordered_primitives.end());
     }
 
-    LOG_MESSAGE(log_level::info) << "Ordered a total of " << total_primitives.size() << " primitives";
-    return total_primitives;
+    LOG_MESSAGE(log_level::info) << "Ordered a total of " << ordered_primitives.size() << " primitives";
+    return ordered_primitives;
 }
 
 std::vector<std::tuple<logic_primitive, int>> create_custom_clause_order_mapping(encoder_abstract &encoder,

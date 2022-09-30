@@ -12,7 +12,6 @@ namespace variable_order {
 // second: sort by the number of affected vars (less affected vars come first)
 // then: sort is NOT stable
 //TODO: check if the order is actually correct
-//TODO: ask tomas on his oppinion on correct order
 void sort_bottom_up(std::vector<planning_logic::logic_primitive> &primitives, int start, int end,
                     const std::vector<int> &variable_order);
 };

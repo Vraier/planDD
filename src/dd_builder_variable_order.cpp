@@ -107,23 +107,22 @@ std::vector<int> order_variables(encoder_abstract &encoder, option_values &optio
     std::vector<int> ordered_variables;
 
     if (options.var_order_force) {
-        std::vector<std::tuple<int, int>> temp = variable_order::create_force_var_order_mapping(encoder, options);
+        std::vector<std::tuple<int, int>> temp = create_force_var_order_mapping(encoder, options);
         for (int i = 0; i < temp.size(); i++) {
             ordered_variables.push_back(std::get<0>(temp[i]));
         }
     } else if (options.var_order_custom) {
-        std::vector<std::tuple<int, int>> temp = variable_order::create_custom_var_order_mapping(encoder, options);
+        std::vector<std::tuple<int, int>> temp = create_custom_var_order_mapping(encoder, options);
         for (int i = 0; i < temp.size(); i++) {
             ordered_variables.push_back(std::get<0>(temp[i]));
         }
     } else if (options.var_order_custom_force) {
-        std::vector<std::tuple<int, int, int>> temp =
-            variable_order::create_custom_force_var_order_mapping(encoder, options);
+        std::vector<std::tuple<int, int, int>> temp = create_custom_force_var_order_mapping(encoder, options);
         for (int i = 0; i < temp.size(); i++) {
             ordered_variables.push_back(std::get<0>(temp[i]));
         }
     } else {
-        LOG_MESSAGE(log_level::error) << "No variable order selected " << variable_order;
+        LOG_MESSAGE(log_level::error) << "No known variable order selected";
     }
 
     // move goal or initial_state variable first
@@ -138,44 +137,6 @@ std::vector<int> order_variables(encoder_abstract &encoder, option_values &optio
     return ordered_variables;
 }
 
-// returns a list of var_index, order_index tuples
-std::vector<std::tuple<int, int>> create_force_var_order_mapping(encoder::encoder_abstract &encoder,
-                                                                 option_values &options) {
-    LOG_MESSAGE(log_level::info) << "Calculating force variable order";
-
-    // collect all logic primitives of the planning problem
-    LOG_MESSAGE(log_level::info) << "Collecting primitives";
-    std::vector<std::tuple<logic_primitive, int>> all_primitives = conjoin_order::create_custom_clause_order_mapping(encoder, options);
-    std::vector<logic_primitive> stripped_primitives;
-    for(int i = 0; i < all_primitives.size(); i++){
-        stripped_primitives.push_back(std::get<0>(all_primitives[i]));
-    }
-
-    // calculate initial variable order (use identity)
-    std::vector<int> initial_order(encoder.m_symbol_map.get_num_variables() + 1);  // + one because of zero variable
-    for (int i = 0; i < initial_order.size(); i++) {
-        initial_order[i] = i;
-    }
-
-    // enable for random initial permutation
-    if(options.force_random_seed){
-        auto rng = std::default_random_engine {};
-        std::shuffle(std::begin(initial_order), std::end(initial_order), rng);
-    }
-
-    // calculate force order
-    LOG_MESSAGE(log_level::info) << "Apllying force algorithm";
-    std::vector<int> force_order = force_variable_order(initial_order, stripped_primitives);
-
-    LOG_MESSAGE(log_level::info) << "Transforming to result";
-    std::vector<std::tuple<int, int>> result;
-    for (int i = 0; i < force_order.size(); i++) {
-        result.push_back(std::make_tuple(force_order[i], i));
-    }
-
-    return result;
-}
-
 std::vector<std::tuple<int, int>> create_custom_var_order_mapping(encoder::encoder_abstract &encoder,
                                                                   option_values &options) {
     LOG_MESSAGE(log_level::info) << "Calculating custom variable order";
@@ -183,7 +144,7 @@ std::vector<std::tuple<int, int>> create_custom_var_order_mapping(encoder::encod
     // calculate order given by order string
     int custom_order_counter;  // counter that implies the partial order
     std::vector<std::tuple<int, int>> result;
-    result.push_back(std::make_tuple(0, custom_order_counter)); // o variable at first position
+    result.push_back(std::make_tuple(0, custom_order_counter));  // o variable at first position
     custom_order_counter++;
 
     // split the order into first and second part (in a really complicated manner)
@@ -227,6 +188,45 @@ std::vector<std::tuple<int, int>> create_custom_var_order_mapping(encoder::encod
             custom_order_counter++;  // increase counter for every group
         }
     }
+    return result;
+}
+
+// returns a list of var_index, order_index tuples
+std::vector<std::tuple<int, int>> create_force_var_order_mapping(encoder::encoder_abstract &encoder,
+                                                                 option_values &options) {
+    LOG_MESSAGE(log_level::info) << "Calculating force variable order";
+
+    // collect all logic primitives of the planning problem
+    LOG_MESSAGE(log_level::info) << "Collecting primitives";
+    std::vector<std::tuple<logic_primitive, int>> all_primitives =
+        conjoin_order::create_custom_clause_order_mapping(encoder, options);
+    std::vector<logic_primitive> stripped_primitives;
+    for (int i = 0; i < all_primitives.size(); i++) {
+        stripped_primitives.push_back(std::get<0>(all_primitives[i]));
+    }
+
+    // calculate initial variable order (use identity)
+    std::vector<int> initial_order(encoder.m_symbol_map.get_num_variables() + 1);  // + one because of zero variable
+    for (int i = 0; i < initial_order.size(); i++) {
+        initial_order[i] = i;
+    }
+
+    // enable for random initial permutation
+    if (options.force_random_seed) {
+        auto rng = std::default_random_engine{};
+        std::shuffle(std::begin(initial_order), std::end(initial_order), rng);
+    }
+
+    // calculate force order
+    LOG_MESSAGE(log_level::info) << "Apllying force algorithm";
+    std::vector<int> force_order = force_variable_order(initial_order, stripped_primitives);
+
+    LOG_MESSAGE(log_level::info) << "Transforming to result";
+    std::vector<std::tuple<int, int>> result;
+    for (int i = 0; i < force_order.size(); i++) {
+        result.push_back(std::make_tuple(force_order[i], i));
+    }
+
     return result;
 }
 

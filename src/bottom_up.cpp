@@ -31,8 +31,8 @@ void sort_bottom_up(std::vector<planning_logic::logic_primitive> &primitives, in
                           return false;
                       }
                   } else {
-                    return false;
-                    }
+                      return false;
+                  }
               });
 }
 
