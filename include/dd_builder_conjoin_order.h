@@ -27,6 +27,8 @@ std::vector<std::tuple<planning_logic::logic_primitive, int>> create_force_claus
     encoder::encoder_abstract &encoder, option_values &options);
 std::vector<std::tuple<planning_logic::logic_primitive, int>> create_custom_clause_order_mapping(
     encoder::encoder_abstract &encoder, option_values &options);
+std::vector<std::tuple<planning_logic::logic_primitive, int>> create_bottom_up_clause_order_mapping(
+    encoder::encoder_abstract &encoder, option_values &options);
 
 // same as order clauses but only orders the precondition, effect and frame clauses for timeset 0
 std::vector<planning_logic::logic_primitive> order_clauses_for_layer(encoder::encoder_abstract &encoder,

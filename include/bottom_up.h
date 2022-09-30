@@ -4,9 +4,9 @@
 
 #include "logic_primitive.h"
 
-namespace variable_order {
+namespace conjoin_order {
 
-// sortes the primitives with the bottom up heuristic
+// sorts the primitives with the bottom up heuristic
 // only sorts inside the range start to end (end is exclusive)
 // first: sort by the highest level of the variables (higher (or lower?) levels come first)
 // second: sort by the number of affected vars (less affected vars come first)

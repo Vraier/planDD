@@ -30,6 +30,7 @@ struct option_values {
     // variable ordering with custom, force or combined
     bool var_order_custom, var_order_force, var_order_custom_force;
     bool clause_order_custom, clause_order_force, clause_order_custom_force;
+    bool clause_order_bottom_up, clause_order_custom_bottom_up;
     bool force_random_seed;
 };
 

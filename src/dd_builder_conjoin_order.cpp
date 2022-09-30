@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <random>
 
+#include "bottom_up.h"
+#include "dd_builder_variable_order.h"
 #include "force.h"
 #include "logging.h"
 
@@ -89,6 +91,11 @@ std::vector<logic_primitive> order_all_clauses(encoder_abstract &encoder, option
         for (int i = 0; i < temp.size(); i++) {
             ordered_primitives.push_back(std::get<0>(temp[i]));
         }
+    } else if (options.clause_order_bottom_up) {
+        std::vector<std::tuple<logic_primitive, int>> temp = create_bottom_up_clause_order_mapping(encoder, options);
+        for (int i = 0; i < temp.size(); i++) {
+            ordered_primitives.push_back(std::get<0>(temp[i]));
+        }
     } else {
         LOG_MESSAGE(log_level::error) << "No known conjoin order selected";
     }
@@ -137,6 +144,7 @@ std::vector<std::tuple<logic_primitive, int>> create_custom_clause_order_mapping
                             result.push_back(std::make_tuple(temp_clauses[k], custom_order_counter));
                         }
                     }
+                    // custom_order_counter++;  // increase counter after every category in a timestep
                 }
                 custom_order_counter++;  // increase counter after every timestep
             }
@@ -217,7 +225,7 @@ std::vector<std::tuple<logic_primitive, int, int>> create_custom_force_clause_or
 
     // sort by custom order and use force order as tiebreaker
     sort(combined_order.begin(), combined_order.end(),
-         [](const std::tuple<int, int, int> &lhs, const std::tuple<int, int, int> &rhs) {
+         [](const std::tuple<logic_primitive, int, int> &lhs, const std::tuple<logic_primitive, int, int> &rhs) {
              if (std::get<1>(lhs) == std::get<1>(rhs)) {
                  return std::get<2>(lhs) < std::get<2>(rhs);
              } else {
@@ -226,6 +234,29 @@ std::vector<std::tuple<logic_primitive, int, int>> create_custom_force_clause_or
          });
 
     return combined_order;
+}
+
+std::vector<std::tuple<logic_primitive, int>> create_bottom_up_clause_order_mapping(encoder::encoder_abstract &encoder,
+                                                                                    option_values &options) {
+    std::vector<std::tuple<logic_primitive, int>> custom_order = create_custom_clause_order_mapping(encoder, options);
+    std::vector<logic_primitive> bottom_up_order;
+    for (int i = 0; i < custom_order.size(); i++) {
+        bottom_up_order.push_back(std::get<0>(custom_order[i]));
+    }
+
+    std::vector<int> pos_to_var = variable_order::order_variables(encoder, options);
+    std::vector<int> var_to_pos(pos_to_var.size());
+    for(int i = 0; i < pos_to_var.size(); i++){
+        var_to_pos[pos_to_var[i]] = i;
+    }
+
+    sort_bottom_up(bottom_up_order, 0, bottom_up_order.size(), var_to_pos);
+
+    std::vector<std::tuple<logic_primitive, int>> result;
+    for (int i = 0; i < bottom_up_order.size(); i++) {
+        result.push_back(std::make_tuple(bottom_up_order[i], i));
+    }
+    return result;
 }
 
 std::vector<logic_primitive> order_clauses_for_layer(encoder_abstract &encoder, std::string &order_string, int layer) {
