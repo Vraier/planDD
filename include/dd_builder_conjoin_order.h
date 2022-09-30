@@ -21,14 +21,15 @@ std::vector<planning_logic::logic_primitive> order_all_clauses(encoder::encoder_
                                                                option_values &options);
 
 // helper methods to order logic primitives. The correct ordering method will be used by order_all_clauses
-std::vector<std::tuple<planning_logic::logic_primitive, int, int>> create_custom_force_clause_order_mapping(
-    encoder::encoder_abstract &encoder, option_values &options);
 std::vector<std::tuple<planning_logic::logic_primitive, int>> create_force_clause_order_mapping(
     encoder::encoder_abstract &encoder, option_values &options);
 std::vector<std::tuple<planning_logic::logic_primitive, int>> create_custom_clause_order_mapping(
     encoder::encoder_abstract &encoder, option_values &options);
 std::vector<std::tuple<planning_logic::logic_primitive, int>> create_bottom_up_clause_order_mapping(
     encoder::encoder_abstract &encoder, option_values &options);
+std::vector<std::tuple<planning_logic::logic_primitive, int, int>> create_mixed_clause_order_mapping(
+    std::vector<std::tuple<planning_logic::logic_primitive, int>> &order,
+    std::vector<std::tuple<planning_logic::logic_primitive, int>> &tiebreaker);
 
 // same as order clauses but only orders the precondition, effect and frame clauses for timeset 0
 std::vector<planning_logic::logic_primitive> order_clauses_for_layer(encoder::encoder_abstract &encoder,

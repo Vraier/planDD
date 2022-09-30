@@ -86,13 +86,22 @@ std::vector<logic_primitive> order_all_clauses(encoder_abstract &encoder, option
             ordered_primitives.push_back(std::get<0>(temp[i]));
         }
     } else if (options.clause_order_custom_force) {
-        std::vector<std::tuple<logic_primitive, int, int>> temp =
-            create_custom_force_clause_order_mapping(encoder, options);
+        std::vector<std::tuple<logic_primitive, int>> order = create_custom_clause_order_mapping(encoder, options);
+        std::vector<std::tuple<logic_primitive, int>> tiebreak = create_force_clause_order_mapping(encoder, options);
+        std::vector<std::tuple<logic_primitive, int, int>> temp = create_mixed_clause_order_mapping(order, tiebreak);
         for (int i = 0; i < temp.size(); i++) {
             ordered_primitives.push_back(std::get<0>(temp[i]));
         }
     } else if (options.clause_order_bottom_up) {
         std::vector<std::tuple<logic_primitive, int>> temp = create_bottom_up_clause_order_mapping(encoder, options);
+        for (int i = 0; i < temp.size(); i++) {
+            ordered_primitives.push_back(std::get<0>(temp[i]));
+        }
+    } else if (options.clause_order_custom_bottom_up) {
+        std::vector<std::tuple<logic_primitive, int>> order = create_custom_clause_order_mapping(encoder, options);
+        std::vector<std::tuple<logic_primitive, int>> tiebreak =
+            create_bottom_up_clause_order_mapping(encoder, options);
+        std::vector<std::tuple<logic_primitive, int, int>> temp = create_mixed_clause_order_mapping(order, tiebreak);
         for (int i = 0; i < temp.size(); i++) {
             ordered_primitives.push_back(std::get<0>(temp[i]));
         }
@@ -112,7 +121,7 @@ std::vector<logic_primitive> order_all_clauses(encoder_abstract &encoder, option
 
 std::vector<std::tuple<logic_primitive, int>> create_custom_clause_order_mapping(encoder_abstract &encoder,
                                                                                  option_values &options) {
-    LOG_MESSAGE(log_level::info) << "Calculating custom  clause order";
+    LOG_MESSAGE(log_level::info) << "Calculating custom conjoin order";
 
     std::string build_order = options.build_order;
     int custom_order_counter;  // counter that implies the partial order
@@ -172,7 +181,7 @@ std::vector<std::tuple<logic_primitive, int>> create_custom_clause_order_mapping
 
 std::vector<std::tuple<logic_primitive, int>> create_force_clause_order_mapping(encoder::encoder_abstract &encoder,
                                                                                 option_values &options) {
-    LOG_MESSAGE(log_level::info) << "Calculating force clause order";
+    LOG_MESSAGE(log_level::info) << "Calculating force conjoin order";
 
     // order the primitives by custom order
     std::vector<std::tuple<logic_primitive, int>> all_primitives =
@@ -204,22 +213,45 @@ std::vector<std::tuple<logic_primitive, int>> create_force_clause_order_mapping(
     return result;
 }
 
-std::vector<std::tuple<logic_primitive, int, int>> create_custom_force_clause_order_mapping(
-    encoder::encoder_abstract &encoder, option_values &options) {
-    LOG_MESSAGE(log_level::info) << "Calculating custom force clause order";
-
+std::vector<std::tuple<logic_primitive, int>> create_bottom_up_clause_order_mapping(encoder::encoder_abstract &encoder,
+                                                                                    option_values &options) {
+    LOG_MESSAGE(log_level::info) << "Calculating bottom up conjoin order";
+    
     std::vector<std::tuple<logic_primitive, int>> custom_order = create_custom_clause_order_mapping(encoder, options);
-    std::vector<std::tuple<logic_primitive, int>> force_order = create_force_clause_order_mapping(encoder, options);
+    std::vector<logic_primitive> bottom_up_order;
+    for (int i = 0; i < custom_order.size(); i++) {
+        bottom_up_order.push_back(std::get<0>(custom_order[i]));
+    }
+
+    std::vector<int> pos_to_var = variable_order::order_variables(encoder, options);
+    std::vector<int> var_to_pos(pos_to_var.size());
+    for (int i = 0; i < pos_to_var.size(); i++) {
+        var_to_pos[pos_to_var[i]] = i;
+    }
+
+    sort_bottom_up(bottom_up_order, 0, bottom_up_order.size(), var_to_pos);
+
+    std::vector<std::tuple<logic_primitive, int>> result;
+    for (int i = 0; i < bottom_up_order.size(); i++) {
+        result.push_back(std::make_tuple(bottom_up_order[i], i));
+    }
+    return result;
+}
+
+std::vector<std::tuple<logic_primitive, int, int>> create_mixed_clause_order_mapping(
+    std::vector<std::tuple<planning_logic::logic_primitive, int>> &order,
+    std::vector<std::tuple<planning_logic::logic_primitive, int>> &tiebreaker) {
+    LOG_MESSAGE(log_level::info) << "Calculating mixed conjoin order";
 
     // combine tuples to triples
     std::vector<std::tuple<logic_primitive, int, int>> combined_order;
     std::map<logic_primitive, int> clause_order_map;  // helper map, maps var index to custom order
-    for (int i = 0; i < custom_order.size(); i++) {
-        clause_order_map[std::get<0>(custom_order[i])] = std::get<1>(custom_order[i]);
+    for (int i = 0; i < order.size(); i++) {
+        clause_order_map[std::get<0>(order[i])] = std::get<1>(order[i]);
     }
-    for (int i = 0; i < force_order.size(); i++) {
-        logic_primitive force_primitive = std::get<0>(force_order[i]);
-        int force_idx = std::get<1>(force_order[i]);
+    for (int i = 0; i < tiebreaker.size(); i++) {
+        logic_primitive force_primitive = std::get<0>(tiebreaker[i]);
+        int force_idx = std::get<1>(tiebreaker[i]);
         combined_order.push_back(std::make_tuple(force_primitive, clause_order_map[force_primitive], force_idx));
     }
 
@@ -234,29 +266,6 @@ std::vector<std::tuple<logic_primitive, int, int>> create_custom_force_clause_or
          });
 
     return combined_order;
-}
-
-std::vector<std::tuple<logic_primitive, int>> create_bottom_up_clause_order_mapping(encoder::encoder_abstract &encoder,
-                                                                                    option_values &options) {
-    std::vector<std::tuple<logic_primitive, int>> custom_order = create_custom_clause_order_mapping(encoder, options);
-    std::vector<logic_primitive> bottom_up_order;
-    for (int i = 0; i < custom_order.size(); i++) {
-        bottom_up_order.push_back(std::get<0>(custom_order[i]));
-    }
-
-    std::vector<int> pos_to_var = variable_order::order_variables(encoder, options);
-    std::vector<int> var_to_pos(pos_to_var.size());
-    for(int i = 0; i < pos_to_var.size(); i++){
-        var_to_pos[pos_to_var[i]] = i;
-    }
-
-    sort_bottom_up(bottom_up_order, 0, bottom_up_order.size(), var_to_pos);
-
-    std::vector<std::tuple<logic_primitive, int>> result;
-    for (int i = 0; i < bottom_up_order.size(); i++) {
-        result.push_back(std::make_tuple(bottom_up_order[i], i));
-    }
-    return result;
 }
 
 std::vector<logic_primitive> order_clauses_for_layer(encoder_abstract &encoder, std::string &order_string, int layer) {

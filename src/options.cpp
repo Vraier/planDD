@@ -85,6 +85,8 @@ void option_parser::parse_command_line(int argc, char *argv[]) {
         ("clause_order_bottom_up", po::bool_switch(&m_values.clause_order_bottom_up)->default_value(false),
          "Orders all variables after the bottom up heuristic. It uses the set variable order. Only applies bottom up "
          "once")  //
+        ("clause_order_custom_bottom_up", po::bool_switch(&m_values.clause_order_bottom_up)->default_value(false),
+         "uses custom order and bottom up as tiebreaker")  //
         ("force_random_seed", po::bool_switch(&m_values.force_random_seed)->default_value(false),
          "Sets the initial order for the force algorithm to a random permutation and does not use custom order")  //
         // variable grouping

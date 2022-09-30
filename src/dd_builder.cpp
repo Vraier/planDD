@@ -378,7 +378,7 @@ void conjoin_primitives_linear(dd_buildable &dd, std::vector<logic_primitive> &l
         //for(int a: primitive.get_affected_variables()){
         //    std::cout << a << " ";
         //}
-        std::cout << std::endl;
+        //std::cout << std::endl;
 
         switch (primitive.m_type) {
             case logic_clause:
