@@ -162,6 +162,12 @@ int planDD::build_bdd(option_values opt_values) {
     if(opt_values.timesteps >= 0){
         variable_grouping::create_all_variables(*encoder, builder, opt_values);
         std::vector<int> var_order = variable_order::order_variables(*encoder, opt_values);
+
+        //std::cout << "var order: ";
+        //for(int a: var_order){
+        //    std::cout << a << " ";
+        //}
+        std::cout << std::endl;
         builder.set_variable_order(var_order);
     }
 
