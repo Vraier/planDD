@@ -172,6 +172,9 @@ std::vector<std::tuple<int, int>> create_custom_var_order_mapping(encoder::encod
                             result.push_back(std::make_tuple(tagged_variables[order_tag][t][k], custom_order_counter));
                         }
                     }
+                    if (options.split_inside_timestep) {
+                        custom_order_counter++;  // increase counter after every category in a timestep
+                    }
                 }
                 custom_order_counter++;  // increase counter after every timestep
             }

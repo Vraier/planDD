@@ -153,7 +153,9 @@ std::vector<std::tuple<logic_primitive, int>> create_custom_clause_order_mapping
                             result.push_back(std::make_tuple(temp_clauses[k], custom_order_counter));
                         }
                     }
-                    // custom_order_counter++;  // increase counter after every category in a timestep
+                    if(options.split_inside_timestep){
+                        custom_order_counter++;  // increase counter after every category in a timestep
+                    }
                 }
                 custom_order_counter++;  // increase counter after every timestep
             }

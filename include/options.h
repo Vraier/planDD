@@ -27,11 +27,12 @@ struct option_values {
     // DD layer building
     bool share_foundations, use_layer_permutation, reverse_layer_building;
 
-    // variable ordering with custom, force or combined
+    // variable ordering with custom, force, bottom up or mixed
     bool var_order_custom, var_order_force, var_order_custom_force;
     bool clause_order_custom, clause_order_force, clause_order_custom_force;
     bool clause_order_bottom_up, clause_order_custom_bottom_up;
     bool force_random_seed;
+    bool split_inside_timestep;
 };
 
 /**

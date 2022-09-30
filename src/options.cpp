@@ -87,6 +87,9 @@ void option_parser::parse_command_line(int argc, char *argv[]) {
          "once")  //
         ("clause_order_custom_bottom_up", po::bool_switch(&m_values.clause_order_bottom_up)->default_value(false),
          "uses custom order and bottom up as tiebreaker")  //
+        ("split_inside_timestep", po::bool_switch(&m_values.split_inside_timestep)->default_value(false),
+         "If set, the tiebreaker for mixed ordering is only applied for each category inside a timestep. If not setp, "
+         "the tiebreaker is used for the whole timesetp")  //
         ("force_random_seed", po::bool_switch(&m_values.force_random_seed)->default_value(false),
          "Sets the initial order for the force algorithm to a random permutation and does not use custom order")  //
         // variable grouping
