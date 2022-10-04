@@ -541,12 +541,73 @@ def best_09_08_big_test():
     return comms
 
 
+def gen_args_for_03_08():
+    args = []
+
+    binary_encode_args = "--binary_encoding --binary_variables --binary_exclude_impossible"
+    downward_argument_map = dict(arguments.standart_downward_argument_map)
+    clause_orders = [   
+        "clause_order_custom",
+        "clause_order_force",
+        "clause_order_custom_force",
+        "clause_order_bottom_up",
+        "clause_order_custom_bottom_up",
+    ]
+    map_template = {
+        "$timeout" : "300s",
+        "$mode" : "build_bdd",
+        "$addition_flags" : " --linear --build_order igx:rympec: --variable_order x:voh --var_order_custom",
+    }
+
+    # with binary encoding
+    for order in clause_orders:
+        new_arg_map = dict(map_template)
+        new_arg_map["$addition_flags"] += " --" + order + " " + binary_encode_args
+
+        if "force" in order:
+            add_desc = "03_08_" + order + "_binary_rand_seed"
+            add_map = dict(new_arg_map)
+            add_map["$addition_flags"] += " --force_random_seed"
+            args.append((add_desc, add_map, downward_argument_map))
+
+        descriptor = "03_08_" + order + "_binary"
+        args.append((descriptor, new_arg_map, downward_argument_map))
+
+    # without binary encoding
+    for order in clause_orders:
+        new_arg_map = dict(map_template)
+        new_arg_map["$addition_flags"] += " --" + order + " --exact_one_constraint"
+
+        if "force" in order:
+            add_desc = "03_08_" + order + "_unary_rand_seed"
+            add_map = dict(new_arg_map)
+            new_arg_map["$addition_flags"] += " --force_random_seed"
+            args.append((add_desc, add_map, downward_argument_map))
+
+        descriptor = "03_08_" + order + "_unary"
+        args.append((descriptor, new_arg_map, downward_argument_map))
+
+    return args
+
+#134, old friend
+def test_03_08_clause_ordering():
+    probs = problems.list_all_downward_solved_problems()
+   
+    args = gen_args_for_03_08()
+
+    comms = commandfile.generate_command_calls(probs, args)
+    print("Num problems:",len(probs))
+    print("Num configs:",len(args))
+    print("Num commands:",len(comms))
+    return comms
+
+
 # TODO test binary encoding with different clause/var orerings
 # TODO test all var orders with all conjoin orders
 
 
 comms = []
-comms += best_09_08_big_test()
+comms += test_03_08_clause_ordering()
 
 commandfile.generate_parallel_file_from_calls(comms)
 

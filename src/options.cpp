@@ -85,7 +85,8 @@ void option_parser::parse_command_line(int argc, char *argv[]) {
         ("clause_order_bottom_up", po::bool_switch(&m_values.clause_order_bottom_up)->default_value(false),
          "Orders all variables after the bottom up heuristic. It uses the set variable order. Only applies bottom up "
          "once")  //
-        ("clause_order_custom_bottom_up", po::bool_switch(&m_values.clause_order_custom_bottom_up)->default_value(false),
+        ("clause_order_custom_bottom_up",
+         po::bool_switch(&m_values.clause_order_custom_bottom_up)->default_value(false),
          "uses custom order and bottom up as tiebreaker")  //
         ("split_inside_timestep", po::bool_switch(&m_values.split_inside_timestep)->default_value(false),
          "If set, the tiebreaker for mixed ordering is only applied for each category inside a timestep. If not setp, "
