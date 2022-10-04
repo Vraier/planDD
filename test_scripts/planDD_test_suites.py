@@ -602,12 +602,70 @@ def test_03_08_clause_ordering():
     return comms
 
 
+def gen_args_for_04_08():
+    args = []
+
+    binary_encode_args = "--binary_encoding --binary_variables --binary_exclude_impossible"
+    downward_argument_map = dict(arguments.standart_downward_argument_map)
+    var_orders = [   
+        "var_order_custom",
+        "var_order_force",
+        "var_order_custom_force",
+    ]
+    map_template = {
+        "$timeout" : "300s",
+        "$mode" : "build_bdd",
+        "$addition_flags" : " --linear --build_order igx:rympec: --variable_order x:voh --clause_order_custom",
+    }
+    
+    # without reordering
+    for order in var_orders:
+        new_arg_map = dict(map_template)
+        new_arg_map["$addition_flags"] += " --" + order + " " + binary_encode_args + " --no_reordering"
+
+        if "force" in order:
+            add_desc = "04_08_" + order + "_no_reorder_rand_seed"
+            add_map = dict(new_arg_map)
+            new_arg_map["$addition_flags"] += " --force_random_seed"
+            args.append((add_desc, add_map, downward_argument_map))
+
+        descriptor = "04_08_" + order + "_no_reorder"
+        args.append((descriptor, new_arg_map, downward_argument_map))
+
+    # with reordering
+    for order in var_orders:
+        new_arg_map = dict(map_template)
+        new_arg_map["$addition_flags"] += " --" + order + " " + binary_encode_args
+
+        if "force" in order:
+            add_desc = "04_08_" + order + "_reorder_rand_seed"
+            add_map = dict(new_arg_map)
+            add_map["$addition_flags"] += " --force_random_seed"
+            args.append((add_desc, add_map, downward_argument_map))
+
+        descriptor = "04_08_" + order + "_reorder"
+        args.append((descriptor, new_arg_map, downward_argument_map))
+
+    return args
+
+#134, old friend
+def test_04_08_clause_ordering():
+    probs = problems.list_all_downward_solved_problems()
+   
+    args = gen_args_for_04_08()
+
+    comms = commandfile.generate_command_calls(probs, args)
+    print("Num problems:",len(probs))
+    print("Num configs:",len(args))
+    print("Num commands:",len(comms))
+    return comms
+
 # TODO test binary encoding with different clause/var orerings
 # TODO test all var orders with all conjoin orders
 
 
 comms = []
-comms += test_03_08_clause_ordering()
+comms += test_04_08_clause_ordering()
 
 commandfile.generate_parallel_file_from_calls(comms)
 
