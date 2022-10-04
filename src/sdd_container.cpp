@@ -51,6 +51,8 @@ void sdd_manager::add_clause_primitive(std::vector<int> &clause, int sdd_index) 
 void sdd_manager::add_exactly_one_primitive(std::vector<int> &variables, int sdd_index) { return; }
 void sdd_manager::add_dnf_primitive(std::vector<std::vector<int>> &dnf, int sdd_index) { return; }
 
+void sdd_manager::create_ith_var(int i) { return; }
+
 void sdd_manager::permute_variables(std::vector<int> &permutation, int source_bdd, int destination_bdd) { return; }
 void sdd_manager::conjoin_two_dds(int dd_a, int dd_b, int dd_result) { return; }
 

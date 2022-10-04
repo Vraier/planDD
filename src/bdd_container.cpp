@@ -20,7 +20,7 @@ bdd_container::bdd_container(int num_bdds) {
 }
 
 bdd_container::~bdd_container() {
-    // check if all nodes were dereferenced corretly (no memory leaks (:)
+    // check if all nodes were dereferenced correctly (no memory leaks (:)
     for (int i = 0; i < m_root_nodes.size(); i++) {
         Cudd_RecursiveDeref(m_bdd_manager, m_root_nodes[i]);
     }
@@ -271,6 +271,7 @@ void bdd_container::set_variable_group(int low, int size) {
 void bdd_container::set_variable_order(std::vector<int> &variable_order) {
     LOG_MESSAGE(log_level::info) << "Setting variable order. manager size: " << Cudd_ReadSize(m_bdd_manager)
                                  << " order size: " << variable_order.size();
+
     int *order = variable_order.data();
     Cudd_ShuffleHeap(m_bdd_manager, order);
 }
@@ -283,7 +284,7 @@ std::vector<int> bdd_container::get_variable_order() {
         if (layer_of_variable_i == -1) {  // variable does not exist
             continue;
         }
-        index_to_layer[i] = layer_of_variable_i;
+        index_to_layer[layer_of_variable_i] = i;
     }
     return index_to_layer;
 }
@@ -302,6 +303,10 @@ void bdd_container::copy_and_conjoin_bdd_from_another_container(bdd_container &c
     Cudd_RecursiveDeref(m_bdd_manager, copied_bdd);
 
     m_root_nodes[0] = tmp;
+}
+
+void bdd_container::create_ith_var(int i){
+    Cudd_bddIthVar(m_bdd_manager, i);
 }
 
 void bdd_container::permute_variables(std::vector<int> &permutation, int source_bdd, int destination_bdd) {

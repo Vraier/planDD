@@ -29,7 +29,9 @@ class sdd_manager : public virtual dd_buildable {
     void add_clause_primitive(std::vector<int> &clause, int sdd_index = 0);
     void add_exactly_one_primitive(std::vector<int> &variables, int sdd_index = 0);
     void add_dnf_primitive(std::vector<std::vector<int>> &dnf, int bdd_index = 0);
-
+    
+    void create_ith_var(int i);
+    
     void permute_variables(std::vector<int> &permutation, int source_bdd, int destination_bdd);
     void conjoin_two_dds(int dd_a, int dd_b, int dd_result);
 

@@ -5,8 +5,8 @@
 #include <vector>
 
 #include "dd_buildable.h"
-#include "planning_logic_formula.h"
 #include "logging.h"
+#include "planning_logic_formula.h"
 
 extern "C" {
 #include "mtr.h"
@@ -45,6 +45,8 @@ class bdd_container : public virtual dd_buildable {
     // adds a dnf to the bdd. it has the form 'g or (a^b^c) or (x^y)'
     void add_dnf_primitive(std::vector<std::vector<int>> &dnf, int dd_index = 0);
 
+    void create_ith_var(int i);
+
     // Functions for building the bdd timestep by timestep
     // permutes the variables in source bdd according to the given permutation
     // write the result into destionation bdd. the old bdd in destination gets freed and is lost
@@ -64,11 +66,11 @@ class bdd_container : public virtual dd_buildable {
     // they will stay consecutive in the variable order from now on
     void set_variable_group(int low, int size);
     // The i-th entry of the permutation array contains the index of the variable that should be brought to the i-th
-    // level indx -> layer
+    // layer -> var index
     void set_variable_order(std::vector<int> &variable_order);
     // returns the permutation of the variable order
-    // the i-th entry contains the the level in the BDD in which the ith variable resides in
-    // indx -> layer
+    // the i-th entry contains the variable index that currently resides in the i-th layer
+    // layer -> var index
     std::vector<int> get_variable_order();
     // reorders the variables with the reorder_shift_converge method
     void reduce_heap();

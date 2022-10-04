@@ -22,6 +22,11 @@ class dd_buildable {
     // adds a dnf to the bdd. it has the form 'g or (a^b^c) or (x^y)'
     virtual void add_dnf_primitive(std::vector<std::vector<int>> &dnf, int dd_index = 0) = 0;
 
+    // creates variables until i variables exist.
+    // this is important for variable ordering
+    // one has to create variables before he can order them
+    virtual void create_ith_var(int i) = 0;
+
     // Functions for building the dd timestep by timestep
     // permutes the variables in source bdd according to the given permutation
     // write the result into destionation bdd. the old bdd in destination gets freed and is lost

@@ -23,11 +23,15 @@ void create_all_variables(encoder_abstract &encoder, bdd_container &container, o
                     encoder.m_symbol_map.get_variable_index(variable_plan_var, t, var, val);
                 }
             }
+
+            container.create_ith_var(encoder.m_symbol_map.next_used_index()-1);
             var_group_small_size = encoder.m_symbol_map.next_used_index() - var_group_small_start;
             if (options.group_variables_small) {
                 container.set_variable_group(var_group_small_start, var_group_small_size);
             }
         }
+        
+        container.create_ith_var(encoder.m_symbol_map.next_used_index()-1);
         var_group_size = encoder.m_symbol_map.next_used_index() - var_group_start;
         if (options.group_variables) {
             container.set_variable_group(var_group_start, var_group_size);
@@ -44,8 +48,9 @@ void create_all_variables(encoder_abstract &encoder, bdd_container &container, o
                     encoder.m_symbol_map.get_variable_index(variable_plan_op, t, op);
                 }
             }
-            op_group_size = encoder.m_symbol_map.next_used_index() - op_group_start;
 
+            container.create_ith_var(encoder.m_symbol_map.next_used_index()-1);
+            op_group_size = encoder.m_symbol_map.next_used_index() - op_group_start;
             if (options.group_actions) {
                 container.set_variable_group(op_group_start, op_group_size);
             }

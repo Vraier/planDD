@@ -76,23 +76,50 @@ int planDD::hack_debug(option_values opt_values) {
         return 0;
     }
 
-    encoder::encoder_abstract *encoder;
-    if(opt_values.binary_parallel){
-        graph::undirected_graph conflict_graph = parser.m_sas_problem.construct_complement_action_conflic_graph();
-        encoder = new encoder::binary_parallel(opt_values, parser.m_sas_problem, conflict_graph);
-    } else {
-        encoder = new encoder::encoder_basic(opt_values, parser.m_sas_problem);
-    }
+    encoder::encoder_basic encoder(opt_values, parser.m_sas_problem);
 
     bdd_container builder(1);
 
-    variable_grouping::create_all_variables(*encoder, builder, opt_values);
-    std::vector<int> var_order = variable_order::order_variables(*encoder, opt_values);
-    builder.set_variable_order(var_order);
+    if(opt_values.timesteps >= 0){
+        variable_grouping::create_all_variables(encoder, builder, opt_values);
+        std::vector<int> var_order = variable_order::order_variables(encoder, opt_values);
 
-    std::vector<planning_logic::logic_primitive> all_primitives = conjoin_order::order_all_clauses(*encoder, opt_values);
-    visualize::visualize_var_order(var_order, all_primitives);
+        std::cout << "Calculated var order: ";
+        for(int a: var_order){
+            std::cout << a << " ";
+        }
+        std::cout << std::endl;
+        builder.set_variable_order(var_order);
 
+        std::vector<int> set_var_order = builder.get_variable_order();
+
+        std::cout << "Set var order: ";
+        for(int a: set_var_order){
+            std::cout << a << " ";
+        }
+        std::cout << std::endl;
+    }
+
+    if(opt_values.no_reordering){
+        builder.disable_reordering();
+    } else{
+        builder.enable_reordering();
+    }
+
+    dd_builder::construct_dd(builder, encoder, opt_values);
+
+    std::vector<int> final_var_order = builder.get_variable_order();
+
+    std::cout << "Final var order: ";
+    for(int a: final_var_order){
+        std::cout << a << " ";
+    }
+    std::cout << std::endl;
+
+
+    builder.print_bdd_info();
+
+    return 0;
 
     /*
     LOG_MESSAGE(log_level::info) << "Outputting order";
@@ -108,13 +135,11 @@ int planDD::hack_debug(option_values opt_values) {
         std::cout << "v=" << std::get<3>(tv) << std::endl;
     }*/
 
-    delete encoder;
 
     //for(auto a: builder.list_minterms(10)){
         //encoder.decode_cnf_solution(a, 5);
     //}
     // builder.write_bdd_to_dot_file("normal_bdd.dot");
-    return 0;
 }
 
 int planDD::conflict_graph(option_values opt_values) {
@@ -163,10 +188,10 @@ int planDD::build_bdd(option_values opt_values) {
         variable_grouping::create_all_variables(*encoder, builder, opt_values);
         std::vector<int> var_order = variable_order::order_variables(*encoder, opt_values);
 
-        //std::cout << "var order: ";
-        //for(int a: var_order){
-        //    std::cout << a << " ";
-        //}
+        std::cout << "var order: ";
+        for(int a: var_order){
+            std::cout << a << " ";
+        }
         std::cout << std::endl;
         builder.set_variable_order(var_order);
     }
