@@ -581,7 +581,7 @@ def gen_args_for_03_08():
         if "force" in order:
             add_desc = "03_08_" + order + "_unary_rand_seed"
             add_map = dict(new_arg_map)
-            new_arg_map["$addition_flags"] += " --force_random_seed"
+            add_map["$addition_flags"] += " --force_random_seed"
             args.append((add_desc, add_map, downward_argument_map))
 
         descriptor = "03_08_" + order + "_unary"
@@ -593,7 +593,8 @@ def gen_args_for_03_08():
 def test_03_08_clause_ordering():
     probs = problems.list_all_downward_solved_problems()
    
-    args = gen_args_for_03_08()
+    args = gen_args_for_03_08()[7:] #WARNING only second half is used here
+
 
     comms = commandfile.generate_command_calls(probs, args)
     print("Num problems:",len(probs))
@@ -626,7 +627,7 @@ def gen_args_for_04_08():
         if "force" in order:
             add_desc = "04_08_" + order + "_no_reorder_rand_seed"
             add_map = dict(new_arg_map)
-            new_arg_map["$addition_flags"] += " --force_random_seed"
+            add_map["$addition_flags"] += " --force_random_seed"
             args.append((add_desc, add_map, downward_argument_map))
 
         descriptor = "04_08_" + order + "_no_reorder"
@@ -653,7 +654,6 @@ def test_04_08_clause_ordering():
     probs = problems.list_all_downward_solved_problems()
    
     args = gen_args_for_04_08()
-
     comms = commandfile.generate_command_calls(probs, args)
     print("Num problems:",len(probs))
     print("Num configs:",len(args))
@@ -666,6 +666,7 @@ def test_04_08_clause_ordering():
 
 comms = []
 comms += test_04_08_clause_ordering()
+comms += test_03_08_clause_ordering()
 
 commandfile.generate_parallel_file_from_calls(comms)
 

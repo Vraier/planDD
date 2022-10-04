@@ -303,25 +303,36 @@ suite_names = [
     #"best_27_7_binary_var_no_imp_reorder", #better (best)
 
     #"best_27_7_binary_var_no_imp_reorder", # comparison
-    "best_09_08_old_best", 
-    "best_09_08_binary_parallel", 
-    "best_09_08_unary_parallel", 
-    "best_09_08_unary_incremental", # TODO unary incremental got much worse. compare to: print_big_information_from_dicts(best_13_7_big_test_no_timesteps)
-    "best_09_08_binary_incremental", 
-    "best_09_08_group_pre_eff", 
+    #"best_09_08_old_best", 
+    #"best_09_08_binary_parallel", 
+    #"best_09_08_unary_parallel", 
+    #"best_09_08_unary_incremental", # TODO unary incremental got much worse. compare to: print_big_information_from_dicts(best_13_7_big_test_no_timesteps)
+    #"best_09_08_binary_incremental", 
+    #"best_09_08_group_pre_eff", 
 
+    # they did not make my portfolio better, it seems my custom order is already really good
+    "03_08_clause_order_custom_binary",
+    
+    "03_08_clause_order_force_binary",
+    "03_08_clause_order_force_binary_rand_seed",
+    "03_08_clause_order_bottom_up_binary",
+
+    "03_08_clause_order_custom_force_binary",
+    "03_08_clause_order_custom_force_binary_rand_seed",
+    "03_08_clause_order_custom_bottom_up_binary",
 ]
 suite_dics = []
 
 for x in suite_names:
-    #write_all_information_to_file("../../test_output/best_09_08/" + x, "../../test_output/" + x + ".pkl")
+    #write_all_information_to_file("../../test_output/03_08_clause_ordering/" + x, "../../test_output/" + x + ".pkl")
     pass
 
 for x in suite_names:
     suite_dics.append(read_all_information_from_file("../../test_output/" + x + ".pkl"))
     
-for x in suite_dics:
-    print_big_information_from_dicts(x)
+for i in range(len(suite_names)):
+    print(suite_names[i])
+    print_big_information_from_dicts(suite_dics[i])
 
 
 portfolio_suite_names = [
@@ -334,4 +345,4 @@ portfolio_dics = []
 for x in portfolio_suite_names:
     portfolio_dics.append(read_all_information_from_file("../../test_output/" + x + ".pkl"))
 
-#print_portfolio_information(portfolio_dics)
+print_portfolio_information(portfolio_dics)
