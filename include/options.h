@@ -11,6 +11,7 @@ struct option_values {
     bool encode_cnf, cnf_to_bdd, conflict_graph, build_bdd, build_sdd, single_minisat, count_minisat, hack_debug;
 
     int timesteps;
+    double num_plans;
     // DD building parameters
     std::string build_order, variable_order;
     // effects the building algorithm

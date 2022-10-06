@@ -16,6 +16,7 @@ sdd_manager::~sdd_manager() { sdd_manager_free(m_sdd_manager); }
 void sdd_manager::set_num_dds(int num_dds) { return; }
 
 bool sdd_manager::is_constant_false(int dd_index) { return true; }
+double sdd_manager::count_num_solutions(int dd_index){ return 0.0;}
 
 void sdd_manager::clear_dd(int dd_index) { return; }
 

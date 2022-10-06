@@ -318,16 +318,19 @@ void construct_dd_by_layer_exponentially(dd_buildable &container, encoder_abstra
 
 bool goal_is_fullfilled(dd_buildable &container, encoder_abstract &encoder, int main_idx, int temp_idx, int timestep) {
     LOG_MESSAGE(log_level::info) << "Checking if goal is fulfilled in timestep " << timestep;
-    std::vector<logic_primitive> goal_primitives = encoder.get_logic_primitives(goal, timestep);
-    container.clear_dd(temp_idx);
-    container.conjoin_two_dds(main_idx, temp_idx, temp_idx);
-    conjoin_primitives_linear(container, goal_primitives, temp_idx, true);
-
+    conjoin_main_dd_with_goal(container, encoder, main_idx, temp_idx, timestep);
     bool is_fulfilled = container.is_constant_false(temp_idx) ? false : true;
     container.clear_dd(temp_idx);
 
     LOG_MESSAGE(log_level::info) << "Goal is " << (is_fulfilled ? "" : "not") << " fulfilled";
     return is_fulfilled;
+}
+
+void conjoin_main_dd_with_goal(dd_buildable &container, encoder_abstract &encoder, int main_idx, int temp_idx, int timestep){
+    std::vector<logic_primitive> goal_primitives = encoder.get_logic_primitives(goal, timestep);
+    container.clear_dd(temp_idx);
+    container.conjoin_two_dds(main_idx, temp_idx, temp_idx);
+    conjoin_primitives_linear(container, goal_primitives, temp_idx, true);
 }
 
 void construct_dd_without_timesteps(dd_buildable &container, encoder_abstract &encoder, option_values &options) {

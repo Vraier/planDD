@@ -23,6 +23,7 @@ class sdd_manager : public virtual dd_buildable {
     void set_num_dds(int num_dds);
 
     bool is_constant_false(int dd_index);
+    double count_num_solutions(int dd_index);
 
     void clear_dd(int dd_index = 0);
 
