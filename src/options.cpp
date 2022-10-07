@@ -31,6 +31,8 @@ void option_parser::parse_command_line(int argc, char *argv[]) {
         // DD building parameters
         ("timesteps", po::value<int>(&m_values.timesteps),
          "The amount of timsteps represented by the cnf formula")  //
+        ("num_plans", po::value<double>(&m_values.num_plans),
+         "The amount of plans the planner will search for")  //
         // what and how to conjoin clauses?
         ("include_mutex", po::bool_switch(&m_values.include_mutex)->default_value(false),
          "If this flag is set, the cnf encoder will include the mutexes from the sas problem in its formula")  //

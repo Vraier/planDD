@@ -11,6 +11,7 @@
 #include "sas_parser.h"
 #include "sdd_container.h"
 #include "dd_builder.h"
+#include "dd_builder_topk.h"
 #include "dd_builder_variable_order.h"
 #include "dd_builder_conjoin_order.h"
 #include "bdd_container.h"
@@ -78,27 +79,7 @@ int planDD::hack_debug(option_values opt_values) {
 
     encoder::encoder_basic encoder(opt_values, parser.m_sas_problem);
 
-    bdd_container builder(1);
-
-    if(opt_values.timesteps >= 0){
-        variable_grouping::create_all_variables(encoder, builder, opt_values);
-        std::vector<int> var_order = variable_order::order_variables(encoder, opt_values);
-
-        std::cout << "Calculated var order: ";
-        for(int a: var_order){
-            std::cout << a << " ";
-        }
-        std::cout << std::endl;
-        builder.set_variable_order(var_order);
-
-        std::vector<int> set_var_order = builder.get_variable_order();
-
-        std::cout << "Set var order: ";
-        for(int a: set_var_order){
-            std::cout << a << " ";
-        }
-        std::cout << std::endl;
-    }
+    bdd_container builder(2);
 
     if(opt_values.no_reordering){
         builder.disable_reordering();
@@ -106,16 +87,7 @@ int planDD::hack_debug(option_values opt_values) {
         builder.enable_reordering();
     }
 
-    dd_builder::construct_dd(builder, encoder, opt_values);
-
-    std::vector<int> final_var_order = builder.get_variable_order();
-
-    std::cout << "Final var order: ";
-    for(int a: final_var_order){
-        std::cout << a << " ";
-    }
-    std::cout << std::endl;
-
+    dd_builder::construct_dd_top_k(builder, encoder, opt_values);
 
     builder.print_bdd_info();
 

@@ -32,6 +32,7 @@ void construct_dd_top_k(dd_buildable &container, encoder::encoder_abstract &enco
             break;
         }
 
+        // TODO abbruchkriterium, wenn nicht gen"ugend pl"ane existieren
         // extend new timestep
         LOG_MESSAGE(log_level::info) << "Extending timestep " << current_timestep;
         // NOTE: it did not help to try to only include eo_op once
