@@ -20,6 +20,23 @@ def list_all_opt_strips_problems():
                 })
     return all_problems
 
+def list_all_opt_strips_unitcost_problems():
+    all_problems = suites.suite_optimal_strips()
+    unit_cost_problem = [p for p in all_problems if suites.TAG_HAS_ONLY_UNIT_COST_ACTIONS in suites.DOMAIN_TO_TAGS[p]]
+    result = []
+    for domain in unit_cost_problem:
+        domain_path = os.path.join(util.PATH_TO_BENCHMARKS, domain)
+        for f in os.listdir(domain_path):
+            file_path = os.path.join(domain_path, f)
+            if os.path.isfile(file_path) and not "domain" in f and ".pddl" in f:
+                result.append({
+                    "d_name" : domain,
+                    "p_name" : f,
+                    "path" : file_path,
+                    "plan_length" : -1,
+                })
+    return result
+
 def list_all_downward_solved_problems():
     downward_dics = extract_planDD_information.downward_read_all_information_from_file()
     all_problems = list_all_opt_strips_problems()

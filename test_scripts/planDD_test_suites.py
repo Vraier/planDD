@@ -589,7 +589,7 @@ def gen_args_for_03_08():
 
     return args
 
-#134, old friend
+# first half 137, second 136
 def test_03_08_clause_ordering():
     probs = problems.list_all_downward_solved_problems()
    
@@ -649,7 +649,7 @@ def gen_args_for_04_08():
 
     return args
 
-#134, old friend
+#136,
 def test_04_08_clause_ordering():
     probs = problems.list_all_downward_solved_problems()
    

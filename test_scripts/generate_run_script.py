@@ -17,7 +17,11 @@ KSTAR_PATH = "../../kstar/fast-downward.py"
 
 # TODO Modify
 # one section for symk
-# two sections for kstar
+# Kstar: 
+#   - plan_reconstructor 221, 233, 249, 173
+#   - fast_downward.py header
+# Symk:
+#   - plan_database: 134
 # fast-downward script for kstar
 
 # TODO, check if everything works
@@ -150,13 +154,13 @@ def generate_topk_parallel_command_file(problems, suites):
                     parallel_file.write(forbidk_topk_command(suite_name, problem, k, t) + "\n")    
                 num_commands += 1
         print("Generated a total of", num_commands, "commands")   
- 
-problems = probs.list_all_opt_strips_problems()   
+
+problems = probs.list_all_opt_strips_unitcost_problems()   
 suites = [
     ("planDD",  10000000, 300),
     ("symk",    10000000, 300),
     ("kstar",   10000000, 300),
-    ("forbidk", 10000000, 300),
+    #("forbidk", 10000000, 300), # i dont do this for now because it would write too many files
 ]
 
 generate_topk_parallel_command_file(problems, suites)

@@ -310,9 +310,25 @@ suite_names = [
     #"best_09_08_binary_incremental", 
     #"best_09_08_group_pre_eff", 
 
+
+
+
+
+
+
+
+
+
+    #"04_08_var_order_custom_reorder",
+    #"04_08_var_order_custom_no_reorder",
+    #"04_08_var_order_force_no_reorder",
+    #"04_08_var_order_force_no_reorder_rand_seed",
+    #"04_08_var_order_custom_force_no_reorder",
+    #"04_08_var_order_custom_force_no_reorder_rand_seed",
+
     # they did not make my portfolio better, it seems my custom order is already really good
     "03_08_clause_order_custom_binary",
-    
+
     "03_08_clause_order_force_binary",
     "03_08_clause_order_force_binary_rand_seed",
     "03_08_clause_order_bottom_up_binary",
@@ -324,7 +340,7 @@ suite_names = [
 suite_dics = []
 
 for x in suite_names:
-    #write_all_information_to_file("../../test_output/03_08_clause_ordering/" + x, "../../test_output/" + x + ".pkl")
+    #write_all_information_to_file("../../test_output/04_08_var_ordering/" + x, "../../test_output/" + x + ".pkl")
     pass
 
 for x in suite_names:
@@ -341,8 +357,9 @@ portfolio_suite_names = [
     "best_27_7_binary_var_reorder", 
     "best_09_08_binary_parallel", 
 ]
+
 portfolio_dics = []
 for x in portfolio_suite_names:
     portfolio_dics.append(read_all_information_from_file("../../test_output/" + x + ".pkl"))
 
-print_portfolio_information(portfolio_dics)
+#print_portfolio_information(portfolio_dics)
