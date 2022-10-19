@@ -72,7 +72,7 @@ def planDD_topk_command(suite_name, problem, num_plans, timeout):
     suite_downward_path = join(SUITE_TO_SCRIPT_PATH, DOWNWARD_PATH)
     fd_payload = "{} --sas-file output.sas --translate-time-limit {} --translate {}  > fd_output.txt".format(suite_downward_path, timeout, suite_problem_path)
     suite_planDD_path = join(SUITE_TO_SCRIPT_PATH, PLANDD_PATH)
-    planDD_payload = "timeout {} {}  --sas_file output.sas --build_bdd --num_plans {} $addition_flags > output.txt".format(timeout, suite_planDD_path, num_plans)
+    planDD_payload = "timeout {} {} --sas_file output.sas --build_bdd --linear --timesteps -1 --clause_order_custom --var_order_custom --build_order rympec:: --binary_encoding --binary_exclude_impossible --binary_variables --num_plans {} $addition_flags > output.txt".format(timeout, suite_planDD_path, num_plans)
 
     whole_command = "{} && {} && {}".format(dir_change_command, fd_payload, planDD_payload)    
     return whole_command   
@@ -109,7 +109,7 @@ def forbidk_topk_command(suite_name, problem, num_plans, timeout):
     
     suite_forbidik_path = join(SUITE_TO_SCRIPT_PATH, FORBIDK_PATH)
     
-    forbidk_command = "{} --translate-time-limit {} --search-time-limit {} {} {}".format(suite_forbidik_path, suite_domain_path, suite_problem_path, num_plans)
+    forbidk_command = "{} --translate-time-limit {} --search-time-limit {} {} {} {}".format(suite_forbidik_path, timeout, timeout, suite_domain_path, suite_problem_path, num_plans)
 
     whole_command = "{} && {} > output.txt".format(dir_change_command, forbidk_command)    
     return whole_command    
@@ -128,7 +128,7 @@ def kstar_topk_command(suite_name, problem, num_plans, timeout):
     suite_kastar_path = join(SUITE_TO_SCRIPT_PATH, KSTAR_PATH)
     
     kastar_payload = "--search \"kstar(blind(),k={},verbosity=silent)\"".format(num_plans)
-    kastar_command = "{} --translate-time-limit {} --search-time-limit {} {} {}".format(suite_kastar_path, suite_domain_path, suite_problem_path, kastar_payload)
+    kastar_command = "{} --translate-time-limit {} --search-time-limit {} {} {} {}".format(suite_kastar_path, timeout, timeout, suite_domain_path, suite_problem_path, kastar_payload)
 
     whole_command = "{} && {} > output.txt".format(dir_change_command, kastar_command)    
     return whole_command    
@@ -136,6 +136,7 @@ def kstar_topk_command(suite_name, problem, num_plans, timeout):
     
 def generate_topk_parallel_command_file(problems, suites):
     with open("all_commands.txt", "w") as parallel_file:
+        num_commands = 0
         for planner, k, t in suites:
             suite_name = "{}_k{}_t{}".format(planner, k, t)
             for problem in problems:
@@ -146,12 +147,16 @@ def generate_topk_parallel_command_file(problems, suites):
                 elif planner == "kstar":
                     parallel_file.write(kstar_topk_command(suite_name, problem, k, t) + "\n")
                 elif planner == "forbidk":
-                    parallel_file.write(forbidk_topk_command(suite_name, problem, k, t) + "\n")       
+                    parallel_file.write(forbidk_topk_command(suite_name, problem, k, t) + "\n")    
+                num_commands += 1
+        print("Generated a total of", num_commands, "commands")   
  
 problems = probs.list_all_opt_strips_problems()   
 suites = [
-    ("kstar", 1000, 300),
-    ("symk", 500, 300),
+    ("planDD",  10000000, 300),
+    ("symk",    10000000, 300),
+    ("kstar",   10000000, 300),
+    ("forbidk", 10000000, 300),
 ]
 
 generate_topk_parallel_command_file(problems, suites)

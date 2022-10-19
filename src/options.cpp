@@ -29,9 +29,9 @@ void option_parser::parse_command_line(int argc, char *argv[]) {
         ("hack_debug", po::bool_switch(&m_values.hack_debug)->default_value(false),
          "Sandbox hack mode for developing purposes")  //
         // DD building parameters
-        ("timesteps", po::value<int>(&m_values.timesteps),
+        ("timesteps", po::value<int>(&m_values.timesteps)->default_value(-1),
          "The amount of timsteps represented by the cnf formula")  //
-        ("num_plans", po::value<double>(&m_values.num_plans),
+        ("num_plans", po::value<double>(&m_values.num_plans)->default_value(-1.0),
          "The amount of plans the planner will search for")  //
         // what and how to conjoin clauses?
         ("include_mutex", po::bool_switch(&m_values.include_mutex)->default_value(false),

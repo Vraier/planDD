@@ -1,5 +1,6 @@
 #include "dd_builder.h"
 
+#include "dd_builder_topk.h"
 #include "logging.h"
 
 using namespace planning_logic;
@@ -11,8 +12,10 @@ void construct_dd(dd_buildable &container, encoder_abstract &encoder, option_val
     LOG_MESSAGE(log_level::info) << "Choosing correct dd building algorithm";
 
     if (options.linear) {
-        if (options.timesteps >= 0) {
+        if (options.timesteps >= 0 && options.num_plans == -1.0) {
             construct_dd_linear(container, encoder, options);
+        } else if (options.timesteps == -1 && options.num_plans >= 0.0) {
+            construct_dd_top_k(container, encoder, options);
         } else {
             construct_dd_without_timesteps(container, encoder, options);
         }
@@ -326,7 +329,8 @@ bool goal_is_fullfilled(dd_buildable &container, encoder_abstract &encoder, int 
     return is_fulfilled;
 }
 
-void conjoin_main_dd_with_goal(dd_buildable &container, encoder_abstract &encoder, int main_idx, int temp_idx, int timestep){
+void conjoin_main_dd_with_goal(dd_buildable &container, encoder_abstract &encoder, int main_idx, int temp_idx,
+                               int timestep) {
     std::vector<logic_primitive> goal_primitives = encoder.get_logic_primitives(goal, timestep);
     container.clear_dd(temp_idx);
     container.conjoin_two_dds(main_idx, temp_idx, temp_idx);
@@ -377,11 +381,11 @@ void conjoin_primitives_linear(dd_buildable &dd, std::vector<logic_primitive> &l
     for (int i = 0; i < logic_primitives.size(); i++) {
         planning_logic::logic_primitive primitive = logic_primitives[i];
 
-        //std::cout << "affected vars ";
-        //for(int a: primitive.get_affected_variables()){
-        //    std::cout << a << " ";
-        //}
-        //std::cout << std::endl;
+        // std::cout << "affected vars ";
+        // for(int a: primitive.get_affected_variables()){
+        //     std::cout << a << " ";
+        // }
+        // std::cout << std::endl;
 
         switch (primitive.m_type) {
             case logic_clause:
