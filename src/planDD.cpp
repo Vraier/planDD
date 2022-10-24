@@ -89,7 +89,7 @@ int planDD::hack_debug(option_values opt_values) {
 
     dd_builder::construct_dd_top_k(builder, encoder, opt_values);
 
-    builder.print_bdd_info();
+    builder.print_info();
 
     return 0;
 
@@ -176,7 +176,7 @@ int planDD::build_bdd(option_values opt_values) {
 
     dd_builder::construct_dd(builder, *encoder, opt_values);
 
-    builder.print_bdd_info();
+    builder.print_info();
 
     delete encoder;
 
@@ -194,16 +194,15 @@ int planDD::build_sdd(option_values opt_values) {
         return 0;
     }
 
-    encoder::encoder_basic encoder(opt_values, parser.m_sas_problem);
-    //encoder.initialize_symbol_map(opt_values.timesteps);
 
-    // encoder.write_cnf_to_file(opt_values.m_values.cnf_file, clauses);
-    sdd_manager builder(encoder.m_symbol_map.get_num_variables());
+    encoder::encoder_basic encoder(opt_values, parser.m_sas_problem);
+    std::vector<planning_logic::logic_primitive> all_primitives = conjoin_order::order_all_clauses(encoder, opt_values);
+
+    sdd_container builder(1, encoder.m_symbol_map.get_num_variables());
     LOG_MESSAGE(log_level::info) << "Start building sdd";
 
-    std::vector<planning_logic::logic_primitive> all_primitives = conjoin_order::order_all_clauses(encoder, opt_values);
     dd_builder::conjoin_primitives_linear(builder, all_primitives);
-    builder.print_sdd();
+    builder.print_info();
 
     return 0;
 }
@@ -250,7 +249,7 @@ int planDD::cnf_to_bdd(option_values opt_values) {
     }
 
     LOG_MESSAGE(log_level::debug) << builder.get_short_statistics();
-    builder.print_bdd_info();
+    builder.print_info();
 
     builder.write_bdd_to_dot_file("after_reorder.dot");
 

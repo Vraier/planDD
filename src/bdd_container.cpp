@@ -4,7 +4,6 @@
 #include "bdd_container.h"
 
 bdd_container::bdd_container(int num_bdds) {
-
     m_bdd_manager = Cudd_Init(0, 0, CUDD_UNIQUE_SLOTS, CUDD_CACHE_SLOTS, 0);
     Cudd_AutodynEnable(m_bdd_manager, CUDD_REORDER_SIFT);
 
@@ -54,13 +53,11 @@ void bdd_container::reduce_heap() {
     LOG_MESSAGE(log_level::info) << "Finished reducing heap. New size: " << Cudd_ReadNodeCount(m_bdd_manager);
 }
 
-void bdd_container::print_bdd_info() {
+void bdd_container::print_info() {
     LOG_MESSAGE(log_level::info) << "Printing CUDD statistics...";
     LOG_MESSAGE(log_level::info) << "Number of nodes: " << Cudd_DagSize(m_root_nodes[0])
-                                 << ", Num Variables: " << Cudd_ReadSize(m_bdd_manager)
-                                 << ", Number of solutions: "
-                                 << Cudd_CountMinterm(m_bdd_manager, m_root_nodes[0],
-                                                      Cudd_ReadSize(m_bdd_manager));
+                                 << ", Num Variables: " << Cudd_ReadSize(m_bdd_manager) << ", Number of solutions: "
+                                 << Cudd_CountMinterm(m_bdd_manager, m_root_nodes[0], Cudd_ReadSize(m_bdd_manager));
     FILE **fout = &stdout;
     Cudd_PrintInfo(m_bdd_manager, *fout);
 }
@@ -138,10 +135,9 @@ bool bdd_container::is_constant_false(int bdd_index) {
     return m_root_nodes[bdd_index] == Cudd_ReadLogicZero(m_bdd_manager);
 }
 
-double bdd_container::count_num_solutions(int dd_index){
+double bdd_container::count_num_solutions(int dd_index) {
     return Cudd_CountMinterm(m_bdd_manager, m_root_nodes[dd_index], Cudd_ReadSize(m_bdd_manager));
 }
-
 
 void bdd_container::add_clause_primitive(std::vector<int> &clause, int bdd_index) {
     // build the disjunction of the literals in the clause
@@ -310,9 +306,7 @@ void bdd_container::copy_and_conjoin_bdd_from_another_container(bdd_container &c
     m_root_nodes[0] = tmp;
 }
 
-void bdd_container::create_ith_var(int i){
-    Cudd_bddIthVar(m_bdd_manager, i);
-}
+void bdd_container::create_ith_var(int i) { Cudd_bddIthVar(m_bdd_manager, i); }
 
 void bdd_container::permute_variables(std::vector<int> &permutation, int source_bdd, int destination_bdd) {
     int num_variables = permutation.size();

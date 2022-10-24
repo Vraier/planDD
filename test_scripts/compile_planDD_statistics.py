@@ -13,7 +13,7 @@ def print_big_information_from_dicts(all_dics):
     time_for_solved = [(d["finish_time"], d["domain_desc"]) for d in solved_dics]
     time_for_solved = sorted(time_for_solved)
     #print("Compiling Solved Testcases: ############################################################################################")
-    #print(time_for_solved)
+    print(sorted(time_for_solved, key = lambda x: x[1]))
 
     print("Compiling Information: #################################################################################################")
     print("Conjoin Order", all_dics[0]["config_build_order"])

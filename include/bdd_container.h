@@ -78,7 +78,7 @@ class bdd_container : public virtual dd_buildable {
     void reduce_heap();
 
     // Wirtes all the information about the CUDD manager to std::out
-    void print_bdd_info();
+    void print_info();
     // lists all minterms of the bdd (satisficing assignments). Lists up to max of such minterms.
     std::vector<std::vector<bool>> list_minterms(int max);
     // returns a short string with a few information about the current stae of CUDD

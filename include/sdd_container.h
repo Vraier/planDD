@@ -11,15 +11,15 @@ extern "C" {
 #include "compiler.h"  // compiler has to be included after sdd api... cool
 }
 
-class sdd_manager : public virtual dd_buildable {
+class sdd_container : public virtual dd_buildable {
    private:
     /* data */
     SddManager *m_sdd_manager;
-    SddNode *m_root_node;
+    std::vector<SddNode *> m_root_nodes;
 
    public:
-    sdd_manager(int num_variables);
-    ~sdd_manager();
+    sdd_container(int num_sdds, int var_count);
+    ~sdd_container();
     void set_num_dds(int num_dds);
 
     bool is_constant_false(int dd_index);
@@ -40,7 +40,7 @@ class sdd_manager : public virtual dd_buildable {
     void enable_reordering();
     void reduce_heap();
 
-    void print_sdd();
+    void print_info();
     std::string get_short_statistics(int dd_index = 0);
 };
 

@@ -43,4 +43,5 @@ class dd_buildable {
     virtual void reduce_heap() = 0;
 
     virtual std::string get_short_statistics(int dd_index = 0) = 0;
+    virtual void print_info() = 0;
 };
