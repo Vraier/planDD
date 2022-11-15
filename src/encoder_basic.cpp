@@ -43,6 +43,7 @@ std::vector<logic_primitive> encoder_basic::get_logic_primitives(primitive_tag t
     }
 }
 
+
 int encoder_basic::num_variables_in_t_timesteps(int t) {
     int num_var_vars = 0;
     int num_op_vars = 0;
@@ -74,7 +75,7 @@ int encoder_basic::num_variables_in_t_timesteps(int t) {
     if (t == 0) {
         total = num_var_vars + 1;
     } else {
-        total = (num_var_vars * t) + (num_op_vars * (t - 1)) + 1;
+        total = (num_var_vars * (t+1)) + (num_op_vars * t) + 1;
     }
     return total;
 }

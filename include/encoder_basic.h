@@ -20,6 +20,10 @@ class encoder_basic : public virtual encoder_abstract {
     // these include the var and operator variables, but not the operator variables for the last timestep
     int num_variables_in_t_timesteps(int t);
 
+    // reserves the indizes for the variables of the given timestep in the symbol_map
+    // uses the default variable order
+    void create_variables_for_timestep(int t);
+
     // parses a cnf solution from minisat into a bool vector
     // assignemnt gives the truth value for the ith variable (index 0 of assignment has no meaningful value)
     // returns an empty vector if the file contains no solution
