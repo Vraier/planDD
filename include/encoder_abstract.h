@@ -6,7 +6,6 @@
 #include "options.h"
 
 // TODO maybe move more code to abstract encoder (or think about removing methos from basic encoder)
-// TODO make folders containinge encoder files
 namespace encoder {
 class encoder_abstract {
    protected:
@@ -25,6 +24,8 @@ class encoder_abstract {
     planning_logic::plan_to_cnf_map m_symbol_map;
 
     virtual ~encoder_abstract(){};
+
+    virtual int num_variables_in_t_timesteps(int t) = 0;
 
     // constructs the logic primitives according to the tag and timestep
     // will change the symbol map if new variables are created

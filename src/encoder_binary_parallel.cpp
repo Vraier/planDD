@@ -34,6 +34,10 @@ binary_parallel::binary_parallel(option_values &options, sas_problem &problem, g
     LOG_MESSAGE(log_level::info) << "Finished construction binary parallel encoder";
 }
 
+int binary_parallel::num_variables_in_t_timesteps(int t){
+    return 0;
+}
+
 std::vector<logic_primitive> binary_parallel::get_logic_primitives(primitive_tag tag, int timestep) {
     update_timesteps(timestep);
 

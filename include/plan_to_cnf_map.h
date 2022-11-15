@@ -55,7 +55,8 @@ class plan_to_cnf_map {
     // same as above but can be used for planning variables
     // needs the siye of variable values to function properly
     std::vector<int> get_variable_index_for_var_binary(int timestep, int var_index, int var_value, int var_size);
-    // TODO remove above methods
+    
+    // TODO remove above two methods
     // same as above but more general (i should remove the ones above)
     std::vector<int> get_variable_index_binary(variable_tag tag, int timestep, int group_index, int value, int size);
 

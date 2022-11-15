@@ -12,6 +12,7 @@ class binary_parallel : public virtual encoder_abstract {
    // the conflict graph has an edge, iff two actions can be taken in the same timestep 
     binary_parallel(option_values &options, sas_problem &problem, graph::undirected_graph &conflict_graph);
 
+    int num_variables_in_t_timesteps(int t);
     // constructs the logic primitives according to the tag and timestep
     // will change the symbol map if new variables are created
     std::vector<planning_logic::logic_primitive> get_logic_primitives(planning_logic::primitive_tag tag, int timestep);

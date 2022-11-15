@@ -45,6 +45,10 @@ void construct_dd_linear(dd_buildable &container, encoder_abstract &encoder, opt
     LOG_MESSAGE(log_level::info) << "Ordering all clauses";
     std::vector<logic_primitive> all_primitives = conjoin_order::order_all_clauses(encoder, options);
     conjoin_primitives_linear(container, all_primitives, 0, false);
+    for (int i = 0; i < options.timesteps; i++) {
+        LOG_MESSAGE(log_level::info) << "In timestep " << i << " there are " << encoder.num_variables_in_t_timesteps(i)
+                                     << " variables";
+    }
 }
 
 void construct_dd_by_layer_unidirectional(dd_buildable &container, encoder_abstract &encoder, option_values &options) {

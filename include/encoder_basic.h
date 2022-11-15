@@ -15,6 +15,10 @@ class encoder_basic : public virtual encoder_abstract {
         : encoder_abstract(options, problem, problem.m_operators.size()) {}
 
     std::vector<planning_logic::logic_primitive> get_logic_primitives(planning_logic::primitive_tag tag, int timestep);
+    
+    // returns the number of variables that occur in t timesteps
+    // these include the var and operator variables, but not the operator variables for the last timestep
+    int num_variables_in_t_timesteps(int t);
 
     // parses a cnf solution from minisat into a bool vector
     // assignemnt gives the truth value for the ith variable (index 0 of assignment has no meaningful value)

@@ -43,6 +43,42 @@ std::vector<logic_primitive> encoder_basic::get_logic_primitives(primitive_tag t
     }
 }
 
+int encoder_basic::num_variables_in_t_timesteps(int t) {
+    int num_var_vars = 0;
+    int num_op_vars = 0;
+
+    // calculate num variables
+    if (m_options.binary_variables) {
+        for (int var = 0; var < m_sas_problem.m_variabels.size(); var++) {
+            int var_size = m_sas_problem.m_variabels[var].m_range;
+            num_var_vars += m_symbol_map.num_bits_for_binary_var(var_size);
+        }
+    } else {
+        for (int var = 0; var < m_sas_problem.m_variabels.size(); var++) {
+            int var_size = m_sas_problem.m_variabels[var].m_range;
+            num_var_vars += var_size;
+        }
+    }
+
+    // calculate num operators
+    if (m_options.binary_encoding) {
+        int op_size = m_sas_problem.m_operators.size();
+        num_op_vars += m_symbol_map.num_bits_for_binary_var(op_size);
+    } else {
+        int op_size = m_sas_problem.m_operators.size();
+        num_op_vars += op_size;
+    }
+
+    // add one for the 0 variable that is included in every bdd
+    int total;
+    if (t == 0) {
+        total = num_var_vars + 1;
+    } else {
+        total = (num_var_vars * t) + (num_op_vars * (t - 1)) + 1;
+    }
+    return total;
+}
+
 // The initial state must hold at t = 0.
 std::vector<logic_primitive> encoder_basic::construct_initial_state() {
     std::vector<logic_primitive> result;
