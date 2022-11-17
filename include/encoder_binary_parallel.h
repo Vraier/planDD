@@ -13,6 +13,7 @@ class binary_parallel : public virtual encoder_abstract {
     binary_parallel(option_values &options, sas_problem &problem, graph::undirected_graph &conflict_graph);
 
     int num_variables_in_t_timesteps(int t);
+    std::vector<planning_logic::logic_primitive> prebuild_goals(int t);
     // constructs the logic primitives according to the tag and timestep
     // will change the symbol map if new variables are created
     std::vector<planning_logic::logic_primitive> get_logic_primitives(planning_logic::primitive_tag tag, int timestep);

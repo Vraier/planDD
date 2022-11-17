@@ -15,7 +15,7 @@ struct option_values {
     // DD building parameters
     std::string build_order, variable_order;
     // effects the building algorithm
-    bool layer, layer_bi, layer_expo, linear;
+    bool layer, layer_bi, layer_expo, linear, prebuild_goals;
     // reverses the order of primitives (only for linear non incremental)
     bool reverse_order;
     // effects the encoding

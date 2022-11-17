@@ -28,6 +28,9 @@ class dd_buildable {
     // one has to create variables before he can order them
     virtual void create_ith_var(int i) = 0;
 
+    virtual void set_variable_group(int low, int size) = 0;
+
+
     // Functions for building the dd timestep by timestep
     // permutes the variables in source bdd according to the given permutation
     // write the result into destionation bdd. the old bdd in destination gets freed and is lost

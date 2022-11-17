@@ -111,6 +111,11 @@ void sdd_container::add_dnf_primitive(std::vector<std::vector<int>> &dnf,
 
 void sdd_container::create_ith_var(int i) { sdd_manager_literal(i, m_sdd_manager); }
 
+void sdd_container::set_variable_group(int low, int size){
+    LOG_MESSAGE(log_level::error) << "Variable grouping not supported for SDDs.";
+    return;
+}
+
 void sdd_container::permute_variables(std::vector<int> &permutation, int source_bdd, int destination_bdd) {
     LOG_MESSAGE(log_level::error) << "Permuting variables not supported for SDDs.";
     return;

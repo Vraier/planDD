@@ -25,7 +25,10 @@ class encoder_abstract {
 
     virtual ~encoder_abstract(){};
 
+    // calculates the number of variables in the first t timesteps
     virtual int num_variables_in_t_timesteps(int t) = 0;
+    // creates a disjunction of all goals in the first t timesteps
+    virtual std::vector<planning_logic::logic_primitive> prebuild_goals(int t) = 0;
 
     // constructs the logic primitives according to the tag and timestep
     // will change the symbol map if new variables are created

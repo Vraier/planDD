@@ -104,6 +104,8 @@ void option_parser::parse_command_line(int argc, char *argv[]) {
         ("group_actions", po::bool_switch(&m_values.group_actions)->default_value(false),
          "Groups the actions for one timestep together. Works with unary and binary encoding")  //
         // building algorithm
+        ("prebuild_goals", po::bool_switch(&m_values.prebuild_goals)->default_value(false),
+         "Used to create all goals for the topK track in the beginning")  //
         ("linear", po::bool_switch(&m_values.linear)->default_value(false),
          "Builds the dd clause by clause")  //
         ("layer", po::bool_switch(&m_values.layer)->default_value(false),

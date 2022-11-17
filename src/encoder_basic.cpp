@@ -43,7 +43,6 @@ std::vector<logic_primitive> encoder_basic::get_logic_primitives(primitive_tag t
     }
 }
 
-
 int encoder_basic::num_variables_in_t_timesteps(int t) {
     int num_var_vars = 0;
     int num_op_vars = 0;
@@ -75,9 +74,40 @@ int encoder_basic::num_variables_in_t_timesteps(int t) {
     if (t == 0) {
         total = num_var_vars + 1;
     } else {
-        total = (num_var_vars * (t+1)) + (num_op_vars * t) + 1;
+        total = (num_var_vars * (t + 1)) + (num_op_vars * t) + 1;
     }
     return total;
+}
+
+std::vector<logic_primitive> encoder_basic::prebuild_goals(int t) {
+    std::vector<logic_primitive> result;
+    std::vector<std::vector<int>> dnf;
+
+    for (int i = 0; i <= t; i++) {
+
+        std::vector<int> goalI; // vector representing the variables that are necessary to fulfil goal in t=i
+        for (int g = 0; g < m_sas_problem.m_goal.size(); g++) {
+            std::pair<int, int> goal_pair = m_sas_problem.m_goal[g];
+            int goal_var = goal_pair.first;
+            int goal_val = goal_pair.second;
+            int goal_var_size = m_sas_problem.m_variabels[goal_var].m_range;
+
+            if (m_options.binary_variables) {
+                std::vector<int> goal_encoding =
+                    m_symbol_map.get_variable_index_for_var_binary(i, goal_var, goal_val, goal_var_size);
+                for (int v : goal_encoding) {
+                    goalI.push_back(v);
+                }
+            } else {
+                int index_var = m_symbol_map.get_variable_index(variable_plan_var, i, goal_var, goal_val);
+                goalI.push_back(index_var);
+            }
+        }
+        dnf.push_back(goalI);
+    }
+
+    result.push_back(logic_primitive(logic_dnf, goal, -1, dnf));
+    return result;
 }
 
 // The initial state must hold at t = 0.

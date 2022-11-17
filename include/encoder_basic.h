@@ -19,6 +19,8 @@ class encoder_basic : public virtual encoder_abstract {
     // returns the number of variables that occur in t timesteps
     // these include the var and operator variables, but not the operator variables for the last timestep
     int num_variables_in_t_timesteps(int t);
+    std::vector<planning_logic::logic_primitive> prebuild_goals(int t);
+
 
     // reserves the indizes for the variables of the given timestep in the symbol_map
     // uses the default variable order

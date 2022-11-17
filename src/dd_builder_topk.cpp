@@ -2,6 +2,7 @@
 
 #include "dd_builder.h"
 #include "logic_primitive.h"
+#include "variable_creation.h"
 
 namespace dd_builder {
 void construct_dd_top_k(dd_buildable &container, encoder::encoder_abstract &encoder, option_values &options) {
@@ -20,7 +21,6 @@ void construct_dd_top_k(dd_buildable &container, encoder::encoder_abstract &enco
     double total_number_of_plans = 0;
     int current_timestep = 0;
     while (true) {
-        
         // calculate number of new plans
         conjoin_main_dd_with_goal(container, encoder, 0, 1, current_timestep);
         double local_number_of_plans = container.count_num_solutions(1);
@@ -28,7 +28,7 @@ void construct_dd_top_k(dd_buildable &container, encoder::encoder_abstract &enco
         total_number_of_plans += local_number_of_plans;
         LOG_MESSAGE(log_level::info) << "Found " << local_number_of_plans << " new plans in timestep "
                                      << current_timestep << " new total is: " << total_number_of_plans;
-        if(total_number_of_plans > options.num_plans){
+        if (total_number_of_plans > options.num_plans) {
             break;
         }
 
@@ -36,6 +36,51 @@ void construct_dd_top_k(dd_buildable &container, encoder::encoder_abstract &enco
         // extend new timestep
         LOG_MESSAGE(log_level::info) << "Extending timestep " << current_timestep;
         // NOTE: it did not help to try to only include eo_op once
+        temp = conjoin_order::order_clauses_for_layer(encoder, order, current_timestep);
+        conjoin_primitives_linear(container, temp, 0, true);
+
+        // updating current timestep
+        current_timestep++;
+    }
+}
+
+void construct_dd_top_k_with_all_goals(dd_buildable &container, encoder::encoder_abstract &encoder,
+                                       option_values &options) {
+    container.set_num_dds(1);
+
+    // split the order into parts (in a really complicated manner)
+    // default rympec::
+    std::stringstream ss(options.build_order);
+    std::string order;
+    std::getline(ss, order, ':');
+
+    // the 100 is a realy magic number
+    // TODO tune it
+    const int num_prebuild_goals = 100;
+
+    // create all variables
+    variable_creation::create_variables_for_timestep_t(num_prebuild_goals, encoder, container, options);
+
+    // prebuild the goal
+    std::vector<planning_logic::logic_primitive> temp = encoder.prebuild_goals(num_prebuild_goals);
+    conjoin_primitives_linear(container, temp, 0, true);
+
+    // construct initial state
+    temp = encoder.get_logic_primitives(planning_logic::ini_state, 0);
+    conjoin_primitives_linear(container, temp, 0, true);
+
+    double total_number_of_plans = 0;
+    int current_timestep = 0;
+    while (true) {
+        // calculate number of new plans
+        total_number_of_plans = container.count_num_solutions(1);
+        LOG_MESSAGE(log_level::info) << "Found " << total_number_of_plans << " plans in timesteps " << current_timestep;
+        if (total_number_of_plans > options.num_plans) {
+            break;
+        }
+
+        // extend new timestep
+        LOG_MESSAGE(log_level::info) << "Extending timestep " << current_timestep;
         temp = conjoin_order::order_clauses_for_layer(encoder, order, current_timestep);
         conjoin_primitives_linear(container, temp, 0, true);
 

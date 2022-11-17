@@ -1,24 +1,25 @@
 #include "planDD.h"
 
 #include <stdio.h>
+
 #include <fstream>
 #include <iostream>
 #include <vector>
 
-#include "logging.h"
-#include "encoder_basic.h"
-#include "encoder_binary_parallel.h"
-#include "sas_parser.h"
-#include "sdd_container.h"
+#include "bdd_container.h"
 #include "dd_builder.h"
+#include "dd_builder_conjoin_order.h"
 #include "dd_builder_topk.h"
 #include "dd_builder_variable_order.h"
-#include "dd_builder_conjoin_order.h"
-#include "bdd_container.h"
-#include "plan_to_cnf_map.h"
-#include "variable_grouping.h"
+#include "encoder_basic.h"
+#include "encoder_binary_parallel.h"
 #include "graph.h"
+#include "logging.h"
 #include "order_visualization.h"
+#include "plan_to_cnf_map.h"
+#include "sas_parser.h"
+#include "sdd_container.h"
+#include "variable_creation.h"
 
 int main(int argc, char *argv[]) {
     // start logging
@@ -81,9 +82,9 @@ int planDD::hack_debug(option_values opt_values) {
 
     bdd_container builder(2);
 
-    if(opt_values.no_reordering){
+    if (opt_values.no_reordering) {
         builder.disable_reordering();
-    } else{
+    } else {
         builder.enable_reordering();
     }
 
@@ -107,9 +108,8 @@ int planDD::hack_debug(option_values opt_values) {
         std::cout << "v=" << std::get<3>(tv) << std::endl;
     }*/
 
-
-    //for(auto a: builder.list_minterms(10)){
-        //encoder.decode_cnf_solution(a, 5);
+    // for(auto a: builder.list_minterms(10)){
+    // encoder.decode_cnf_solution(a, 5);
     //}
     // builder.write_bdd_to_dot_file("normal_bdd.dot");
 }
@@ -126,11 +126,11 @@ int planDD::conflict_graph(option_values opt_values) {
     graph::undirected_graph complement_graph = parser.m_sas_problem.construct_complement_action_conflic_graph();
     std::vector<int> colouring = graph::approximate_colouring(complement_graph);
     int max = 0;
-    for(int i = 0; i < colouring.size(); i++){
+    for (int i = 0; i < colouring.size(); i++) {
         max = colouring[i] > max ? colouring[i] : max;
     }
 
-    LOG_MESSAGE(log_level::info) << "Num colours: " << max+1;
+    LOG_MESSAGE(log_level::info) << "Num colours: " << max + 1;
 
     graph::write_to_file_with_colouring("graph.dot", complement_graph, colouring, false);
 
@@ -147,7 +147,7 @@ int planDD::build_bdd(option_values opt_values) {
     }
 
     encoder::encoder_abstract *encoder;
-    if(opt_values.binary_parallel){
+    if (opt_values.binary_parallel) {
         graph::undirected_graph conflict_graph = parser.m_sas_problem.construct_complement_action_conflic_graph();
         encoder = new encoder::binary_parallel(opt_values, parser.m_sas_problem, conflict_graph);
     } else {
@@ -156,21 +156,21 @@ int planDD::build_bdd(option_values opt_values) {
 
     bdd_container builder(1);
 
-    if(opt_values.timesteps >= 0){
-        variable_grouping::create_all_variables(*encoder, builder, opt_values);
+    if (opt_values.timesteps >= 0) {
+        variable_creation::create_variables_for_first_t_steps(opt_values.timesteps, *encoder, builder, opt_values);
         std::vector<int> var_order = variable_order::order_variables(*encoder, opt_values);
 
-        //std::cout << "var order: ";
-        //for(int a: var_order){
-        //    std::cout << a << " ";
-        //}
-        //std::cout << std::endl;
+        // std::cout << "var order: ";
+        // for(int a: var_order){
+        //     std::cout << a << " ";
+        // }
+        // std::cout << std::endl;
         builder.set_variable_order(var_order);
     }
 
-    if(opt_values.no_reordering){
+    if (opt_values.no_reordering) {
         builder.disable_reordering();
-    } else{
+    } else {
         builder.enable_reordering();
     }
 
@@ -180,8 +180,8 @@ int planDD::build_bdd(option_values opt_values) {
 
     delete encoder;
 
-    //for(auto a: builder.list_minterms(10)){
-        //encoder.decode_cnf_solution(a, 5);
+    // for(auto a: builder.list_minterms(10)){
+    // encoder.decode_cnf_solution(a, 5);
     //}
     // builder.write_bdd_to_dot_file("normal_bdd.dot");
     return 0;
@@ -193,7 +193,6 @@ int planDD::build_sdd(option_values opt_values) {
         LOG_MESSAGE(log_level::error) << "Error while parsing sas_file";
         return 0;
     }
-
 
     encoder::encoder_basic encoder(opt_values, parser.m_sas_problem);
     std::vector<planning_logic::logic_primitive> all_primitives = conjoin_order::order_all_clauses(encoder, opt_values);
@@ -215,8 +214,8 @@ int planDD::encode_cnf(option_values opt_values) {
         return 0;
     }
 
-    //cnf_encoder encoder(opt_values, parser.m_sas_problem);
-    //encoder.initialize_symbol_map(opt_values.timesteps);
+    // cnf_encoder encoder(opt_values, parser.m_sas_problem);
+    // encoder.initialize_symbol_map(opt_values.timesteps);
 
     return 0;
 }

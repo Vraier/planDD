@@ -38,6 +38,10 @@ int binary_parallel::num_variables_in_t_timesteps(int t){
     return 0;
 }
 
+std::vector<logic_primitive> binary_parallel::prebuild_goals(int t){
+    return std::vector<logic_primitive>();
+}
+
 std::vector<logic_primitive> binary_parallel::get_logic_primitives(primitive_tag tag, int timestep) {
     update_timesteps(timestep);
 

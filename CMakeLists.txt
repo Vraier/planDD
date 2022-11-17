@@ -43,7 +43,7 @@ target_sources(planDD
 		"src/options.cpp" "src/planDD.cpp"
 		"src/planning_logic_formula.cpp" "src/sas_parser.cpp" 
 		"src/plan_to_cnf_map.cpp" "src/logic_primitive.cpp" 
-		"src/sdd_container.cpp" "src/variable_grouping.cpp"
+		"src/sdd_container.cpp" "src/variable_creation.cpp"
 		"src/graph.cpp" "src/encoder_binary_parallel.cpp"
 		"src/force.cpp" "src/graph.cpp" "src/order_visualization"
 		"src/bottom_up.cpp"

@@ -15,7 +15,11 @@ void construct_dd(dd_buildable &container, encoder_abstract &encoder, option_val
         if (options.timesteps >= 0 && options.num_plans == -1.0) {
             construct_dd_linear(container, encoder, options);
         } else if (options.timesteps == -1 && options.num_plans >= 0.0) {
-            construct_dd_top_k(container, encoder, options);
+            if (options.prebuild_goals) {
+                construct_dd_top_k_with_all_goals(container, encoder, options);
+            } else {
+                construct_dd_top_k(container, encoder, options);
+            }
         } else {
             construct_dd_without_timesteps(container, encoder, options);
         }

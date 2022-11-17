@@ -32,6 +32,8 @@ class sdd_container : public virtual dd_buildable {
     void add_dnf_primitive(std::vector<std::vector<int>> &dnf, int bdd_index = 0);
     
     void create_ith_var(int i);
+    void set_variable_group(int low, int size);
+
     
     void permute_variables(std::vector<int> &permutation, int source_bdd, int destination_bdd);
     void conjoin_two_dds(int dd_a, int dd_b, int dd_result);
