@@ -106,6 +106,8 @@ void option_parser::parse_command_line(int argc, char *argv[]) {
         // building algorithm
         ("prebuild_goals", po::bool_switch(&m_values.prebuild_goals)->default_value(false),
          "Used to create all goals for the topK track in the beginning")  //
+        ("restart", po::bool_switch(&m_values.restart)->default_value(false),
+         "Restarts the topK step for every timestep to find the encessary amount of problems.")  //
         ("linear", po::bool_switch(&m_values.linear)->default_value(false),
          "Builds the dd clause by clause")  //
         ("layer", po::bool_switch(&m_values.layer)->default_value(false),

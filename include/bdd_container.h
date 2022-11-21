@@ -36,6 +36,7 @@ class bdd_container : public virtual dd_buildable {
     // check if the bdd is the zero node
     bool is_constant_false(int bdd_index);
     double count_num_solutions(int dd_index);
+    double count_num_solutions(int dd_index, int nvars);
 
 
     // frees all the nodes under this bdd

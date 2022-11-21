@@ -7,6 +7,8 @@ namespace variable_creation {
 
 void create_variables_for_first_t_steps(int t, encoder::encoder_abstract &encoder, dd_buildable &container,
                                         option_values &options) {
+    LOG_MESSAGE(log_level::info) << "Creating the variables (and grouping) for first " << t << " timesteps";
+    
     for (int i = 0; i <= t; i++) {
         create_variables_for_timestep_t(i, encoder, container, options);
     }

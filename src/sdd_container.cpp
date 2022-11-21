@@ -38,6 +38,11 @@ void sdd_container::set_num_dds(int num_dds) {
 bool sdd_container::is_constant_false(int dd_index) { return sdd_node_is_true(m_root_nodes[dd_index]) == 1; }
 double sdd_container::count_num_solutions(int dd_index) { return sdd_model_count(m_root_nodes[0], m_sdd_manager); }
 
+double sdd_container::count_num_solutions(int dd_index, int nvars){
+    LOG_MESSAGE(log_level::error) << "Counting with different nvars not supported for SDDs.";
+    return -1;
+}
+
 void sdd_container::clear_dd(int dd_index) {
     sdd_deref(m_root_nodes[dd_index], m_sdd_manager);
     m_root_nodes[dd_index] = sdd_manager_literal(0, m_sdd_manager);

@@ -17,6 +17,8 @@ void construct_dd(dd_buildable &container, encoder_abstract &encoder, option_val
         } else if (options.timesteps == -1 && options.num_plans >= 0.0) {
             if (options.prebuild_goals) {
                 construct_dd_top_k_with_all_goals(container, encoder, options);
+            } else if (options.restart){
+                construct_dd_top_k_restarting(encoder, options);
             } else {
                 construct_dd_top_k(container, encoder, options);
             }
@@ -35,24 +37,11 @@ void construct_dd(dd_buildable &container, encoder_abstract &encoder, option_val
     LOG_MESSAGE(log_level::info) << "Finished constructing final DD";
 }
 
-void construct_dd_with_timesteps(dd_buildable &container, encoder_abstract &encoder, option_values &options) {
-    LOG_MESSAGE(log_level::info) << "Building dd with t=" << options.timesteps << " timestpes";
-
-    // calculate initial variable ordering
-
-    std::vector<logic_primitive> all_primitives = conjoin_order::order_all_clauses(encoder, options);
-    conjoin_primitives_linear(container, all_primitives, 0, false);
-}
-
-void construct_dd_linear(dd_buildable &container, encoder_abstract &encoder, option_values &options) {
-    LOG_MESSAGE(log_level::info) << "Building dd linear";
-    for (int i = 0; i <= options.timesteps; i++) {
-        LOG_MESSAGE(log_level::info) << "In timestep " << i << " there are " << encoder.num_variables_in_t_timesteps(i)
-                                     << " variables";
-    }
+void construct_dd_linear(dd_buildable &container, encoder_abstract &encoder, option_values &options, bool silent) {
+    LOG_MESSAGE(log_level::info) << "Building dd linear with t=" << options.timesteps << " timestpes";
     LOG_MESSAGE(log_level::info) << "Ordering all clauses";
     std::vector<logic_primitive> all_primitives = conjoin_order::order_all_clauses(encoder, options);
-    conjoin_primitives_linear(container, all_primitives, 0, false);
+    conjoin_primitives_linear(container, all_primitives, 0, silent);
 }
 
 void construct_dd_by_layer_unidirectional(dd_buildable &container, encoder_abstract &encoder, option_values &options) {
@@ -345,7 +334,7 @@ void conjoin_main_dd_with_goal(dd_buildable &container, encoder_abstract &encode
     conjoin_primitives_linear(container, goal_primitives, temp_idx, true);
 }
 
-void construct_dd_without_timesteps(dd_buildable &container, encoder_abstract &encoder, option_values &options) {
+void construct_dd_without_timesteps(dd_buildable &container, encoder_abstract &encoder, option_values &options, bool silent) {
     LOG_MESSAGE(log_level::info) << "Building BDD without knowing the correct amount of timesteps";
 
     container.set_num_dds(2);
@@ -358,7 +347,7 @@ void construct_dd_without_timesteps(dd_buildable &container, encoder_abstract &e
 
     // construct initial state
     std::vector<logic_primitive> temp = encoder.get_logic_primitives(ini_state, 0);
-    conjoin_primitives_linear(container, temp, 0, true);
+    conjoin_primitives_linear(container, temp, 0, silent);
 
     int t = 0;
     while (true) {

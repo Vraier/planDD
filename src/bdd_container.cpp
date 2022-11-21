@@ -139,6 +139,10 @@ double bdd_container::count_num_solutions(int dd_index) {
     return Cudd_CountMinterm(m_bdd_manager, m_root_nodes[dd_index], Cudd_ReadSize(m_bdd_manager));
 }
 
+double bdd_container::count_num_solutions(int dd_index, int nvars) {
+    return Cudd_CountMinterm(m_bdd_manager, m_root_nodes[dd_index], nvars);
+}
+
 void bdd_container::add_clause_primitive(std::vector<int> &clause, int bdd_index) {
     // build the disjunction of the literals in the clause
     DdNode *var, *tmp;

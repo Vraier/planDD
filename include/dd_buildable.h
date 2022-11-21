@@ -12,7 +12,10 @@ class dd_buildable {
 
     // check if the bdd is the zero node
     virtual bool is_constant_false(int dd_index) = 0;
+    // counts assuming all existing variables are used
     virtual double count_num_solutions(int dd_index) = 0;
+    // counts assuming only nvars variables are used
+    virtual double count_num_solutions(int dd_index, int nvars) = 0;
 
     // frees all the nodes under this dd
     virtual void clear_dd(int dd_index = 0) = 0;

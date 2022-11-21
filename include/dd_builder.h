@@ -15,16 +15,12 @@ namespace dd_builder {
 // chooses the correct construction algorithm according to options
 void construct_dd(dd_buildable &container, encoder::encoder_abstract &encoder, option_values &options);
 
-// refactored method to construct dd when the amount of timesteps is known
-// allows for finegrained control of variable and clause ordering (with force or bottom up heuristic)
-void construct_dd_with_timesteps(dd_buildable &container, encoder::encoder_abstract &encoder, option_values &options);
-
 // conjoins one logic primitive at the time to the bdd
-void construct_dd_linear(dd_buildable &container, encoder::encoder_abstract &encoder, option_values &options);
+void construct_dd_linear(dd_buildable &container, encoder::encoder_abstract &encoder, option_values &options, bool silent = false);
 
 // incremental, when the timesteps are not known
 void construct_dd_without_timesteps(dd_buildable &container, encoder::encoder_abstract &encoder,
-                                    option_values &options);
+                                    option_values &options, bool silent = false);
 
 // builds a bdd for a single step and then copies it to the opter container for each timestep
 void construct_dd_by_layer_unidirectional(dd_buildable &container, encoder::encoder_abstract &encoder,

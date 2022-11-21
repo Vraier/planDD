@@ -24,6 +24,7 @@ class sdd_container : public virtual dd_buildable {
 
     bool is_constant_false(int dd_index);
     double count_num_solutions(int dd_index);
+    double count_num_solutions(int dd_index, int nvars);
 
     void clear_dd(int dd_index = 0);
 
