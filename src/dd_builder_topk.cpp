@@ -4,6 +4,7 @@
 #include "dd_builder.h"
 #include "logic_primitive.h"
 #include "variable_creation.h"
+#include "dd_builder_variable_order.h"
 
 using namespace encoder;
 
@@ -56,6 +57,19 @@ void construct_dd_top_k_restarting(encoder_abstract &encoder, option_values &opt
         option_values temp_opts = options;
         temp_opts.timesteps = curr_timestep;
         bdd_container container(1);
+
+        // variable order
+        variable_creation::create_variables_for_first_t_steps(temp_opts.timesteps, encoder, container, temp_opts);
+        std::vector<int> var_order = variable_order::order_variables(encoder, temp_opts);
+        container.set_variable_order(var_order);
+
+        // reordering
+        if (temp_opts.no_reordering) {
+            container.disable_reordering();
+        } else {
+            container.enable_reordering();
+        }
+
         construct_dd_linear(container, encoder, temp_opts, true);
 
         double curr_plans = container.count_num_solutions(0);
@@ -64,7 +78,7 @@ void construct_dd_top_k_restarting(encoder_abstract &encoder, option_values &opt
         LOG_MESSAGE(log_level::info) << "Found " << curr_plans << " new plans in timestep " << curr_timestep
                                      << " new total is: " << total_plans;
 
-        if(total_plans >= options.num_plans){
+        if (total_plans >= options.num_plans) {
             return;
         }
 

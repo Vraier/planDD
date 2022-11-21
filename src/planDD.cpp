@@ -196,6 +196,13 @@ int planDD::build_sdd(option_values opt_values) {
 
     encoder::encoder_basic encoder(opt_values, parser.m_sas_problem);
     sdd_container container(1, encoder.num_variables_in_t_timesteps(opt_values.timesteps));
+
+    if (opt_values.no_reordering) {
+        container.disable_reordering();
+    } else {
+        container.enable_reordering();
+    }
+
     variable_creation::create_variables_for_first_t_steps(opt_values.timesteps, encoder, container, opt_values);
     std::vector<planning_logic::logic_primitive> all_primitives = conjoin_order::order_all_clauses(encoder, opt_values);
 
