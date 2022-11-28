@@ -1,13 +1,35 @@
 #include "dd_builder_topk.h"
 
+#include <regex>
+
 #include "bdd_container.h"
 #include "dd_builder.h"
 #include "logic_primitive.h"
 #include "variable_creation.h"
 
+#include <fstream>
+
 using namespace encoder;
 
 namespace dd_builder {
+
+// finds the legth of the plan from an fast downward output file
+int get_plan_length(std::string file_path){
+    std::ifstream infile(file_path);
+    std::string line;
+
+    while (std::getline(infile, line)){
+        std::regex rgx("\\[.*\\] Plan length: ([0-9]*) step\\(s\\).");
+        std::smatch match;
+        const std::string constLine = line;
+        if(std::regex_search(constLine.begin(), constLine.end(), match, rgx)){
+            return std::stoi(match[1].str().c_str());
+        }
+    }
+    return -1;
+}
+
+
 void construct_dd_top_k(dd_buildable &container, encoder_abstract &encoder, option_values &options) {
     LOG_MESSAGE(log_level::info) << "Running TopK Configuration";
 
@@ -49,8 +71,20 @@ void construct_dd_top_k(dd_buildable &container, encoder_abstract &encoder, opti
     }
 }
 
+
 void construct_dd_top_k_restarting(encoder_abstract &encoder, option_values &options) {
     int curr_timestep = 0;  // TODO, maybe start at 1
+
+    if(options.use_fd){
+        curr_timestep = get_plan_length("fd_output.txt");
+        if(curr_timestep < 0){
+            LOG_MESSAGE(log_level::error) << "Could not extract minimal planlength";
+            return;
+        } else {
+            LOG_MESSAGE(log_level::error) << "Extracted a minimal planlegth of " << curr_timestep;
+        }
+    }
+
     double total_plans = 0.0;
     while (true) {
         option_values temp_opts = options;

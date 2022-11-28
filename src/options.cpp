@@ -108,6 +108,9 @@ void option_parser::parse_command_line(int argc, char *argv[]) {
          "Used to create all goals for the topK track in the beginning")  //
         ("restart", po::bool_switch(&m_values.restart)->default_value(false),
          "Restarts the topK step for every timestep to find the encessary amount of problems.")  //
+        ("use_fd", po::bool_switch(&m_values.use_fd)->default_value(false),
+         "Can be used with the restarting topK track to use the output file of a fast downward run. It can use the "
+         "file to determine the minimal amount of steps and does not have to calculate it itsel.")  //
         ("linear", po::bool_switch(&m_values.linear)->default_value(false),
          "Builds the dd clause by clause")  //
         ("layer", po::bool_switch(&m_values.layer)->default_value(false),
