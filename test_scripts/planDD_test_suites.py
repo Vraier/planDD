@@ -663,10 +663,56 @@ def test_04_08_clause_ordering():
 # TODO test binary encoding with different clause/var orerings
 # TODO test all var orders with all conjoin orders
 
+#
+def test_21_11_restarting_sdd():
+    probs = problems.list_all_downward_solved_problems()
+    downward_argument_map = dict(arguments.standart_downward_argument_map)
+
+    map_old_best =  {
+        "$timeout" : "300s",
+        "$mode" : "build_bdd",
+        "$addition_flags" : "--linear --build_order igx:rympec: --variable_order x:voh --clause_order_custom --var_order_custom --binary_encoding --binary_variables --binary_exclude_impossible",
+    }
+    map_sdd = {
+        "$timeout" : "300s",
+        "$mode" : "build_sdd",
+        "$addition_flags" : "--linear --build_order igx:rympec: --clause_order_custom --binary_encoding --binary_variables --binary_exclude_impossible",
+    }
+
+    map_incremental =  {
+        "$timeout" : "300s",
+        "$timesteps" : -1,
+        "$mode" : "build_bdd",
+        "$addition_flags" : "--linear --build_order rympec:: --variable_order x:voh --clause_order_custom --var_order_custom --binary_encoding --binary_variables --binary_exclude_impossible --num_plans 10000000",
+    }
+    map_incremental_restart =  {
+        "$timeout" : "300s",
+        "$timesteps" : -1,
+        "$mode" : "build_bdd",
+        "$addition_flags" : "--linear --build_order igx:rympec: --variable_order x:voh --clause_order_custom --var_order_custom --binary_encoding --binary_variables --binary_exclude_impossible --num_plans 10000000 --restart",
+    }
+
+    arg1 = ("best_21_11_old_best", map_old_best, downward_argument_map)
+    arg2 = ("best_21_11_sdd", map_sdd, downward_argument_map)
+    arg3 = ("best_21_11_incremental", map_incremental, downward_argument_map)
+    arg4 = ("best_21_11_incremental_restart", map_incremental_restart, downward_argument_map)
+    args = [
+        arg1, 
+        arg2, 
+        arg3, 
+        arg4,  
+    ]
+
+    comms = commandfile.generate_command_calls(probs, args)
+    print("Num problems:",len(probs))
+    print("Num configs:",len(args))
+    print("Num commands:",len(comms))
+    return comms
+
 
 comms = []
-comms += test_04_08_clause_ordering()
-comms += test_03_08_clause_ordering()
+comms += test_21_11_restarting_sdd()
+
 
 commandfile.generate_parallel_file_from_calls(comms)
 

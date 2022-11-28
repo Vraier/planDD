@@ -95,7 +95,7 @@ def extract_symk_time_to_progress(file_path):
 suite_names = [
     "planDD_k10000000_t300",
     "symk_k10000000_t300",
-    #"kstar_k10000000_t300",
+    "kstar_k10000000_t300",
 ]
 
 suite_dics = []
