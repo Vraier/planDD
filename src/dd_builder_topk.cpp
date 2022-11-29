@@ -15,24 +15,34 @@ using namespace encoder;
 namespace dd_builder {
 
 // finds the legth of the plan from an fast downward output file
-int get_plan_length(std::string file_path){
+int get_plan_length(std::string file_path) {
     std::ifstream infile(file_path);
     std::string line;
 
-    while (std::getline(infile, line)){
+    while (std::getline(infile, line)) {
         std::regex rgx("\\[.*\\] Plan length: ([0-9]*) step\\(s\\).");
         std::smatch match;
         const std::string constLine = line;
-        if(std::regex_search(constLine.begin(), constLine.end(), match, rgx)){
+        if (std::regex_search(constLine.begin(), constLine.end(), match, rgx)) {
             return std::stoi(match[1].str().c_str());
         }
     }
     return -1;
 }
 
-
 void construct_dd_top_k(dd_buildable &container, encoder_abstract &encoder, option_values &options) {
     LOG_MESSAGE(log_level::info) << "Running TopK Configuration";
+
+    int min_plan_length = -1;
+    if (options.use_fd) {
+        min_plan_length = get_plan_length("fd_output.txt");
+        if (min_plan_length < 0) {
+            LOG_MESSAGE(log_level::error) << "Could not extract minimal planlength";
+            return;
+        } else {
+            LOG_MESSAGE(log_level::info) << "Extracted a minimal planlegth of " << min_plan_length;
+        }
+    }
 
     container.set_num_dds(2);
 
@@ -49,18 +59,22 @@ void construct_dd_top_k(dd_buildable &container, encoder_abstract &encoder, opti
     double total_number_of_plans = 0;
     int current_timestep = 0;
     while (true) {
-        // calculate number of new plans
-        conjoin_main_dd_with_goal(container, encoder, 0, 1, current_timestep);
-        double local_number_of_plans = container.count_num_solutions(1);
-        container.clear_dd(1);
-        total_number_of_plans += local_number_of_plans;
-        LOG_MESSAGE(log_level::info) << "Found " << local_number_of_plans << " new plans in timestep "
-                                     << current_timestep << " new total is: " << total_number_of_plans;
+
+        // calculate new solutions if we dont use a fd run before or if we reached the minimal plan length
+        if (!options.use_fd || current_timestep >= min_plan_length) {
+            // calculate number of new plans
+            conjoin_main_dd_with_goal(container, encoder, 0, 1, current_timestep);
+            double local_number_of_plans = container.count_num_solutions(1);
+            container.clear_dd(1);
+            total_number_of_plans += local_number_of_plans;
+            LOG_MESSAGE(log_level::info) << "Found " << local_number_of_plans << " new plans in timestep "
+                                         << current_timestep << " new total is: " << total_number_of_plans;
+        }
         if (total_number_of_plans > options.num_plans) {
             break;
         }
 
-        // TODO abbruchkriterium, wenn nicht gen"ugend pl"ane existieren
+        // TODO abort if there are not enough plans
         // extend new timestep
         LOG_MESSAGE(log_level::info) << "Extending timestep " << current_timestep;
         // NOTE: it did not help to try to only include eo_op once
@@ -72,17 +86,16 @@ void construct_dd_top_k(dd_buildable &container, encoder_abstract &encoder, opti
     }
 }
 
-
 void construct_dd_top_k_restarting(encoder_abstract &encoder, option_values &options) {
     int curr_timestep = 0;  // TODO, maybe start at 1
 
-    if(options.use_fd){
+    if (options.use_fd) {
         curr_timestep = get_plan_length("fd_output.txt");
-        if(curr_timestep < 0){
+        if (curr_timestep < 0) {
             LOG_MESSAGE(log_level::error) << "Could not extract minimal planlength";
             return;
         } else {
-            LOG_MESSAGE(log_level::error) << "Extracted a minimal planlegth of " << curr_timestep;
+            LOG_MESSAGE(log_level::info) << "Extracted a minimal planlegth of " << curr_timestep;
         }
     }
 

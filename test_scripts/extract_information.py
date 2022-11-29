@@ -31,7 +31,7 @@ def find_all_output_files(suite_path):
         fold_path = os.path.join(suite_path, fold)
         if os.path.isdir(fold_path):
             for fil in os.listdir(fold_path):
-                if fil == "output.txt":
+                if fil == "output.txt" or fil == "planDD_output.txt":
                     file_path = os.path.join(fold_path, fil)
                     all_file_paths.append((fold, file_path))
                     break
@@ -42,12 +42,13 @@ def find_all_output_files(suite_path):
 def write_all_information_to_file(suite_path, output_path):
     all_files = find_all_output_files(suite_path)
     all_dics = []
+    print(all_files)
 
     for i in range(len(all_files)):
         print("Compile information about testcase ", i+1, " from ", len(all_files))
         domain_desc, file_path = all_files[i]
         dic = {}
-        if "planDD" in suite_path:
+        if "planDD" in suite_path or "best_21_11" in suite_path:
             dic = compile_information_about_planDD_into_dic(domain_desc, file_path)
         elif "symk" in suite_path:
             dic = compile_information_about_symk_into_dic(domain_desc, file_path)
@@ -96,12 +97,14 @@ suite_names = [
     "planDD_k10000000_t300",
     "symk_k10000000_t300",
     "kstar_k10000000_t300",
+    "best_21_11_incremental",
+    "best_21_11_incremental_restart"
 ]
 
 suite_dics = []
 
 for x in suite_names:
-    #write_all_information_to_file("../../test_output/competitors/" + x, "../../test_output/" + x + ".pkl")
+    #write_all_information_to_file("../../test_output/best_21_11/" + x, "../../test_output/" + x + ".pkl")
     pass
 
 for x in suite_names:
@@ -132,6 +135,7 @@ def get_k_to_solved_list(suite_dics, timebound):
     return result
 
 for i in range(len(suite_names)):
+    #print((suite_dics[i][0]))
     plot_values = get_k_to_solved_list(suite_dics[i], 300)
     plt.plot([x for x,_ in plot_values], [y for _,y in plot_values], linestyle=":", marker="o", label=suite_names[i])
 

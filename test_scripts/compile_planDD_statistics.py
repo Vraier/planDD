@@ -327,20 +327,25 @@ suite_names = [
     #"04_08_var_order_custom_force_no_reorder_rand_seed",
 
     # they did not make my portfolio better, it seems my custom order is already really good
-    "03_08_clause_order_custom_binary",
+    #"03_08_clause_order_custom_binary",
 
-    "03_08_clause_order_force_binary",
-    "03_08_clause_order_force_binary_rand_seed",
-    "03_08_clause_order_bottom_up_binary",
+    #"03_08_clause_order_force_binary",
+    #"03_08_clause_order_force_binary_rand_seed",
+    #"03_08_clause_order_bottom_up_binary",
 
-    "03_08_clause_order_custom_force_binary",
-    "03_08_clause_order_custom_force_binary_rand_seed",
-    "03_08_clause_order_custom_bottom_up_binary",
+    #"03_08_clause_order_custom_force_binary",
+    #"03_08_clause_order_custom_force_binary_rand_seed",
+    #"03_08_clause_order_custom_bottom_up_binary",
+
+    "best_21_11_old_best",
+    "best_21_11_sdd",
+    #"best_21_11_incremental",
+    #"best_21_11_incremental_restart"
 ]
 suite_dics = []
 
 for x in suite_names:
-    #write_all_information_to_file("../../test_output/04_08_var_ordering/" + x, "../../test_output/" + x + ".pkl")
+    #write_all_information_to_file("../../test_output/best_21_11/" + x, "../../test_output/" + x + ".pkl")
     pass
 
 for x in suite_names:
@@ -355,7 +360,8 @@ portfolio_suite_names = [
     "best_27_7_binary_var_no_imp_reorder",
     "best_27_7_binary_var_no_imp", 
     "best_27_7_binary_var_reorder", 
-    "best_09_08_binary_parallel", 
+    "best_09_08_binary_parallel",
+    "best_21_11_sdd", 
 ]
 
 portfolio_dics = []

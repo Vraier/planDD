@@ -140,7 +140,8 @@ def extract_has_finished(file_path):
             p1 = re.compile("\[(.*)\]\[info\] Finished constructing DD.*")
             p2 = re.compile("\[(.*)\]\[info\] Finished constructing final DD.*")
             p3 = re.compile("\[(.*)\]\[info\] Printing CUDD statistics\.\.\..*")
-            if p2.match(line) or p3.match(line):
+            p4 = re.compile("\[(.*)\]\[info\] Printing LibSDD statistics\.\.\..*")
+            if p2.match(line) or p3.match(line) or p4.match(line):
                 return True
     return False
 
