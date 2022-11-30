@@ -88,23 +88,27 @@ def extract_symk_time_to_progress(file_path):
     result = {}
     with open(file_path, "r") as f:
         content = str(f.read())
-        lst = re.findall(r"\[t=(.*)s.*\] Attempted plans: (.*)M", content)
-        for x in lst:
-            result[float(x[0])] = float(x[1])*1000000
+        lst1 = re.findall(r"\[t=(.*)s.*\] Attempted plans: (.*)M", content)
+        lst2 = re.findall(r"\[t=(.*)s.*\] BOUND: [0-9]* < [0-9]* \[([0-9]*)\/[0-9]* plans\].*", content)
+        for x in lst1:
+            result[float(x[0])] = float(x[1])*(10**6)
+        for x in lst2:
+            result[float(x[0])] = float(x[1])
     return result
 
 suite_names = [
-    "planDD_k10000000_t300",
-    "symk_k10000000_t300",
-    "kstar_k10000000_t300",
-    "best_21_11_incremental",
-    "best_21_11_incremental_restart"
+    "kstar_k1000000000",
+    #"symk_k1000000000",
+    #"planDDRestartUseFD_k1000000000",
+    #"planDDTopKRestart_k1000000000",
+    "planDDUseFD_k1000000000",
+    "planDDTopK_k1000000000",
 ]
 
 suite_dics = []
 
 for x in suite_names:
-    #write_all_information_to_file("../../test_output/best_21_11/" + x, "../../test_output/" + x + ".pkl")
+    #write_all_information_to_file("../../test_output/best_30_11/" + x, "../../test_output/" + x + ".pkl")
     pass
 
 for x in suite_names:
@@ -118,12 +122,12 @@ def get_k_to_solved_list(suite_dics, timebound):
     result = []
     for d in suite_dics:
         progress = d["progress_to_time"]
-        values = [value for key, value in progress.items() if key < timebound]
+        values = [value for key, value in progress.items() if key <= timebound]
         if len(values) == 0:
             max_ks.append(0)
             #print("No solved on", d)
         else:
-            max_ks.append(min(10000000, max(values)))
+            max_ks.append(min(10**9, max(values)))
     max_ks.sort()
 
     num_suites = len(max_ks)
@@ -136,7 +140,7 @@ def get_k_to_solved_list(suite_dics, timebound):
 
 for i in range(len(suite_names)):
     #print((suite_dics[i][0]))
-    plot_values = get_k_to_solved_list(suite_dics[i], 300)
+    plot_values = get_k_to_solved_list(suite_dics[i], 600)
     plt.plot([x for x,_ in plot_values], [y for _,y in plot_values], linestyle=":", marker="o", label=suite_names[i])
 
 plt.xscale("log")

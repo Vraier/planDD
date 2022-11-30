@@ -234,18 +234,27 @@ planDD_topK_use_fd_flags = "--linear --timesteps -1 --clause_order_custom --var_
 planDD_topK_restart_flags = "--linear --timesteps -1 --clause_order_custom --var_order_custom --build_order igrymx:pec: --binary_encoding --binary_exclude_impossible --binary_variables --restart"
 planDD_topK_restart_use_fd_flags = "--linear --timesteps -1 --clause_order_custom --var_order_custom --build_order igrymx:pec: --binary_encoding --binary_exclude_impossible --binary_variables --restart --use_fd"
 
+# better flag for restarting: igx:rympec:
+planDD_improved_restart = "--linear --timesteps -1 --clause_order_custom --var_order_custom --build_order igx:rympec: --binary_encoding --binary_exclude_impossible --binary_variables --restart"
+planDD_improved_restart_use_fd = "--linear --timesteps -1 --clause_order_custom --var_order_custom --build_order igx:rympec: --binary_encoding --binary_exclude_impossible --binary_variables --restart"
+
 currentK = 10**9
 
 problems = probs.list_all_opt_strips_unitcost_problems()
 # planner type, suite name, num plan, additional flags
 suites = [
-    ("planDD", "planDDTopK", currentK, planDD_topK_flags),
-    ("planDDUseFD", "planDDUseFD", currentK, planDD_topK_use_fd_flags),
-    ("planDD", "planDDTopKRestart", currentK, planDD_topK_restart_flags),
-    ("planDDUseFD", "planDDRestartUseFD", currentK, planDD_topK_restart_use_fd_flags),
-    ("symk", "symk", currentK, ""),
-    ("kstar", "kstar", currentK, ""),
-    # ("forbidk", 10000000, 300), # i dont do this for now because it would write too many files
+    #on 137 with 600 sec timeout 60 cores
+    
+    #("planDD", "planDDTopK", currentK, planDD_topK_flags),
+    #("planDDUseFD", "planDDUseFD", currentK, planDD_topK_use_fd_flags),
+    #("planDD", "planDDTopKRestart", currentK, planDD_topK_restart_flags),
+    #("planDDUseFD", "planDDRestartUseFD", currentK, planDD_topK_restart_use_fd_flags),
+    #("symk", "symk", currentK, ""),
+    #("kstar", "kstar", currentK, ""),
+    ##### ("forbidk", 10000000, 300), # i dont do this for now because it would write too many files
+
+    ("planDD", "planDDFixedRestart", currentK, planDD_improved_restart),
+    ("planDDUseFD", "planDDFixedRestartUseFD", currentK, planDD_improved_restart_use_fd),
 ]
 
 # parallel --jobs X --timeout 600 :::: all_commands.txt
