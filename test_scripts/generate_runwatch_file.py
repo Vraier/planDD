@@ -253,6 +253,7 @@ suites = [
     #("kstar", "kstar", currentK, ""),
     ##### ("forbidk", 10000000, 300), # i dont do this for now because it would write too many files
 
+    ("planDD", "planDD_31_11", currentK, planDD_topK_flags),
     ("planDD", "planDDFixedRestart", currentK, planDD_improved_restart),
     ("planDDUseFD", "planDDFixedRestartUseFD", currentK, planDD_improved_restart_use_fd),
 ]
