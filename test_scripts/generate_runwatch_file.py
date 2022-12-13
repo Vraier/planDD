@@ -236,7 +236,7 @@ planDD_topK_restart_use_fd_flags = "--linear --timesteps -1 --clause_order_custo
 
 # better flag for restarting: igx:rympec:
 planDD_improved_restart = "--linear --timesteps -1 --clause_order_custom --var_order_custom --build_order igx:rympec: --binary_encoding --binary_exclude_impossible --binary_variables --restart"
-planDD_improved_restart_use_fd = "--linear --timesteps -1 --clause_order_custom --var_order_custom --build_order igx:rympec: --binary_encoding --binary_exclude_impossible --binary_variables --restart"
+planDD_improved_restart_use_fd = "--linear --timesteps -1 --clause_order_custom --var_order_custom --build_order igx:rympec: --binary_encoding --binary_exclude_impossible --binary_variables --restart --use_fd"
 
 currentK = 10**9
 
@@ -253,6 +253,7 @@ suites = [
     #("kstar", "kstar", currentK, ""),
     ##### ("forbidk", 10000000, 300), # i dont do this for now because it would write too many files
 
+    #on 135 600 sec timeout 60 cores (sic)
     ("planDD", "planDD_31_11", currentK, planDD_topK_flags),
     ("planDD", "planDDFixedRestart", currentK, planDD_improved_restart),
     ("planDDUseFD", "planDDFixedRestartUseFD", currentK, planDD_improved_restart_use_fd),

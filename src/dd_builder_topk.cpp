@@ -75,6 +75,7 @@ void construct_dd_top_k(dd_buildable &container, encoder_abstract &encoder, opti
         }
 
         // TODO abort if there are not enough plans
+        // TODO i should probably create and order the variables for the next timestep here
         // extend new timestep
         LOG_MESSAGE(log_level::info) << "Extending timestep " << current_timestep;
         // NOTE: it did not help to try to only include eo_op once

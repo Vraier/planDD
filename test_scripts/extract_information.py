@@ -97,18 +97,23 @@ def extract_symk_time_to_progress(file_path):
     return result
 
 suite_names = [
-    "kstar_k1000000000",
-    #"symk_k1000000000",
-    #"planDDRestartUseFD_k1000000000",
+    #"planDDTopK_k1000000000",
+    #"planDDUseFD_k1000000000",
     #"planDDTopKRestart_k1000000000",
-    "planDDUseFD_k1000000000",
-    "planDDTopK_k1000000000",
+    #"planDDRestartUseFD_k1000000000",
+
+    "kstar_k1000000000",
+    "symk_k1000000000",
+
+    #"planDD_31_11_k1000000000",
+    "planDDFixedRestart_k1000000000",
+    #"planDDFixedRestartUseFD_k1000000000",
 ]
 
 suite_dics = []
 
 for x in suite_names:
-    #write_all_information_to_file("../../test_output/best_30_11/" + x, "../../test_output/" + x + ".pkl")
+    #write_all_information_to_file("../../test_output/best_01_12/" + x, "../../test_output/" + x + ".pkl")
     pass
 
 for x in suite_names:
@@ -127,7 +132,7 @@ def get_k_to_solved_list(suite_dics, timebound):
             max_ks.append(0)
             #print("No solved on", d)
         else:
-            max_ks.append(min(10**9, max(values)))
+            max_ks.append(min(10**90, max(values)))
     max_ks.sort()
 
     num_suites = len(max_ks)
@@ -140,7 +145,7 @@ def get_k_to_solved_list(suite_dics, timebound):
 
 for i in range(len(suite_names)):
     #print((suite_dics[i][0]))
-    plot_values = get_k_to_solved_list(suite_dics[i], 600)
+    plot_values = get_k_to_solved_list(suite_dics[i], 300)
     plt.plot([x for x,_ in plot_values], [y for _,y in plot_values], linestyle=":", marker="o", label=suite_names[i])
 
 plt.xscale("log")
