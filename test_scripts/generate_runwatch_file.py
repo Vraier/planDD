@@ -66,6 +66,37 @@ def create_and_change_directory_command(output_folder):
     return whole_command
 
 
+# used for optimal and naiv track, will execute fd before
+def planDD_optimal_command(suite_name, problem, additional_flags):
+    sanitized_name = util.get_sanitized_domain_description(
+        problem["d_name"], problem["p_name"]
+    )
+    suite_path = join(SCRIPT_TO_TEST_OUTPUT, suite_name, sanitized_name)
+    dir_change_command = create_and_change_directory_command(suite_path)
+
+    problem_path = problem["path"]
+
+    suite_problem_path = join(SUITE_TO_SCRIPT_PATH, problem_path)
+
+    suite_downward_path = join(SUITE_TO_SCRIPT_PATH, DOWNWARD_PATH)
+    fd_payload = (
+        '{} --sas-file output.sas {} --search "astar(lmcut())" > fd_output.txt'.format(
+            suite_downward_path, suite_problem_path
+        )
+    )
+    suite_planDD_path = join(SUITE_TO_SCRIPT_PATH, PLANDD_PATH)
+    planDD_payload = (
+        "{} --sas_file output.sas {} > output.txt".format(
+            suite_planDD_path, additional_flags
+        )
+    )
+
+    whole_command = "{} && {} && {}".format(
+        dir_change_command, fd_payload, planDD_payload
+    )
+    return whole_command
+
+
 # does only translate the problem before
 def planDD_topK_command(suite_name, problem, num_plans, additional_flags):
     sanitized_name = util.get_sanitized_domain_description(
@@ -84,7 +115,7 @@ def planDD_topK_command(suite_name, problem, num_plans, additional_flags):
     )
     suite_planDD_path = join(SUITE_TO_SCRIPT_PATH, PLANDD_PATH)
     planDD_payload = (
-        "{} --sas_file output.sas --build_bdd {} --num_plans {} > output.txt".format(
+        "{} --sas_file output.sas {} --num_plans {} > output.txt".format(
             suite_planDD_path, additional_flags, num_plans
         )
     )
@@ -120,7 +151,7 @@ def planDD_topk_use_fd_command(
     )
     suite_planDD_path = join(SUITE_TO_SCRIPT_PATH, PLANDD_PATH)
     planDD_payload = (
-        "{} --sas_file output.sas --build_bdd {} --num_plans {} > output.txt".format(
+        "{} --sas_file output.sas {} --num_plans {} > output.txt".format(
             suite_planDD_path, additional_flags, num_plans
         )
     )
@@ -213,6 +244,8 @@ def generate_topk_runwatch_command_file(problems, suites):
                 task_command = ""
                 if planner == "planDD":
                     task_command = planDD_topK_command(suite_name, problem, k, flags)
+                elif planner == "planDDOptimal":
+                    task_command = planDD_optimal_command(suite_name, problem, flags)
                 elif planner == "planDDUseFD":
                     task_command = planDD_topk_use_fd_command(
                         suite_name, problem, k, flags
@@ -238,6 +271,12 @@ planDD_topK_restart_use_fd_flags = "--linear --timesteps -1 --clause_order_custo
 planDD_improved_restart = "--linear --timesteps -1 --clause_order_custom --var_order_custom --build_order igx:rympec: --binary_encoding --binary_exclude_impossible --binary_variables --restart"
 planDD_improved_restart_use_fd = "--linear --timesteps -1 --clause_order_custom --var_order_custom --build_order igx:rympec: --binary_encoding --binary_exclude_impossible --binary_variables --restart --use_fd"
 
+# naiv, optimal, restarting and incremental (both with fd) suites, 14/12/2022
+planDD_naiv_bdd_14_12 = "--build_bdd_naiv --build_order igrympecx:: --clause_order_custom"
+planDD_optimal_bdd_14_12 = "--build_bdd --linear --timesteps 1 --use_fd --build_order igx:rympec: --variable_order x:voh --clause_order_custom --var_order_custom --binary_encoding --binary_variables --binary_exclude_impossible"
+planDD_restart_14_12 = "--build_bdd --linear --timesteps -1 --clause_order_custom --var_order_custom --build_order igx:rympec: --binary_encoding --binary_exclude_impossible --binary_variables --restart --use_fd"
+planDD_incremental_14_12 = "--build_bdd --linear --timesteps -1 --clause_order_custom --var_order_custom --build_order rympec:: --binary_encoding --binary_exclude_impossible --binary_variables --use_fd"
+
 currentK = 10**9
 
 problems = probs.list_all_opt_strips_unitcost_problems()
@@ -254,9 +293,15 @@ suites = [
     ##### ("forbidk", 10000000, 300), # i dont do this for now because it would write too many files
 
     #on 135 600 sec timeout 60 cores (sic)
-    ("planDD", "planDD_31_11", currentK, planDD_topK_flags),
-    ("planDD", "planDDFixedRestart", currentK, planDD_improved_restart),
-    ("planDDUseFD", "planDDFixedRestartUseFD", currentK, planDD_improved_restart_use_fd),
+    #("planDD", "planDD_31_11", currentK, planDD_topK_flags),
+    #("planDD", "planDDFixedRestart", currentK, planDD_improved_restart),
+    #("planDDUseFD", "planDDFixedRestartUseFD", currentK, planDD_improved_restart_use_fd),
+
+    # naiv, optimal, and restarting suites
+    ("planDDOptimal", "planDDNaivBdd_14_12", currentK, planDD_naiv_bdd_14_12),
+    ("planDDOptimal", "planDDOptimalBdd_14_12", currentK, planDD_optimal_bdd_14_12),
+    ("planDDUseFD", "planDDRestart_14_12", currentK, planDD_restart_14_12),
+    ("planDDUseFD", "planDDIncremental_14_12", currentK, planDD_incremental_14_12),
 ]
 
 # parallel --jobs X --timeout 600 :::: all_commands.txt

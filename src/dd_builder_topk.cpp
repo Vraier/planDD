@@ -25,7 +25,8 @@ void construct_dd_top_k(dd_buildable &container, encoder_abstract &encoder, opti
             LOG_MESSAGE(log_level::info) << "Extracted a minimal planlegth of " << min_plan_length;
             // NOTE(JP) it seems to make a difference, if i create every variables at once or only some at a time.
             // this is quiet wonky. i have no clue if it actually helps or is decresing the performance
-            variable_creation::create_variables_for_timestep_t(min_plan_length, encoder, container, options);
+            // NOTE(JP) this seems to make it impossible to conjoin bdd with goal in the end. it is so wonky
+            //variable_creation::create_variables_for_timestep_t(min_plan_length, encoder, container, options);
         }
     }
 

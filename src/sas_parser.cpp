@@ -20,9 +20,12 @@ int get_plan_length(std::string file_path) {
         std::smatch match;
         const std::string constLine = line;
         if (std::regex_search(constLine.begin(), constLine.end(), match, rgx)) {
-            return std::stoi(match[1].str().c_str());
+            int result = std::stoi(match[1].str().c_str());
+            LOG_MESSAGE(log_level::info) << "Extracted a minimal planlength of " << result << " from fast downward";
+            return result;
         }
     }
+    LOG_MESSAGE(log_level::error) << "Could not extract a planlength from fast downward";
     return -1;
 }
 
