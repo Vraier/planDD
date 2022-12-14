@@ -68,7 +68,8 @@
         "variant": "cpp",
         "unordered_set": "cpp",
         "regex": "cpp",
-        "shared_mutex": "cpp"
+        "shared_mutex": "cpp",
+        "sddapi.h": "c"
     },
     "python.formatting.provider": "black",
     "cmake.configureOnOpen": false

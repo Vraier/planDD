@@ -1,7 +1,5 @@
 #include "dd_builder_topk.h"
 
-#include <regex>
-
 #include "bdd_container.h"
 #include "dd_builder.h"
 #include "logic_primitive.h"
@@ -14,22 +12,6 @@ using namespace encoder;
 
 namespace dd_builder {
 
-// finds the legth of the plan from an fast downward output file
-int get_plan_length(std::string file_path) {
-    std::ifstream infile(file_path);
-    std::string line;
-
-    while (std::getline(infile, line)) {
-        std::regex rgx("\\[.*\\] Plan length: ([0-9]*) step\\(s\\).");
-        std::smatch match;
-        const std::string constLine = line;
-        if (std::regex_search(constLine.begin(), constLine.end(), match, rgx)) {
-            return std::stoi(match[1].str().c_str());
-        }
-    }
-    return -1;
-}
-
 void construct_dd_top_k(dd_buildable &container, encoder_abstract &encoder, option_values &options) {
     LOG_MESSAGE(log_level::info) << "Running TopK Configuration";
 
@@ -41,6 +23,9 @@ void construct_dd_top_k(dd_buildable &container, encoder_abstract &encoder, opti
             return;
         } else {
             LOG_MESSAGE(log_level::info) << "Extracted a minimal planlegth of " << min_plan_length;
+            // NOTE(JP) it seems to make a difference, if i create every variables at once or only some at a time.
+            // this is quiet wonky. i have no clue if it actually helps or is decresing the performance
+            variable_creation::create_variables_for_timestep_t(min_plan_length, encoder, container, options);
         }
     }
 
@@ -53,6 +38,8 @@ void construct_dd_top_k(dd_buildable &container, encoder_abstract &encoder, opti
     std::getline(ss, order, ':');
 
     // construct initial state
+    // NOTE(JP) creating the vraiable here does not help, this approach will stay waeaker on some testcases
+    //variable_creation::create_variables_for_timestep_t(0, encoder, container, options);
     std::vector<planning_logic::logic_primitive> temp = encoder.get_logic_primitives(planning_logic::ini_state, 0);
     conjoin_primitives_linear(container, temp, 0, true);
 
@@ -75,7 +62,8 @@ void construct_dd_top_k(dd_buildable &container, encoder_abstract &encoder, opti
         }
 
         // TODO abort if there are not enough plans
-        // TODO i should probably create and order the variables for the next timestep here
+        // NOTE(JP) creating the vraiable here does not help, this approach will stay waeaker on some testcases
+        //variable_creation::create_variables_for_timestep_t(current_timestep+1, encoder, container, options);
         // extend new timestep
         LOG_MESSAGE(log_level::info) << "Extending timestep " << current_timestep;
         // NOTE: it did not help to try to only include eo_op once

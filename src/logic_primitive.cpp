@@ -50,7 +50,6 @@ std::string logic_primitive::to_string() {
             type = "none";
             break;
     }
-    type = m_type == logic_clause ? "cl" : "eo";
     time = "t=" + std::to_string(m_timestep);
     data = "d=";
     for (int x : m_data) {

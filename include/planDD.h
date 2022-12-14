@@ -9,6 +9,9 @@ int conflict_graph(option_values opt_values);
 int build_bdd(option_values opt_values);
 int build_sdd(option_values opt_values);
 
+int build_bdd_naiv(option_values opt_values);
+int build_sdd_naiv(option_values opt_values);
+
 int encode_cnf(option_values opt_values);
 int cnf_to_bdd(option_values opt_values);
 

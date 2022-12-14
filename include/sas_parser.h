@@ -54,6 +54,9 @@ class sas_problem {
     graph::undirected_graph construct_complement_action_conflic_graph();
 };
 
+// returns the legth of the plan found by a fd_run
+int get_plan_length(std::string file_path);
+
 class sas_parser {
    public:
     const std::string m_filepath;

@@ -5,6 +5,8 @@
 #include <fstream>
 #include <iostream>
 #include <vector>
+#include <algorithm>
+#include <random>
 
 #include "bdd_container.h"
 #include "dd_builder.h"
@@ -20,6 +22,8 @@
 #include "sas_parser.h"
 #include "sdd_container.h"
 #include "variable_creation.h"
+
+#include "compiler.h"
 
 int main(int argc, char *argv[]) {
     // start logging
@@ -48,6 +52,14 @@ int main(int argc, char *argv[]) {
 
     if (options.m_values.build_sdd) {
         return planDD::build_sdd(options.m_values);
+    }
+
+    if (options.m_values.build_bdd_naiv) {
+        return planDD::build_bdd_naiv(options.m_values);
+    }
+
+    if (options.m_values.build_sdd_naiv) {
+        return planDD::build_sdd_naiv(options.m_values);
     }
 
     if (options.m_values.cnf_to_bdd) {
@@ -139,6 +151,8 @@ int planDD::conflict_graph(option_values opt_values) {
     return 0;
 }
 
+// TODO make tow function, one for optimal, one for topk
+// also make using fd more consistent (i dont want to keep using timesteps, maybe remove it completely)
 int planDD::build_bdd(option_values opt_values) {
     sas_parser parser(opt_values.sas_file);
     if (parser.start_parsing() == -1) {
@@ -184,6 +198,77 @@ int planDD::build_bdd(option_values opt_values) {
     // encoder.decode_cnf_solution(a, 5);
     //}
     // builder.write_bdd_to_dot_file("normal_bdd.dot");
+    return 0;
+}
+
+int planDD::build_bdd_naiv(option_values opt_values) {
+    sas_parser parser(opt_values.sas_file);
+    if (parser.start_parsing() == -1) {
+        LOG_MESSAGE(log_level::error) << "Error while parsing sas_file";
+        return 0;
+    }
+
+    encoder::encoder_basic *encoder = new encoder::encoder_basic(opt_values, parser.m_sas_problem);
+    int min_plan_length = get_plan_length("fd_output.txt");
+
+    option_values temp_opts = opt_values;
+    temp_opts.timesteps = min_plan_length;
+
+    std::vector<planning_logic::logic_primitive> all_primitives = conjoin_order::order_all_clauses(*encoder, temp_opts);
+    if(opt_values.naiv_random){
+        auto rng = std::default_random_engine {};
+        std::shuffle(std::begin(all_primitives), std::end(all_primitives), rng);
+    }
+
+    bdd_container builder(1);
+    builder.enable_reordering();
+    dd_builder::conjoin_primitives_linear(builder, all_primitives, 0, false);
+
+    builder.print_info();
+
+    delete encoder;
+    return 0;
+}
+
+int planDD::build_sdd_naiv(option_values opt_values){
+    sas_parser parser(opt_values.sas_file);
+    if (parser.start_parsing() == -1) {
+        LOG_MESSAGE(log_level::error) << "Error while parsing sas_file";
+        return 0;
+    }
+
+    encoder::encoder_basic *encoder = new encoder::encoder_basic(opt_values, parser.m_sas_problem);
+    int min_plan_length = get_plan_length("fd_output.txt");
+    option_values temp_opts = opt_values;
+    temp_opts.timesteps = min_plan_length;
+    std::vector<planning_logic::logic_primitive> all_primitives = conjoin_order::order_all_clauses(*encoder, temp_opts);
+    encoder->m_symbol_map.get_num_variables();
+
+    // write cnf to file
+    std::fstream file_out;
+    file_out.open("prob.cnf", std::ios_base::out);
+    file_out << "p cnf " << encoder->m_symbol_map.get_num_variables() << " " << all_primitives.size() << std::endl;
+    for (int i = 0; i < all_primitives.size(); i++) {
+        std::cout << all_primitives[i].to_string() << std::endl;
+        std::vector<int> clause = all_primitives[i].m_data;
+        for (int l : clause) {
+            file_out << l << " ";
+        }
+        file_out << "0" << std::endl;
+    }
+    file_out.close();
+
+    // encoder is constructing dnfs. i have to fix? this so i can build a sdd from pure clauses
+
+    /*
+    Fnf* fnf = NULL;
+    fnf = read_cnf("prob.cnf");
+    printf("\ncreating initial vtree (%s)...",options.initial_vtree_type);
+    Vtree* vtree = sdd_vtree_new(fnf->var_count, "balanced");
+    SddManager* manager = sdd_manager_new(vtree);
+    sdd_vtree_free(vtree);
+    */
+
     return 0;
 }
 

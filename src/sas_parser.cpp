@@ -1,5 +1,6 @@
 #include "sas_parser.h"
 
+#include <regex>
 #include <fstream>
 #include <iostream>
 #include <map>
@@ -9,6 +10,21 @@
 #include <vector>
 
 #include "logging.h"
+
+int get_plan_length(std::string file_path) {
+    std::ifstream infile(file_path);
+    std::string line;
+
+    while (std::getline(infile, line)) {
+        std::regex rgx("\\[.*\\] Plan length: ([0-9]*) step\\(s\\).");
+        std::smatch match;
+        const std::string constLine = line;
+        if (std::regex_search(constLine.begin(), constLine.end(), match, rgx)) {
+            return std::stoi(match[1].str().c_str());
+        }
+    }
+    return -1;
+}
 
 bool sas_problem::are_variables_consistent(std::vector<std::pair<int, int>> &set1,
                                            std::vector<std::pair<int, int>> &set2) {
