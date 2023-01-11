@@ -54,7 +54,7 @@ def find_all_output_files(suite_path):
         fold_path = os.path.join(suite_path, fold)
         if os.path.isdir(fold_path):
             for fil in os.listdir(fold_path):
-                if "planDD_output" in fil:
+                if "planDD_output" in fil or fil == "output.txt":
                     file_path = os.path.join(fold_path, fil)
                     all_file_paths.append((fold, file_path))
                     break

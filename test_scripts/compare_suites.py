@@ -4,8 +4,8 @@ import os
 import re
 import suites
 
-topk_path = "../test_output/best_30_11/planDDUseFD_k1000000000/"
-optimal_path = "../test_output/best_21_11/best_21_11_old_best"
+topk_path = "../test_output/best_14_12/planDDRestart_14_12_k1000000000/"
+optimal_path = "../test_output/best_14_12/planDDOptimalBdd_14_12_k1000000000"
 
 def get_all_testcases(suite_path):
     all_file_paths = []

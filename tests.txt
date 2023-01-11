@@ -1,0 +1,35 @@
+[ ] test all variable and clause orderings (naive encoding)
+    [ ] do the same for reverse orderings (sure?)
+
+[ ] test different building strategies
+    [ ] build linear
+    [ ] build layer by layer
+    [ ] exponential
+    [ ] bidirectional
+    [ ] with variable permutation
+
+[ ] test different encodings
+    [ ] naive
+    [ ] ladder encoding
+    [ ] direct encoding
+    [ ] binary (operators, variables, both, excluding) 
+    [ ] parallel (how?)
+    [ ] binary parallel
+
+[ ] test force ordering vor variables and clauses
+[ ] test the influence of dynamic reordering
+
+[ ] test the grouping of variables in the order
+
+[ ] test naive bdd (with random clause order or with force order and random seed), with dynamic reordering
+[ ] test naive sdd
+
+[ ] test incremental approaches
+
+[ ] compare with competitors
+    [ ] topk track (incremental)
+    [ ] topq track
+
+[ ] implement proof of concept 
+    [ ] uniform random plan
+    [ ] what is the most likely action to start

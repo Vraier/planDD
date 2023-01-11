@@ -1,5 +1,6 @@
 from xml.dom.expatbuilder import theDOMImplementation
 from extract_planDD_information import *
+import matplotlib.pyplot as plt
 
 import statistics
 
@@ -49,7 +50,7 @@ def print_big_information_from_dicts(all_dics):
     average_colours = statistics.mean([i["num_colour_classes"] for i in solved_dics])
     print("Average number of colouring time and colours: {:0.3f}, {:0.1f}".format(average_colouring_time, average_colours))
 
-# print information in multiple suites are of interest. 
+# print information in multiple suites are of interest.
 # key arguments hold the config values that differentiate between the runs
 def get_small_information_from_dicts(all_dics, key_arguments):
     config_discription = ""
@@ -90,9 +91,6 @@ def print_solving_difference_between_two_congigs(dics1, name1, dics2, name2):
     print(solved1 - solved2)
     print("Only solved by", name2, ": ")
     print(solved2 - solved1)
-    
-
-    
 
 def print_portfolio_information(suites):
     curr_solved = set()
@@ -108,6 +106,28 @@ def print_portfolio_information(suites):
         prev_solved = set(curr_solved)
 
     print(curr_solved)
+
+
+def plot_suites(suite_dics):
+    suite_points = []
+    for i in range(len(suite_dics)):
+        dics = suite_dics[i]
+        times = []
+        for d in dics:
+            t = d["finish_time"]
+            if t >= 0 and t <= 600:
+                times.append(t)
+        times.sort()
+        points = []
+        total = 1
+        for t in times:
+            points.append((t, total))
+            total += 1
+        suite_points.append(points)
+
+    for ps in suite_points:
+        plt.plot([x for x,_ in ps], [y for _,y in ps], linestyle=":", marker="o", label=suite_names[i])
+    plt.show()
 
 
 
@@ -337,15 +357,20 @@ suite_names = [
     #"03_08_clause_order_custom_force_binary_rand_seed",
     #"03_08_clause_order_custom_bottom_up_binary",
 
-    "best_21_11_old_best",
-    "best_21_11_sdd",
+    #"best_21_11_old_best",
+    #"best_21_11_sdd",
     #"best_21_11_incremental",
     #"best_21_11_incremental_restart"
+
+    # to check if restart is as good as optimal and to compare with naiv
+    "planDDNaivBdd_14_12_k1000000000",
+    "planDDOptimalBdd_14_12_k1000000000",
+
 ]
 suite_dics = []
 
 for x in suite_names:
-    #write_all_information_to_file("../../test_output/best_21_11/" + x, "../../test_output/" + x + ".pkl")
+    #write_all_information_to_file("../../test_output/best_14_12/" + x, "../../test_output/" + x + ".pkl")
     pass
 
 for x in suite_names:
@@ -354,6 +379,10 @@ for x in suite_names:
 for i in range(len(suite_names)):
     print(suite_names[i])
     print_big_information_from_dicts(suite_dics[i])
+
+
+plot_suites(suite_dics)
+    
 
 
 portfolio_suite_names = [

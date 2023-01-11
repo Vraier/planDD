@@ -106,14 +106,18 @@ suite_names = [
     "symk_k1000000000",
 
     #"planDD_31_11_k1000000000",
-    "planDDFixedRestart_k1000000000",
+    #"planDDFixedRestart_k1000000000",
     #"planDDFixedRestartUseFD_k1000000000",
+
+    # to check if restart is now was good as optimal
+    "planDDRestart_14_12_k1000000000",
+    #"planDDIncremental_14_12_k1000000000",
 ]
 
 suite_dics = []
 
 for x in suite_names:
-    #write_all_information_to_file("../../test_output/best_01_12/" + x, "../../test_output/" + x + ".pkl")
+    #write_all_information_to_file("../../test_output/best_14_12/" + x, "../../test_output/" + x + ".pkl")
     pass
 
 for x in suite_names:
@@ -145,7 +149,7 @@ def get_k_to_solved_list(suite_dics, timebound):
 
 for i in range(len(suite_names)):
     #print((suite_dics[i][0]))
-    plot_values = get_k_to_solved_list(suite_dics[i], 300)
+    plot_values = get_k_to_solved_list(suite_dics[i], 600)
     plt.plot([x for x,_ in plot_values], [y for _,y in plot_values], linestyle=":", marker="o", label=suite_names[i])
 
 plt.xscale("log")
