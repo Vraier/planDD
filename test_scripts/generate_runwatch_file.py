@@ -278,6 +278,9 @@ planDD_incremental_14_12 = "--build_bdd --linear --timesteps -1 --clause_order_c
 currentK = 10**9
 
 opt_strip_unit_cost_problems = probs.list_all_opt_strips_unitcost_problems()
+random_easy_downard_probs = probs.select_random_set_from_downward_solved_problems(200)
+
+
 # planner type, suite name, num plan, additional flags
 suites = [
     # on 137 with 600 sec timeout 60 cores
@@ -301,7 +304,6 @@ suites = [
 
 
 # T1 clause order suites
-# also uses the interleaved part
 def generate_all_conjoin_orders():
     all_orders = []
     single_timesetps = [
@@ -338,7 +340,6 @@ def generate_all_conjoin_orders():
 
 clause_order_suites = []
 clause_orders = generate_all_conjoin_orders()
-print(clause_orders)
 for i in range(len(clause_orders)):
     ord = clause_orders[i]
     clause_order_suites.append(
@@ -348,10 +349,31 @@ for i in range(len(clause_orders)):
         "--build_bdd --linear --use_fd --build_order {} --clause_order_custom".format(ord))
     )
 
-random_easy_donward_probs = probs.select_random_set_from_downward_solved_problems(200)
-
-
-# parallel --jobs X --timeout 600 :::: all_commands.txt
-#print("Num problems:", len(opt_strip_unit_cost_problems))
+# parallel --jobs X --timeout 60 :::: all_commands.txt
+#print("Num problems:", len(random_easy_downard_probs))
 #print("Num configs:", len(clause_order_suites))
-generate_topk_runwatch_command_file(random_easy_donward_probs, clause_order_suites)
+#generate_topk_runwatch_command_file(random_easy_downard_probs, clause_order_suites)
+
+
+# T2 var order suites
+def generate_variables_orders():
+    return ["vox:h", "ovx:h", "x:voh", "x:ovh"]
+
+var_order_suites = []
+var_orders = generate_variables_orders()
+for i in range(len(var_orders)):
+    ord = var_orders[i]
+    var_order_suites.append(
+        ("planDDOptimal", 
+        "T02_11_01_ord_" + str(i), 
+        currentK, 
+        "--build_bdd --linear --use_fd --build_order igx:rympec: --clause_order_custom --var_order_custom --variable_order ".format(ord))
+    )
+
+# parallel --jobs X --timeout 60 :::: all_commands.txt
+print("Num problems:", len(random_easy_downard_probs))
+print("Num configs:", len(var_order_suites))
+generate_topk_runwatch_command_file(random_easy_downard_probs, var_order_suites)
+
+
+# T3 different building algorithms

@@ -3,7 +3,7 @@
     [ ] var orders (T2)
     [ ] do the same for reverse orderings (sure?)
 
-[ ] test different building strategies
+[ ] test different building strategies (T3)
     [ ] build linear
     [ ] build layer by layer
     [ ] exponential

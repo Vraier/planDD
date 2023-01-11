@@ -52,7 +52,7 @@ void create_variables_for_timestep_t(int t, encoder::encoder_abstract &encoder, 
             encoder.m_symbol_map.get_variable_index_for_op_binary(t - 1, 0);
         } else {
             for (int op = 0; op < encoder.m_sas_problem.m_operators.size(); op++) {
-                encoder.m_symbol_map.get_variable_index(variable_plan_op, t, op);
+                encoder.m_symbol_map.get_variable_index(variable_plan_op, t-1, op);
             }
         }
 

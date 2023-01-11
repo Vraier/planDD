@@ -152,7 +152,6 @@ int planDD::conflict_graph(option_values opt_values) {
 }
 
 // TODO make two!!!!!!!!!!!!! functions, one for optimal, one for topk
-// also make using fd more consistent (i dont want to keep using timesteps, maybe remove it completely)
 int planDD::build_bdd(option_values opt_values) {
     sas_parser parser(opt_values.sas_file);
     if (parser.start_parsing() == -1) {
@@ -170,7 +169,6 @@ int planDD::build_bdd(option_values opt_values) {
 
     bdd_container builder(1);
 
-    // hack to allow optimal bdd construction to use fd
     if (opt_values.use_fd) {
         int min_plan_length = get_plan_length("fd_output.txt");
         opt_values.timesteps = min_plan_length;
