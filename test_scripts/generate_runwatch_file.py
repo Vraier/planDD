@@ -350,9 +350,9 @@ for i in range(len(clause_orders)):
     )
 
 # parallel --jobs X --timeout 60 :::: all_commands.txt
-#print("Num problems:", len(random_easy_downard_probs))
-#print("Num configs:", len(clause_order_suites))
-#generate_topk_runwatch_command_file(random_easy_downard_probs, clause_order_suites)
+print("Num problems:", len(random_easy_downard_probs))
+print("Num configs:", len(clause_order_suites))
+generate_topk_runwatch_command_file(random_easy_downard_probs, clause_order_suites)
 
 
 # T2 var order suites
@@ -371,9 +371,10 @@ for i in range(len(var_orders)):
     )
 
 # parallel --jobs X --timeout 60 :::: all_commands.txt
-print("Num problems:", len(random_easy_downard_probs))
-print("Num configs:", len(var_order_suites))
-generate_topk_runwatch_command_file(random_easy_downard_probs, var_order_suites)
+#print("Num problems:", len(random_easy_downard_probs))
+#print("Num configs:", len(var_order_suites))
+#generate_topk_runwatch_command_file(random_easy_downard_probs, var_order_suites)
 
 
 # T3 different building algorithms
+
