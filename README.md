@@ -26,7 +26,7 @@ scons
 ```
 For more information, check their README files.
 
-To compile planDD create and move to planDD/build and run
+To compile planDD create and move to the planDD/build directory and run
 ```
 cmake ..
 make
@@ -34,5 +34,5 @@ make
 
 # Dependencies
 
-I use the CUDD library (https://github.com/ivmai/cudd) and the SDD library (http://reasoning.cs.ucla.edu/sdd/) the build the BDDs and SDDs.
+I use the CUDD library (https://github.com/ivmai/cudd) and the SDD library (http://reasoning.cs.ucla.edu/sdd/) to build the BDDs and SDDs.
 Their license files can be found in the corresponding folder in planDD/contrib

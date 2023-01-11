@@ -159,7 +159,5 @@ print(len(succesfull))
 
 for x in succesfull:
     print(x)
-
-
 # Prepares the planDD run
 # generate_parallel_file_from_calls(generate_DD_calls())

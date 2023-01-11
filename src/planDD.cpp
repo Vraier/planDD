@@ -171,21 +171,22 @@ int planDD::build_bdd(option_values opt_values) {
     bdd_container builder(1);
 
     // hack to allow optimal bdd construction to use fd
-    if(opt_values.timesteps > 0 && opt_values.use_fd){
+    if (opt_values.use_fd) {
         int min_plan_length = get_plan_length("fd_output.txt");
         opt_values.timesteps = min_plan_length;
+        if (min_plan_length < 0) {
+            LOG_MESSAGE(log_level::error) << "Could not find a minimal plan length";
+            return 0;
+        }
     }
 
     if (opt_values.timesteps >= 0) {
         variable_creation::create_variables_for_first_t_steps(opt_values.timesteps, *encoder, builder, opt_values);
-        std::vector<int> var_order = variable_order::order_variables(*encoder, opt_values);
 
-        // std::cout << "var order: ";
-        // for(int a: var_order){
-        //     std::cout << a << " ";
-        // }
-        // std::cout << std::endl;
-        builder.set_variable_order(var_order);
+        if (opt_values.var_order_custom || opt_values.var_order_force || opt_values.var_order_custom_force) {
+            std::vector<int> var_order = variable_order::order_variables(*encoder, opt_values);
+            builder.set_variable_order(var_order);
+        }
     }
 
     if (opt_values.no_reordering) {
@@ -221,8 +222,8 @@ int planDD::build_bdd_naiv(option_values opt_values) {
     temp_opts.timesteps = min_plan_length;
 
     std::vector<planning_logic::logic_primitive> all_primitives = conjoin_order::order_all_clauses(*encoder, temp_opts);
-    if(opt_values.naiv_random){
-        auto rng = std::default_random_engine {};
+    if (opt_values.naiv_random) {
+        auto rng = std::default_random_engine{};
         std::shuffle(std::begin(all_primitives), std::end(all_primitives), rng);
     }
 
@@ -236,7 +237,7 @@ int planDD::build_bdd_naiv(option_values opt_values) {
     return 0;
 }
 
-int planDD::build_sdd_naiv(option_values opt_values){
+int planDD::build_sdd_naiv(option_values opt_values) {
     sas_parser parser(opt_values.sas_file);
     if (parser.start_parsing() == -1) {
         LOG_MESSAGE(log_level::error) << "Error while parsing sas_file";

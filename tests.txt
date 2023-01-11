@@ -1,4 +1,6 @@
 [ ] test all variable and clause orderings (naive encoding)
+    [ ] clause orders (T1)
+    [ ] var orders (T2)
     [ ] do the same for reverse orderings (sure?)
 
 [ ] test different building strategies

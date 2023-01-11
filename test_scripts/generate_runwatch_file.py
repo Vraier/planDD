@@ -1,5 +1,7 @@
 from os import listdir
 from os.path import isfile, join, dirname, basename
+import itertools
+from itertools import chain, combinations
 
 import planDD_test_util_problems as probs
 import planDD_test_util_general as util
@@ -85,10 +87,8 @@ def planDD_optimal_command(suite_name, problem, additional_flags):
         )
     )
     suite_planDD_path = join(SUITE_TO_SCRIPT_PATH, PLANDD_PATH)
-    planDD_payload = (
-        "{} --sas_file output.sas {} > output.txt".format(
-            suite_planDD_path, additional_flags
-        )
+    planDD_payload = "{} --sas_file output.sas {} > output.txt".format(
+        suite_planDD_path, additional_flags
     )
 
     whole_command = "{} && {} && {}".format(
@@ -114,10 +114,8 @@ def planDD_topK_command(suite_name, problem, num_plans, additional_flags):
         suite_downward_path, suite_problem_path
     )
     suite_planDD_path = join(SUITE_TO_SCRIPT_PATH, PLANDD_PATH)
-    planDD_payload = (
-        "{} --sas_file output.sas {} --num_plans {} > output.txt".format(
-            suite_planDD_path, additional_flags, num_plans
-        )
+    planDD_payload = "{} --sas_file output.sas {} --num_plans {} > output.txt".format(
+        suite_planDD_path, additional_flags, num_plans
     )
 
     whole_command = "{} && {} && {}".format(
@@ -150,10 +148,8 @@ def planDD_topk_use_fd_command(
         )
     )
     suite_planDD_path = join(SUITE_TO_SCRIPT_PATH, PLANDD_PATH)
-    planDD_payload = (
-        "{} --sas_file output.sas {} --num_plans {} > output.txt".format(
-            suite_planDD_path, additional_flags, num_plans
-        )
+    planDD_payload = "{} --sas_file output.sas {} --num_plans {} > output.txt".format(
+        suite_planDD_path, additional_flags, num_plans
     )
 
     whole_command = "{} && {} && {}".format(
@@ -256,7 +252,7 @@ def generate_topk_runwatch_command_file(problems, suites):
                     task_command = kstar_topk_command(suite_name, problem, k)
                 elif planner == "forbidk":
                     task_command = forbidk_topk_command(suite_name, problem, k)
-                #runwatch_file.write("{} {}\n".format(str(num_commands), task_command))
+                # runwatch_file.write("{} {}\n".format(str(num_commands), task_command))
                 runwatch_file.write("{}\n".format(task_command))
                 num_commands += 1
         print("Generated a total of", num_commands, "commands")
@@ -272,31 +268,30 @@ planDD_improved_restart = "--linear --timesteps -1 --clause_order_custom --var_o
 planDD_improved_restart_use_fd = "--linear --timesteps -1 --clause_order_custom --var_order_custom --build_order igx:rympec: --binary_encoding --binary_exclude_impossible --binary_variables --restart --use_fd"
 
 # naiv, optimal, restarting and incremental (both with fd) suites, 14/12/2022
-planDD_naiv_bdd_14_12 = "--build_bdd_naiv --build_order igrympecx:: --clause_order_custom"
+planDD_naiv_bdd_14_12 = (
+    "--build_bdd_naiv --build_order igrympecx:: --clause_order_custom"
+)
 planDD_optimal_bdd_14_12 = "--build_bdd --linear --timesteps 1 --use_fd --build_order igx:rympec: --variable_order x:voh --clause_order_custom --var_order_custom --binary_encoding --binary_variables --binary_exclude_impossible"
 planDD_restart_14_12 = "--build_bdd --linear --timesteps -1 --clause_order_custom --var_order_custom --build_order igx:rympec: --binary_encoding --binary_exclude_impossible --binary_variables --restart --use_fd"
 planDD_incremental_14_12 = "--build_bdd --linear --timesteps -1 --clause_order_custom --var_order_custom --build_order rympec:: --binary_encoding --binary_exclude_impossible --binary_variables --use_fd"
 
 currentK = 10**9
 
-problems = probs.list_all_opt_strips_unitcost_problems()
+opt_strip_unit_cost_problems = probs.list_all_opt_strips_unitcost_problems()
 # planner type, suite name, num plan, additional flags
 suites = [
-    #on 137 with 600 sec timeout 60 cores
-    
-    #("planDD", "planDDTopK", currentK, planDD_topK_flags),
-    #("planDDUseFD", "planDDUseFD", currentK, planDD_topK_use_fd_flags),
-    #("planDD", "planDDTopKRestart", currentK, planDD_topK_restart_flags),
-    #("planDDUseFD", "planDDRestartUseFD", currentK, planDD_topK_restart_use_fd_flags),
-    #("symk", "symk", currentK, ""),
-    #("kstar", "kstar", currentK, ""),
+    # on 137 with 600 sec timeout 60 cores
+    # ("planDD", "planDDTopK", currentK, planDD_topK_flags),
+    # ("planDDUseFD", "planDDUseFD", currentK, planDD_topK_use_fd_flags),
+    # ("planDD", "planDDTopKRestart", currentK, planDD_topK_restart_flags),
+    # ("planDDUseFD", "planDDRestartUseFD", currentK, planDD_topK_restart_use_fd_flags),
+    # ("symk", "symk", currentK, ""),
+    # ("kstar", "kstar", currentK, ""),
     ##### ("forbidk", 10000000, 300), # i dont do this for now because it would write too many files
-
-    #on 135 600 sec timeout 60 cores (sic)
-    #("planDD", "planDD_31_11", currentK, planDD_topK_flags),
-    #("planDD", "planDDFixedRestart", currentK, planDD_improved_restart),
-    #("planDDUseFD", "planDDFixedRestartUseFD", currentK, planDD_improved_restart_use_fd),
-
+    # on 135 600 sec timeout 60 cores (sic)
+    # ("planDD", "planDD_31_11", currentK, planDD_topK_flags),
+    # ("planDD", "planDDFixedRestart", currentK, planDD_improved_restart),
+    # ("planDDUseFD", "planDDFixedRestartUseFD", currentK, planDD_improved_restart_use_fd),
     # naiv, optimal, and restarting suites
     ("planDDOptimal", "planDDNaivBdd_14_12", currentK, planDD_naiv_bdd_14_12),
     ("planDDOptimal", "planDDOptimalBdd_14_12", currentK, planDD_optimal_bdd_14_12),
@@ -304,5 +299,59 @@ suites = [
     ("planDDUseFD", "planDDIncremental_14_12", currentK, planDD_incremental_14_12),
 ]
 
+
+# T1 clause order suites
+# also uses the interleaved part
+def generate_all_conjoin_orders():
+    all_orders = []
+    single_timesetps = [
+        "i",  # initial state
+        "g",  # goal
+    ]
+    multi_timesteps = [
+        "rym",  # all variable and action mutexes
+        "pe",  # preconditions and effects
+        "c",  # changing atoms
+    ]
+    # choose which parts not to interleave but order disjoint
+    # (interleaving only one or zero part(s) does are edge cases, i dont do interleaved parts of size 0)
+    powerset = list(
+        chain.from_iterable(
+            combinations(multi_timesteps, r) for r in range(len(multi_timesteps))
+        )
+    )
+
+    for subset in powerset:
+        local_single = single_timesetps + list(subset) + ["x"]
+        local_multi = [x for x in multi_timesteps if x not in subset]
+
+        single_permutations = list(itertools.permutations(local_single))
+        multi_permutations = list(itertools.permutations(local_multi))
+
+        for s in single_permutations:
+            for p in multi_permutations:
+                new_order = "".join(s) + ":" + "".join(p) + ":"
+                all_orders.append(new_order)
+
+    return all_orders
+
+
+clause_order_suites = []
+clause_orders = generate_all_conjoin_orders()
+print(clause_orders)
+for i in range(len(clause_orders)):
+    ord = clause_orders[i]
+    clause_order_suites.append(
+        ("planDDOptimal", 
+        "T01_11_01_ord_" + str(i), 
+        currentK, 
+        "--build_bdd --linear --use_fd --build_order {} --clause_order_custom".format(ord))
+    )
+
+random_easy_donward_probs = probs.select_random_set_from_downward_solved_problems(200)
+
+
 # parallel --jobs X --timeout 600 :::: all_commands.txt
-generate_topk_runwatch_command_file(problems, suites)
+#print("Num problems:", len(opt_strip_unit_cost_problems))
+#print("Num configs:", len(clause_order_suites))
+generate_topk_runwatch_command_file(random_easy_donward_probs, clause_order_suites)
