@@ -343,38 +343,93 @@ clause_orders = generate_all_conjoin_orders()
 for i in range(len(clause_orders)):
     ord = clause_orders[i]
     clause_order_suites.append(
-        ("planDDOptimal", 
-        "T01_11_01_ord_" + str(i), 
-        currentK, 
-        "--build_bdd --linear --use_fd --build_order {} --clause_order_custom".format(ord))
+        (
+            "planDDOptimal",
+            "T01_11_01_ord_" + str(i),
+            currentK,
+            "--build_bdd --linear --use_fd --build_order {} --clause_order_custom".format(
+                ord
+            ),
+        )
     )
 
 # parallel --jobs X --timeout 60 :::: all_commands.txt
-print("Num problems:", len(random_easy_downard_probs))
-print("Num configs:", len(clause_order_suites))
-generate_topk_runwatch_command_file(random_easy_downard_probs, clause_order_suites)
+# print("Num problems:", len(random_easy_downard_probs))
+# print("Num configs:", len(clause_order_suites))
+# generate_topk_runwatch_command_file(random_easy_downard_probs, clause_order_suites)
 
 
-# T2 var order suites
+# T2 var order suites and T3 different build algorithms
 def generate_variables_orders():
     return ["vox:h", "ovx:h", "x:voh", "x:ovh"]
 
-var_order_suites = []
+
+T0304_suites = []
 var_orders = generate_variables_orders()
 for i in range(len(var_orders)):
     ord = var_orders[i]
-    var_order_suites.append(
-        ("planDDOptimal", 
-        "T02_11_01_ord_" + str(i), 
-        currentK, 
-        "--build_bdd --linear --use_fd --build_order igx:rympec: --clause_order_custom --var_order_custom --variable_order ".format(ord))
+    T0304_suites.append(
+        (
+            "planDDOptimal",
+            "T02_11_01_ord_" + str(i),
+            currentK,
+            "--build_bdd --linear --use_fd --build_order igx:rympec: --clause_order_custom --var_order_custom --variable_order {}".format(
+                ord
+            ),
+        )
+    )
+    T0304_suites.append(
+        (
+            "planDDOptimal",
+            "T02_11_01_ord_" + str(i) + "_no_reorder",
+            currentK,
+            "--build_bdd --linear --use_fd --build_order igx:rympec: --clause_order_custom --var_order_custom --variable_order {} --no_reordering".format(
+                ord
+            ),
+        )
     )
 
+T0304_suites += [
+    (
+        "planDDOptimal",
+        "T03_15_01_layer",
+        currentK,
+        "--build_bdd --layer --use_fd --build_order ig:rympec: --clause_order_custom --var_order_custom",
+    ),
+    (
+        "planDDOptimal",
+        "T03_15_01_layer_perm",
+        currentK,
+        "--build_bdd --layer --use_fd --build_order ig:rympec: --clause_order_custom --var_order_custom --use_layer_permutation",
+    ),
+    (
+        "planDDOptimal",
+        "T03_15_01_bi",
+        currentK,
+        "--build_bdd --layer_bi --use_fd --build_order ig:rympec:ig --clause_order_custom --var_order_custom",
+    ),
+    (
+        "planDDOptimal",
+        "T03_15_01_bi_share",
+        currentK,
+        "--build_bdd --layer_bi --use_fd --build_order ig:rympec:ig --clause_order_custom --var_order_custom --share_foundations",
+    ),
+    (
+        "planDDOptimal",
+        "T03_15_01_bi_share_perm",
+        currentK,
+        "--build_bdd --layer_bi --use_fd --build_order ig:rympec:ig --clause_order_custom --var_order_custom --share_foundations --use_layer_permutation",
+    ),
+    (
+        "planDDOptimal",
+        "T03_15_01_expo",
+        currentK,
+        "--build_bdd --layer_expo --use_fd --build_order ig:rympec: --clause_order_custom --var_order_custom ",
+    ),
+]
+
+
 # parallel --jobs X --timeout 60 :::: all_commands.txt
-#print("Num problems:", len(random_easy_downard_probs))
-#print("Num configs:", len(var_order_suites))
-#generate_topk_runwatch_command_file(random_easy_downard_probs, var_order_suites)
-
-
-# T3 different building algorithms
-
+print("Num problems:", len(opt_strip_unit_cost_problems))
+print("Num configs:", len(T0304_suites))
+generate_topk_runwatch_command_file(opt_strip_unit_cost_problems, T0304_suites)

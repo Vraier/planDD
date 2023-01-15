@@ -153,7 +153,7 @@ std::vector<std::tuple<logic_primitive, int>> create_custom_clause_order_mapping
                             result.push_back(std::make_tuple(temp_clauses[k], custom_order_counter));
                         }
                     }
-                    if(options.split_inside_timestep){
+                    if (options.split_inside_timestep) {
                         custom_order_counter++;  // increase counter after every category in a timestep
                     }
                 }
@@ -218,7 +218,7 @@ std::vector<std::tuple<logic_primitive, int>> create_force_clause_order_mapping(
 std::vector<std::tuple<logic_primitive, int>> create_bottom_up_clause_order_mapping(encoder::encoder_abstract &encoder,
                                                                                     option_values &options) {
     LOG_MESSAGE(log_level::info) << "Calculating bottom up conjoin order";
-    
+
     std::vector<std::tuple<logic_primitive, int>> custom_order = create_custom_clause_order_mapping(encoder, options);
     std::vector<logic_primitive> bottom_up_order;
     for (int i = 0; i < custom_order.size(); i++) {
@@ -306,7 +306,13 @@ std::vector<logic_primitive> order_clauses_for_foundation(encoder_abstract &enco
 
     for (char c : order_string) {
         primitive_tag order_tag = char_tag_map[c];
-        temp_clauses = collect_primitives_for_all_timesteps(encoder, order_tag, timesteps);
+        if (order_tag == ini_state) {
+            temp_clauses = collect_primitives_for_single_timestep(encoder, order_tag, 0);
+        } else if (order_tag = goal) {
+            temp_clauses = collect_primitives_for_single_timestep(encoder, order_tag, timesteps);
+        } else {
+            temp_clauses = collect_primitives_for_all_timesteps(encoder, order_tag, timesteps);
+        }
         result_clauses.insert(result_clauses.end(), temp_clauses.begin(), temp_clauses.end());
     }
 

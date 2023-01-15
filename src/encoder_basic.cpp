@@ -84,8 +84,7 @@ std::vector<logic_primitive> encoder_basic::prebuild_goals(int t) {
     std::vector<std::vector<int>> dnf;
 
     for (int i = 0; i <= t; i++) {
-
-        std::vector<int> goalI; // vector representing the variables that are necessary to fulfil goal in t=i
+        std::vector<int> goalI;  // vector representing the variables that are necessary to fulfil goal in t=i
         for (int g = 0; g < m_sas_problem.m_goal.size(); g++) {
             std::pair<int, int> goal_pair = m_sas_problem.m_goal[g];
             int goal_var = goal_pair.first;
@@ -309,8 +308,7 @@ std::vector<logic_primitive> encoder_basic::construct_precondition(int timestep)
 
     for (int op = 0; op < m_sas_problem.m_operators.size(); op++) {
         // one dnf for all preconditions and effects and one dnf for copying for every single precon
-        std::vector<std::vector<int>> default_dnf, op_grouped_dnf;
-        std::vector<int> op_grouped_clause;
+        std::vector<std::vector<int>> default_dnf;
         if (m_options.binary_encoding) {
             std::vector<int> op_indizes = m_symbol_map.get_variable_index_for_op_binary(timestep, op);
             for (int o : op_indizes) {
@@ -326,7 +324,6 @@ std::vector<logic_primitive> encoder_basic::construct_precondition(int timestep)
             tmp.push_back(-index_op);
             default_dnf.push_back(tmp);
         }
-        op_grouped_dnf = default_dnf;
 
         for (int eff = 0; eff < m_sas_problem.m_operators[op].m_effects.size(); eff++) {
             std::vector<std::vector<int>> new_dnf = default_dnf;
@@ -344,7 +341,6 @@ std::vector<logic_primitive> encoder_basic::construct_precondition(int timestep)
                 std::vector<int> var_indizes = m_symbol_map.get_variable_index_for_var_binary(
                     timestep, effected_var, effected_old_val, effected_var_size);
                 new_dnf.push_back(var_indizes);
-                op_grouped_clause.insert(op_grouped_clause.end(), var_indizes.begin(), var_indizes.end());
             } else {
                 // variable unary
                 int index_precondition =
@@ -352,36 +348,11 @@ std::vector<logic_primitive> encoder_basic::construct_precondition(int timestep)
                 std::vector<int> tmp;
                 tmp.push_back(index_precondition);
                 new_dnf.push_back(tmp);
-                op_grouped_clause.push_back(index_precondition);
             }
-
-            if (!m_options.group_pre_eff) {
-                result.push_back(logic_primitive(logic_dnf, precon, timestep, new_dnf));
-            }
-        }
-
-        if (m_options.group_pre_eff) {
-            for (int eff = 0; eff < m_sas_problem.m_operators[op].m_effects.size(); eff++) {
-                int effected_var, effected_new_val, effected_var_size;
-                effected_var = std::get<0>(m_sas_problem.m_operators[op].m_effects[eff]);
-                effected_new_val = std::get<2>(m_sas_problem.m_operators[op].m_effects[eff]);
-                effected_var_size = m_sas_problem.m_variabels[effected_var].m_range;
-
-                if (m_options.binary_variables) {
-                    std::vector<int> var_indizes = m_symbol_map.get_variable_index_for_var_binary(
-                        timestep + 1, effected_var, effected_new_val, effected_var_size);
-                    op_grouped_clause.insert(op_grouped_clause.end(), var_indizes.begin(), var_indizes.end());
-                } else {
-                    // variable unary
-                    int index_precondition = m_symbol_map.get_variable_index(variable_plan_var, timestep + 1,
-                                                                             effected_var, effected_new_val);
-                    op_grouped_clause.push_back(index_precondition);
-                }
-            }
-            op_grouped_dnf.push_back(op_grouped_clause);
-            result.push_back(logic_primitive(logic_dnf, precon, timestep, op_grouped_dnf));
+            result.push_back(logic_primitive(logic_dnf, precon, timestep, new_dnf));
         }
     }
+
     return result;
 }
 
@@ -554,7 +525,7 @@ std::vector<logic_primitive> encoder_basic::construct_mutex(int timestep) {
     return result;
 }
 
-std::vector<std::vector<int>> encoder_basic::generate_at_most_one_constraint(std::vector<int> &variables,
+std::vector<std::vector<int>> encoder_basic::generate_at_most_one_constraint(std::vector<int>& variables,
                                                                              variable_tag constraint_type,
                                                                              int timestep) {
     if (!m_options.use_ladder_encoding) {
@@ -566,7 +537,7 @@ std::vector<std::vector<int>> encoder_basic::generate_at_most_one_constraint(std
     }
 }
 
-std::vector<std::vector<int>> encoder_basic::generate_at_most_one_constraint_ladder(std::vector<int> &variables,
+std::vector<std::vector<int>> encoder_basic::generate_at_most_one_constraint_ladder(std::vector<int>& variables,
                                                                                     variable_tag constraint_type,
                                                                                     int timestep) {
     std::vector<std::vector<int>> all_new_clauses;
@@ -595,7 +566,7 @@ std::vector<std::vector<int>> encoder_basic::generate_at_most_one_constraint_lad
     return all_new_clauses;
 }
 
-std::vector<std::vector<int>> encoder_basic::generate_at_most_one_constraint_pairwise(std::vector<int> &variables) {
+std::vector<std::vector<int>> encoder_basic::generate_at_most_one_constraint_pairwise(std::vector<int>& variables) {
     std::vector<std::vector<int>> all_new_clauses;
     for (int i = 0; i < variables.size(); i++) {
         for (int j = i + 1; j < variables.size(); j++) {
@@ -688,7 +659,7 @@ std::string encoder_basic::decode_cnf_variable(int index) {
 // interprets a solution from minisat. It translates the sat solution to a
 // planning problem solution (with some addional debugg information)
 // This call depends on the correct symbol map.
-void encoder_basic::decode_cnf_solution(std::vector<bool> &assignment, int num_timesteps) {
+void encoder_basic::decode_cnf_solution(std::vector<bool>& assignment, int num_timesteps) {
     if (assignment.size() == 0) {
         LOG_MESSAGE(log_level::warning) << "Trying to decode an assignment of size 0";
         return;
@@ -733,7 +704,7 @@ void encoder_basic::decode_cnf_solution(std::vector<bool> &assignment, int num_t
     }
 }
 
-void encoder_basic::compare_assignments(std::vector<bool> &assignment1, std::vector<bool> &assignment2) {
+void encoder_basic::compare_assignments(std::vector<bool>& assignment1, std::vector<bool>& assignment2) {
     LOG_MESSAGE(log_level::info) << "Comparing two assignments. Size of cnf variables and assignment one and two is: "
                                  << m_symbol_map.get_num_variables() << " " << assignment1.size() << " "
                                  << assignment2.size();

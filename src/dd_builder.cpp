@@ -77,6 +77,12 @@ void construct_dd_by_layer_unidirectional(dd_buildable &container, encoder_abstr
     std::vector<int> permutation =
         encoder.m_symbol_map.calculate_permutation_by_timesteps(permutation_direction, options.timesteps);
 
+    // build the bdd for the foundation bdd
+    LOG_MESSAGE(log_level::info) << "Start building initial state foundation BDD";
+    std::vector<logic_primitive> foundation_primitives =
+        conjoin_order::order_clauses_for_foundation(encoder, ini_seed, options.timesteps);
+    conjoin_primitives_linear(container, foundation_primitives, main_bdd_idx, true);
+
     // build the initial layer bdds
     LOG_MESSAGE(log_level::info) << "Start building layer BDDs";
     // constructs the first layer
@@ -85,17 +91,6 @@ void construct_dd_by_layer_unidirectional(dd_buildable &container, encoder_abstr
         conjoin_order::order_clauses_for_layer(encoder, layer_seed, first_layer);
     conjoin_primitives_linear(container, layer_primitives, layer_bdd_idx, true);
     container.reduce_heap();
-
-    // TODO think about variable ordering
-    // apply the extended variable map to the main bdd
-    // single_step_bdd.set_variable_order(order_for_all_timesteps);
-    // main_bdd.set_variable_order(order_for_all_timesteps);
-
-    // build the bdd for the foundation bdd
-    LOG_MESSAGE(log_level::info) << "Start building initial state foundation BDD";
-    std::vector<logic_primitive> foundation_primitives =
-        conjoin_order::order_clauses_for_foundation(encoder, ini_seed, options.timesteps);
-    conjoin_primitives_linear(container, foundation_primitives, main_bdd_idx, true);
 
     // build the main bdd layer by layer
     int curr_layer = first_layer;
@@ -148,20 +143,6 @@ void construct_dd_by_layer_bidirectional(dd_buildable &container, encoder_abstra
     std::vector<int> forward_permutation =
         encoder.m_symbol_map.calculate_permutation_by_timesteps(1, options.timesteps);
 
-    // build the initial layer bdds
-    LOG_MESSAGE(log_level::info) << "Start building layer BDDs";
-    // constructs the first layer
-    const int first_layer = 0;
-    LOG_MESSAGE(log_level::info) << "Building first layer";
-    std::vector<logic_primitive> layer_primitives =
-        conjoin_order::order_clauses_for_layer(encoder, layer_seed, first_layer);
-    conjoin_primitives_linear(container, layer_primitives, layer_bdd_idx, true);
-    container.reduce_heap();
-
-    // apply the extended variable map to the main bdd
-    // single_step_bdd.set_variable_order(order_for_all_timesteps);
-    // main_bdd.set_variable_order(order_for_all_timesteps);
-
     // build the bdd for the foundations
     LOG_MESSAGE(log_level::info) << "Start building initial state foundation BDD";
     std::vector<logic_primitive> init_foundation_primitives =
@@ -171,6 +152,16 @@ void construct_dd_by_layer_bidirectional(dd_buildable &container, encoder_abstra
     std::vector<logic_primitive> goal_foundation_primitives =
         conjoin_order::order_clauses_for_foundation(encoder, goal_seed, options.timesteps);
     conjoin_primitives_linear(container, goal_foundation_primitives, main_end_idx, true);
+
+    // build the initial layer bdds
+    // constructs the first layer
+    LOG_MESSAGE(log_level::info) << "Start building layer BDDs";
+    const int first_layer = 0;
+    LOG_MESSAGE(log_level::info) << "Building first layer";
+    std::vector<logic_primitive> layer_primitives =
+        conjoin_order::order_clauses_for_layer(encoder, layer_seed, first_layer);
+    conjoin_primitives_linear(container, layer_primitives, layer_bdd_idx, true);
+    container.reduce_heap();
 
     int t_begin = 0;
     int t_end = options.timesteps - 1;
@@ -184,7 +175,7 @@ void construct_dd_by_layer_bidirectional(dd_buildable &container, encoder_abstra
 
             // we have to update the new bdd to conjoin
             // only if we need the next step
-            if (t_end - t_begin > 1) {
+            if (t_end - t_begin > 0) {
                 // construct new needed bdd
                 if (options.use_layer_permutation) {
                     auto forward_perm =
@@ -193,7 +184,7 @@ void construct_dd_by_layer_bidirectional(dd_buildable &container, encoder_abstra
                 } else {
                     container.clear_dd(layer_bdd_idx);
                     std::vector<logic_primitive> layer_primitives =
-                        conjoin_order::order_clauses_for_layer(encoder, layer_seed, t_begin);
+                        conjoin_order::order_clauses_for_layer(encoder, layer_seed, t_end);
                     conjoin_primitives_linear(container, layer_primitives, layer_bdd_idx, true);
                 }
             }
@@ -206,7 +197,7 @@ void construct_dd_by_layer_bidirectional(dd_buildable &container, encoder_abstra
 
             // we have to update the new bdd to conjoin
             // only if we need the next step
-            if (t_end - t_begin > 1) {
+            if (t_end - t_begin > 0) {
                 // construct new needed bdd
                 if (options.use_layer_permutation) {
                     auto backward_perm =
@@ -215,7 +206,7 @@ void construct_dd_by_layer_bidirectional(dd_buildable &container, encoder_abstra
                 } else {
                     container.clear_dd(layer_bdd_idx);
                     std::vector<logic_primitive> layer_primitives =
-                        conjoin_order::order_clauses_for_layer(encoder, layer_seed, t_end);
+                        conjoin_order::order_clauses_for_layer(encoder, layer_seed, t_begin);
                     conjoin_primitives_linear(container, layer_primitives, layer_bdd_idx, true);
                 }
             }
@@ -254,6 +245,9 @@ void construct_dd_by_layer_exponentially(dd_buildable &container, encoder_abstra
         LOG_MESSAGE(log_level::error) << "Build order string is not compatible wit layer building";
         return;
     }
+
+    container.set_num_dds(40);
+
 
     // split the order into parts (in a really complicated manner)
     std::stringstream ss(options.build_order);
