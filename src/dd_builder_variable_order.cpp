@@ -200,13 +200,13 @@ std::vector<std::tuple<int, int>> create_force_var_order_mapping(encoder::encode
     LOG_MESSAGE(log_level::info) << "Calculating force variable order";
 
     // collect all logic primitives of the planning problem
-    LOG_MESSAGE(log_level::info) << "Collecting primitives";
     std::vector<std::tuple<logic_primitive, int>> all_primitives =
         conjoin_order::create_custom_clause_order_mapping(encoder, options);
     std::vector<logic_primitive> stripped_primitives;
     for (int i = 0; i < all_primitives.size(); i++) {
         stripped_primitives.push_back(std::get<0>(all_primitives[i]));
     }
+    LOG_MESSAGE(log_level::info) << "Collected " << stripped_primitives.size() << " primitives";
 
     // calculate initial variable order (use identity)
     std::vector<int> initial_order(encoder.m_symbol_map.get_num_variables() + 1);  // + one because of zero variable

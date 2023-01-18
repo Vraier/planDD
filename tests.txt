@@ -1,4 +1,4 @@
-[ ] test all variable and clause orderings (naive encoding)
+[x] test all variable and clause orderings (naive encoding)
     [X] clause orders (T1)
     [x] var orders (T2)
     [ ] do the same for reverse orderings (sure?)
@@ -12,7 +12,7 @@
     [ ] without dynamic reordering
     [ ] tree?
 
-[ ] test different encodings
+[ ] test different encodings (T6)
     [ ] naive
     [ ] ladder encoding
     [ ] direct encoding
@@ -27,14 +27,17 @@
 [ ] test the grouping of variables in the order
 
 [ ] test naive bdd (T4)
-    (with random clause order or with force order and random seed), with dynamic reordering 
+    - force var order
+    - bottom up clause order
+    - dynamic shifting
 [ ] test naive sdd
+    - compiler (dynamic, v-tree search, bottom up clause order)
 
 [ ] test incremental approaches
 [ ] compare with competitors
     [ ] topk track (incremental)
     [ ] topq track
 
-[ ] implement proof of concept 
+[ ] implement proof of concept (T5)
     [ ] uniform random plan
-    [ ] what is the most likely action to start
+    [ ] what is the most likely action to end

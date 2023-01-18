@@ -411,3 +411,53 @@ std::vector<int> bdd_container::extend_variable_order_to_all_steps(
     LOG_MESSAGE(log_level::info) << "Extendet size is: " << result_index_to_layer_map.size();
     return result_index_to_layer_map;
 }
+
+void bdd_container::calculate_set_of_random_solutions(int num_solutions) {
+    LOG_MESSAGE(log_level::info) << "Start calculating random set of " << num_solutions << " solutions";
+
+    DdNode **all_variables = new DdNode *[Cudd_ReadSize(m_bdd_manager)];
+    for (int i = 0; i < Cudd_ReadSize(m_bdd_manager); i++) {
+        all_variables[i] = Cudd_bddIthVar(m_bdd_manager, i);
+    }
+
+    DdNode **res = Cudd_bddPickArbitraryMinterms(m_bdd_manager, m_root_nodes[0], all_variables,
+                                                 Cudd_ReadSize(m_bdd_manager), num_solutions);
+
+    LOG_MESSAGE(log_level::info) << "Found all desired solutions";
+
+    delete[] all_variables;
+    return;
+}
+
+void bdd_container::calculate_most_common_action(int timestep, sas_problem problem, planning_logic::plan_to_cnf_map variable_map) {
+    LOG_MESSAGE(log_level::info) << "Start finding most common operator for timestep " << timestep;
+
+    for (int i = 0; i < problem.m_operators.size(); i++) {
+        operator_info op_info = problem.m_operators[i];
+        std::vector<int> op_indizes = variable_map.get_variable_index_for_op_binary(timestep, i);
+        // DdNode *restrictedDD =
+
+        DdNode *var, *tmp;
+        DdNode *restrictedDD = m_root_nodes[0];
+        Cudd_Ref(restrictedDD);
+
+        for (int j = 0; j < op_indizes.size(); j++) {
+            var = Cudd_bddIthVar(m_bdd_manager, std::abs(op_indizes[j]));
+            if (op_indizes[j] > 0) {
+                tmp = Cudd_bddAnd(m_bdd_manager, var, restrictedDD);
+            } else {
+                tmp = Cudd_bddAnd(m_bdd_manager, Cudd_Not(var), restrictedDD);
+            }
+            Cudd_Ref(tmp);
+            Cudd_RecursiveDeref(m_bdd_manager, restrictedDD);
+            restrictedDD = tmp;
+        }
+
+        double num_solutions_for_op = Cudd_CountMinterm(m_bdd_manager, restrictedDD, Cudd_ReadSize(m_bdd_manager));
+        LOG_MESSAGE(log_level::info) << "Found " << num_solutions_for_op << " solutions for operator " << op_info.to_string();
+
+        Cudd_RecursiveDeref(m_bdd_manager, restrictedDD);
+    }
+
+    LOG_MESSAGE(log_level::info) << "Finished finding most common operator";
+}

@@ -14,6 +14,7 @@ PLANDD_PATH = "../../planDD/build/planDD"
 SYMK_PATH = "../../symk/fast-downward.py"
 FORBIDK_PATH = "../../forbiditerative/plan_topk.sh"
 KSTAR_PATH = "../../kstar/fast-downward.py"
+SDD_PATH = "../../sdd/sdd-2.0/build/sdd"
 
 # timeout 300 bash -c 'command1 && command2'
 
@@ -93,6 +94,38 @@ def planDD_optimal_command(suite_name, problem, additional_flags):
 
     whole_command = "{} && {} && {}".format(
         dir_change_command, fd_payload, planDD_payload
+    )
+    return whole_command
+
+# will execute fd, planDD (for cnf creation) and sdd compiler
+def planDD_naiv_sdd_command(suite_name, problem, additional_flags):
+    sanitized_name = util.get_sanitized_domain_description(
+        problem["d_name"], problem["p_name"]
+    )
+    suite_path = join(SCRIPT_TO_TEST_OUTPUT, suite_name, sanitized_name)
+    dir_change_command = create_and_change_directory_command(suite_path)
+
+    problem_path = problem["path"]
+
+    suite_problem_path = join(SUITE_TO_SCRIPT_PATH, problem_path)
+    suite_downward_path = join(SUITE_TO_SCRIPT_PATH, DOWNWARD_PATH)
+    suite_planDD_path = join(SUITE_TO_SCRIPT_PATH, PLANDD_PATH)
+    suite_sdd_path = join(SUITE_TO_SCRIPT_PATH, SDD_PATH)
+
+    fd_payload = (
+        '{} --sas-file output.sas {} --search "astar(lmcut())" > fd_output.txt'.format(
+            suite_downward_path, suite_problem_path
+        )
+    )
+    planDD_payload = "{} --sas_file output.sas {} > output.txt".format(
+        suite_planDD_path, additional_flags
+    )
+    sdd_payload = "{} -c prob.cnf -p > sdd_output.txt".format(
+        suite_sdd_path
+    )
+
+    whole_command = "{} && {} && {} && {}".format(
+        dir_change_command, fd_payload, planDD_payload, sdd_payload
     )
     return whole_command
 
@@ -242,10 +275,10 @@ def generate_topk_runwatch_command_file(problems, suites):
                     task_command = planDD_topK_command(suite_name, problem, k, flags)
                 elif planner == "planDDOptimal":
                     task_command = planDD_optimal_command(suite_name, problem, flags)
+                elif planner == "planDDSDD":
+                    task_command = planDD_naiv_sdd_command(suite_name, problem, flags)
                 elif planner == "planDDUseFD":
-                    task_command = planDD_topk_use_fd_command(
-                        suite_name, problem, k, flags
-                    )
+                    task_command = planDD_topk_use_fd_command(suite_name, problem, k, flags)
                 elif planner == "symk":
                     task_command = symk_topk_command(suite_name, problem, k)
                 elif planner == "kstar":
@@ -430,6 +463,28 @@ T0304_suites += [
 
 
 # parallel --jobs X --timeout 60 :::: all_commands.txt
+#print("Num problems:", len(opt_strip_unit_cost_problems))
+#print("Num configs:", len(T0304_suites))
+#generate_topk_runwatch_command_file(opt_strip_unit_cost_problems, T0304_suites)
+
+
+#T4, T5, T6, naive comparison, proof of concept, encoding
+
+T040506_suites = [
+    (
+        "planDDOptimal",
+        "T04_18_01_naiv_bdd",
+        currentK,
+        "--build_bdd_naiv --build_order igrympecx:: --var_order_force --clause_order_bottom_up",
+    ),
+    (
+        "planDDSDD",
+        "T04_18_01_naiv_sdd",
+        currentK,
+        "--build_sdd_naiv --build_order igrympecx:: --clause_order_custom",
+    ),
+]
+
 print("Num problems:", len(opt_strip_unit_cost_problems))
-print("Num configs:", len(T0304_suites))
-generate_topk_runwatch_command_file(opt_strip_unit_cost_problems, T0304_suites)
+print("Num configs:", len(T040506_suites))
+generate_topk_runwatch_command_file(opt_strip_unit_cost_problems, T040506_suites)

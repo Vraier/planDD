@@ -197,6 +197,16 @@ int planDD::build_bdd(option_values opt_values) {
 
     builder.print_info();
 
+    if(opt_values.query_random_plans){
+        int num_solutions = 0.1 * builder.count_num_solutions(0);
+        int num_desired_solutions = std::min(std::max(0, num_solutions), 200000000);
+        builder.calculate_set_of_random_solutions(num_desired_solutions);
+    }
+
+    if(opt_values.query_common_operators){
+        builder.calculate_most_common_action(opt_values.timesteps-1, parser.m_sas_problem, encoder->m_symbol_map);
+    }
+
     delete encoder;
 
     // for(auto a: builder.list_minterms(10)){
@@ -219,13 +229,17 @@ int planDD::build_bdd_naiv(option_values opt_values) {
     option_values temp_opts = opt_values;
     temp_opts.timesteps = min_plan_length;
 
-    std::vector<planning_logic::logic_primitive> all_primitives = conjoin_order::order_all_clauses(*encoder, temp_opts);
-    if (opt_values.naiv_random) {
-        auto rng = std::default_random_engine{};
-        std::shuffle(std::begin(all_primitives), std::end(all_primitives), rng);
-    }
+    // these arguments come as close to the sdd compiler as possible
+    // temp_opts.force_random_seed = true;
+    // temp_opts.var_order_force = true;
+    // temp_opts.clause_order_bottom_up = true;
 
     bdd_container builder(1);
+    variable_creation::create_variables_for_first_t_steps(temp_opts.timesteps, *encoder, builder, opt_values);
+    std::vector<int> var_order = variable_order::order_variables(*encoder, temp_opts);
+    builder.set_variable_order(var_order);
+    std::vector<planning_logic::logic_primitive> all_primitives = conjoin_order::order_all_clauses(*encoder, temp_opts);
+
     builder.enable_reordering();
     dd_builder::conjoin_primitives_linear(builder, all_primitives, 0, false);
 
@@ -254,7 +268,6 @@ int planDD::build_sdd_naiv(option_values opt_values) {
     file_out.open("prob.cnf", std::ios_base::out);
     file_out << "p cnf " << encoder->m_symbol_map.get_num_variables() << " " << all_primitives.size() << std::endl;
     for (int i = 0; i < all_primitives.size(); i++) {
-        std::cout << all_primitives[i].to_string() << std::endl;
         std::vector<int> clause = all_primitives[i].m_data;
         for (int l : clause) {
             file_out << l << " ";
@@ -263,16 +276,7 @@ int planDD::build_sdd_naiv(option_values opt_values) {
     }
     file_out.close();
 
-    // encoder is constructing dnfs. i have to fix? this so i can build a sdd from pure clauses
-
-    /*
-    Fnf* fnf = NULL;
-    fnf = read_cnf("prob.cnf");
-    printf("\ncreating initial vtree (%s)...",options.initial_vtree_type);
-    Vtree* vtree = sdd_vtree_new(fnf->var_count, "balanced");
-    SddManager* manager = sdd_manager_new(vtree);
-    sdd_vtree_free(vtree);
-    */
+    // at this point the external sdd compiler should be called with prob.cnf as cnf file input
 
     return 0;
 }

@@ -30,8 +30,6 @@ void option_parser::parse_command_line(int argc, char *argv[]) {
          "Sandbox hack mode for developing purposes")  //
         ("build_bdd_naiv", po::bool_switch(&m_values.build_bdd_naiv)->default_value(false),
          "builds the bdd in a naiv way and makes no optimizations. used as a baseline")  //
-        ("naiv_random", po::bool_switch(&m_values.naiv_random)->default_value(false),
-         "Uses a random permutation for the clauses for naiv bdd construction")  //
         ("build_sdd_naiv", po::bool_switch(&m_values.build_sdd_naiv)->default_value(false),
          "Uses the default sdd compiler to build an sdd")  //
         // DD building parameters
@@ -132,7 +130,11 @@ void option_parser::parse_command_line(int argc, char *argv[]) {
          "If this flag is set, the layer bdds will be constructed, beginning from the goal, from last timestep to "
          "first")  //
         ("use_layer_permutation", po::bool_switch(&m_values.use_layer_permutation)->default_value(false),
-         "If this flag is set, the new layer bdd will be constructed using a variable permutation");  //
+         "If this flag is set, the new layer bdd will be constructed using a variable permutation")  //
+        ("query_random_plans", po::bool_switch(&m_values.query_random_plans)->default_value(false),
+         "Can be used after BDD construction to query a set of random plans")  //
+        ("query_common_operators", po::bool_switch(&m_values.query_common_operators)->default_value(false),
+         "Can be used after BDD construction to query the most common last operator");  //
 
     po::store(po::parse_command_line(argc, argv, m_option_desc), m_argument_map);
     po::notify(m_argument_map);

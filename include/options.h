@@ -9,7 +9,6 @@ struct option_values {
     std::string sas_file, ass_file, cnf_file;
     // Program modes
     bool encode_cnf, cnf_to_bdd, conflict_graph, build_bdd, build_sdd, single_minisat, count_minisat, hack_debug, build_bdd_naiv, build_sdd_naiv;
-    bool naiv_random;
 
     int timesteps;
     double num_plans;
@@ -35,6 +34,10 @@ struct option_values {
     bool clause_order_bottom_up, clause_order_custom_bottom_up;
     bool force_random_seed;
     bool split_inside_timestep;
+
+    // proof of concept queries
+    bool query_random_plans;
+    bool query_common_operators;
 };
 
 /**

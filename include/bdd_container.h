@@ -7,6 +7,7 @@
 #include "dd_buildable.h"
 #include "logging.h"
 #include "planning_logic_formula.h"
+#include "sas_parser.h"
 
 extern "C" {
 #include "mtr.h"
@@ -97,4 +98,10 @@ class bdd_container : public virtual dd_buildable {
     // extends the variable order for timestep 0 to all timesteps
     std::vector<int> extend_variable_order_to_all_steps(std::map<planning_logic::tagged_variable, int> &variable_map,
                                                         std::map<int, int> &single_step_order);
+
+   // proof of concepts for queries on bdds
+   void calculate_set_of_random_solutions(int num_solutions);
+   // currently only works for binary encoding
+   // finds the most common operator used in the given timestep
+   void calculate_most_common_action(int timestep, sas_problem problem, planning_logic::plan_to_cnf_map variable_map);
 };
