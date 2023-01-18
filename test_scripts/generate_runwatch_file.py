@@ -97,6 +97,7 @@ def planDD_optimal_command(suite_name, problem, additional_flags):
     )
     return whole_command
 
+
 # will execute fd, planDD (for cnf creation) and sdd compiler
 def planDD_naiv_sdd_command(suite_name, problem, additional_flags):
     sanitized_name = util.get_sanitized_domain_description(
@@ -120,9 +121,7 @@ def planDD_naiv_sdd_command(suite_name, problem, additional_flags):
     planDD_payload = "{} --sas_file output.sas {} > output.txt".format(
         suite_planDD_path, additional_flags
     )
-    sdd_payload = "{} -c prob.cnf -p > sdd_output.txt".format(
-        suite_sdd_path
-    )
+    sdd_payload = "{} -c prob.cnf -p > sdd_output.txt".format(suite_sdd_path)
 
     whole_command = "{} && {} && {} && {}".format(
         dir_change_command, fd_payload, planDD_payload, sdd_payload
@@ -278,7 +277,9 @@ def generate_topk_runwatch_command_file(problems, suites):
                 elif planner == "planDDSDD":
                     task_command = planDD_naiv_sdd_command(suite_name, problem, flags)
                 elif planner == "planDDUseFD":
-                    task_command = planDD_topk_use_fd_command(suite_name, problem, k, flags)
+                    task_command = planDD_topk_use_fd_command(
+                        suite_name, problem, k, flags
+                    )
                 elif planner == "symk":
                     task_command = symk_topk_command(suite_name, problem, k)
                 elif planner == "kstar":
@@ -463,14 +464,15 @@ T0304_suites += [
 
 
 # parallel --jobs X --timeout 60 :::: all_commands.txt
-#print("Num problems:", len(opt_strip_unit_cost_problems))
-#print("Num configs:", len(T0304_suites))
-#generate_topk_runwatch_command_file(opt_strip_unit_cost_problems, T0304_suites)
+# print("Num problems:", len(opt_strip_unit_cost_problems))
+# print("Num configs:", len(T0304_suites))
+# generate_topk_runwatch_command_file(opt_strip_unit_cost_problems, T0304_suites)
 
 
-#T4, T5, T6, naive comparison, proof of concept, encoding
+# T4, T5, T6, naive comparison, proof of concept, encoding
 
 T040506_suites = [
+    # T4
     (
         "planDDOptimal",
         "T04_18_01_naiv_bdd",
@@ -482,6 +484,74 @@ T040506_suites = [
         "T04_18_01_naiv_sdd",
         currentK,
         "--build_sdd_naiv --build_order igrympecx:: --clause_order_custom",
+    ),
+    # T5
+    (
+        "planDDOptimal",
+        "T05_18_01_random_plans",
+        currentK,
+        "--build_bdd --linear --use_fd --build_order igx:rympec: --clause_order_custom --var_order_custom --binary_encoding --binary_variables --binary_exclude_impossible --query_random_plans",
+    ),
+    (
+        "planDDOptimal",
+        "T05_18_01_common_operator",
+        currentK,
+        "--build_bdd --linear --use_fd --build_order igx:rympec: --clause_order_custom --var_order_custom --binary_encoding --binary_variables --binary_exclude_impossible --query_common_operators",
+    ),
+    # T6
+    (
+        "planDDOptimal",
+        "T06_18_01_encoding_naiv",
+        currentK,
+        "--build_bdd --linear --use_fd --build_order igx:rympec: --clause_order_custom --var_order_custom",
+    ),
+    (
+        "planDDOptimal",
+        "T06_18_01_encoding_ladder",
+        currentK,
+        "--build_bdd --linear --use_fd --build_order igx:rympec: --clause_order_custom --var_order_custom --use_ladder_encoding",
+    ),
+    (
+        "planDDOptimal",
+        "T06_18_01_encoding_direct",
+        currentK,
+        "--build_bdd --linear --use_fd --build_order igx:rympec: --clause_order_custom --var_order_custom --exact_one_constraint",
+    ),
+    (
+        "planDDOptimal",
+        "T06_18_01_encoding_binary_op",
+        currentK,
+        "--build_bdd --linear --use_fd --build_order igx:rympec: --clause_order_custom --var_order_custom --binary_encoding",
+    ),
+    (
+        "planDDOptimal",
+        "T06_18_01_encoding_binary_var",
+        currentK,
+        "--build_bdd --linear --use_fd --build_order igx:rympec: --clause_order_custom --var_order_custom --binary_variables",
+    ),
+    (
+        "planDDOptimal",
+        "T06_18_01_encoding_binary_var_op",
+        currentK,
+        "--build_bdd --linear --use_fd --build_order igx:rympec: --clause_order_custom --var_order_custom --binary_encoding --binary_variables",
+    ),
+    (
+        "planDDOptimal",
+        "T06_18_01_encoding_binary_var_op_exclude",
+        currentK,
+        "--build_bdd --linear --use_fd --build_order igx:rympec: --clause_order_custom --var_order_custom --binary_encoding --binary_variables --binary_exclude",
+    ),
+    (
+        "planDDOptimal",
+        "T06_18_01_encoding_parallel",
+        currentK,
+        "--build_bdd --linear --timesteps -2 --build_order rympec:: --clause_order_custom --var_order_custom --parallel_plan",
+    ),
+    (
+        "planDDOptimal",
+        "T06_18_01_encoding_parallel_binary",
+        currentK,
+        "--build_bdd --linear --timesteps -2 --build_order rympec:: --clause_order_custom --var_order_custom --binary_parallel",
     ),
 ]
 
