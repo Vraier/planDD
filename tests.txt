@@ -1,14 +1,15 @@
 [ ] test all variable and clause orderings (naive encoding)
     [X] clause orders (T1)
-    [ ] var orders (T2)
+    [x] var orders (T2)
     [ ] do the same for reverse orderings (sure?)
 
-[ ] test different building strategies (T3)
-    [ ] build linear
-    [ ] build layer by layer
-    [ ] exponential
-    [ ] bidirectional
-    [ ] with variable permutation
+[x] test different building strategies (T3)
+    [x] build linear
+    [x] build layer by layer
+    [x] exponential
+    [x] bidirectional
+    [x] with variable permutation
+    [ ] without dynamic reordering
     [ ] tree?
 
 [ ] test different encodings
@@ -20,6 +21,7 @@
     [ ] binary parallel
 
 [ ] test force ordering vor variables and clauses
+    [ ] with random seed and without
 [ ] test the influence of dynamic reordering
 
 [ ] test the grouping of variables in the order
