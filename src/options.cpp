@@ -37,6 +37,8 @@ void option_parser::parse_command_line(int argc, char *argv[]) {
          "The amount of timsteps represented by the cnf formula")  //
         ("num_plans", po::value<double>(&m_values.num_plans)->default_value(-1.0),
          "The amount of plans the planner will search for")  //
+        ("quality_bound", po::value<double>(&m_values.quality_bound)->default_value(-1.0),
+         "Used as a relative quality bound for Top-Q planning")  //
         // what and how to conjoin clauses?
         ("include_mutex", po::bool_switch(&m_values.include_mutex)->default_value(false),
          "If this flag is set, the cnf encoder will include the mutexes from the sas problem in its formula")  //
@@ -95,7 +97,7 @@ void option_parser::parse_command_line(int argc, char *argv[]) {
          po::bool_switch(&m_values.clause_order_custom_bottom_up)->default_value(false),
          "uses custom order and bottom up as tiebreaker")  //
         ("split_inside_timestep", po::bool_switch(&m_values.split_inside_timestep)->default_value(false),
-         "If set, the tiebreaker for mixed ordering is only applied for each category inside a timestep. If not setp, "
+         "If set, the tiebreaker for mixed ordering is only applied for each category inside a timestep. If not set, "
          "the tiebreaker is used for the whole timesetp")  //
         ("force_random_seed", po::bool_switch(&m_values.force_random_seed)->default_value(false),
          "Sets the initial order for the force algorithm to a random permutation and does not use custom order")  //
@@ -111,7 +113,7 @@ void option_parser::parse_command_line(int argc, char *argv[]) {
         ("prebuild_goals", po::bool_switch(&m_values.prebuild_goals)->default_value(false),
          "Used to create all goals for the topK track in the beginning")  //
         ("restart", po::bool_switch(&m_values.restart)->default_value(false),
-         "Restarts the topK step for every timestep to find the encessary amount of problems.")  //
+         "Restarts the topK step for every timestep to find the necessary amount of problems.")  //
         ("use_fd", po::bool_switch(&m_values.use_fd)->default_value(false),
          "Can be used with the restarting topK track to use the output file of a fast downward run. It can use the "
          "file to determine the minimal amount of steps and does not have to calculate it itsel.")  //

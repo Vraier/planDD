@@ -47,6 +47,41 @@ def compile_information_about_planDD_into_dic(domain_desc, file_path):
 
     return info
 
+def compile_information_about_sdd_compiler_into_dic(domain_desc, file_path):
+    info = {}
+    info["has_finished"] = False
+    info["finish_time"] = -1
+    info["last_memory"] = -99999
+    info["last_nodes"] = -99999
+    info["last_pair_count"] = -99999
+    info["last_decision_count"] = -99999
+
+    with open(file_path, "r") as f:
+        p1 = re.compile("compilation time.*: (.*) sec")
+        p2 = re.compile("reading cnf...vars=(.*) clauses=(.*)")
+        p3 = re.compile("memory \(free\).*\((.*) MB\)")
+        p4 = re.compile("memory \(allocated\).*\((.*) MB\)")
+        p5 = re.compile(" sdd size.*: (.*)(?<!dead)$")
+        p6 = re.compile(" sdd node count.*: (.*)(?<!dead)$")
+        for line in f:
+            if p1.match(line):
+                info["has_finished"] = True
+                info["finish_time"] = float(p1.search(line).group(1))
+            if p2.match(line):
+                info["constructed_variables"] = int(p2.search(line).group(1))
+                info["constructed_clauses"] = int(p2.search(line).group(2))
+            if p3.match(line):
+                info["last_memory"] = max(info["last_memory"], float(p3.search(line).group(1)))
+            if p4.match(line):
+                info["last_memory"] = max(info["last_memory"], float(p4.search(line).group(1)))
+            if p5.match(line):
+                info["last_pair_count"] = int(p5.search(line).group(1).replace(',', ''))
+            if p6.match(line):
+                info["last_decision_count"] = int(p6.search(line).group(1).replace(',', ''))
+                info["last_nodes"] = info["last_decision_count"] + info["last_pair_count"]
+                
+    return info
+
 # returns a list of tuples that represents paths to output files from planDD
 def find_all_output_files(suite_path):
     all_file_paths = []
@@ -75,6 +110,29 @@ def write_all_information_to_file(suite_path, output_path):
     print("Dumping information to file")
     with open(output_path, "wb") as f:
         pickle.dump(all_dics, f)  
+
+def write_sdd_compiler_to_file(suite_path, output_path):
+    all_files = []
+    for fold in os.listdir(suite_path):
+        fold_path = os.path.join(suite_path, fold)
+        if os.path.isdir(fold_path):
+            for fil in os.listdir(fold_path):
+                if fil == "sdd_output.txt":
+                    file_path = os.path.join(fold_path, fil)
+                    all_files.append((fold, file_path))
+                    break
+    all_dics = []
+
+    for i in range(len(all_files)):
+        print("Compile information about testcase ", i+1, " from ", len(all_files))
+        domain_desc, file_path = all_files[i]
+        dic = compile_information_about_sdd_compiler_into_dic(domain_desc, file_path)
+        all_dics.append(dic)
+
+    print("Dumping information to file")
+    with open(output_path, "wb") as f:
+        pickle.dump(all_dics, f)  
+
                 
 # Reads in the dicitonaries that were written to file eralier
 def read_all_information_from_file(pickle_file):

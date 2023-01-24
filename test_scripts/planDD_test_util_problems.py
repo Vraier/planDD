@@ -96,7 +96,8 @@ def weighted_choice(choices):
 # selects a random set of problems with weights invers proportional to downward finish time
 def select_random_set_from_downward_solved_problems(num_problems):
     downward_dics = extract_planDD_information.downward_read_all_information_from_file()
-    all_problems = list_all_opt_strips_problems()
+    all_problems = list_all_opt_strips_problems() #NOTE: i have to decide i want to use all or only unit cost problem here
+    #all_problems = list_all_opt_strips_unitcost_problems()
 
     # Allows to quickly find the information about a testcase from an older run
     downward_domain_to_dic = {}
@@ -119,6 +120,8 @@ def select_random_set_from_downward_solved_problems(num_problems):
 
     random.seed(1337)
     random_problems = []
+
+    print("Num opt strip problems, solved by fd:", len(filtered_problems))
     for i in range(num_problems):
         random_problems.append(weighted_choice(filtered_problems))
 

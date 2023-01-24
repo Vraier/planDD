@@ -197,14 +197,14 @@ int planDD::build_bdd(option_values opt_values) {
 
     builder.print_info();
 
-    if(opt_values.query_random_plans){
+    if (opt_values.query_random_plans) {
         int num_solutions = 0.1 * builder.count_num_solutions(0);
         int num_desired_solutions = std::min(std::max(0, num_solutions), 200000000);
         builder.calculate_set_of_random_solutions(num_desired_solutions);
     }
 
-    if(opt_values.query_common_operators){
-        builder.calculate_most_common_action(opt_values.timesteps-1, parser.m_sas_problem, encoder->m_symbol_map);
+    if (opt_values.query_common_operators) {
+        builder.calculate_most_common_action(opt_values.timesteps - 1, parser.m_sas_problem, encoder->m_symbol_map);
     }
 
     delete encoder;
@@ -286,6 +286,15 @@ int planDD::build_sdd(option_values opt_values) {
     if (parser.start_parsing() == -1) {
         LOG_MESSAGE(log_level::error) << "Error while parsing sas_file";
         return 0;
+    }
+
+    if (opt_values.use_fd) {
+        int min_plan_length = get_plan_length("fd_output.txt");
+        opt_values.timesteps = min_plan_length;
+        if (min_plan_length < 0) {
+            LOG_MESSAGE(log_level::error) << "Could not find a minimal plan length";
+            return 0;
+        }
     }
 
     encoder::encoder_basic encoder(opt_values, parser.m_sas_problem);

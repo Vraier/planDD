@@ -113,15 +113,16 @@ std::string bdd_container::get_short_statistics(int bdd_index) {
 
 // Writes a dot file representing the argument DDs
 void bdd_container::write_bdd_to_dot_file(std::string filename) {
-    DdNode *add = Cudd_BddToAdd(m_bdd_manager, m_root_nodes[0]);
-    Cudd_Ref(add);
+    //DdNode *add = Cudd_BddToAdd(m_bdd_manager, m_root_nodes[0]);
+    //Cudd_Ref(add);
     FILE *outfile;  // output file pointer for .dot file
     outfile = fopen(filename.c_str(), "w");
     DdNode **ddnodearray = (DdNode **)malloc(sizeof(DdNode *));  // initialize the function array
-    ddnodearray[0] = add;
-    Cudd_DumpDot(m_bdd_manager, 1, ddnodearray, NULL, NULL, outfile);  // dump the function to .dot file
+    //ddnodearray[0] = add;
+    ddnodearray[0] = m_root_nodes[0];
+    Cudd_DumpDDcal(m_bdd_manager, 1, ddnodearray, NULL, NULL, outfile);  // dump the function to .dot file
     free(ddnodearray);
-    Cudd_RecursiveDeref(m_bdd_manager, add);
+    //Cudd_RecursiveDeref(m_bdd_manager, add);
     fclose(outfile);
 }
 
@@ -269,7 +270,7 @@ void bdd_container::disable_reordering() { Cudd_AutodynDisable(m_bdd_manager); }
 void bdd_container::enable_reordering() { Cudd_AutodynEnable(m_bdd_manager, CUDD_REORDER_SIFT); }
 
 void bdd_container::set_variable_group(int low, int size) {
-    LOG_MESSAGE(log_level::debug) << "Grouping size: " << size;
+    //LOG_MESSAGE(log_level::debug) << "Grouping size: " << size;
     Cudd_MakeTreeNode(m_bdd_manager, low, size, MTR_DEFAULT);
 }
 

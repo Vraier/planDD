@@ -9,35 +9,41 @@
     [x] exponential
     [x] bidirectional
     [x] with variable permutation
-    [ ] without dynamic reordering
+    [ ] layer perm without reordering
     [ ] tree?
 
-[ ] test different encodings (T6)
-    [ ] naive
-    [ ] ladder encoding
-    [ ] direct encoding
-    [ ] binary (operators, variables, both, excluding) 
-    [ ] parallel (how?)
-    [ ] binary parallel
+[x] test different encodings (T6)
+    [x] naive
+    [x] ladder encoding
+    [x] direct encoding
+    [x] binary (operators, variables, both, excluding) 
+    [x] parallel (how?)
+    [x] binary parallel
+    [ ] fix error with ladder encoding
 
-[ ] test force ordering vor variables and clauses
-    [ ] with random seed and without
+[x] test force ordering for variables and clauses (T9)
+    [x] with random seed and without
 [ ] test the influence of dynamic reordering
+[x] test the grouping of variables in the order
+[x] bottom up clause ordering
+[x] combining it with custom order (probably not)
 
-[ ] test the grouping of variables in the order
 
-[ ] test naive bdd (T4)
+[x] test naive bdd (T4)
     - force var order
     - bottom up clause order
     - dynamic shifting
-[ ] test naive sdd
+[x] test naive sdd
     - compiler (dynamic, v-tree search, bottom up clause order)
 
-[ ] test incremental approaches
-[ ] compare with competitors
-    [ ] topk track (incremental)
-    [ ] topq track
+[x] compare with competitors (T8)
+    - incremental or restarting and SDD or BDD
+    - symk and kstar without outputting plans
+    
+[x] topq track (T7)
+    - multiple values of q: 1.1, 1.2, 1.3, 1.4
+    - restarting approach only
 
-[ ] implement proof of concept (T5)
-    [ ] uniform random plan
-    [ ] what is the most likely action to end
+[x] implement proof of concept (T5)
+    [x] uniform random plan
+    [x] what is the most likely action to end

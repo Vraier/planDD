@@ -97,7 +97,7 @@ def extract_symk_time_to_progress(file_path):
     return result
 
 suite_names = [
-    #"planDDTopK_k1000000000",
+    "planDDTopK_k1000000000",
     #"planDDUseFD_k1000000000",
     #"planDDTopKRestart_k1000000000",
     #"planDDRestartUseFD_k1000000000",
@@ -111,7 +111,7 @@ suite_names = [
 
     # to check if restart is now was good as optimal
     "planDDRestart_14_12_k1000000000",
-    #"planDDIncremental_14_12_k1000000000",
+    "planDDIncremental_14_12_k1000000000",
 ]
 
 suite_dics = []
@@ -149,7 +149,7 @@ def get_k_to_solved_list(suite_dics, timebound):
 
 for i in range(len(suite_names)):
     #print((suite_dics[i][0]))
-    plot_values = get_k_to_solved_list(suite_dics[i], 600)
+    plot_values = get_k_to_solved_list(suite_dics[i], 300)
     plt.plot([x for x,_ in plot_values], [y for _,y in plot_values], linestyle=":", marker="o", label=suite_names[i])
 
 plt.xscale("log")

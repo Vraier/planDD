@@ -12,18 +12,17 @@ void construct_dd(dd_buildable &container, encoder_abstract &encoder, option_val
     LOG_MESSAGE(log_level::info) << "Choosing correct dd building algorithm";
 
     if (options.linear) {
-        if (options.timesteps >= 0 && options.num_plans == -1.0) {
-            construct_dd_linear(container, encoder, options, false);
-        } else if (options.timesteps == -1 && options.num_plans >= 0.0) {
+        if (options.timesteps >= 0 && (options.num_plans >= 0.0 || options.quality_bound >= 1.0)) {
             if (options.prebuild_goals) {
+                // wont be used anymore
                 construct_dd_top_k_with_all_goals(container, encoder, options);
-            } else if (options.restart){
+            } else if (options.restart) {
                 construct_dd_top_k_restarting(encoder, options);
             } else {
                 construct_dd_top_k(container, encoder, options);
             }
-        } else {
-            construct_dd_without_timesteps(container, encoder, options);
+        } else if (options.timesteps >= 0 && options.num_plans == -1.0) {
+            construct_dd_linear(container, encoder, options, false);
         }
     } else if (options.layer) {
         construct_dd_by_layer_unidirectional(container, encoder, options);
@@ -248,7 +247,6 @@ void construct_dd_by_layer_exponentially(dd_buildable &container, encoder_abstra
 
     container.set_num_dds(40);
 
-
     // split the order into parts (in a really complicated manner)
     std::stringstream ss(options.build_order);
     std::string ini_seed, layer_seed, goal_seed;
@@ -328,7 +326,8 @@ void conjoin_main_dd_with_goal(dd_buildable &container, encoder_abstract &encode
     conjoin_primitives_linear(container, goal_primitives, temp_idx, true);
 }
 
-void construct_dd_without_timesteps(dd_buildable &container, encoder_abstract &encoder, option_values &options, bool silent) {
+void construct_dd_without_timesteps(dd_buildable &container, encoder_abstract &encoder, option_values &options,
+                                    bool silent) {
     LOG_MESSAGE(log_level::info) << "Building BDD without knowing the correct amount of timesteps";
 
     container.set_num_dds(2);

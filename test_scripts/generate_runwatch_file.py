@@ -12,7 +12,7 @@ SUITE_TO_SCRIPT_PATH = "../../../planDD/test_scripts"
 DOWNWARD_PATH = "../../downward/fast-downward.py"
 PLANDD_PATH = "../../planDD/build/planDD"
 SYMK_PATH = "../../symk/fast-downward.py"
-FORBIDK_PATH = "../../forbiditerative/plan_topk.sh"
+FORBIDK_PATH = "../../forbiditerative/plan_unordered_topq.sh"
 KSTAR_PATH = "../../kstar/fast-downward.py"
 SDD_PATH = "../../sdd/sdd-2.0/build/sdd"
 
@@ -216,7 +216,7 @@ def symk_topk_command(suite_name, problem, num_plans):
     return whole_command
 
 
-def forbidk_topk_command(suite_name, problem, num_plans):
+def forbidk_topk_command(suite_name, problem, qualtiy_bound):
     sanitized_name = util.get_sanitized_domain_description(
         problem["d_name"], problem["p_name"]
     )
@@ -232,7 +232,7 @@ def forbidk_topk_command(suite_name, problem, num_plans):
     suite_forbidik_path = join(SUITE_TO_SCRIPT_PATH, FORBIDK_PATH)
 
     forbidk_command = "{} {} {} {}".format(
-        suite_forbidik_path, suite_domain_path, suite_problem_path, num_plans
+        suite_forbidik_path, suite_domain_path, suite_problem_path, qualtiy_bound
     )
 
     whole_command = "{} && {} > output.txt".format(dir_change_command, forbidk_command)
@@ -285,7 +285,7 @@ def generate_topk_runwatch_command_file(problems, suites):
                 elif planner == "kstar":
                     task_command = kstar_topk_command(suite_name, problem, k)
                 elif planner == "forbidk":
-                    task_command = forbidk_topk_command(suite_name, problem, k)
+                    task_command = forbidk_topk_command(suite_name, problem, flags)
                 # runwatch_file.write("{} {}\n".format(str(num_commands), task_command))
                 runwatch_file.write("{}\n".format(task_command))
                 num_commands += 1
@@ -555,6 +555,140 @@ T040506_suites = [
     ),
 ]
 
+# print("Num problems:", len(opt_strip_unit_cost_problems))
+# print("Num configs:", len(T040506_suites))
+# generate_topk_runwatch_command_file(opt_strip_unit_cost_problems, T040506_suites)
+
+
+T070809_suites = [
+    (
+        "planDDOptimal",
+        "T07_24_01_planDD_topq_1_1",
+        currentK,
+        "--build_bdd --use_fd --linear --timesteps -1 --clause_order_custom --var_order_custom --build_order igx:rympec: --binary_encoding --binary_exclude_impossible --binary_variables --restart --quality_bound 1.1",
+    ),
+    (
+        "planDDOptimal",
+        "T07_24_01_planDD_topq_1_2",
+        currentK,
+        "--build_bdd --use_fd --linear --timesteps -1 --clause_order_custom --var_order_custom --build_order igx:rympec: --binary_encoding --binary_exclude_impossible --binary_variables --restart --quality_bound 1.2",
+    ),
+    (
+        "planDDOptimal",
+        "T07_24_01_planDD_topq_1_3",
+        currentK,
+        "--build_bdd --use_fd --linear --timesteps -1 --clause_order_custom --var_order_custom --build_order igx:rympec: --binary_encoding --binary_exclude_impossible --binary_variables --restart --quality_bound 1.3",
+    ),
+    (
+        "planDDOptimal",
+        "T07_24_01_planDD_topq_1_4",
+        currentK,
+        "--build_bdd --use_fd --linear --timesteps -1 --clause_order_custom --var_order_custom --build_order igx:rympec: --binary_encoding --binary_exclude_impossible --binary_variables --restart --quality_bound 1.4",
+    ),
+    (
+        "forbidk",
+        "T07_24_01_forbid_topq_1_1",
+        currentK,
+        "1.1",
+    ),
+    (
+        "forbidk",
+        "T07_24_01_forbid_topq_1_2",
+        currentK,
+        "1.2",
+    ),
+    (
+        "forbidk",
+        "T07_24_01_forbid_topq_1_3",
+        currentK,
+        "1.3",
+    ),
+    (
+        "forbidk",
+        "T07_24_01_forbid_topq_1_4",
+        currentK,
+        "1.4",
+    ),
+    # T08
+    (
+        "planDDOptimal",
+        "T08_24_01_BDD_optimal",
+        currentK,
+        "--build_bdd --linear --timesteps 1 --use_fd --build_order igx:rympec: --variable_order x:voh --clause_order_custom --var_order_custom --binary_encoding --binary_variables --binary_exclude_impossible",
+    ),
+    (
+        "planDDOptimal",
+        "T08_24_01_SDD_optimal",
+        currentK,
+        "--build_sdd --linear --timesteps 1 --use_fd --build_order igx:rympec: --variable_order x:voh --clause_order_custom --var_order_custom --binary_encoding --binary_variables --binary_exclude_impossible",
+    ),
+    ("planDDUseFD", "T08_24_01_planDD_restart", currentK, planDD_restart_14_12),
+    ("planDDUseFD", "T08_24_01_planDD_incremental", currentK, planDD_incremental_14_12),
+    ("symk", "T08_24_01_symk", currentK, ""),
+    ("kstar", "T08_24_01_kstar", currentK, ""),
+    # T09
+    (
+        "planDDOptimal",
+        "T09_24_01_force_clause",
+        currentK,
+        "--build_bdd --use_fd --linear --clause_order_force --var_order_custom --build_order igx:rympec: --binary_encoding --binary_exclude_impossible --binary_variables",
+    ),
+    (
+        "planDDOptimal",
+        "T09_24_01_force_var",
+        currentK,
+        "--build_bdd --use_fd --linear --clause_order_custom --var_order_force --build_order igx:rympec: --binary_encoding --binary_exclude_impossible --binary_variables",
+    ),
+    (
+        "planDDOptimal",
+        "T09_24_01_force_clause_random",
+        currentK,
+        "--build_bdd --use_fd --linear --force_random_seed --clause_order_force --var_order_custom --build_order igx:rympec: --binary_encoding --binary_exclude_impossible --binary_variables",
+    ),
+    (
+        "planDDOptimal",
+        "T09_24_01_force_var_random",
+        currentK,
+        "--build_bdd --use_fd --linear --force_random_seed --clause_order_custom --var_order_force --build_order igx:rympec: --binary_encoding --binary_exclude_impossible --binary_variables",
+    ),
+    (
+        "planDDOptimal",
+        "T09_24_01_bottom_up",
+        currentK,
+        "--build_bdd --use_fd --linear --clause_order_bottom_up --var_order_custom --build_order igx:rympec: --binary_encoding --binary_exclude_impossible --binary_variables",
+    ),
+    (
+        "planDDOptimal",
+        "T09_24_01_force_clause_custom",
+        currentK,
+        "--build_bdd --use_fd --linear --clause_order_custom_force --var_order_custom --build_order igx:rympec: --binary_encoding --binary_exclude_impossible --binary_variables",
+    ),
+    (
+        "planDDOptimal",
+        "T09_24_01_force_var_custom",
+        currentK,
+        "--build_bdd --use_fd --linear --clause_order_custom --var_order_custom_force --build_order igx:rympec: --binary_encoding --binary_exclude_impossible --binary_variables",
+    ),
+    (
+        "planDDOptimal",
+        "T09_24_01_group_var",
+        currentK,
+        "--build_bdd --use_fd --linear --group_variables --clause_order_custom --var_order_custom --build_order igx:rympec: --binary_encoding --binary_exclude_impossible --binary_variables",
+    ),
+    (
+        "planDDOptimal",
+        "T09_24_01_group_var_small",
+        currentK,
+        "--build_bdd --use_fd --linear --group_variables_small --clause_order_custom --var_order_custom --build_order igx:rympec: --binary_encoding --binary_exclude_impossible --binary_variables",
+    ),
+    (
+        "planDDOptimal",
+        "T09_24_01_group_op",
+        currentK,
+        "--build_bdd --use_fd --linear --group_actions --clause_order_custom --var_order_custom --build_order igx:rympec: --binary_encoding --binary_exclude_impossible --binary_variables",
+    ),
+]
+
 print("Num problems:", len(opt_strip_unit_cost_problems))
-print("Num configs:", len(T040506_suites))
-generate_topk_runwatch_command_file(opt_strip_unit_cost_problems, T040506_suites)
+print("Num configs:", len(T070809_suites))
+generate_topk_runwatch_command_file(opt_strip_unit_cost_problems, T070809_suites)
