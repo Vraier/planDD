@@ -561,54 +561,54 @@ T040506_suites = [
 
 
 T070809_suites = [
-    (
-        "planDDOptimal",
-        "T07_24_01_planDD_topq_1_1",
-        currentK,
-        "--build_bdd --use_fd --linear --timesteps -1 --clause_order_custom --var_order_custom --build_order igx:rympec: --binary_encoding --binary_exclude_impossible --binary_variables --restart --quality_bound 1.1",
-    ),
-    (
-        "planDDOptimal",
-        "T07_24_01_planDD_topq_1_2",
-        currentK,
-        "--build_bdd --use_fd --linear --timesteps -1 --clause_order_custom --var_order_custom --build_order igx:rympec: --binary_encoding --binary_exclude_impossible --binary_variables --restart --quality_bound 1.2",
-    ),
-    (
-        "planDDOptimal",
-        "T07_24_01_planDD_topq_1_3",
-        currentK,
-        "--build_bdd --use_fd --linear --timesteps -1 --clause_order_custom --var_order_custom --build_order igx:rympec: --binary_encoding --binary_exclude_impossible --binary_variables --restart --quality_bound 1.3",
-    ),
-    (
-        "planDDOptimal",
-        "T07_24_01_planDD_topq_1_4",
-        currentK,
-        "--build_bdd --use_fd --linear --timesteps -1 --clause_order_custom --var_order_custom --build_order igx:rympec: --binary_encoding --binary_exclude_impossible --binary_variables --restart --quality_bound 1.4",
-    ),
-    (
-        "forbidk",
-        "T07_24_01_forbid_topq_1_1",
-        currentK,
-        "1.1",
-    ),
-    (
-        "forbidk",
-        "T07_24_01_forbid_topq_1_2",
-        currentK,
-        "1.2",
-    ),
-    (
-        "forbidk",
-        "T07_24_01_forbid_topq_1_3",
-        currentK,
-        "1.3",
-    ),
-    (
-        "forbidk",
-        "T07_24_01_forbid_topq_1_4",
-        currentK,
-        "1.4",
-    ),
+    #(
+    #    "planDDOptimal",
+    #    "T07_24_01_planDD_topq_1_1",
+    #    currentK,
+    #    "--build_bdd --use_fd --linear --timesteps -1 --clause_order_custom --var_order_custom --build_order igx:rympec: --binary_encoding --binary_exclude_impossible --binary_variables --restart --quality_bound 1.1",
+    #),
+    #(
+    #    "planDDOptimal",
+    #    "T07_24_01_planDD_topq_1_2",
+    #    currentK,
+    #    "--build_bdd --use_fd --linear --timesteps -1 --clause_order_custom --var_order_custom --build_order igx:rympec: --binary_encoding --binary_exclude_impossible --binary_variables --restart --quality_bound 1.2",
+    #),
+    #(
+    #    "planDDOptimal",
+    #    "T07_24_01_planDD_topq_1_3",
+    #    currentK,
+    #    "--build_bdd --use_fd --linear --timesteps -1 --clause_order_custom --var_order_custom --build_order igx:rympec: --binary_encoding --binary_exclude_impossible --binary_variables --restart --quality_bound 1.3",
+    #),
+    #(
+    #    "planDDOptimal",
+    #    "T07_24_01_planDD_topq_1_4",
+    #    currentK,
+    #    "--build_bdd --use_fd --linear --timesteps -1 --clause_order_custom --var_order_custom --build_order igx:rympec: --binary_encoding --binary_exclude_impossible --binary_variables --restart --quality_bound 1.4",
+    #),
+    #(
+    #    "forbidk",
+    #    "T07_24_01_forbid_topq_1_1",
+    #    currentK,
+    #    "1.1",
+    #),
+    #(
+    #    "forbidk",
+    #    "T07_24_01_forbid_topq_1_2",
+    #    currentK,
+    #    "1.2",
+    #),
+    #(
+    #    "forbidk",
+    #    "T07_24_01_forbid_topq_1_3",
+    #    currentK,
+    #    "1.3",
+    #),
+    #(
+    #    "forbidk",
+    #    "T07_24_01_forbid_topq_1_4",
+    #    currentK,
+    #    "1.4",
+    #),
     # T08
     (
         "planDDOptimal",
