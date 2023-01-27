@@ -610,85 +610,150 @@ T070809_suites = [
     #    "1.4",
     #),
     # T08
+    #(
+    #    "planDDOptimal",
+    #    "T08_24_01_BDD_optimal",
+    #    currentK,
+    #    "--build_bdd --linear --timesteps 1 --use_fd --build_order igx:rympec: --variable_order x:voh --clause_order_custom --var_order_custom --binary_encoding --binary_variables --binary_exclude_impossible",
+    #),
+    #(
+    #    "planDDOptimal",
+    #    "T08_24_01_SDD_optimal",
+    #    currentK,
+    #    "--build_sdd --linear --timesteps 1 --use_fd --build_order igx:rympec: --variable_order x:voh --clause_order_custom --var_order_custom --binary_encoding --binary_variables --binary_exclude_impossible",
+    #),
+    #("planDDUseFD", "T08_24_01_planDD_restart", currentK, planDD_restart_14_12),
+    #("planDDUseFD", "T08_24_01_planDD_incremental", currentK, planDD_incremental_14_12),
+    #("symk", "T08_24_01_symk", currentK, ""),
+    #("kstar", "T08_24_01_kstar", currentK, ""),
+    ## T09
+    #(
+    #    "planDDOptimal",
+    #    "T09_24_01_force_clause",
+    #    currentK,
+    #    "--build_bdd --use_fd --linear --clause_order_force --var_order_custom --build_order igx:rympec: --binary_encoding --binary_exclude_impossible --binary_variables",
+    #),
+    #(
+    #    "planDDOptimal",
+    #    "T09_24_01_force_var",
+    #    currentK,
+    #    "--build_bdd --use_fd --linear --clause_order_custom --var_order_force --build_order igx:rympec: --binary_encoding --binary_exclude_impossible --binary_variables",
+    #),
+    #(
+    #    "planDDOptimal",
+    #    "T09_24_01_force_clause_random",
+    #    currentK,
+    #    "--build_bdd --use_fd --linear --force_random_seed --clause_order_force --var_order_custom --build_order igx:rympec: --binary_encoding --binary_exclude_impossible --binary_variables",
+    #),
+    #(
+    #    "planDDOptimal",
+    #    "T09_24_01_force_var_random",
+    #    currentK,
+    #    "--build_bdd --use_fd --linear --force_random_seed --clause_order_custom --var_order_force --build_order igx:rympec: --binary_encoding --binary_exclude_impossible --binary_variables",
+    #),
+    #(
+    #    "planDDOptimal",
+    #    "T09_24_01_bottom_up",
+    #    currentK,
+    #    "--build_bdd --use_fd --linear --clause_order_bottom_up --var_order_custom --build_order igx:rympec: --binary_encoding --binary_exclude_impossible --binary_variables",
+    #),
+    #(
+    #    "planDDOptimal",
+    #    "T09_24_01_force_clause_custom",
+    #    currentK,
+    #    "--build_bdd --use_fd --linear --clause_order_custom_force --var_order_custom --build_order igx:rympec: --binary_encoding --binary_exclude_impossible --binary_variables",
+    #),
+    #(
+    #    "planDDOptimal",
+    #    "T09_24_01_force_var_custom",
+    #    currentK,
+    #    "--build_bdd --use_fd --linear --clause_order_custom --var_order_custom_force --build_order igx:rympec: --binary_encoding --binary_exclude_impossible --binary_variables",
+    #),
+    #(
+    #    "planDDOptimal",
+    #    "T09_24_01_group_var",
+    #    currentK,
+    #    "--build_bdd --use_fd --linear --group_variables --clause_order_custom --var_order_custom --build_order igx:rympec: --binary_encoding --binary_exclude_impossible --binary_variables",
+    #),
+    #(
+    #    "planDDOptimal",
+    #    "T09_24_01_group_var_small",
+    #    currentK,
+    #    "--build_bdd --use_fd --linear --group_variables_small --clause_order_custom --var_order_custom --build_order igx:rympec: --binary_encoding --binary_exclude_impossible --binary_variables",
+    #),
+    #(
+    #    "planDDOptimal",
+    #    "T09_24_01_group_op",
+    #    currentK,
+    #    "--build_bdd --use_fd --linear --group_actions --clause_order_custom --var_order_custom --build_order igx:rympec: --binary_encoding --binary_exclude_impossible --binary_variables",
+    #),
+]
+    
+fixed_suites = [
+    # Top-Q
     (
-        "planDDOptimal",
-        "T08_24_01_BDD_optimal",
+        "forbidk",
+        "T0X_27_01_forbid_topq_1_1",
         currentK,
-        "--build_bdd --linear --timesteps 1 --use_fd --build_order igx:rympec: --variable_order x:voh --clause_order_custom --var_order_custom --binary_encoding --binary_variables --binary_exclude_impossible",
+        "1.1",
+    ),
+    (
+        "forbidk",
+        "T0X_27_01_forbid_topq_1_2",
+        currentK,
+        "1.2",
+    ),
+    (
+        "forbidk",
+        "T0X_27_01_forbid_topq_1_3",
+        currentK,
+        "1.3",
+    ),
+    (
+        "forbidk",
+        "T0X_27_01_forbid_topq_1_4",
+        currentK,
+        "1.4",
     ),
     (
         "planDDOptimal",
-        "T08_24_01_SDD_optimal",
+        "T0X_27_01_planDD_topq_1_1",
         currentK,
-        "--build_sdd --linear --timesteps 1 --use_fd --build_order igx:rympec: --variable_order x:voh --clause_order_custom --var_order_custom --binary_encoding --binary_variables --binary_exclude_impossible",
-    ),
-    ("planDDUseFD", "T08_24_01_planDD_restart", currentK, planDD_restart_14_12),
-    ("planDDUseFD", "T08_24_01_planDD_incremental", currentK, planDD_incremental_14_12),
-    ("symk", "T08_24_01_symk", currentK, ""),
-    ("kstar", "T08_24_01_kstar", currentK, ""),
-    # T09
-    (
-        "planDDOptimal",
-        "T09_24_01_force_clause",
-        currentK,
-        "--build_bdd --use_fd --linear --clause_order_force --var_order_custom --build_order igx:rympec: --binary_encoding --binary_exclude_impossible --binary_variables",
+        "--build_bdd --use_fd --linear --timesteps -1 --clause_order_custom --var_order_custom --build_order igx:rympec: --binary_encoding --binary_exclude_impossible --binary_variables --restart --quality_bound 1.1",
     ),
     (
         "planDDOptimal",
-        "T09_24_01_force_var",
+        "T0X_27_01_planDD_topq_1_2",
         currentK,
-        "--build_bdd --use_fd --linear --clause_order_custom --var_order_force --build_order igx:rympec: --binary_encoding --binary_exclude_impossible --binary_variables",
+        "--build_bdd --use_fd --linear --timesteps -1 --clause_order_custom --var_order_custom --build_order igx:rympec: --binary_encoding --binary_exclude_impossible --binary_variables --restart --quality_bound 1.2",
     ),
     (
         "planDDOptimal",
-        "T09_24_01_force_clause_random",
+        "T0X_27_01_planDD_topq_1_3",
         currentK,
-        "--build_bdd --use_fd --linear --force_random_seed --clause_order_force --var_order_custom --build_order igx:rympec: --binary_encoding --binary_exclude_impossible --binary_variables",
+        "--build_bdd --use_fd --linear --timesteps -1 --clause_order_custom --var_order_custom --build_order igx:rympec: --binary_encoding --binary_exclude_impossible --binary_variables --restart --quality_bound 1.3",
     ),
     (
         "planDDOptimal",
-        "T09_24_01_force_var_random",
+        "T0X_27_01_planDD_topq_1_4",
         currentK,
-        "--build_bdd --use_fd --linear --force_random_seed --clause_order_custom --var_order_force --build_order igx:rympec: --binary_encoding --binary_exclude_impossible --binary_variables",
+        "--build_bdd --use_fd --linear --timesteps -1 --clause_order_custom --var_order_custom --build_order igx:rympec: --binary_encoding --binary_exclude_impossible --binary_variables --restart --quality_bound 1.4",
+    ),
+    #Queries
+    (
+        "planDDOptimal",
+        "T0X_27_01_random_plans",
+        currentK,
+        "--build_bdd --linear --use_fd --build_order igx:rympec: --clause_order_custom --var_order_custom --binary_encoding --binary_variables --binary_exclude_impossible --query_random_plans",
     ),
     (
         "planDDOptimal",
-        "T09_24_01_bottom_up",
+        "T0X_27_01_common_operator",
         currentK,
-        "--build_bdd --use_fd --linear --clause_order_bottom_up --var_order_custom --build_order igx:rympec: --binary_encoding --binary_exclude_impossible --binary_variables",
-    ),
-    (
-        "planDDOptimal",
-        "T09_24_01_force_clause_custom",
-        currentK,
-        "--build_bdd --use_fd --linear --clause_order_custom_force --var_order_custom --build_order igx:rympec: --binary_encoding --binary_exclude_impossible --binary_variables",
-    ),
-    (
-        "planDDOptimal",
-        "T09_24_01_force_var_custom",
-        currentK,
-        "--build_bdd --use_fd --linear --clause_order_custom --var_order_custom_force --build_order igx:rympec: --binary_encoding --binary_exclude_impossible --binary_variables",
-    ),
-    (
-        "planDDOptimal",
-        "T09_24_01_group_var",
-        currentK,
-        "--build_bdd --use_fd --linear --group_variables --clause_order_custom --var_order_custom --build_order igx:rympec: --binary_encoding --binary_exclude_impossible --binary_variables",
-    ),
-    (
-        "planDDOptimal",
-        "T09_24_01_group_var_small",
-        currentK,
-        "--build_bdd --use_fd --linear --group_variables_small --clause_order_custom --var_order_custom --build_order igx:rympec: --binary_encoding --binary_exclude_impossible --binary_variables",
-    ),
-    (
-        "planDDOptimal",
-        "T09_24_01_group_op",
-        currentK,
-        "--build_bdd --use_fd --linear --group_actions --clause_order_custom --var_order_custom --build_order igx:rympec: --binary_encoding --binary_exclude_impossible --binary_variables",
+        "--build_bdd --linear --use_fd --build_order igx:rympec: --clause_order_custom --var_order_custom --binary_encoding --binary_variables --binary_exclude_impossible --query_common_operators",
     ),
 ]
 
 print("Num problems:", len(opt_strip_unit_cost_problems))
-print("Num configs:", len(T070809_suites))
-generate_topk_runwatch_command_file(opt_strip_unit_cost_problems, T070809_suites)
+print("Num configs:", len(fixed_suites))
+generate_topk_runwatch_command_file(opt_strip_unit_cost_problems, fixed_suites)

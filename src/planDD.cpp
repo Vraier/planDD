@@ -198,8 +198,8 @@ int planDD::build_bdd(option_values opt_values) {
     builder.print_info();
 
     if (opt_values.query_random_plans) {
-        int num_solutions = 0.1 * builder.count_num_solutions(0);
-        int num_desired_solutions = std::min(std::max(0, num_solutions), 200000000);
+        int num_solutions = builder.count_num_solutions(0);
+        int num_desired_solutions = std::min(num_solutions, 1000);
         builder.calculate_set_of_random_solutions(num_desired_solutions);
     }
 

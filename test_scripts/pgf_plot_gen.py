@@ -187,17 +187,17 @@ variable_order_differences = [
     
 
 suite_names = [
-    "T02_varOrder/T02_11_01_ord_0_k1000000000",
-    "T02_varOrder/T02_11_01_ord_0_no_reorder_k1000000000",
-    "T02_varOrder/T02_11_01_ord_1_k1000000000",
-    "T02_varOrder/T02_11_01_ord_1_no_reorder_k1000000000",
-    "T02_varOrder/T02_11_01_ord_2_k1000000000",
-    "T02_varOrder/T02_11_01_ord_2_no_reorder_k1000000000",
-    "T02_varOrder/T02_11_01_ord_3_k1000000000",
-    "T02_varOrder/T02_11_01_ord_3_no_reorder_k1000000000",
+    #"T02_varOrder/T02_11_01_ord_0_k1000000000",
+    #"T02_varOrder/T02_11_01_ord_0_no_reorder_k1000000000",
+    #"T02_varOrder/T02_11_01_ord_1_k1000000000",
+    #"T02_varOrder/T02_11_01_ord_1_no_reorder_k1000000000",
+    #"T02_varOrder/T02_11_01_ord_2_k1000000000",
+    #"T02_varOrder/T02_11_01_ord_2_no_reorder_k1000000000",
+    #"T02_varOrder/T02_11_01_ord_3_k1000000000",
+    #"T02_varOrder/T02_11_01_ord_3_no_reorder_k1000000000",
 
-    #"T04_naiv/T04_18_01_naiv_bdd_k1000000000",
-    #"T04_naiv/T04_18_01_naiv_sdd_k1000000000",
+    "T04_naiv/T04_18_01_naiv_bdd_k1000000000",
+    "T04_naiv/T04_18_01_naiv_sdd_k1000000000",
 
     #"T03_construction/T03_15_01_bi_k1000000000",
     #"T03_construction/T03_15_01_bi_share_k1000000000",
@@ -215,6 +215,9 @@ suite_names = [
     #"T06_encoding/T06_18_01_encoding_naiv_k1000000000",
     #"T06_encoding/T06_18_01_encoding_parallel_k1000000000",
     #"T06_encoding/T06_18_01_encoding_parallel_binary_k1000000000",
+
+    #"T05_query/T05_18_01_common_operator_k1000000000",
+    #"T05_query/T05_18_01_random_plans_k1000000000",
 ]
 all_dics = []
 
@@ -228,11 +231,99 @@ for x in suite_names:
 for x in suite_names:
     all_dics.append(read_all_information_from_file("../../final_results/" + x + ".pkl"))
 
-print_solving_difference_between_two_configs(all_dics[2], "naiv", all_dics[1], "ladder")
+for i in range(len(suite_names)):
+    suites = all_dics[i]
+    xys = get_finish_time_num_finished_tuples(suites)
+    print(xys)
+    with open("../../final_results/" + suite_names[i] + ".csv", "w", newline='') as out_file:
+        writer = csv.writer(out_file)
+        writer.writerows(xys)
+
+
+def query_analysis():
+    random_plan_dics = read_all_information_from_file("../../final_results/T05_query/T05_18_01_random_plans_k1000000000.pkl")
+    common_op_dics = read_all_information_from_file("../../final_results/T05_query/T05_18_01_common_operator_k1000000000.pkl")
+
+    num_solutions = []
+    started_counting = 0
+    finished_counting = 0
+    counting_times = []
+    relative_counting_times = []
+    for d in common_op_dics:
+        if d["num_solutions"] >= 0:
+            num_solutions.append(d["num_solutions"])
+        if d["query_common_start"] >= 0:
+            started_counting += 1
+        if d["query_common_end"] >= 0:
+            finished_counting += 1
+            counting_time = d["query_common_end"]-d["query_common_start"]
+            relative_counting_time = counting_time/d["query_common_end"]
+            counting_times.append(counting_time)
+            relative_counting_times.append(relative_counting_time)
+
+    started_sampling = 0
+    finished_sampling = 0
+    sampling_times = []
+    relative_sampling_times = []
+    for d in random_plan_dics:
+        if d["query_random_start"] >= 0:
+            started_sampling += 1
+        if d["query_random_end"] >= 0:
+            finished_sampling += 1
+            sampling_time = d["query_random_end"]-d["query_random_start"]
+            relative_sampling_time = counting_time/d["query_random_end"]
+            sampling_times.append(sampling_time)
+            relative_sampling_times.append(relative_sampling_time)
+
+    print("Number of solutions", sorted(num_solutions))
+    print("Started counting", started_counting, "Finished counting", finished_counting)
+    print("Counting times", sorted(counting_times))
+    print("Relative counting times", sorted(relative_counting_times))
+
+    print("Started sampling", started_sampling, "Finished sampling", finished_sampling)
+    print("Sampling times", sorted(sampling_times))
+    print("Relative sampling times", sorted(relative_sampling_times))
+
+# compares two configurations by building a scatter plot
+def scatter_plot_compare_two_configs(info_dics_config1, info_dics_config2, timeout, name1, name2, csv_name):
+    points = []
+
+    dom_to_dic1 = {}
+    for prob_dic in info_dics_config1:
+        dom_to_dic1[prob_dic["domain_desc"]] = prob_dic
+
+    add_info = []
+    for prob_dic2 in info_dics_config2:
+        if not prob_dic2["domain_desc"] in dom_to_dic1:
+            print("Warning")
+            continue
+        prob_dic1 = dom_to_dic1[prob_dic2["domain_desc"]]
+
+        time1 = prob_dic1["finish_time"] if prob_dic1["finish_time"] > 0 and prob_dic1["finish_time"] <= timeout else timeout * 1.2
+        time2 = prob_dic2["finish_time"] if prob_dic2["finish_time"] > 0 and prob_dic1["finish_time"] <= timeout else timeout * 1.2
+
+        if(time1 <= 300 or time2 <= 300):
+            add_info.append((prob_dic2["domain_desc"], time1, time2))
+        points.append((time1, time2))
+
+    for x in sorted(add_info):
+        print(x)
+
+    fig, ax = plt.subplots()
+    ax.set_aspect('equal', adjustable='box')
+    ax.scatter([x for x, y in points], [y for x, y in points])
+    ax.plot([0,timeout],[0,timeout], 'red', linewidth=1)
+    plt.xlabel(name1)
+    plt.ylabel(name2)
+    plt.show()
+    with open("../../final_results/" + csv_name, "w", newline='') as out_file:
+        writer = csv.writer(out_file)
+        writer.writerows(points)
+
 
 for i in range(len(suite_names)):
     print(suite_names[i])
-    print_big_information_from_dicts(all_dics[i])
+    #print_big_information_from_dicts(all_dics[i])
     pass
 
 plot_suites(suite_names, all_dics)
@@ -247,10 +338,11 @@ plot_suites(suite_names, all_dics)
 
 #plt.show()
 
-for i in range(len(suite_names)):
-    suites = all_dics[i]
-    xys = get_finish_time_num_finished_tuples(suites)
-    print(xys)
-    with open("../../final_results/" + suite_names[i] + ".csv", "w", newline='') as out_file:
-        writer = csv.writer(out_file)
-        writer.writerows(xys)
+# for query analysis
+#query_analysis()
+
+# for naiv comparison
+naive_bdd = read_all_information_from_file("../../final_results/T04_naiv/T04_18_01_naiv_bdd_k1000000000.pkl")
+naive_sdd = read_all_information_from_file("../../final_results/T04_naiv/T04_18_01_naiv_sdd_k1000000000.pkl")
+print(naive_sdd[0])
+scatter_plot_compare_two_configs(naive_bdd, naive_sdd, 300, "bdd", "sdd", "naive_scatter.csv")

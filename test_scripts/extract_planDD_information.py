@@ -45,10 +45,63 @@ def compile_information_about_planDD_into_dic(domain_desc, file_path):
     info["num_colour_classes"] = extract_num_colours(file_path)
     # parse info again to get more polished information
 
+    info["num_solutions"] = extract_num_solutions(file_path)
+    info["query_common_start"] = extract_query_common_start(file_path)
+    info["query_common_end"] = extract_query_common_end(file_path)
+    info["query_random_start"] = extract_query_random_start(file_path)
+    info["query_random_end"] = extract_query_random_end(file_path)
+
     return info
+
+def extract_num_solutions(file_path):
+    with open(file_path, "r") as f:
+        for line in f:
+            p = re.compile(".*Number of nodes: .*, Num Variables: .*, Number of solutions: (.*)")
+            if p.match(line):
+                return float(p.search(line).group(1))
+    return -999999
+
+def extract_query_common_start(file_path):
+    with open(file_path, "r") as f:
+        for line in f:
+            p1 = re.compile("\[(.*)\]\[info\] Start finding most common operator for timestep.*")
+            if p1.match(line):
+                time_string = p1.search(line).group(1)
+                return convert_time_string_to_float(time_string)
+    return -99999
+
+def extract_query_common_end(file_path):
+    with open(file_path, "r") as f:
+        for line in f:
+            p1 = re.compile("\[(.*)\]\[info\] Finished finding most common operator.*")
+            if p1.match(line):
+                time_string = p1.search(line).group(1)
+                return convert_time_string_to_float(time_string)
+    return -99999
+
+def extract_query_random_start(file_path):
+    with open(file_path, "r") as f:
+        for line in f:
+            p1 = re.compile("\[(.*)\]\[info\] Start calculating random set of .* solutions.*")
+            if p1.match(line):
+                time_string = p1.search(line).group(1)
+                return convert_time_string_to_float(time_string)
+    return -99999
+
+def extract_query_random_end(file_path):
+    with open(file_path, "r") as f:
+        for line in f:
+            p1 = re.compile("\[(.*)\]\[info\] Found all desired solutions.*")
+            if p1.match(line):
+                time_string = p1.search(line).group(1)
+                return convert_time_string_to_float(time_string)
+    return -99999
 
 def compile_information_about_sdd_compiler_into_dic(domain_desc, file_path):
     info = {}
+    info["domain_desc"] = domain_desc
+    info["file_path"] = file_path
+
     info["has_finished"] = False
     info["finish_time"] = -1
     info["last_memory"] = -99999

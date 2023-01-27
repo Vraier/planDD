@@ -15,12 +15,14 @@ def scatter_plot_compare_two_configs(info_dics_config1, info_dics_config2, timeo
 
     for prob_dic2 in info_dics_config2:
         if not prob_dic2["domain_desc"] in dom_to_dic1:
+            print("Warning")
             continue
         prob_dic1 = dom_to_dic1[prob_dic2["domain_desc"]]
 
         time1 = prob_dic1["finish_time"] if prob_dic1["finish_time"] > 0 and prob_dic1["finish_time"] <= timeout else timeout * 1.2
         time2 = prob_dic2["finish_time"] if prob_dic2["finish_time"] > 0 and prob_dic1["finish_time"] <= timeout else timeout * 1.2
 
+        print(prob_dic2["domain_desc"], time1, time2)
         points.append((time1, time2))
 
     fig, ax = plt.subplots()
