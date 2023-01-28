@@ -187,17 +187,17 @@ variable_order_differences = [
     
 
 suite_names = [
-    #"T02_varOrder/T02_11_01_ord_0_k1000000000",
-    #"T02_varOrder/T02_11_01_ord_0_no_reorder_k1000000000",
-    #"T02_varOrder/T02_11_01_ord_1_k1000000000",
-    #"T02_varOrder/T02_11_01_ord_1_no_reorder_k1000000000",
-    #"T02_varOrder/T02_11_01_ord_2_k1000000000",
-    #"T02_varOrder/T02_11_01_ord_2_no_reorder_k1000000000",
-    #"T02_varOrder/T02_11_01_ord_3_k1000000000",
-    #"T02_varOrder/T02_11_01_ord_3_no_reorder_k1000000000",
+    "T02_varOrder/T02_11_01_ord_0_k1000000000",
+    "T02_varOrder/T02_11_01_ord_0_no_reorder_k1000000000",
+    "T02_varOrder/T02_11_01_ord_1_k1000000000",
+    "T02_varOrder/T02_11_01_ord_1_no_reorder_k1000000000",
+    "T02_varOrder/T02_11_01_ord_2_k1000000000",
+    "T02_varOrder/T02_11_01_ord_2_no_reorder_k1000000000",
+    "T02_varOrder/T02_11_01_ord_3_k1000000000",
+    "T02_varOrder/T02_11_01_ord_3_no_reorder_k1000000000",
 
-    "T04_naiv/T04_18_01_naiv_bdd_k1000000000",
-    "T04_naiv/T04_18_01_naiv_sdd_k1000000000",
+    #"T04_naiv/T04_18_01_naiv_bdd_k1000000000",
+    #"T04_naiv/T04_18_01_naiv_sdd_k1000000000",
 
     #"T03_construction/T03_15_01_bi_k1000000000",
     #"T03_construction/T03_15_01_bi_share_k1000000000",
@@ -308,6 +308,7 @@ def scatter_plot_compare_two_configs(info_dics_config1, info_dics_config2, timeo
 
     for x in sorted(add_info):
         print(x)
+    print("Both solved together:", len(add_info))
 
     fig, ax = plt.subplots()
     ax.set_aspect('equal', adjustable='box')
@@ -326,7 +327,6 @@ for i in range(len(suite_names)):
     #print_big_information_from_dicts(all_dics[i])
     pass
 
-plot_suites(suite_names, all_dics)
 
 
 #for suites in all_dics:
@@ -344,5 +344,6 @@ plot_suites(suite_names, all_dics)
 # for naiv comparison
 naive_bdd = read_all_information_from_file("../../final_results/T04_naiv/T04_18_01_naiv_bdd_k1000000000.pkl")
 naive_sdd = read_all_information_from_file("../../final_results/T04_naiv/T04_18_01_naiv_sdd_k1000000000.pkl")
-print(naive_sdd[0])
+print_big_information_from_dicts(naive_bdd)
+plot_suites(suite_names, all_dics)
 scatter_plot_compare_two_configs(naive_bdd, naive_sdd, 300, "bdd", "sdd", "naive_scatter.csv")
