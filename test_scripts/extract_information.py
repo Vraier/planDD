@@ -2,6 +2,11 @@ import os
 import re
 import pickle
 import matplotlib.pyplot as plt
+import csv
+import suites
+import planDD_test_util_general as util
+
+
 
 # extracts all the possible information from an output file into a dict
 def compile_information_about_planDD_into_dic(domain_desc, file_path):
@@ -97,31 +102,36 @@ def extract_symk_time_to_progress(file_path):
     return result
 
 suite_names = [
-    "planDDTopK_k1000000000",
+    #"planDDTopK_k1000000000",
     #"planDDUseFD_k1000000000",
     #"planDDTopKRestart_k1000000000",
     #"planDDRestartUseFD_k1000000000",
 
-    "kstar_k1000000000",
-    "symk_k1000000000",
+    #"kstar_k1000000000",
+    #"symk_k1000000000",
 
     #"planDD_31_11_k1000000000",
     #"planDDFixedRestart_k1000000000",
     #"planDDFixedRestartUseFD_k1000000000",
 
     # to check if restart is now was good as optimal
-    "planDDRestart_14_12_k1000000000",
-    "planDDIncremental_14_12_k1000000000",
+    #"planDDRestart_14_12_k1000000000",
+    #"planDDIncremental_14_12_k1000000000",
+
+    "T08_topK/T08_24_01_kstar_k1000000000",
+    "T08_topK/T08_24_01_symk_k1000000000",
+    #"T08_topK/T08_24_01_planDD_incremental_k1000000000",
+    "T08_topK/T08_24_01_planDD_restart_k1000000000",
 ]
 
 suite_dics = []
 
 for x in suite_names:
-    #write_all_information_to_file("../../test_output/best_14_12/" + x, "../../test_output/" + x + ".pkl")
+    #write_all_information_to_file("../../final_results/" + x, "../../final_results/" + x + ".pkl")
     pass
 
 for x in suite_names:
-    suite_dics.append(read_all_information_from_file("../../test_output/" + x + ".pkl"))
+    suite_dics.append(read_all_information_from_file("../../final_results/" + x + ".pkl"))
 
 
 # input: list of dictionaries and timebound
@@ -147,11 +157,75 @@ def get_k_to_solved_list(suite_dics, timebound):
     result.sort(key = lambda x: (x[0],-x[1]))
     return result
 
-for i in range(len(suite_names)):
-    #print((suite_dics[i][0]))
-    plot_values = get_k_to_solved_list(suite_dics[i], 300)
-    plt.plot([x for x,_ in plot_values], [y for _,y in plot_values], linestyle=":", marker="o", label=suite_names[i])
+#for i in range(len(suite_names)):
+#    #print((suite_dics[i][0]))
+#    plot_values = get_k_to_solved_list(suite_dics[i], 300)
+#    xys = [(a,b) for a,b in plot_values if a >= 1]
+#    #print(xys)
+#    with open("../../final_results/" + suite_names[i] + "_kCoverage.csv", "w", newline='') as out_file:
+#        writer = csv.writer(out_file)
+#        writer.writerows(xys)
+#    plt.plot([x for x,_ in plot_values], [y for _,y in plot_values], linestyle=":", marker="o", label=suite_names[i])
 
-plt.xscale("log")
-plt.legend()
-plt.show()
+#plt.xscale("log")
+#plt.legend()
+#plt.show()
+
+def list_coverage_on_domains(suitess, desired_k):
+    all_problems = suites.suite_optimal_strips()
+    unit_cost_problems = [
+        p for p in all_problems if suites.TAG_HAS_ONLY_UNIT_COST_ACTIONS in suites.DOMAIN_TO_TAGS[p]
+    ]
+
+    suite_doms = {}
+    for dom in unit_cost_problems:
+        suite_doms[dom] = 0
+        sanitized_dom = util.get_sanitized_domain_description(dom, "")
+        for prob in suitess:
+            #print(prob)
+            if sanitized_dom in prob["domain_desc"]:
+                for key, value in prob["progress_to_time"].items():
+                    if value > desired_k:
+                        suite_doms[dom] += 1
+                        break
+    return suite_doms
+
+
+def write_dom_coverage():
+    desired_ks = [10**3, 10**6, 10**9]
+    num_ks = len(desired_ks)
+    all_problems = suites.suite_optimal_strips()
+    unit_cost_problems = [
+        p for p in all_problems if suites.TAG_HAS_ONLY_UNIT_COST_ACTIONS in suites.DOMAIN_TO_TAGS[p]
+    ]
+
+    for dom in unit_cost_problems:
+        with open("dom_coverages.tab", "a") as fil:
+            fil.write("\\textsc{" + dom + "} & ")
+            covs = {}
+            for i in range(len(suite_dics)):
+                suite = suite_dics[i]
+                for des_k in desired_ks:
+                    dom_coverage = list_coverage_on_domains(suite, des_k)
+                    covs[(i , des_k)] = dom_coverage[dom]
+
+
+            for i in range(len(suite_dics)):
+                suite = suite_dics[i]
+                for des_k in desired_ks:
+                    c = covs[(i, des_k)]
+                    is_biggest = True
+                    for otherI in range(len(suite_dics)):
+                        if otherI == i:
+                            continue
+                        otherC = covs[(otherI, des_k)]
+                        if otherC > c:
+                            is_biggest = False
+                    if is_biggest and c > 0:
+                        fil.write("\\textbf{" + str(c) + "} & ")
+                    else:
+                        fil.write(str(c) + " & ")
+            fil.write("\\\\\n")
+
+
+write_dom_coverage()

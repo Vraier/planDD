@@ -29,6 +29,7 @@ def compile_information_about_planDD_into_dic(domain_desc, file_path):
     info["progress_peak_nodes"] = extract_progress_peak_nodes(file_path)
     info["progress_reorderings"] = extract_progress_reorderings(file_path)
     info["progress_memory"] = extract_progress_memory(file_path)
+    info["progress_add_conjoin_permute"] = extract_add_conjoin_permute(file_path)
 
     info["last_timesteps"] = -99999 if len(info["progress_timesteps"]) == 0 else info["progress_timesteps"][-1]
     info["last_conjoin_percent"] = -99999 if len(info["progress_conjoin_percent"]) == 0 else info["progress_conjoin_percent"][-1]
@@ -259,9 +260,11 @@ def extract_has_finished(file_path):
 def extract_finish_time(file_path):
     with open(file_path, "r") as f:
         for line in f:
-            p1 = re.compile("\[(.*)\]\[info\] Finished constructing DD.*")
-            p2 = re.compile("\[(.*)\]\[info\] Finished constructing final DD.*")
+            p2 = re.compile("\[(.*)\]\[info\] Printing LibSDD statistics.*")
             p3 = re.compile("\[(.*)\]\[info\] Printing CUDD statistics\.\.\..*")
+            if p2.match(line):
+                time_string = p2.search(line).group(1)
+                return convert_time_string_to_float(time_string)
             if p3.match(line):
                 time_string = p3.search(line).group(1)
                 return convert_time_string_to_float(time_string)
@@ -344,6 +347,12 @@ def extract_progress_memory(file_path):
         content = str(f.read())
         lst = re.findall(r"\[.*\]\[info\] Conjoined \d*% of all clauses. CUDD stats: #nodes: \d* #peak nodes: \d* #reorderings: \d* #memory bytes: (\d*).*", content)
     return [int(x) for x in lst]
+
+def extract_add_conjoin_permute(file_path):
+    with open(file_path, "r") as f:
+        content = str(f.read())
+        lst = re.findall(r"\[(.*)\]\[info\] (?:Adding timestep for t=.* CUDD stats: #nodes: .* #peak nodes: .*|Conjoining two bdds.*|Permuating .* variables)", content)
+    return [convert_time_string_to_float(x) for x in lst]
 
 # Methods that take the information of a dictionary and extracts parts from it or refine the information
 def get_time_for_reordering_from_info(info):

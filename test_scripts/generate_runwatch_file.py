@@ -691,30 +691,30 @@ T070809_suites = [
     
 fixed_suites = [
     # Top-Q
-    (
-        "forbidk",
-        "T0X_27_01_forbid_topq_1_2",
-        currentK,
-        "1.2",
-    ),
-    (
-        "forbidk",
-        "T0X_27_01_forbid_topq_1_4",
-        currentK,
-        "1.4",
-    ),
-    (
-        "forbidk",
-        "T0X_27_01_forbid_topq_1_1",
-        currentK,
-        "1.1",
-    ),
-    (
-        "forbidk",
-        "T0X_27_01_forbid_topq_1_3",
-        currentK,
-        "1.3",
-    ),
+    #(
+    #    "forbidk",
+    #    "T0X_27_01_forbid_topq_1_2",
+    #    currentK,
+    #    "1.2",
+    #),
+    #(
+    #    "forbidk",
+    #    "T0X_27_01_forbid_topq_1_4",
+    #    currentK,
+    #    "1.4",
+    #),
+    #(
+    #    "forbidk",
+    #    "T0X_27_01_forbid_topq_1_1",
+    #    currentK,
+    #    "1.1",
+    #),
+    #(
+    #    "forbidk",
+    #    "T0X_27_01_forbid_topq_1_3",
+    #    currentK,
+    #    "1.3",
+    #),
     #(
     #    "planDDOptimal",
     #    "T0X_27_01_planDD_topq_1_1",
@@ -740,18 +740,18 @@ fixed_suites = [
     #    "--build_bdd --use_fd --linear --timesteps -1 --clause_order_custom --var_order_custom --build_order igx:rympec: --binary_encoding --binary_exclude_impossible --binary_variables --restart --quality_bound 1.4",
     #),
     #Queries
-    #(
-    #    "planDDOptimal",
-    #    "T0X_27_01_random_plans",
-    #    currentK,
-    #    "--build_bdd --linear --use_fd --build_order igx:rympec: --clause_order_custom --var_order_custom --binary_encoding --binary_variables --binary_exclude_impossible --query_random_plans",
-    #),
-    #(
-    #    "planDDOptimal",
-    #    "T0X_27_01_common_operator",
-    #    currentK,
-    #    "--build_bdd --linear --use_fd --build_order igx:rympec: --clause_order_custom --var_order_custom --binary_encoding --binary_variables --binary_exclude_impossible --query_common_operators",
-    #),
+    (
+        "planDDOptimal",
+        "T0X_27_01_random_plans",
+        currentK,
+        "--build_bdd --linear --use_fd --build_order igx:rympec: --clause_order_custom --var_order_custom --binary_encoding --binary_variables --binary_exclude_impossible --query_random_plans",
+    ),
+    (
+        "planDDOptimal",
+        "T0X_27_01_common_operator",
+        currentK,
+        "--build_bdd --linear --use_fd --build_order igx:rympec: --clause_order_custom --var_order_custom --binary_encoding --binary_variables --binary_exclude_impossible --query_common_operators",
+    ),
 ]
 
 print("Num problems:", len(opt_strip_unit_cost_problems))

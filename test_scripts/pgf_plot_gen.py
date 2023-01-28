@@ -17,7 +17,7 @@ def print_big_information_from_dicts(all_dics):
     time_for_solved = [(d["finish_time"], d["domain_desc"]) for d in solved_dics]
     time_for_solved = sorted(time_for_solved)
     #print("Compiling Solved Testcases: ############################################################################################")
-    print(sorted(time_for_solved, key = lambda x: x[1]))
+    #print(sorted(time_for_solved, key = lambda x: x[1]))
 
     print("Compiling Information: #################################################################################################")
     print("Conjoin Order", all_dics[0]["config_build_order"])
@@ -187,24 +187,24 @@ variable_order_differences = [
     
 
 suite_names = [
-    "T02_varOrder/T02_11_01_ord_0_k1000000000",
-    "T02_varOrder/T02_11_01_ord_0_no_reorder_k1000000000",
-    "T02_varOrder/T02_11_01_ord_1_k1000000000",
-    "T02_varOrder/T02_11_01_ord_1_no_reorder_k1000000000",
-    "T02_varOrder/T02_11_01_ord_2_k1000000000",
-    "T02_varOrder/T02_11_01_ord_2_no_reorder_k1000000000",
-    "T02_varOrder/T02_11_01_ord_3_k1000000000",
-    "T02_varOrder/T02_11_01_ord_3_no_reorder_k1000000000",
+    #"T02_varOrder/T02_11_01_ord_0_k1000000000",
+    #"T02_varOrder/T02_11_01_ord_0_no_reorder_k1000000000",
+    #"T02_varOrder/T02_11_01_ord_1_k1000000000",
+    #"T02_varOrder/T02_11_01_ord_1_no_reorder_k1000000000",
+    #"T02_varOrder/T02_11_01_ord_2_k1000000000",
+    #"T02_varOrder/T02_11_01_ord_2_no_reorder_k1000000000",
+    #"T02_varOrder/T02_11_01_ord_3_k1000000000",
+    #"T02_varOrder/T02_11_01_ord_3_no_reorder_k1000000000",
 
     #"T04_naiv/T04_18_01_naiv_bdd_k1000000000",
     #"T04_naiv/T04_18_01_naiv_sdd_k1000000000",
 
-    #"T03_construction/T03_15_01_bi_k1000000000",
-    #"T03_construction/T03_15_01_bi_share_k1000000000",
-    #"T03_construction/T03_15_01_bi_share_perm_k1000000000",
-    #"T03_construction/T03_15_01_expo_k1000000000",
-    #"T03_construction/T03_15_01_layer_k1000000000",
-    #"T03_construction/T03_15_01_layer_perm_k1000000000",
+    "T03_construction/T03_15_01_bi_k1000000000",
+    "T03_construction/T03_15_01_bi_share_k1000000000",
+    "T03_construction/T03_15_01_bi_share_perm_k1000000000",
+    "T03_construction/T03_15_01_expo_k1000000000",
+    "T03_construction/T03_15_01_layer_k1000000000",
+    "T03_construction/T03_15_01_layer_perm_k1000000000",
 
     #"T06_encoding/T06_18_01_encoding_binary_op_k1000000000",
     #"T06_encoding/T06_18_01_encoding_binary_var_k1000000000",
@@ -218,11 +218,21 @@ suite_names = [
 
     #"T05_query/T05_18_01_common_operator_k1000000000",
     #"T05_query/T05_18_01_random_plans_k1000000000",
+
+    #"T08_topK/T08_24_01_BDD_optimal_k1000000000",
+    #"T08_topK/T08_24_01_SDD_optimal_k1000000000",
+    #"T08_topK/T08_24_01_kstar_k1000000000",
+    #"T08_topK/T08_24_01_symk_k1000000000",
+    #"T08_topK/T08_24_01_planDD_incremental_k1000000000",
+    #"T08_topK/T08_24_01_planDD_restart_k1000000000",
 ]
 all_dics = []
 
 #write_all_information_to_file("../../final_results/T04_naiv/T04_18_01_naiv_bdd_k1000000000", "../../final_results/T04_naiv/T04_18_01_naiv_bdd_k1000000000.pkl")
 #write_sdd_compiler_to_file("../../final_results/T04_naiv/T04_18_01_naiv_sdd_k1000000000", "../../final_results/T04_naiv/T04_18_01_naiv_sdd_k1000000000.pkl")
+
+#write_all_information_to_file("../../final_results/T08_topK/T08_24_01_BDD_optimal_k1000000000", "../../final_results/T08_topK/T08_24_01_BDD_optimal_k1000000000.pkl")
+#write_all_information_to_file("../../final_results/T08_topK/T08_24_01_SDD_optimal_k1000000000", "../../final_results/T08_topK/T08_24_01_SDD_optimal_k1000000000.pkl")
 
 for x in suite_names:
     #write_all_information_to_file("../../final_results/" + x, "../../final_results/" + x + ".pkl")
@@ -234,11 +244,10 @@ for x in suite_names:
 for i in range(len(suite_names)):
     suites = all_dics[i]
     xys = get_finish_time_num_finished_tuples(suites)
-    print(xys)
+    #print(xys)
     with open("../../final_results/" + suite_names[i] + ".csv", "w", newline='') as out_file:
         writer = csv.writer(out_file)
         writer.writerows(xys)
-
 
 def query_analysis():
     random_plan_dics = read_all_information_from_file("../../final_results/T05_query/T05_18_01_random_plans_k1000000000.pkl")
@@ -321,20 +330,52 @@ def scatter_plot_compare_two_configs(info_dics_config1, info_dics_config2, timeo
         writer = csv.writer(out_file)
         writer.writerows(points)
 
+def add_conjoin_permute_stats_for_layer_perm():
+    suites = read_all_information_from_file("../../final_results/T03_construction/T03_15_01_layer_perm_k1000000000.pkl")
+    percent_spent_conjoining = []
+    percent_spent_permuting = []
+    for prob in suites:
+        acp = prob["progress_add_conjoin_permute"]
+        i = 0
+
+        totalC = 0
+        totalP = 0 #total time permutating
+        while i < len(acp):
+            if i + 3 >= len(acp):
+                break
+            a = acp[i]
+            c = acp[i+1]
+            p = acp[i+2]
+            a2 = acp[i+3]
+
+            totalP += a2 - p
+            totalC += p - c
+
+            i+=3
+
+        if len(acp) > 3:
+            lastTime = acp[-1]
+            relativeC = totalC/lastTime
+            relativeP = totalP/lastTime
+            percent_spent_conjoining.append(relativeC)
+            percent_spent_permuting.append(relativeP)
+    
+    print("Average con", statistics.mean(percent_spent_conjoining))
+    print("Average perm", statistics.mean(percent_spent_permuting))
+
+
 
 for i in range(len(suite_names)):
     print(suite_names[i])
-    #print_big_information_from_dicts(all_dics[i])
+    print_big_information_from_dicts(all_dics[i])
     pass
 
+for suites in all_dics:
+    xys = get_finish_time_num_finished_tuples(suites)
+    xs = [x for x,_ in xys]
+    ys = [y for _,y in xys]
 
-
-#for suites in all_dics:
-#    xys = get_finish_time_num_finished_tuples(suites)
-#    xs = [x for x,_ in xys]
-#    ys = [y for _,y in xys]
-
-#    plt.plot(xs,ys, color="blue")
+    plt.plot(xs,ys, color="blue")
 
 #plt.show()
 
@@ -342,8 +383,10 @@ for i in range(len(suite_names)):
 #query_analysis()
 
 # for naiv comparison
-naive_bdd = read_all_information_from_file("../../final_results/T04_naiv/T04_18_01_naiv_bdd_k1000000000.pkl")
-naive_sdd = read_all_information_from_file("../../final_results/T04_naiv/T04_18_01_naiv_sdd_k1000000000.pkl")
-print_big_information_from_dicts(naive_bdd)
-plot_suites(suite_names, all_dics)
-scatter_plot_compare_two_configs(naive_bdd, naive_sdd, 300, "bdd", "sdd", "naive_scatter.csv")
+#naive_bdd = read_all_information_from_file("../../final_results/T04_naiv/T04_18_01_naiv_bdd_k1000000000.pkl")
+#naive_sdd = read_all_information_from_file("../../final_results/T04_naiv/T04_18_01_naiv_sdd_k1000000000.pkl")
+#print_big_information_from_dicts(naive_bdd)
+#plot_suites(suite_names, all_dics)
+#scatter_plot_compare_two_configs(naive_bdd, naive_sdd, 300, "bdd", "sdd", "naive_scatter.csv")
+
+#add_conjoin_permute_stats_for_layer_perm()
